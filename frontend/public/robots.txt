@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://gilasartirac-svg.github.io/glsArt/sitemap.xml

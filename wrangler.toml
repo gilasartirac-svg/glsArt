@@ -1,0 +1,13 @@
+name = "gilasartworker"
+main = "worker/src/index.js"
+compatibility_date = "2026-09-24"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "gilasartdatabase"
+database_id = "3e6741e8-e50c-4c8d-b50a-33d9db2dfd4c"
+
+[vars]
+APP_ORIGIN = "https://gilasartirac-svg.github.io"
+PAYMENT_ENV = "sandbox"
