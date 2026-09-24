@@ -1,7 +1,7 @@
 const API=window.GILASART_API||'https://gilasartworker.gilasart-ir-ac.workers.dev';
 const app=document.querySelector('#app');let state={products:[],categories:[],user:null,roles:[],cart:null};
 const fa=n=>new Intl.NumberFormat('fa-IR').format(Number(n||0));
-async function api(path,opt={}){const r=await fetch(API+path,{credentials:'include',headers:{'content-type':'application/json',...(opt.headers||{})},...opt});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'خطا');return d}
+async function api(path,opt={}){const headers={...(opt.headers||{})};if(opt.body)headers['content-type']='application/json';const r=await fetch(API+path,{credentials:'include',headers,...opt});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'خطا');return d}
 function csrf(){return document.cookie.split('; ').find(x=>x.startsWith('gs_csrf='))?.split('=')[1]||''}
 function layout(content){app.innerHTML=`<header class="top"><div class="wrap nav"><a class="brand" href="#/">گیلاآرت<small>GILAS ART</small></a><nav class="links"><a href="#/shop">فروشگاه</a><a href="#/about">درباره ما</a></nav><div class="spacer"></div><a class="iconbtn" href="#/cart">سبد</a><a class="iconbtn" href="#/account">حساب</a></div></header><main>${content}</main><footer class="footer"><div class="wrap">گیلاآرت — تجربه‌ای آرام برای خرید هنر.</div></footer>`}
 function productCard(p){return `<article class="card"><a href="#/product/${encodeURIComponent(p.slug)}"><div class="thumb">${p.image?`<img src="${p.image}" alt="${p.name}">`:'اثر هنری'}</div><div class="cardbody"><h3>${p.name}</h3><div class="muted">${p.sku||''}</div><div class="price">${fa(p.price_irt)} تومان</div></div></a></article>`}
