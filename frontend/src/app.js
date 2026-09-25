@@ -9,7 +9,7 @@ async function api(path,opt={}){
   if(state.csrf&&!['GET','HEAD','OPTIONS'].includes(method)&&!path.startsWith('/api/auth/request-otp')&&!path.startsWith('/api/auth/verify-otp'))headers['x-csrf-token']=state.csrf;
   const r=await fetch(API+path,{credentials:'include',...opt,headers});
   const d=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(d.error||'خطا');
+  if(!r.ok){const e=new Error(d.message||d.error||'خطا');e.code=d.code||null;throw e}
   return d;
 }
 function layout(content){app.innerHTML=`<header class="top"><div class="wrap nav"><a class="brand" href="#/">گیلاآرت<small>GILAS ART</small></a><nav class="links"><a href="#/shop">فروشگاه</a><a href="#/about">درباره ما</a></nav><div class="spacer"></div><a class="iconbtn" href="#/cart">سبد</a><a class="iconbtn" href="#/account">حساب</a><a class="iconbtn" href="#/orders">سفارش‌ها</a></div></header><main>${content}</main><footer class="footer"><div class="wrap">گیلاآرت — تجربه‌ای آرام برای خرید هنر.</div></footer>`}
