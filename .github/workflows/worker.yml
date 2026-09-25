@@ -8,3 +8,6 @@ jobs:
    - uses: actions/setup-node@v4
      with: {node-version: 20}
    - run: node --check worker/src/index.js
+   - run: node --check frontend/src/app.js
+   - run: npm ci
+   - run: npm test
