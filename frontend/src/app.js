@@ -15,8 +15,13 @@ async function account(){await loadMe();if(state.user){layout(`<section class="w
 async function checkout(){await loadMe();if(!state.user){location.hash='/account';return}const d=await api('/api/cart');layout(`<section class="wrap page"><div class="product"><div class="panel"><h1>ثبت سفارش</h1><div class="form"><label>نام گیرنده<input id="rn" value="${state.user.name||''}"></label><label>استان<input id="pr"></label><label>شهر<input id="ct"></label><label>نشانی<textarea id="ad"></textarea></label><label>کد پستی<input id="pc"></label><button class="btn primary" id="order">ثبت سفارش و پرداخت</button><div id="msg"></div></div></div><div class="panel"><h2>خلاصه</h2><p>جمع کالاها: ${fa(d.subtotal_irt)} تومان</p><p>ارسال: ${fa(d.subtotal_irt>=10000000?0:500000)} تومان</p><strong class="price">مبلغ نهایی: ${fa(d.subtotal_irt+(d.subtotal_irt>=10000000?0:500000))} تومان</strong></div></div></section>`);document.querySelector('#order').onclick=async()=>{try{const a=await api('/api/addresses',{method:'POST',body:JSON.stringify({recipientName:document.querySelector('#rn').value,province:document.querySelector('#pr').value,city:document.querySelector('#ct').value,address:document.querySelector('#ad').value,postalCode:document.querySelector('#pc').value}),headers:{'x-csrf-token':csrf()}});const o=await api('/api/orders',{method:'POST',body:JSON.stringify({addressId:a.addressId}),headers:{'x-csrf-token':csrf()}});const pay=await api('/api/orders/'+o.orderId+'/pay',{method:'POST',headers:{'x-csrf-token':csrf()}});location.href=pay.url}catch(e){document.querySelector('#msg').innerHTML='<span class="error">'+e.message+'</span>'}}}
 async function router(){const p=location.hash.slice(2).split('/');try{if(!p[0])return home();
 
-if(p[0]==='admin'){
- const {default:AdminApp}=await import('./admin/AdminApp.js');
+if(p[0]==='admin'){const base = location.pathname.includes('/glsArt/')
+ ? '/glsArt'
+ : '';
+
+const {default:AdminApp}=await import(
+ base + '/admin/AdminApp.js'
+);
 
  await loadMe();
 
