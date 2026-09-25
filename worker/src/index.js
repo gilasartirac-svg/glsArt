@@ -38,6 +38,19 @@ async function requirePermission(u,env,name){
  const pp=await permissions(u,env);
  return pp.includes(name);
 }
+
+function csv(rows){
+ if(!rows || !rows.length) return '';
+ const keys=Object.keys(rows[0]);
+ return [
+  keys.join(','),
+  ...rows.map(r=>keys.map(k=>{
+   const v=r[k]??'';
+   return '"'+String(v).replaceAll('"','""')+'"';
+  }).join(','))
+ ].join('\n');
+}
+
 async function audit(env,actor,action,type,id,meta,req){
  await env.DB.prepare(
  'INSERT INTO audit_logs(id,actor_user_id,action,entity_type,entity_id,metadata_json,before_json,after_json,ip) VALUES(?,?,?,?,?,?,?,?,?)'
@@ -184,8 +197,344 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  if(u.pathname==='/api/favorites'&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const b=await body(req);await env.DB.prepare('INSERT OR IGNORE INTO favorites(user_id,product_id) VALUES(?,?)').bind(me.id,String(b.productId||'')).run();return json({ok:true})}
  if(u.pathname==='/api/favorites'&&req.method==='DELETE'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const pid=u.searchParams.get('productId');await env.DB.prepare('DELETE FROM favorites WHERE user_id=? AND product_id=?').bind(me.id,pid).run();return json({ok:true})}
  if(u.pathname==='/api/admin/products'&&req.method==='GET'){if(!(await requirePermission(me,env,'products.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT p.*,i.quantity stock FROM products p LEFT JOIN inventory i ON i.product_id=p.id ORDER BY p.created_at DESC').all();return json({items:r.results||[]})}
- if(u.pathname==='/api/admin/products'&&req.method==='POST'){if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const b=await body(req);const id=uid();await env.DB.batch([env.DB.prepare('INSERT INTO products(id,category_id,slug,sku,name,description,price_irt,active,seo_title,seo_description) VALUES(?,?,?,?,?,?,?,?,?,?)').bind(id,b.categoryId||null,b.slug,b.sku,b.name,b.description||'',Number(b.priceIrt)||0,b.active===false?0:1,b.seoTitle||b.name,b.seoDescription||''),env.DB.prepare('INSERT INTO inventory(product_id,quantity) VALUES(?,?)').bind(id,Math.max(0,Number(b.stock)||0))]);await audit(env,me,'admin.product.create','product',id,{sku:b.sku},req);return json({ok:true,id})}
+ if(u.pathname==='/api/admin/products'&&req.method==='POST'){if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const b=await body(req);const id=uid();await env.DB.batch([env.DB.prepare('INSERT INTO products(id,category_id,slug,sku,name,description,price_irt,active,seo_title,seo_description) VALUES(?,?,?,?,?,?,?,?,?,?)').bind(id,b.categoryId||null,b.slug,b.sku,b.name,b.description||'',Number(b.priceIrt)||0,b.active===false?0:1,b.seoTitle||b.name,b.seoDescription||''),env.DB.prepare('INSERT INTO inventory(product_id,quantity) VALUES(?,?)').bind(id,Math.max(0,Number(b.stock)||0))]);await audit(env,me,'admin.product.create','product',id,{
+ before:null,
+ after:{
+  sku:b.sku,
+  name:b.name,
+  priceIrt:Number(b.priceIrt)||0,
+  stock:Number(b.stock)||0
+ }
+},req);return json({ok:true,id})}
+
+
+ if(u.pathname.startsWith('/api/admin/products/') &&
+    req.method==='PUT'){
+
+  if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))
+   return json({error:'forbidden'},403);
+
+  const id=u.pathname.split('/').pop();
+
+  const before=await env.DB.prepare(
+   'SELECT * FROM products WHERE id=?'
+  ).bind(id).first();
+
+  if(!before)
+   return json({error:'not_found'},404);
+
+  const b=await body(req);
+
+  await env.DB.prepare(`
+   UPDATE products
+   SET
+    name=?,
+    description=?,
+    price_irt=?,
+    active=?,
+    seo_title=?,
+    seo_description=?,
+    updated_at=CURRENT_TIMESTAMP
+   WHERE id=?
+  `).bind(
+   b.name||before.name,
+   b.description||before.description,
+   Number(b.priceIrt ?? before.price_irt),
+   b.active===false?0:1,
+   b.seoTitle||before.seo_title,
+   b.seoDescription||before.seo_description,
+   id
+  ).run();
+
+  const after=await env.DB.prepare(
+   'SELECT * FROM products WHERE id=?'
+  ).bind(id).first();
+
+  await audit(
+   env,
+   me,
+   'admin.product.update',
+   'product',
+   id,
+   {before,after},
+   req
+  );
+
+  return json({ok:true});
+ }
+
+
+ if(u.pathname.startsWith('/api/admin/products/') &&
+    req.method==='DELETE'){
+
+  if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))
+   return json({error:'forbidden'},403);
+
+  const id=u.pathname.split('/').pop();
+
+  const before=await env.DB.prepare(
+   'SELECT * FROM products WHERE id=?'
+  ).bind(id).first();
+
+  if(!before)
+   return json({error:'not_found'},404);
+
+  await env.DB.prepare(
+   'DELETE FROM products WHERE id=?'
+  ).bind(id).run();
+
+  await audit(
+   env,
+   me,
+   'admin.product.delete',
+   'product',
+   id,
+   {before,after:null},
+   req
+  );
+
+  return json({ok:true});
+ }
+
+
+ if(u.pathname.startsWith('/api/admin/orders/') &&
+    u.pathname.endsWith('/status') &&
+    req.method==='PUT'){
+
+  if(!(await requirePermission(me,env,'orders.write'))||!requireCsrf(req))
+   return json({error:'forbidden'},403);
+
+  const id=u.pathname.split('/')[4];
+
+  const before=await env.DB.prepare(
+   'SELECT * FROM orders WHERE id=?'
+  ).bind(id).first();
+
+  if(!before)
+   return json({error:'not_found'},404);
+
+  const b=await body(req);
+
+  await env.DB.prepare(`
+   UPDATE orders
+   SET status=?, updated_at=CURRENT_TIMESTAMP
+   WHERE id=?
+  `).bind(
+   String(b.status||before.status),
+   id
+  ).run();
+
+  const after=await env.DB.prepare(
+   'SELECT * FROM orders WHERE id=?'
+  ).bind(id).first();
+
+  await audit(
+   env,
+   me,
+   'admin.order.status.change',
+   'order',
+   id,
+   {before,after},
+   req
+  );
+
+  return json({ok:true});
+ }
+
  if(u.pathname==='/api/admin/orders'&&req.method==='GET'){if(!(await requirePermission(me,env,'orders.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT o.*,u.mobile FROM orders o JOIN users u ON u.id=o.user_id ORDER BY o.created_at DESC LIMIT 200').all();return json({items:r.results||[]})}
  if(u.pathname==='/api/admin/stats'&&req.method==='GET'){if(!(await requirePermission(me,env,'reports.read')))return json({error:'forbidden'},403);const [a,b,c]=await Promise.all([env.DB.prepare('SELECT COUNT(*) n FROM orders').first(),env.DB.prepare("SELECT COALESCE(SUM(total_irt),0) n FROM orders WHERE status IN ('PAID','PROCESSING','SHIPPED','DELIVERED')").first(),env.DB.prepare('SELECT COUNT(*) n FROM users').first()]);return json({orders:a.n,revenue_irt:b.n,users:c.n})}
+
+
+ if(u.pathname==='/api/admin/audit'&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'reports.read')))
+   return json({error:'forbidden'},403);
+
+  const r=await env.DB.prepare(`
+   SELECT
+    id,
+    actor_user_id,
+    action,
+    entity_type,
+    entity_id,
+    before_json,
+    after_json,
+    ip,
+    created_at
+   FROM audit_logs
+   ORDER BY created_at DESC
+   LIMIT 500
+  `).all();
+
+  return json({items:r.results||[]});
+ }
+
+
+ if(u.pathname==='/api/admin/reports/sales'&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'reports.read')))
+   return json({error:'forbidden'},403);
+
+  const r=await env.DB.prepare(`
+   SELECT
+    DATE(created_at) day,
+    COUNT(*) orders,
+    COALESCE(SUM(total_irt),0) revenue_irt
+   FROM orders
+   WHERE status IN ('PAID','PROCESSING','SHIPPED','DELIVERED')
+   GROUP BY DATE(created_at)
+   ORDER BY day DESC
+   LIMIT 365
+  `).all();
+
+  return json({items:r.results||[]});
+ }
+
+
+ if(u.pathname==='/api/admin/reports/products'&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'reports.read')))
+   return json({error:'forbidden'},403);
+
+  const r=await env.DB.prepare(`
+   SELECT
+    p.id,
+    p.name,
+    p.sku,
+    COALESCE(SUM(oi.quantity),0) sold,
+    COALESCE(SUM(oi.line_total_irt),0) revenue_irt
+   FROM products p
+   LEFT JOIN order_items oi ON oi.product_id=p.id
+   GROUP BY p.id
+   ORDER BY sold DESC
+   LIMIT 200
+  `).all();
+
+  return json({items:r.results||[]});
+ }
+
+
+ if(u.pathname==='/api/admin/reports/customers'&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'reports.read')))
+   return json({error:'forbidden'},403);
+
+  const r=await env.DB.prepare(`
+   SELECT
+    u.id,
+    u.mobile,
+    u.name,
+    COUNT(o.id) orders,
+    COALESCE(SUM(o.total_irt),0) total_purchase_irt
+   FROM users u
+   LEFT JOIN orders o ON o.user_id=u.id
+   GROUP BY u.id
+   ORDER BY total_purchase_irt DESC
+   LIMIT 500
+  `).all();
+
+  return json({items:r.results||[]});
+ }
+
+
+
+ if(u.pathname==='/api/admin/export/audit.csv'&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'reports.read')))
+   return json({error:'forbidden'},403);
+
+  const r=await env.DB.prepare(`
+   SELECT
+    actor_user_id,
+    action,
+    entity_type,
+    entity_id,
+    before_json,
+    after_json,
+    ip,
+    created_at
+   FROM audit_logs
+   ORDER BY created_at DESC
+   LIMIT 500
+  `).all();
+
+  return new Response(csv(r.results||[]),{
+   headers:{
+    'content-type':'text/csv; charset=utf-8',
+    'content-disposition':'attachment; filename="audit.csv"'
+   }
+  });
+ }
+
+
+ if(u.pathname==='/api/admin/export/sales.csv'&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'reports.read')))
+   return json({error:'forbidden'},403);
+
+  const r=await env.DB.prepare(`
+   SELECT
+    DATE(created_at) day,
+    COUNT(*) orders,
+    COALESCE(SUM(total_irt),0) revenue_irt
+   FROM orders
+   WHERE status IN ('PAID','PROCESSING','SHIPPED','DELIVERED')
+   GROUP BY DATE(created_at)
+   ORDER BY day DESC
+  `).all();
+
+  return new Response(csv(r.results||[]),{
+   headers:{
+    'content-type':'text/csv; charset=utf-8',
+    'content-disposition':'attachment; filename="sales.csv"'
+   }
+  });
+ }
+
+
+ if(u.pathname==='/api/admin/export/products.csv'&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'reports.read')))
+   return json({error:'forbidden'},403);
+
+  const r=await env.DB.prepare(`
+   SELECT
+    p.name,
+    p.sku,
+    COALESCE(SUM(oi.quantity),0) sold,
+    COALESCE(SUM(oi.line_total_irt),0) revenue_irt
+   FROM products p
+   LEFT JOIN order_items oi ON oi.product_id=p.id
+   GROUP BY p.id
+   ORDER BY sold DESC
+  `).all();
+
+  return new Response(csv(r.results||[]),{
+   headers:{
+    'content-type':'text/csv; charset=utf-8',
+    'content-disposition':'attachment; filename="products.csv"'
+   }
+  });
+ }
+
+
+ if(u.pathname==='/api/admin/export/customers.csv'&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'reports.read')))
+   return json({error:'forbidden'},403);
+
+  const r=await env.DB.prepare(`
+   SELECT
+    u.id,
+    u.mobile,
+    u.name,
+    COUNT(o.id) orders,
+    COALESCE(SUM(o.total_irt),0) total_purchase_irt
+   FROM users u
+   LEFT JOIN orders o ON o.user_id=u.id
+   GROUP BY u.id
+   ORDER BY total_purchase_irt DESC
+  `).all();
+
+  return new Response(csv(r.results||[]),{
+   headers:{
+    'content-type':'text/csv; charset=utf-8',
+    'content-disposition':'attachment; filename="customers.csv"'
+   }
+  });
+ }
+
  return json({error:'not_found'},404)}
 export default {async fetch(req,env){const headers={...security,...cors(req,env)};try{const r=await route(req,env);for(const[k,v]of Object.entries(headers)){if(k==='set-cookie')continue;r.headers.set(k,v)}return r}catch(e){console.error('request_failed',{path:new URL(req.url).pathname,error:String(e)});return json({error:'internal_error'},500,headers)}}};
