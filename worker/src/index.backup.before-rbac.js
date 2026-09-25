@@ -10,35 +10,7 @@ function cors(req,env){const o=req.headers.get('Origin'); return o&&o===origin(e
 function cookies(req){const out={};for(const x of (req.headers.get('cookie')||'').split(';')){const [k,...v]=x.trim().split('=');if(k)out[k]=v.join('=')}return out}
 async function body(req){return req.json().catch(()=>({}))}
 async function user(req,env){const sid=cookies(req)['__Host-gs_session'];if(!sid)return null;return env.DB.prepare("SELECT u.id,u.mobile,u.name FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.id=? AND s.revoked_at IS NULL AND unixepoch(s.expires_at)>unixepoch('now')").bind(sid).first()}
-async function roles(u,env){
- if(!u)return [];
- const legacy=await env.DB.prepare('SELECT r.name FROM roles r JOIN user_roles ur ON ur.role_id=r.id WHERE ur.user_id=?').bind(u.id).all();
- const enterprise=await env.DB.prepare('SELECT ar.name FROM admin_roles ar JOIN admin_users au ON au.role_id=ar.id WHERE au.user_id=? AND au.active=1').bind(u.id).all();
- return [...new Set([
-  ...(legacy.results||[]).map(x=>x.name),
-  ...(enterprise.results||[]).map(x=>x.name)
- ])];
-}
-
-async function permissions(u,env){
- if(!u)return [];
- const r=await env.DB.prepare(`
- SELECT DISTINCT p.name
- FROM permissions p
- JOIN role_permissions rp ON rp.permission_id=p.id
- JOIN admin_roles ar ON ar.id=rp.role_id
- JOIN admin_users au ON au.role_id=ar.id
- WHERE au.user_id=? AND au.active=1
- `).bind(u.id).all();
- return (r.results||[]).map(x=>x.name);
-}
-
-async function requirePermission(u,env,name){
- const rr=await roles(u,env);
- if(rr.includes('admin')||rr.includes('super_admin')) return true;
- const pp=await permissions(u,env);
- return pp.includes(name);
-}
+async function roles(u,env){if(!u)return [];const r=await env.DB.prepare('SELECT r.name FROM roles r JOIN user_roles ur ON ur.role_id=r.id WHERE ur.user_id=?').bind(u.id).all();return (r.results||[]).map(x=>x.name)}
 async function audit(env,actor,action,type,id,meta,req){await env.DB.prepare('INSERT INTO audit_logs(id,actor_user_id,action,entity_type,entity_id,metadata_json,ip) VALUES(?,?,?,?,?,?,?)').bind(uid(),actor?.id||null,action,type||null,id||null,JSON.stringify(meta||{}),req.headers.get('CF-Connecting-IP')||'').run()}
 function requireCsrf(req){return req.headers.get('X-CSRF-Token')&&req.headers.get('X-CSRF-Token')===cookies(req)['gs_csrf']}
 async function requireUser(req,env){const u=await user(req,env);return u}
