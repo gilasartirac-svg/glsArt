@@ -1,12 +1,11 @@
 import Sidebar from './components/Sidebar.js';
 import Header from './components/Header.js';
-
-import Dashboard from './pages/Dashboard.js';
+import adminRouter from './router.js';
 
 export default function AdminApp(){
 
  return `
- <div class="admin-layout">
+ <div class="admin-layout" dir="rtl">
 
   <aside>
    ${Sidebar()}
@@ -14,11 +13,14 @@ export default function AdminApp(){
 
   <main>
    ${Header()}
+
    <section id="admin-page">
-    ${Dashboard()}
+    ${adminRouter()}
    </section>
+
   </main>
 
  </div>
  `;
+
 }
