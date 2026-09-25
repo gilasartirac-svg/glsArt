@@ -16,7 +16,25 @@ async function checkout(){await loadMe();if(!state.user){location.hash='/account
 async function router(){
 const p=location.hash.slice(2).split('/');
 try{
+if(p[0]==='admin'){
+ const {default:AdminApp}=await import('./admin/AdminApp.js');
 
+ await loadMe();
+
+ if(!state.roles.includes('admin')){
+  layout(`
+  <section class="wrap page">
+   <div class="panel">
+    <h2>دسترسی غیرمجاز</h2>
+   </div>
+  </section>
+  `);
+  return;
+ }
+
+ app.innerHTML=AdminApp();
+ return;
+}
 if(p[0]==='admin'){
  const {default:AdminApp}=await import('./admin/AdminApp.js');
 
