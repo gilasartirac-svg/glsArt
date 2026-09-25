@@ -39,21 +39,7 @@ async function requirePermission(u,env,name){
  const pp=await permissions(u,env);
  return pp.includes(name);
 }
-async function audit(env,actor,action,type,id,meta,req){
- await env.DB.prepare(
- 'INSERT INTO audit_logs(id,actor_user_id,action,entity_type,entity_id,metadata_json,before_json,after_json,ip) VALUES(?,?,?,?,?,?,?,?,?)'
- ).bind(
- uid(),
- actor?.id||null,
- action,
- type||null,
- id||null,
- JSON.stringify(meta||{}),
- JSON.stringify(meta?.before||null),
- JSON.stringify(meta?.after||null),
- req.headers.get('CF-Connecting-IP')||''
- ).run()
-}
+async function audit(env,actor,action,type,id,meta,req){await env.DB.prepare('INSERT INTO audit_logs(id,actor_user_id,action,entity_type,entity_id,metadata_json,ip) VALUES(?,?,?,?,?,?,?)').bind(uid(),actor?.id||null,action,type||null,id||null,JSON.stringify(meta||{}),req.headers.get('CF-Connecting-IP')||'').run()}
 function requireCsrf(req){return req.headers.get('X-CSRF-Token')&&req.headers.get('X-CSRF-Token')===cookies(req)['gs_csrf']}
 async function requireUser(req,env){const u=await user(req,env);return u}
 async function rate(env,key,limit,minutes){const h=await env.DB.prepare('SELECT COUNT(*) n FROM otp_challenges WHERE request_ip=? AND created_at>datetime(\'now\',?)').bind(key,`-${minutes} minutes`).first();return (h?.n||0)<limit}
@@ -68,109 +54,6 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  if(u.pathname==='/api/me'&&req.method==='GET'){const u0=await user(req,env);return json({user:u0,roles:await roles(u0,env)})}
  if(u.pathname==='/api/auth/logout'&&req.method==='POST'){const sid=cookies(req)['__Host-gs_session'];if(sid)await env.DB.prepare("UPDATE sessions SET revoked_at=datetime('now') WHERE id=?").bind(sid).run();return json({ok:true},200,{'set-cookie':['__Host-gs_session=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0','gs_csrf=; Path=/; Secure; SameSite=None; Max-Age=0']})}
  const me=await requireUser(req,env);
-
- if(u.pathname==='/api/admin/me'&&req.method==='GET'){
-  if(!me)return json({error:'unauthorized'},401);
-  return json({
-   user:me,
-   roles:await roles(me,env),
-   permissions:await permissions(me,env)
-  });
- }
-
-
- if(u.pathname==='/api/admin/permissions'&&req.method==='GET'){
-  if(!me)return json({error:'unauthorized'},401);
-  return json({items:await permissions(me,env)});
- }
-
-
- if(u.pathname==='/api/admin/roles'&&req.method==='GET'){
-  if(!(await requirePermission(me,env,'roles.manage')))
-   return json({error:'forbidden'},403);
-
-  const r=await env.DB.prepare(
-   'SELECT id,name,description FROM admin_roles ORDER BY name'
-  ).all();
-
-  return json({items:r.results||[]});
- }
-
-
- if(u.pathname.startsWith('/api/admin/users/') &&
-    u.pathname.endsWith('/roles') &&
-    req.method==='POST'){
-
-  if(!(await requirePermission(me,env,'roles.manage'))||!requireCsrf(req))
-   return json({error:'forbidden'},403);
-
-  const id=u.pathname.split('/')[4];
-  const b=await body(req);
-
-  const before=await env.DB.prepare(
-   'SELECT * FROM admin_users WHERE user_id=?'
-  ).bind(id).first();
-
-
-  await env.DB.prepare(
-   'INSERT OR REPLACE INTO admin_users(user_id,role_id,active) VALUES(?,?,1)'
-  ).bind(id,b.roleId).run();
-
-
-  await audit(
-   env,
-   me,
-   'admin.role.assign',
-   'user',
-   id,
-   {
-    before,
-    after:{roleId:b.roleId}
-   },
-   req
-  );
-
-  return json({ok:true});
- }
-
-
- if(u.pathname.startsWith('/api/admin/users/') &&
-    u.pathname.endsWith('/status') &&
-    req.method==='PUT'){
-
-  if(!(await requirePermission(me,env,'users.manage'))||!requireCsrf(req))
-   return json({error:'forbidden'},403);
-
-  const id=u.pathname.split('/')[4];
-  const b=await body(req);
-
-  const before=await env.DB.prepare(
-   'SELECT * FROM admin_users WHERE user_id=?'
-  ).bind(id).first();
-
-
-  await env.DB.prepare(
-   'UPDATE admin_users SET active=? WHERE user_id=?'
-  ).bind(b.active?1:0,id).run();
-
-
-  await audit(
-   env,
-   me,
-   'admin.user.status',
-   'user',
-   id,
-   {
-    before,
-    after:{active:b.active}
-   },
-   req
-  );
-
-  return json({ok:true});
- }
-
-
  if(u.pathname==='/api/addresses'&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const b=await body(req);if(!b.recipientName||!b.province||!b.city||!b.address||!b.postalCode)return json({error:'invalid_address'},400);const aid=uid();await env.DB.prepare('INSERT INTO addresses(id,user_id,title,recipient_name,mobile,province,city,address,postal_code) VALUES(?,?,?,?,?,?,?,?,?)').bind(aid,me.id,b.title||'آدرس اصلی',String(b.recipientName).slice(0,120),me.mobile,String(b.province).slice(0,80),String(b.city).slice(0,80),String(b.address).slice(0,500),String(b.postalCode).replace(/\D/g,'').slice(0,10)).run();return json({ok:true,addressId:aid})}
  if(u.pathname==='/api/addresses'&&req.method==='GET'){if(!me)return json({items:[]});const r=await env.DB.prepare('SELECT id,title,recipient_name,mobile,province,city,address,postal_code FROM addresses WHERE user_id=? ORDER BY created_at DESC').bind(me.id).all();return json({items:r.results||[]})}
  if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const slug=u.pathname.split('/')[3],p=await env.DB.prepare('SELECT id FROM products WHERE slug=? AND active=1').bind(slug).first();if(!p)return json({error:'not_found'},404);const b=await body(req),rating=Number(b.rating),txt=String(b.body||'').trim();if(!Number.isInteger(rating)||rating<1||rating>5||txt.length<3||txt.length>1000)return json({error:'invalid_review'},400);await env.DB.prepare('INSERT INTO reviews(id,user_id,product_id,rating,body,approved) VALUES(?,?,?,?,?,0)').bind(uid(),me.id,p.id,rating,txt).run();return json({ok:true})}
