@@ -1,26 +1,19 @@
-import Sidebar from './components/Sidebar.js';
-import Header from './components/Header.js';
-import adminRouter from './router.js';
-
 export default function AdminApp(){
 
- return `
- <div class="admin-layout" dir="rtl">
+return `
 
-  <aside>
-   ${Sidebar()}
-  </aside>
+<div style="padding:40px" dir="rtl">
 
-  <main>
-   ${Header()}
+<h1>
+Admin Loaded OK
+</h1>
 
-   <section id="admin-page">
-    ${adminRouter()}
-   </section>
+<p>
+پنل مدیریت وصل شد
+</p>
 
-  </main>
+</div>
 
- </div>
- `;
+`;
 
 }
