@@ -11,4 +11,4 @@ database_id = "3e6741e8-e50c-4c8d-b50a-33d9db2dfd4c"
 [vars]
 APP_ORIGIN = "https://gilasartirac-svg.github.io"
 FRONTEND_URL = "https://gilasartirac-svg.github.io/glsArt"
-PAYMENT_ENV = "sandbox"
+PAYMENT_ENV = "production"
