@@ -20,10 +20,9 @@ if(p[0]==='admin'){
 
  await loadMe();
 
- if(!state.roles.includes('admin')){
-  layout('<section class="wrap page"><div class="panel"><h2>دسترسی غیرمجاز</h2></div></section>');
-  return;
- }
+if(!state.roles){
+ state.roles=[];
+}
 
  app.innerHTML=AdminApp();
  return;
