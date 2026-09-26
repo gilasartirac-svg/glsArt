@@ -7,6 +7,7 @@ workers_dev = true
 binding = "DB"
 database_name = "gilasartdatabase"
 database_id = "3e6741e8-e50c-4c8d-b50a-33d9db2dfd4c"
+    migrations_dir = "database/migrations"
 
 [vars]
 APP_ORIGIN = "https://gilasartirac-svg.github.io"
