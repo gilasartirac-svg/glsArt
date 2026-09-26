@@ -1,6 +1,7 @@
 const API=window.GILASART_API||'https://gilasartworker.gilasart-ir-ac.workers.dev';
 let csrfToken='';
 let sessionChecked=false;
+
 const apiError=(data,status,path)=>new Error((data?.error||data?.message||`HTTP ${status}`)+` · ${path}`);
 
 async function ensureCsrf(force=false){
@@ -10,8 +11,11 @@ async function ensureCsrf(force=false){
   const d=await r.json().catch(()=>({}));
   csrfToken=d.csrfToken||'';
   sessionChecked=true;
- }catch{}
- return csrfToken;
+  return csrfToken;
+ }catch{
+  sessionChecked=true;
+  return '';
+ }
 }
 
 function friendlyError(data,status,path){
@@ -36,7 +40,7 @@ function showAdminLoadError(message){
  });
 }
 
-export async function api(path,options={}){
+async function request(path,options,attempt=0){
  const method=(options.method||'GET').toUpperCase();
  const headers={...(options.headers||{})};
  if(options.body&&!headers['content-type'])headers['content-type']='application/json';
@@ -45,15 +49,16 @@ export async function api(path,options={}){
   if(token)headers['x-csrf-token']=token;
  }
  const controller=new AbortController();
- const timeout=setTimeout(()=>controller.abort(),12000);
+ const timeout=setTimeout(()=>controller.abort(),10000);
  try{
   const res=await fetch(API+path,{credentials:'include',cache:'no-store',...options,headers,signal:controller.signal});
   const data=await res.json().catch(()=>({}));
   if(data.csrfToken)csrfToken=data.csrfToken;
+  if((res.status===401||res.status===403)&&attempt===0){
+   await ensureCsrf(true);
+   return request(path,options,1);
+  }
   if(!res.ok){
-   if((res.status===401||res.status===403)&&!sessionChecked){
-    await ensureCsrf(true);
-   }
    const message=friendlyError(data,res.status,path);
    showAdminLoadError(`خطا در دریافت اطلاعات: ${message}`);
    throw apiError({error:message},res.status,path);
@@ -61,7 +66,7 @@ export async function api(path,options={}){
   return data;
  }catch(e){
   if(e.name==='AbortError'){
-   const err=new Error('زمان پاسخ سرور تمام شد؛ اتصال Worker/D1 را بررسی کنید.');
+   const err=new Error('پاسخ سرور در زمان مقرر دریافت نشد؛ اتصال Worker یا D1 در دسترس نیست.');
    showAdminLoadError(err.message);
    throw err;
   }
@@ -70,6 +75,10 @@ export async function api(path,options={}){
  }finally{
   clearTimeout(timeout);
  }
+}
+
+export async function api(path,options={}){
+ return request(path,options,0);
 }
 
 export const admin={
