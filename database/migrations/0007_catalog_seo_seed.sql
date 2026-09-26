@@ -21,3 +21,10 @@ INSERT OR IGNORE INTO product_images(id,product_id,path,alt_text,sort_order,is_p
 ('img_barg','sample_barg','/glsArt/art/barg.svg','تابلو رقص برگ‌ها',0,1),
 ('img_sokoot','sample_sokoot','/glsArt/art/sokoot.svg','تابلو مینیمال سکوت روشن',0,1),
 ('img_atiq','sample_atiq','/glsArt/art/atiq.svg','تابلو کلاسیک عطر عتیق',0,1);
+INSERT OR IGNORE INTO permissions(id,name) VALUES
+('perm_coupons_read','coupons.read'),('perm_coupons_write','coupons.write'),
+('perm_reviews_read','reviews.read'),('perm_reviews_write','reviews.write'),
+('perm_settings_read','settings.read'),('perm_settings_write','settings.write');
+INSERT OR IGNORE INTO role_permissions(role_id,permission_id)
+SELECT ar.id,p.id FROM admin_roles ar JOIN permissions p ON p.name IN ('coupons.read','coupons.write','reviews.read','reviews.write','settings.read','settings.write')
+WHERE ar.name IN ('admin','super_admin','manager');
