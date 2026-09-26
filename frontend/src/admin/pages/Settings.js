@@ -1,10 +1,1 @@
-export default function Settings(){
-
-return `
-<div dir="rtl">
-<h2>Settings</h2>
-<p>Enterprise Admin Module</p>
-</div>
-`;
-
-}
+export default function Settings(){return `<div class="admin-page" dir="rtl"><div class="admin-title"><h2>تنظیمات</h2></div><div class="panel"><h3>وضعیت محیط</h3><p class="muted">کلیدهای پرداخت، Kavenegar و سایر اسرار عمداً در پنل نمایش داده نمی‌شوند.</p><div class="notice">امنیت: secrets فقط در محیط Worker نگهداری می‌شوند.</div><div class="toolbar"><a class="btn ghost" href="#/admin/dashboard">بازگشت به داشبورد</a></div></div></div>`;}
