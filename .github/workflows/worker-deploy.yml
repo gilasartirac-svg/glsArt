@@ -25,14 +25,13 @@ jobs:
 
       - run: npm ci
 
+      - name: Verify Cloudflare CI credentials
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || (echo "::error::CLOUDFLARE_API_TOKEN is missing"; exit 1)
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || (echo "::error::CLOUDFLARE_ACCOUNT_ID is missing"; exit 1)
+
       - name: Apply remote D1 migrations
-        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
         run: npx wrangler d1 migrations apply gilasartdatabase --remote
 
       - name: Deploy Worker
-        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
         run: npx wrangler deploy --config wrangler.toml
-
-      - name: Report missing Cloudflare CI credentials
-        if: ${{ env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' }}
-        run: echo "Cloudflare CI secrets are not configured; Worker/D1 deployment was intentionally skipped."
