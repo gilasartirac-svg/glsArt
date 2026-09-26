@@ -1,4 +1,5 @@
 const API=window.GILASART_API||'https://gilasartworker.gilasart-ir-ac.workers.dev';
+const apiError=(data,status,path)=>{const detail=data?.error||data?.message||`HTTP ${status}`;return new Error(`${detail} · ${path}`)};
 let csrfToken='';
 
 async function ensureCsrf(){
@@ -22,7 +23,7 @@ export async function api(path,options={}){
  const res=await fetch(API+path,{credentials:'include',...options,headers});
  const data=await res.json().catch(()=>({}));
  if(data.csrfToken)csrfToken=data.csrfToken;
- if(!res.ok)throw new Error(data.error||'خطا در ارتباط با سرور');
+ if(!res.ok)throw apiError(data,res.status,path);
  return data;
 }
 
