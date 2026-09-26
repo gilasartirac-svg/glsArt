@@ -171,3 +171,8 @@ input,textarea,select{font-weight:400;letter-spacing:0}
 .admin-nav-group a{display:flex;align-items:center;min-height:42px;border-radius:10px;padding:0 12px}
 .admin-nav-group a:hover{background:rgba(201,168,106,.09);color:var(--ga-gold-2)}
 @media(max-width:700px){.form-grid{grid-template-columns:1fr}}
+
+/* Main navigation — desktop + mobile */
+.nav{min-width:0}.links{align-items:center;min-width:0;overflow-x:auto;scrollbar-width:none}.links::-webkit-scrollbar{display:none}.links a{padding:8px 10px;border-radius:10px;white-space:nowrap;transition:background .18s ease,color .18s ease,transform .18s ease}.links a:hover{background:rgba(201,168,106,.09);color:var(--gold);transform:translateY(-1px)}.links .admin-link{color:var(--gold-2);border:1px solid rgba(201,168,106,.22);background:rgba(201,168,106,.06)}.iconbtn{white-space:nowrap}
+@media(max-width:900px){.nav{gap:8px}.brand{flex:0 0 auto}.links{display:flex;flex:1;gap:2px;order:2}.spacer{display:none}.iconbtn{padding:7px 10px;font-size:13px;order:3}.links a{font-size:13px;padding:7px 8px}}
+@media(max-width:520px){.nav{height:64px}.brand small{display:none}.brand{font-size:18px}.links a{font-size:12px;padding:6px 7px}.iconbtn{font-size:12px;padding:6px 8px}}
