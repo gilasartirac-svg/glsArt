@@ -381,7 +381,7 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  if(u.pathname==='/api/admin/reviews'&&req.method==='GET'){if(!(await requirePermission(me,env,'reviews.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT r.*,p.name product_name,u.mobile FROM reviews r JOIN products p ON p.id=r.product_id JOIN users u ON u.id=r.user_id ORDER BY r.created_at DESC LIMIT 500').all();return json({items:r.results||[]})}
  if(u.pathname.startsWith('/api/admin/reviews/')&&req.method==='PUT'){if(!(await requirePermission(me,env,'reviews.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const id=u.pathname.split('/').pop(),before=await env.DB.prepare('SELECT * FROM reviews WHERE id=?').bind(id).first();if(!before)return json({error:'not_found'},404);const b=await body(req);await env.DB.prepare('UPDATE reviews SET approved=? WHERE id=?').bind(b.approved?1:0,id).run();const after=await env.DB.prepare('SELECT * FROM reviews WHERE id=?').bind(id).first();await audit(env,me,'admin.review.moderate','review',id,{before,after},req);return json({ok:true})}
  if(u.pathname.startsWith('/api/admin/reviews/')&&req.method==='DELETE'){if(!(await requirePermission(me,env,'reviews.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const id=u.pathname.split('/').pop(),before=await env.DB.prepare('SELECT * FROM reviews WHERE id=?').bind(id).first();if(!before)return json({error:'not_found'},404);await env.DB.prepare('DELETE FROM reviews WHERE id=?').bind(id).run();await audit(env,me,'admin.review.delete','review',id,{before,after:null},req);return json({ok:true})}
- if(u.pathname==='/api/admin/stats'&&req.method==='GET'){if(!(await requirePermission(me,env,'reports.read')))return json({error:'forbidden'},403);const [a,b,c]=await Promise.all([env.DB.prepare('SELECT COUNT(*) n FROM orders').first(),env.DB.prepare("SELECT COALESCE(SUM(total_irt),0) n FROM orders WHERE status IN ('PAID','PROCESSING','SHIPPED','DELIVERED')").first(),env.DB.prepare('SELECT COUNT(*) n FROM users').first()]);return json({orders:a.n,revenue_irt:b.n,users:c.n})}
+ if(u.pathname==='/api/admin/stats'&&req.method==='GET'){if(!(await requirePermission(me,env,'reports.read')))return json({error:'forbidden'},403);const [a,b,c,d]=await Promise.all([env.DB.prepare('SELECT COUNT(*) n FROM orders WHERE is_sample=0').first(),env.DB.prepare("SELECT COALESCE(SUM(total_irt),0) n FROM orders WHERE is_sample=0 AND status IN ('PAID','PROCESSING','SHIPPED','DELIVERED')").first(),env.DB.prepare('SELECT COUNT(*) n FROM users WHERE mobile NOT LIKE \'0912000000%\'').first(),env.DB.prepare("SELECT COALESCE(SUM(total_irt),0) n FROM orders WHERE is_sample=0 AND DATE(created_at)=DATE('now') AND status IN ('PAID','PROCESSING','SHIPPED','DELIVERED')").first()]);return json({orders:a.n,revenue_irt:b.n,users:c.n,today_sales_irt:d.n})}
 
 
  if(u.pathname==='/api/admin/audit'&&req.method==='GET'){
@@ -418,7 +418,7 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
     COUNT(*) orders,
     COALESCE(SUM(total_irt),0) revenue_irt
    FROM orders
-   WHERE status IN ('PAID','PROCESSING','SHIPPED','DELIVERED')
+   WHERE is_sample=0 AND status IN ('PAID','PROCESSING','SHIPPED','DELIVERED')
    GROUP BY DATE(created_at)
    ORDER BY day DESC
    LIMIT 365
@@ -441,6 +441,8 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
     COALESCE(SUM(oi.line_total_irt),0) revenue_irt
    FROM products p
    LEFT JOIN order_items oi ON oi.product_id=p.id
+   LEFT JOIN orders oo ON oo.id=oi.order_id AND oo.is_sample=0
+   WHERE oo.id IS NULL OR oo.status IN ('PAID','PROCESSING','SHIPPED','DELIVERED')
    GROUP BY p.id
    ORDER BY sold DESC
    LIMIT 200
@@ -462,7 +464,7 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
     COUNT(o.id) orders,
     COALESCE(SUM(o.total_irt),0) total_purchase_irt
    FROM users u
-   LEFT JOIN orders o ON o.user_id=u.id
+   LEFT JOIN orders o ON o.user_id=u.id AND o.is_sample=0
    GROUP BY u.id
    ORDER BY total_purchase_irt DESC
    LIMIT 500
