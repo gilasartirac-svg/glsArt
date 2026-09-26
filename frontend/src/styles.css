@@ -160,3 +160,14 @@ body{font-weight:400;letter-spacing:-.01em}
 h1,h2,h3,h4,h5,h6,.brand,.admin-brand,.admin-header h3{font-weight:700;letter-spacing:-.025em}
 .price,.btn.primary,.admin-layout .card strong{font-variant-numeric:tabular-nums;font-feature-settings:"ss01","tnum"}
 input,textarea,select{font-weight:400;letter-spacing:0}
+
+/* Admin forms + tables */
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.form label{display:flex;flex-direction:column;gap:7px;color:var(--ga-muted);font-size:13px;margin-bottom:12px}
+.form input,.form select,.form textarea{width:100%;box-sizing:border-box;border:1px solid var(--ga-line);background:#0f0f13;color:var(--ga-text);border-radius:12px;padding:11px 13px;min-height:44px}
+.form textarea{min-height:110px;resize:vertical}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.btn.danger{border:1px solid rgba(220,90,90,.35);color:#f0b0b0;background:rgba(120,30,30,.12)}
+.admin-nav-group a{display:flex;align-items:center;min-height:42px;border-radius:10px;padding:0 12px}
+.admin-nav-group a:hover{background:rgba(201,168,106,.09);color:var(--ga-gold-2)}
+@media(max-width:700px){.form-grid{grid-template-columns:1fr}}
