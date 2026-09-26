@@ -68,6 +68,36 @@ async function audit(env,actor,action,type,id,meta,req){
 }
 function requireCsrf(req){return req.headers.get('X-CSRF-Token')&&req.headers.get('X-CSRF-Token')===cookies(req)['gs_csrf']}
 async function requireUser(req,env){const u=await user(req,env);return u}
+async function ensureAdminBootstrap(env){
+  try{
+    await env.DB.prepare('SELECT is_sample FROM orders LIMIT 1').first();
+  }catch{
+    try{await env.DB.prepare("ALTER TABLE orders ADD COLUMN is_sample INTEGER NOT NULL DEFAULT 0 CHECK(is_sample IN(0,1))").run()}catch{}
+  }
+  const statements=[
+    env.DB.prepare("INSERT OR IGNORE INTO admin_roles(id,name,description) VALUES('admin-role','admin','دسترسی کامل پنل مدیریت گیلاس آرت')"),
+    env.DB.prepare("INSERT OR IGNORE INTO permissions(id,name) VALUES('perm_products_read','products.read'),('perm_products_write','products.write'),('perm_orders_read','orders.read'),('perm_orders_write','orders.write'),('perm_customers_read','customers.read'),('perm_customers_write','customers.write'),('perm_payments_read','payments.read'),('perm_reports_read','reports.read'),('perm_settings_read','settings.read'),('perm_settings_write','settings.write'),('perm_inventory_read','inventory.read'),('perm_inventory_write','inventory.write'),('perm_coupons_read','coupons.read'),('perm_coupons_write','coupons.write'),('perm_reviews_read','reviews.read'),('perm_reviews_write','reviews.write'),('perm_users_write','users.write'),('perm_users_manage','users.manage'),('perm_roles_manage','roles.manage')"),
+    env.DB.prepare("INSERT OR IGNORE INTO role_permissions(role_id,permission_id) SELECT 'admin-role',id FROM permissions"),
+    env.DB.prepare("INSERT OR IGNORE INTO users(id,mobile,name) VALUES('usr_admin_gilasart','09153090907','مدیر گیلاس آرت')"),
+    env.DB.prepare("INSERT OR REPLACE INTO admin_users(user_id,role_id,active) SELECT id,'admin-role',1 FROM users WHERE mobile='09153090907'"),
+    env.DB.prepare("INSERT OR IGNORE INTO categories(id,slug,name,description,active) VALUES('cat_abstract','abstract','آبستره','آثار انتزاعی با تمرکز بر رنگ، فرم و بافت.',1),('cat_modern','modern','مدرن','تابلوهای مدرن برای فضاهای معاصر.',1),('cat_minimal','minimal','مینیمال','آثار آرام و مینیمال برای دکوراسیون خلوت.',1),('cat_classic','classic','کلاسیک','آثار با حال‌وهوای اصیل و ماندگار.',1)"),
+    env.DB.prepare("INSERT OR IGNORE INTO products(id,category_id,slug,sku,name,description,price_irt,active,seo_title,seo_description) VALUES('sample_mehr','cat_abstract','mehr','GA-1001','مهرِ خاک و نور','تابلوی آبستره با ترکیب خاکی، مسی و نور گرم.',8900000,1,'مهر خاک و نور | تابلو آبستره','تابلو آبستره مهر خاک و نور برای دکوراسیون گرم و هنری.'),('sample_shab','cat_modern','shab','GA-1002','شبِ آرام','اثری مدرن با فضای شبانه و نور ماه.',7600000,1,'شب آرام | تابلو مدرن','تابلو مدرن شب آرام با طیف آبی و نور ماه.'),('sample_khak','cat_minimal','khak','GA-1003','هندسه‌ی خاک','ترکیب مینیمال فرم‌های هندسی و رنگ‌های خاکی.',6400000,1,'هندسه خاک | تابلو مینیمال','تابلو مینیمال هندسه خاک برای دکوراسیون مدرن.'),('sample_barg','cat_abstract','barg','GA-1004','رقص برگ‌ها','اثری انتزاعی با خطوط روان و رنگ‌های سبز و طلایی.',9800000,1,'رقص برگ‌ها | اثر هنری','تابلو رقص برگ‌ها با ترکیب سبز و طلایی.'),('sample_sokoot','cat_minimal','sokoot','GA-1005','سکوت روشن','تابلویی مینیمال با فرم‌های روشن و خطوط تیره.',5200000,1,'سکوت روشن | تابلو مینیمال','تابلو مینیمال سکوت روشن.'),('sample_atiq','cat_classic','atiq','GA-1006','عطرِ عتیق','اثری با حال‌وهوای کلاسیک و پالت گرم.',12500000,1,'عطر عتیق | تابلو کلاسیک','تابلو کلاسیک عطر عتیق با پالت گرم.')"),
+    env.DB.prepare("INSERT OR IGNORE INTO inventory(product_id,quantity) VALUES('sample_mehr',8),('sample_shab',6),('sample_khak',10),('sample_barg',5),('sample_sokoot',12),('sample_atiq',4)"),
+    env.DB.prepare("INSERT OR IGNORE INTO product_images(id,product_id,path,alt_text,sort_order,is_primary) VALUES('img_mehr','sample_mehr','/glsArt/art/mehr.svg','تابلو آبستره مهر خاک و نور',0,1),('img_shab','sample_shab','/glsArt/art/shab.svg','تابلو مدرن شب آرام',0,1),('img_khak','sample_khak','/glsArt/art/khak.svg','تابلو مینیمال هندسه خاک',0,1),('img_barg','sample_barg','/glsArt/art/barg.svg','تابلو رقص برگ‌ها',0,1),('img_sokoot','sample_sokoot','/glsArt/art/sokoot.svg','تابلو مینیمال سکوت روشن',0,1),('img_atiq','sample_atiq','/glsArt/art/atiq.svg','تابلو کلاسیک عطر عتیق',0,1)"),
+    env.DB.prepare("INSERT OR IGNORE INTO users(id,mobile,name) VALUES('usr_sample_01','09120000001','مشتری نمونه یک'),('usr_sample_02','09120000002','مشتری نمونه دو'),('usr_sample_03','09120000003','مشتری نمونه سه')"),
+    env.DB.prepare("INSERT OR IGNORE INTO orders(id,user_id,status,subtotal_irt,shipping_irt,total_irt,is_sample) VALUES('ord_sample_paid','usr_sample_01','PAID',8900000,500000,9400000,1),('ord_sample_pending','usr_sample_02','PENDING',7600000,500000,8100000,1),('ord_sample_cancelled','usr_sample_03','CANCELLED',6400000,500000,6900000,1)"),
+    env.DB.prepare("INSERT OR IGNORE INTO order_items(id,order_id,product_id,sku,name,unit_price_irt,quantity,line_total_irt) VALUES('oi_sample_paid','ord_sample_paid','sample_mehr','GA-1001','مهرِ خاک و نور',8900000,1,8900000),('oi_sample_pending','ord_sample_pending','sample_shab','GA-1002','شبِ آرام',7600000,1,7600000),('oi_sample_cancelled','ord_sample_cancelled','sample_khak','GA-1003','هندسه‌ی خاک',6400000,1,6400000)"),
+    env.DB.prepare("INSERT OR IGNORE INTO payments(id,order_id,status,amount_irt,authority,ref_id,paid_at) VALUES('pay_sample_paid','ord_sample_paid','PAID',9400000,'SAMPLE-AUTH-1001','SAMPLE-REF-1001',CURRENT_TIMESTAMP),('pay_sample_pending','ord_sample_pending','CREATED',8100000,'SAMPLE-AUTH-1002',NULL,NULL),('pay_sample_cancelled','ord_sample_cancelled','CANCELLED',6900000,NULL,NULL,NULL)"),
+    env.DB.prepare("INSERT OR IGNORE INTO payment_attempts(id,payment_id,authority,request_code,verify_code,callback_status,raw_status) VALUES('attempt_sample_paid','pay_sample_paid','SAMPLE-AUTH-1001',100,100,'OK','SAMPLE'),('attempt_sample_pending','pay_sample_pending','SAMPLE-AUTH-1002',100,NULL,'PENDING','SAMPLE')"),
+    env.DB.prepare("INSERT OR IGNORE INTO coupons(id,code,kind,value,max_uses,active,expires_at) VALUES('coupon_sample_10','SAMPLE10','PERCENT',10,100,1,datetime('now','+90 day')),('coupon_sample_fixed','SAMPLE500','FIXED',500000,50,1,datetime('now','+60 day'))"),
+    env.DB.prepare("INSERT OR IGNORE INTO reviews(id,user_id,product_id,rating,body,approved) VALUES('review_sample_01','usr_sample_01','sample_mehr',5,'نظر نمونه برای تست مدیریت نظرات.',0),('review_sample_02','usr_sample_02','sample_shab',4,'نظر نمونه دوم برای تست مدیریت نظرات.',0)")
+  ];
+  await env.DB.batch(statements);
+  try{
+    await env.DB.prepare("INSERT OR IGNORE INTO site_settings(key,value) VALUES('admin_bootstrap_v1','ready')").run();
+  }catch{}
+  return true;
+}
 async function rate(env,key,limit,minutes){const h=await env.DB.prepare('SELECT COUNT(*) n FROM otp_challenges WHERE request_ip=? AND created_at>datetime(\'now\',?)').bind(key,`-${minutes} minutes`).first();return (h?.n||0)<limit}
 async function zarin(env,endpoint,payload){const base=env.PAYMENT_ENV==='production'?'https://api.zarinpal.com/pg/v4/payment':'https://sandbox.zarinpal.com/pg/v4/payment';const r=await fetch(base+'/'+endpoint,{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify({...payload,merchant_id:env.ZARINPAL_MERCHANT_ID})});return r.json()}
 async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req,env)});
@@ -81,6 +111,7 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  if(u.pathname==='/api/auth/logout'&&req.method==='POST'){if(!requireCsrf(req))return json({error:'forbidden'},403);const sid=cookies(req)['__Host-gs_session'];if(sid)await env.DB.prepare("UPDATE sessions SET revoked_at=datetime('now') WHERE id=?").bind(sid).run();return json({ok:true},200,{'set-cookie':['__Host-gs_session=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0','gs_csrf=; Path=/; Secure; SameSite=None; Max-Age=0']})}
  const me=await requireUser(req,env);
  if(u.pathname.startsWith('/api/admin') && me?.mobile!=='09153090907')return json({error:'forbidden'},403);
+ if(me?.mobile==='09153090907' && u.pathname.startsWith('/api/admin')){try{await ensureAdminBootstrap(env)}catch(e){console.error('admin bootstrap failed',e?.message||e)}}
 
  if(u.pathname==='/api/admin/me'&&req.method==='GET'){
   if(!me)return json({error:'unauthorized'},401);
