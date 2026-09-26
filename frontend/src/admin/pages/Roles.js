@@ -1,10 +1,2 @@
-export default function Roles(){
-
-return `
-<div dir="rtl">
-<h2>Roles</h2>
-<p>Enterprise Admin Module</p>
-</div>
-`;
-
-}
+import {admin} from '../services/api.js';
+export default function Roles(){setTimeout(async()=>{try{const d=await admin.roles();document.querySelector('#roles-table').innerHTML=(d.items||[]).map(x=>`<tr><td>${x.name}</td><td>${x.description||'—'}</td></tr>`).join('')||'<tr><td colspan="2">نقشی ثبت نشده است.</td></tr>'}catch(e){document.querySelector('#roles-error').textContent=e.message}},0);return `<div class="admin-page" dir="rtl"><div class="admin-title"><h2>نقش‌ها و دسترسی‌ها</h2></div><div id="roles-error" class="error"></div><div class="panel"><table class="admin-table"><thead><tr><th>نقش</th><th>توضیح</th></tr></thead><tbody id="roles-table"><tr><td colspan="2">در حال دریافت...</td></tr></tbody></table></div></div>`;}
