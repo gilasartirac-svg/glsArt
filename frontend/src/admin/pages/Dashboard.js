@@ -1,4 +1,4 @@
-import {admin} from '../services/api.js';
+import {admin} from '../services/api.js?v=20260926.2';
 
 export default function Dashboard(){
 
