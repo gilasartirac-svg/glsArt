@@ -10,3 +10,5 @@ test('auth uses cryptographic OTP generation and CSRF for mutations',()=>{assert
 test('commerce schema contains source-of-truth tables',()=>{for(const name of ['products','inventory','orders','order_items','payments','payment_attempts','audit_logs','user_roles'])assert.match(schema,new RegExp('CREATE TABLE '+name));});
 test('payment finalization uses one atomic D1 batch and guards duplicate callbacks',()=>{assert.match(worker,/await env\.DB\.batch\(statements\)/);assert.match(worker,/pp\.status!='PAID'/);assert.match(worker,/oo\.status='PENDING'/);assert.match(worker,/quantity=quantity-\?/);});
 test('checkout idempotency is enforced server-side',()=>{assert.match(worker,/idempotency_key_required/);assert.match(worker,/checkout_key/);assert.match(schema,/CREATE TABLE orders/);});
+
+test('admin control panel is restricted to the designated mobile',()=>{assert.match(worker,/u\.pathname\.startsWith\('\/api\/admin'\).*me\?\.mobile!==['"]09153090907['"]/);const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');assert.match(app,/state\.user\?\.mobile===["']09153090907["']/);assert.match(app,/if\(!isAdminUser\(\)\)/)});
