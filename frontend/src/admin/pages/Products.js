@@ -1,4 +1,4 @@
-import {admin,api} from '../services/api.js';
+import {admin,api} from '../services/api.js?v=20260926.2';
 const money=n=>new Intl.NumberFormat('fa-IR').format(Number(n||0));
 export default function Products(){
  setTimeout(async()=>{try{const [pd,cd]=await Promise.all([admin.products(),api('/api/admin/categories')]);const cat=document.querySelector('#p-category');cat.innerHTML='<option value="">بدون دسته</option>'+(cd.items||[]).map(x=>`<option value="${x.id}">${x.name}</option>`).join('');render(pd.items||[])}catch(e){document.querySelector('#products-error').textContent=e.message}
