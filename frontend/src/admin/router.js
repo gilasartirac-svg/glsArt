@@ -1,4 +1,4 @@
-const ASSET_VERSION='20260926.2';
+const ASSET_VERSION='20260926.3';
 const pages={
  dashboard:'./pages/Dashboard.js',
  products:'./pages/Products.js',
@@ -32,7 +32,11 @@ export async function loadAdminPage(){
   const mod=await import(path+'?v='+ASSET_VERSION);
   if(sequence!==loadSequence)return;
   const current=document.querySelector('#admin-page');
-  if(current)current.innerHTML=mod.default();
+  if(!current)return;
+  current.innerHTML=mod.default();
+  if(typeof mod.mount==='function'){
+    await mod.mount();
+  }
  }catch(e){
   if(sequence!==loadSequence)return;
   const current=document.querySelector('#admin-page');
