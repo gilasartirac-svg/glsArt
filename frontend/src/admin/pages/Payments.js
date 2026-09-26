@@ -1,10 +1,2 @@
-export default function Payments(){
-
-return `
-<div dir="rtl">
-<h2>Payments</h2>
-<p>Enterprise Admin Module</p>
-</div>
-`;
-
-}
+import {api} from '../services/api.js';
+export default function Payments(){setTimeout(async()=>{try{const d=await api('/api/admin/payments');const el=document.querySelector('#payments-table');if(el)el.innerHTML=(d.items||[]).map(p=>`<tr><td>${p.order_id}</td><td>${p.mobile}</td><td>${new Intl.NumberFormat('fa-IR').format(p.amount_irt||0)}</td><td><span class="pill">${p.status}</span></td><td>${p.ref_id||'—'}</td><td>${p.created_at||''}</td></tr>`).join('')||'<tr><td colspan="6">پرداختی وجود ندارد.</td></tr>'}catch(e){document.querySelector('#payments-error').textContent=e.message}},0);return `<div class="admin-page" dir="rtl"><div class="admin-title"><h2>پرداخت‌ها</h2></div><div id="payments-error" class="error"></div><div class="panel"><table class="admin-table"><thead><tr><th>سفارش</th><th>موبایل</th><th>مبلغ</th><th>وضعیت</th><th>Ref ID</th><th>تاریخ</th></tr></thead><tbody id="payments-table"><tr><td colspan="6">در حال دریافت...</td></tr></tbody></table></div></div>`;}
