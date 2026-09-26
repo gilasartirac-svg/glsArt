@@ -1,4 +1,4 @@
-import {api} from '../services/api.js';
+import {api} from '../services/api.js?v=20260926.2';
 
 export default function Coupons(){
  setTimeout(()=>{load();document.querySelector('#coupon-form')?.addEventListener('submit',submit)},0);
