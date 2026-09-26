@@ -1,23 +1,41 @@
 const API=window.GILASART_API||'https://gilasartworker.gilasart-ir-ac.workers.dev';
 let csrfToken='';
+let sessionChecked=false;
 const apiError=(data,status,path)=>new Error((data?.error||data?.message||`HTTP ${status}`)+` · ${path}`);
+
 async function ensureCsrf(force=false){
  if(csrfToken&&!force)return csrfToken;
  try{
   const r=await fetch(API+'/api/me',{credentials:'include',cache:'no-store'});
   const d=await r.json().catch(()=>({}));
   csrfToken=d.csrfToken||'';
+  sessionChecked=true;
  }catch{}
  return csrfToken;
 }
+
+function friendlyError(data,status,path){
+ const code=String(data?.error||'');
+ if(status===401||code==='unauthorized')return 'نشست مدیریت معتبر نیست یا منقضی شده است.';
+ if(status===403||code==='forbidden')return 'دسترسی این کاربر به این بخش تأیید نشد.';
+ if(status===404||code==='not_found')return 'مسیر یا اطلاعات در سرور پیدا نشد.';
+ if(status===409)return 'این عملیات با وضعیت فعلی داده‌ها سازگار نیست.';
+ if(status>=500||code==='internal_error')return 'سرور هنگام خواندن اطلاعات با خطا روبه‌رو شد.';
+ return data?.message||data?.error||`HTTP ${status} · ${path}`;
+}
+
 function showAdminLoadError(message){
  document.querySelectorAll('#admin-page tbody').forEach(el=>{
-  if(el.textContent.includes('در حال دریافت')){
-   el.innerHTML=`<tr><td colspan="12" class="error-cell">${message}</td></tr>`;
+  if(/در حال دریافت|در حال بارگذاری/.test(el.textContent||'')){
+   const colspan=el.querySelector('td')?.getAttribute('colspan')||'12';
+   el.innerHTML=`<tr><td colspan="${colspan}" class="error-cell">${message}</td></tr>`;
   }
  });
- document.querySelectorAll('#admin-page .admin-data-error').forEach(el=>el.textContent=message);
+ document.querySelectorAll('#admin-page .admin-data-error,#admin-page .error').forEach(el=>{
+  if(!el.textContent||el.classList.contains('admin-data-error'))el.textContent=message;
+ });
 }
+
 export async function api(path,options={}){
  const method=(options.method||'GET').toUpperCase();
  const headers={...(options.headers||{})};
@@ -33,9 +51,12 @@ export async function api(path,options={}){
   const data=await res.json().catch(()=>({}));
   if(data.csrfToken)csrfToken=data.csrfToken;
   if(!res.ok){
-   const message=(data?.error||`HTTP ${res.status}`);
+   if((res.status===401||res.status===403)&&!sessionChecked){
+    await ensureCsrf(true);
+   }
+   const message=friendlyError(data,res.status,path);
    showAdminLoadError(`خطا در دریافت اطلاعات: ${message}`);
-   throw apiError(data,res.status,path);
+   throw apiError({error:message},res.status,path);
   }
   return data;
  }catch(e){
@@ -46,8 +67,11 @@ export async function api(path,options={}){
   }
   showAdminLoadError(e.message||'خطا در ارتباط با سرور');
   throw e;
- }finally{clearTimeout(timeout)}
+ }finally{
+  clearTimeout(timeout);
+ }
 }
+
 export const admin={
  me:()=>api('/api/admin/me'),
  stats:()=>api('/api/admin/stats'),
