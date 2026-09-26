@@ -1,15 +1,1 @@
-export default function Header(){
-
-return `
-<header class="admin-header" dir="rtl">
-
-<h3>پنل مدیریت</h3>
-
-<div>
-مدیر سیستم
-</div>
-
-</header>
-`;
-
-}
+export default function Header(){return `<header class="admin-header" dir="rtl"><div class="admin-header-title"><span class="admin-kicker">GILAS ART / ADMIN</span><h3>پنل مدیریت</h3></div><div class="admin-header-actions"><span class="admin-user-badge">مدیر سیستم</span><button class="theme-toggle" id="theme-toggle" type="button" aria-label="تغییر حالت نمایش" title="تغییر حالت روز و شب" onclick="window.GilasArtTheme&&window.GilasArtTheme.toggle()"><span class="theme-icon">◐</span><span>روز / شب</span></button></div></header>`;}
