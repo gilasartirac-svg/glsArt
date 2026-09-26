@@ -437,13 +437,16 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
     p.id,
     p.name,
     p.sku,
-    COALESCE(SUM(oi.quantity),0) sold,
-    COALESCE(SUM(oi.line_total_irt),0) revenue_irt
+    COALESCE(s.sold,0) sold,
+    COALESCE(s.revenue_irt,0) revenue_irt
    FROM products p
-   LEFT JOIN order_items oi ON oi.product_id=p.id
-   LEFT JOIN orders oo ON oo.id=oi.order_id AND oo.is_sample=0
-   WHERE oo.id IS NULL OR oo.status IN ('PAID','PROCESSING','SHIPPED','DELIVERED')
-   GROUP BY p.id
+   LEFT JOIN (
+    SELECT oi.product_id,SUM(oi.quantity) sold,SUM(oi.line_total_irt) revenue_irt
+    FROM order_items oi
+    JOIN orders o ON o.id=oi.order_id
+    WHERE o.is_sample=0 AND o.status IN ('PAID','PROCESSING','SHIPPED','DELIVERED')
+    GROUP BY oi.product_id
+   ) s ON s.product_id=p.id
    ORDER BY sold DESC
    LIMIT 200
   `).all();
