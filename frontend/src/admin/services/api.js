@@ -23,7 +23,7 @@ export async function api(path,options={}){
  const res=await fetch(API+path,{credentials:'include',...options,headers});
  const data=await res.json().catch(()=>({}));
  if(data.csrfToken)csrfToken=data.csrfToken;
- if(!res.ok)throw apiError(data,res.status,path);
+ if(!res.ok){document.querySelectorAll('#admin-page tbody').forEach(el=>{if(el.textContent.includes('در حال دریافت'))el.innerHTML=`<tr><td colspan="12" class="error-cell">خطا در دریافت اطلاعات: ${data?.error||`HTTP ${res.status}`}</td></tr>`});throw apiError(data,res.status,path);}
  return data;
 }
 
