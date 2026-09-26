@@ -203,3 +203,15 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 .error-cell{text-align:center!important;padding:24px!important;color:var(--ui-danger);background:color-mix(in srgb,var(--ui-danger) 7%,transparent)}
 @media(max-width:900px){.hero-sky,.hero-sky canvas{min-height:340px}.hero-sky{border-radius:24px}}
 @media(max-width:520px){.hero-sky,.hero-sky canvas{min-height:300px}.sky-caption{right:12px;bottom:12px}.sky-caption strong{font-size:17px}}
+
+/* Admin navigation + responsive premium polish */
+.admin-nav-group a.active{
+  color:var(--ui-text);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--ui-gold) 16%,transparent),color-mix(in srgb,var(--ui-gold) 6%,transparent));
+  border-color:color-mix(in srgb,var(--ui-gold) 28%,var(--ui-line));
+  box-shadow:inset -3px 0 0 var(--ui-gold),0 8px 24px rgba(0,0,0,.10);
+  font-weight:700;
+}
+:root[data-theme="light"] .admin-nav-group a.active{box-shadow:inset -3px 0 0 var(--ui-gold),0 8px 24px rgba(80,60,30,.07)}
+.top .theme-toggle{margin-inline:4px}
+@media(max-width:700px){.top .theme-toggle{width:38px;min-width:38px;padding:7px}.top .theme-toggle span:not(.theme-icon){display:none}}
