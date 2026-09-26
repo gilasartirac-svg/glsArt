@@ -80,6 +80,7 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  if(u.pathname==='/api/me'&&req.method==='GET'){const u0=await user(req,env);const csrfToken=cookies(req)['gs_csrf']||null;return json({user:u0,roles:await roles(u0,env),csrfToken})}
  if(u.pathname==='/api/auth/logout'&&req.method==='POST'){if(!requireCsrf(req))return json({error:'forbidden'},403);const sid=cookies(req)['__Host-gs_session'];if(sid)await env.DB.prepare("UPDATE sessions SET revoked_at=datetime('now') WHERE id=?").bind(sid).run();return json({ok:true},200,{'set-cookie':['__Host-gs_session=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0','gs_csrf=; Path=/; Secure; SameSite=None; Max-Age=0']})}
  const me=await requireUser(req,env);
+ if(u.pathname.startsWith('/api/admin') && me?.mobile!=='09153090907')return json({error:'forbidden'},403);
 
  if(u.pathname==='/api/admin/me'&&req.method==='GET'){
   if(!me)return json({error:'unauthorized'},401);
