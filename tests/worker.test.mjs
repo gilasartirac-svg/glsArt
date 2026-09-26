@@ -8,3 +8,5 @@ const schema=readFileSync(new URL('../database/migrations/0001_initial.sql',impo
 test('payment flow requires server-side verification',()=>{assert.match(worker,/verify\.json/);assert.match(worker,/code===100\|\|code===101/);assert.match(worker,/callback_status/)});
 test('auth uses cryptographic OTP generation and CSRF for mutations',()=>{assert.match(worker,/crypto\.getRandomValues/);assert.match(worker,/requireCsrf/);assert.match(worker,/__Host-gs_session/)});
 test('commerce schema contains source-of-truth tables',()=>{for(const name of ['products','inventory','orders','order_items','payments','payment_attempts','audit_logs','user_roles'])assert.match(schema,new RegExp('CREATE TABLE '+name));});
+test('payment finalization uses one atomic D1 batch and guards duplicate callbacks',()=>{assert.match(worker,/await env\.DB\.batch\(statements\)/);assert.match(worker,/pp\.status!='PAID'/);assert.match(worker,/oo\.status='PENDING'/);assert.match(worker,/quantity=quantity-\?/);});
+test('checkout idempotency is enforced server-side',()=>{assert.match(worker,/idempotency_key_required/);assert.match(worker,/checkout_key/);assert.match(schema,/CREATE TABLE orders/);});
