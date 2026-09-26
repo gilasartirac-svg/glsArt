@@ -152,3 +152,11 @@ main,section,.container,.products,.product-grid,.cards{min-width:0}
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
+
+
+/* Persian typography polish */
+:root{font-synthesis:none}
+body{font-weight:400;letter-spacing:-.01em}
+h1,h2,h3,h4,h5,h6,.brand,.admin-brand,.admin-header h3{font-weight:700;letter-spacing:-.025em}
+.price,.btn.primary,.admin-layout .card strong{font-variant-numeric:tabular-nums;font-feature-settings:"ss01","tnum"}
+input,textarea,select{font-weight:400;letter-spacing:0}
