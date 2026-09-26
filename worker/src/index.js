@@ -196,6 +196,28 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  if(u.pathname==='/api/favorites'&&req.method==='GET'){if(!me)return json({items:[]});const r=await env.DB.prepare('SELECT p.id,p.slug,p.name,p.price_irt,pi.path image FROM favorites f JOIN products p ON p.id=f.product_id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE f.user_id=?').bind(me.id).all();return json({items:r.results||[]})}
  if(u.pathname==='/api/favorites'&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const b=await body(req);await env.DB.prepare('INSERT OR IGNORE INTO favorites(user_id,product_id) VALUES(?,?)').bind(me.id,String(b.productId||'')).run();return json({ok:true})}
  if(u.pathname==='/api/favorites'&&req.method==='DELETE'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const pid=u.searchParams.get('productId');await env.DB.prepare('DELETE FROM favorites WHERE user_id=? AND product_id=?').bind(me.id,pid).run();return json({ok:true})}
+ if(u.pathname==='/api/admin/inventory'&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'inventory.read')))return json({error:'forbidden'},403);
+  const r=await env.DB.prepare('SELECT p.id,p.name,p.sku,p.price_irt,COALESCE(i.quantity,0) quantity, i.updated_at FROM products p LEFT JOIN inventory i ON i.product_id=p.id ORDER BY p.name LIMIT 500').all();
+  return json({items:r.results||[]});
+ }
+ if(u.pathname.startsWith('/api/admin/inventory/')&&req.method==='PUT'){
+  if(!(await requirePermission(me,env,'inventory.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+  const id=u.pathname.split('/').pop();
+  const b=await body(req), quantity=Math.max(0,Math.min(1000000,Number(b.quantity)));
+  if(!Number.isFinite(quantity))return json({error:'invalid_quantity'},400);
+  const before=await env.DB.prepare('SELECT product_id,quantity FROM inventory WHERE product_id=?').bind(id).first();
+  if(!before)return json({error:'not_found'},404);
+  await env.DB.prepare('UPDATE inventory SET quantity=?,updated_at=CURRENT_TIMESTAMP WHERE product_id=?').bind(Math.trunc(quantity),id).run();
+  await audit(env,me,'admin.inventory.update','product',id,{before,after:{product_id:id,quantity:Math.trunc(quantity)}},req);
+  return json({ok:true});
+ }
+ if(u.pathname==='/api/admin/payments'&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'payments.read')))return json({error:'forbidden'},403);
+  const r=await env.DB.prepare('SELECT p.id,p.order_id,p.status,p.amount_irt,p.authority,p.ref_id,p.paid_at,p.created_at,u.mobile FROM payments p JOIN orders o ON o.id=p.order_id JOIN users u ON u.id=o.user_id ORDER BY p.created_at DESC LIMIT 500').all();
+  return json({items:r.results||[]});
+ }
+
  if(u.pathname==='/api/admin/products'&&req.method==='GET'){if(!(await requirePermission(me,env,'products.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT p.*,i.quantity stock FROM products p LEFT JOIN inventory i ON i.product_id=p.id ORDER BY p.created_at DESC').all();return json({items:r.results||[]})}
  if(u.pathname==='/api/admin/products'&&req.method==='POST'){if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const b=await body(req);const id=uid();await env.DB.batch([env.DB.prepare('INSERT INTO products(id,category_id,slug,sku,name,description,price_irt,active,seo_title,seo_description) VALUES(?,?,?,?,?,?,?,?,?,?)').bind(id,b.categoryId||null,b.slug,b.sku,b.name,b.description||'',Number(b.priceIrt)||0,b.active===false?0:1,b.seoTitle||b.name,b.seoDescription||''),env.DB.prepare('INSERT INTO inventory(product_id,quantity) VALUES(?,?)').bind(id,Math.max(0,Number(b.stock)||0))]);await audit(env,me,'admin.product.create','product',id,{
  before:null,
