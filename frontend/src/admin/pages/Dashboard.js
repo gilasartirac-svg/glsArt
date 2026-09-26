@@ -14,6 +14,8 @@ export default function Dashboard(){
 
    if(orders) orders.textContent=data.orders||0;
    if(revenue) revenue.textContent=new Intl.NumberFormat('fa-IR').format(data.revenue_irt||0);
+   const today=document.querySelector('#today-sales');
+   if(today) today.textContent=new Intl.NumberFormat('fa-IR').format(data.today_sales_irt||0);
    if(users) users.textContent=data.users||0;
 
   }catch(e){
