@@ -1,3 +1,4 @@
+const ASSET_VERSION='20260926.2';
 const pages={
  dashboard:'./pages/Dashboard.js',
  products:'./pages/Products.js',
@@ -28,14 +29,14 @@ export async function loadAdminPage(){
  if(!el)return;
  el.innerHTML='<div class="panel admin-page-loading"><p class="muted">در حال بارگذاری بخش…</p></div>';
  try{
-  const mod=await import(path);
+  const mod=await import(path+'?v='+ASSET_VERSION);
   if(sequence!==loadSequence)return;
   const current=document.querySelector('#admin-page');
   if(current)current.innerHTML=mod.default();
  }catch(e){
   if(sequence!==loadSequence)return;
   const current=document.querySelector('#admin-page');
-  if(current)current.innerHTML=`<div class="panel"><h2>خطا در بارگذاری بخش</h2><p class="error">${e.message||'خطای ناشناخته'}</p><button class="btn primary" type="button" onclick="location.reload()">تلاش مجدد</button></div>`;
+  if(current)current.innerHTML='<div class="panel"><h2>خطا در بارگذاری بخش</h2><p class="error">'+(e.message||'خطای ناشناخته')+'</p><button class="btn primary" type="button" onclick="location.reload()">تلاش مجدد</button></div>';
   throw e;
  }
 }
