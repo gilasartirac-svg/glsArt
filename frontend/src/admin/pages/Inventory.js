@@ -1,10 +1,2 @@
-export default function Inventory(){
-
-return `
-<div dir="rtl">
-<h2>Inventory</h2>
-<p>Enterprise Admin Module</p>
-</div>
-`;
-
-}
+import {api} from '../services/api.js';
+export default function Inventory(){setTimeout(async()=>{try{const d=await api('/api/admin/inventory');const el=document.querySelector('#inventory-table');if(el)el.innerHTML=(d.items||[]).map(x=>`<tr><td>${x.name}</td><td>${x.sku||'—'}</td><td><input class="stock-input" data-id="${x.id}" type="number" min="0" value="${x.quantity||0}"></td><td><button class="btn ghost save-stock" data-id="${x.id}">ذخیره</button></td></tr>`).join('')||'<tr><td colspan="4">محصولی وجود ندارد.</td></tr>';document.querySelectorAll('.save-stock').forEach(b=>b.onclick=async()=>{const i=document.querySelector('.stock-input[data-id="'+b.dataset.id+'"]');try{await api('/api/admin/inventory/'+b.dataset.id,{method:'PUT',body:JSON.stringify({quantity:Number(i.value)})});b.textContent='ذخیره شد';setTimeout(()=>b.textContent='ذخیره',1000)}catch(e){alert(e.message)}})}catch(e){document.querySelector('#inventory-error').textContent=e.message}},0);return `<div class="admin-page" dir="rtl"><div class="admin-title"><h2>موجودی</h2></div><div id="inventory-error" class="error"></div><div class="panel"><table class="admin-table"><thead><tr><th>محصول</th><th>SKU</th><th>موجودی</th><th>عملیات</th></tr></thead><tbody id="inventory-table"><tr><td colspan="4">در حال دریافت...</td></tr></tbody></table></div></div>`;}
