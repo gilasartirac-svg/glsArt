@@ -1,3 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /checkout
+Disallow: /cart
 Sitemap: https://gilasartirac-svg.github.io/glsArt/sitemap.xml
