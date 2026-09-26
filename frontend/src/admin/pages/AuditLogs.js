@@ -1,10 +1,2 @@
-export default function AuditLogs(){
-
-return `
-<div dir="rtl">
-<h2>AuditLogs</h2>
-<p>Enterprise Admin Module</p>
-</div>
-`;
-
-}
+import {admin} from '../services/api.js';
+export default function AuditLogs(){setTimeout(async()=>{try{const d=await admin.audit();document.querySelector('#audit-table').innerHTML=(d.items||[]).map(x=>`<tr><td>${x.action}</td><td>${x.entity_type||'—'}</td><td>${x.entity_id||'—'}</td><td>${x.actor_user_id||'—'}</td><td>${x.created_at||''}</td></tr>`).join('')||'<tr><td colspan="5">لاگی وجود ندارد.</td></tr>'}catch(e){document.querySelector('#audit-error').textContent=e.message}},0);return `<div class="admin-page" dir="rtl"><div class="admin-title"><h2>لاگ امنیتی و ممیزی</h2></div><div id="audit-error" class="error"></div><div class="panel"><table class="admin-table"><thead><tr><th>عملیات</th><th>موجودیت</th><th>شناسه</th><th>کاربر</th><th>زمان</th></tr></thead><tbody id="audit-table"><tr><td colspan="5">در حال دریافت...</td></tr></tbody></table></div></div>`;}
