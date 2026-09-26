@@ -219,7 +219,7 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  }
 
  if(u.pathname==='/api/admin/products'&&req.method==='GET'){if(!(await requirePermission(me,env,'products.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT p.*,i.quantity stock FROM products p LEFT JOIN inventory i ON i.product_id=p.id ORDER BY p.created_at DESC').all();return json({items:r.results||[]})}
- if(u.pathname==='/api/admin/products'&&req.method==='POST'){if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const b=await body(req);const id=uid();await env.DB.batch([env.DB.prepare('INSERT INTO products(id,category_id,slug,sku,name,description,price_irt,active,seo_title,seo_description) VALUES(?,?,?,?,?,?,?,?,?,?)').bind(id,b.categoryId||null,b.slug,b.sku,b.name,b.description||'',Number(b.priceIrt)||0,b.active===false?0:1,b.seoTitle||b.name,b.seoDescription||''),env.DB.prepare('INSERT INTO inventory(product_id,quantity) VALUES(?,?)').bind(id,Math.max(0,Number(b.stock)||0))]);await audit(env,me,'admin.product.create','product',id,{
+ if(u.pathname==='/api/admin/products'&&req.method==='POST'){if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const b=await body(req);const id=uid();await env.DB.batch([env.DB.prepare('INSERT INTO products(id,category_id,slug,sku,name,description,price_irt,active,seo_title,seo_description) VALUES(?,?,?,?,?,?,?,?,?,?)').bind(id,b.categoryId||null,b.slug,b.sku,b.name,b.description||'',Number(b.priceIrt)||0,b.active===false?0:1,b.seoTitle||b.name,b.seoDescription||''),env.DB.prepare('INSERT INTO inventory(product_id,quantity) VALUES(?,?)').bind(id,Math.max(0,Number(b.stock)||0)),...(b.imagePath?[env.DB.prepare('INSERT INTO product_images(id,product_id,path,alt_text,is_primary) VALUES(?,?,?,?,1)').bind(uid(),id,String(b.imagePath),String(b.imageAlt||b.name))]:[])]);await audit(env,me,'admin.product.create','product',id,{
  before:null,
  after:{
   sku:b.sku,
@@ -260,13 +260,15 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
    WHERE id=?
   `).bind(
    b.name||before.name,
-   b.description||before.description,
+   b.description??before.description,
    Number(b.priceIrt ?? before.price_irt),
    b.active===false?0:1,
    b.seoTitle||before.seo_title,
    b.seoDescription||before.seo_description,
    id
   ).run();
+  if(b.categoryId!==undefined)await env.DB.prepare('UPDATE products SET category_id=? WHERE id=?').bind(b.categoryId||null,id).run();
+  if(b.imagePath){await env.DB.prepare('DELETE FROM product_images WHERE product_id=?').bind(id).run();await env.DB.prepare('INSERT INTO product_images(id,product_id,path,alt_text,is_primary) VALUES(?,?,?,?,1)').bind(uid(),id,String(b.imagePath),String(b.imageAlt||before.name),).run();}
 
   const after=await env.DB.prepare(
    'SELECT * FROM products WHERE id=?'
