@@ -36,6 +36,9 @@ jobs:
       - name: Check
         run: npm run check
 
+      - name: Check frontend JavaScript syntax
+        run: node --check frontend/src/app.js
+
       - name: Test
         run: npm test
 
