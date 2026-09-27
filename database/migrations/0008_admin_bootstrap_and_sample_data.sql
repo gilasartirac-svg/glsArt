@@ -58,5 +58,3 @@ INSERT OR IGNORE INTO roles(id,name) VALUES('role-admin','admin');
 INSERT OR IGNORE INTO user_roles(user_id,role_id)
 SELECT id,(SELECT id FROM roles WHERE name='admin' LIMIT 1) FROM users WHERE mobile='09153090907' AND EXISTS (SELECT 1 FROM roles WHERE name='admin');
 
--- Keep sample analytics out of production KPIs while making every admin screen testable.
-ALTER TABLE orders ADD COLUMN is_sample INTEGER NOT NULL DEFAULT 0 CHECK(is_sample IN(0,1));
