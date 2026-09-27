@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050916">
+<meta name="robots" content="noindex,follow">
+<title>404 | صفحه پیدا نشد — GilasArt</title>
+<style>
+:root{--bg:#040713;--navy:#081225;--gold:#e4b65a;--gold2:#fff0b0;--text:#f7f3e8;--muted:#aeb8c9}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Tahoma,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+body{overflow:hidden;display:grid;place-items:center;isolation:isolate}
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:-5}
+.space,.nebula,.aurora{position:fixed;inset:-15%;pointer-events:none;z-index:-4}
+.space{background:radial-gradient(circle at 50% 45%,#102447 0,#071326 28%,#040713 68%,#02030a 100%)}
+.nebula{filter:blur(28px);opacity:.7;background:
+radial-gradient(ellipse at 15% 80%,rgba(210,145,62,.28),transparent 32%),
+radial-gradient(ellipse at 85% 18%,rgba(64,113,203,.30),transparent 34%),
+radial-gradient(ellipse at 50% 115%,rgba(91,51,155,.23),transparent 38%);
+animation:drift 18s ease-in-out infinite alternate}
+.aurora{background:conic-gradient(from 210deg at 50% 50%,transparent,rgba(228,182,90,.08),transparent 28%,rgba(55,116,214,.09),transparent 58%);animation:spin 35s linear infinite}
+@keyframes drift{to{transform:scale(1.08) translate(2%,-1%);opacity:.9}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.card{width:min(920px,92vw);padding:clamp(24px,5vw,58px) 24px;text-align:center;position:relative}
+.ring{width:min(330px,62vw);aspect-ratio:1;margin:0 auto 8px;border:1px solid rgba(228,182,90,.45);border-radius:50%;display:grid;place-items:center;position:relative;box-shadow:0 0 45px rgba(228,182,90,.10),inset 0 0 45px rgba(46,98,184,.12);animation:float 5s ease-in-out infinite}
+.ring:before,.ring:after{content:"";position:absolute;border-radius:50%;inset:-14px;border:1px solid rgba(228,182,90,.16);transform:rotate(25deg) scaleX(1.35);animation:orbit 9s linear infinite}
+.ring:after{inset:-28px;transform:rotate(-35deg) scaleX(1.65);animation-duration:14s}
+@keyframes orbit{to{transform:rotate(385deg) scaleX(1.35)}}
+@keyframes float{50%{transform:translateY(-8px)}}
+.galaxy{width:78%;aspect-ratio:1;border-radius:50%;background:
+radial-gradient(circle,#fff7d0 0 2%,#e9bd61 3%,transparent 7%),
+repeating-conic-gradient(from 15deg,rgba(255,229,151,.0) 0 8deg,rgba(67,137,232,.34) 10deg 16deg,rgba(205,151,63,.30) 18deg 23deg,transparent 25deg 35deg),
+radial-gradient(circle,#081126 0 30%,#0e2d5c 48%,#182f62 57%,#081126 72%,#02050d 100%);
+box-shadow:0 0 45px rgba(80,137,229,.28),0 0 90px rgba(228,182,90,.10);animation:galaxy 12s linear infinite}
+@keyframes galaxy{to{transform:rotate(360deg)}}
+.num{font-family:Georgia,serif;font-size:clamp(76px,13vw,145px);line-height:1;font-weight:700;letter-spacing:-.08em;color:var(--gold);text-shadow:0 0 8px rgba(228,182,90,.65),0 0 35px rgba(228,182,90,.25);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;direction:ltr;pointer-events:none}
+h1{margin:30px 0 12px;font-size:clamp(24px,4vw,42px);font-weight:600;color:var(--gold2);text-shadow:0 2px 20px rgba(0,0,0,.5)}
+p{margin:0 auto 28px;max-width:650px;color:var(--muted);font-size:clamp(14px,2vw,18px);line-height:2}
+.home{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;border:1px solid var(--gold);border-radius:999px;color:#171108;background:linear-gradient(135deg,#fff0ad,var(--gold));font-weight:700;text-decoration:none;box-shadow:0 0 22px rgba(228,182,90,.2);transition:.25s}
+.home:hover{transform:translateY(-3px);box-shadow:0 0 34px rgba(228,182,90,.4)}
+.home:focus-visible{outline:3px solid #fff;outline-offset:4px}
+.footer{margin-top:38px;color:#778298;font-size:12px;letter-spacing:.08em}
+.footer b{display:block;color:var(--gold);font-family:Georgia,serif;font-size:18px;margin-bottom:5px}
+@media(max-height:700px){.ring{width:190px}.card{padding:15px}.ring{margin-bottom:0}h1{margin-top:16px}.footer{margin-top:18px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="space"></div><div class="nebula"></div><div class="aurora"></div><canvas id="stars" aria-hidden="true"></canvas>
+<main class="card" role="main">
+  <div class="ring" aria-hidden="true"><div class="galaxy"></div><div class="num">404</div></div>
+  <h1>صفحه مورد نظر یافت نشد</h1>
+  <p>به نظر می‌رسد وارد یک مسیر ناشناخته در کهکشان گیلاس آرت شده‌اید.<br>آدرس را بررسی کنید یا به صفحه اصلی بازگردید.</p>
+  <a class="home" id="home" href="/" aria-label="بازگشت به صفحه اصلی">⌂ <span>بازگشت به صفحه اصلی</span></a>
+  <div class="footer"><b>GilasArt</b>هنر، همیشه راهی به سوی آینده دارد...</div>
+</main>
+<script>
+(()=>{const c=document.getElementById('stars'),x=c.getContext('2d'),D=devicePixelRatio||1;
+function resize(){c.width=innerWidth*D;c.height=innerHeight*D;x.setTransform(D,0,0,D,0,0)}resize();addEventListener('resize',resize);
+const stars=Array.from({length:Math.min(260,Math.floor(innerWidth*innerHeight/6500))},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.5+.25,a:Math.random(),s:Math.random()*.018+.004}));
+function draw(){x.clearRect(0,0,innerWidth,innerHeight);for(const s of stars){s.a+=s.s;if(s.a>1||s.a<.1)s.s=-s.s;x.globalAlpha=.15+s.a*.65;x.fillStyle='#fff';x.beginPath();x.arc(s.x,s.y,s.r,0,Math.PI*2);x.fill()}requestAnimationFrame(draw)}draw();
+const h=document.getElementById('home');h.href=location.hostname.endsWith('github.io')?'/glsArt/':'/';
+})();
+</script>
+</body>
+</html>
