@@ -26,14 +26,12 @@ test('production worker deployment is consolidated and uses the bootstrap secret
 });
 
 
-test('payment settlement guards stock before marking payment paid',()=>{
-  const paymentPos=worker.indexOf("UPDATE payments SET status='PAID'");
-  const inventoryPos=worker.indexOf("UPDATE inventory SET quantity=quantity-?");
-  assert.ok(paymentPos>0 && inventoryPos>paymentPos);
-  const settlement=worker.slice(paymentPos,inventoryPos+500);
-  assert.match(settlement,/NOT EXISTS \(SELECT 1 FROM order_items oi LEFT JOIN inventory inv/);
-  assert.match(settlement,/inv\.quantity<oi\.quantity/);
-  assert.match(settlement,/quantity>=\?/);
+test('payment settlement requires an active stock reservation',()=>{
+  assert.match(worker,/stock_reservations WHERE order_id=\?/);
+  assert.match(worker,/stock_reservation_missing/);
+  assert.match(worker,/UPDATE payments SET status='PAID'/);
+  assert.match(worker,/DELETE FROM stock_reservations WHERE order_id=\?/);
+  assert.doesNotMatch(worker,/UPDATE inventory SET quantity=quantity-\? WHERE product_id=\?/);
 });
 
 
@@ -49,4 +47,16 @@ test('failed and expired payments release reservations',()=>{
   assert.match(worker,/DELETE FROM stock_reservations WHERE order_id=\?/);
   assert.match(worker,/UPDATE inventory SET quantity=quantity\+\?/);
   assert.match(worker,/async function cleanupExpiredReservations/);
+});
+
+test('OTP login supports Android WebOTP and redirects to home after verification',()=>{
+  assert.match(frontend,/autocomplete="one-time-code"/);
+  assert.match(frontend,/OTPCredential/);
+  assert.match(frontend,/navigator\.credentials\.get/);
+  assert.match(frontend,/location\.hash='\\/'/);
+  assert.match(frontend,/function accountLink\(\)/);
+  assert.match(frontend,/state\.user\?/);
+});
+test('OTP SMS includes the WebOTP origin-bound format',()=>{
+  assert.match(worker,/@\\$\\{new URL\\(frontend\\(env\\)\\)\\.host\\} #\\$\\{code\\}/);
 });
