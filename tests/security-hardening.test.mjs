@@ -35,3 +35,18 @@ test('payment settlement guards stock before marking payment paid',()=>{
   assert.match(settlement,/inv\.quantity<oi\.quantity/);
   assert.match(settlement,/quantity>=\?/);
 });
+
+
+test('checkout uses stock reservations before payment',()=>{
+  assert.match(worker,/INSERT INTO stock_reservations/);
+  assert.match(worker,/reservedUntil/);
+  assert.match(worker,/UPDATE inventory SET quantity=quantity-\?/);
+  assert.match(worker,/SELECT COUNT\(\*\) FROM stock_reservations WHERE order_id=\?/);
+});
+
+test('failed and expired payments release reservations',()=>{
+  assert.match(worker,/async function releaseReservation/);
+  assert.match(worker,/DELETE FROM stock_reservations WHERE order_id=\?/);
+  assert.match(worker,/UPDATE inventory SET quantity=quantity\+\?/);
+  assert.match(worker,/async function cleanupExpiredReservations/);
+});
