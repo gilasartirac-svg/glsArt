@@ -34,20 +34,7 @@ jobs:
 
       - name: Inspect remote D1 schema before migrations
         run: |
-          echo '--- migration history ---'
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT id,name,applied_at FROM d1_migrations ORDER BY id" --json || true
-          echo '--- tables ---'
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT name,type FROM sqlite_master WHERE type IN ('table','view') ORDER BY type,name" --json
-          echo '--- migration rows ---'
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT * FROM d1_migrations" --json || true
-          echo '--- users columns ---'
-          npx wrangler d1 execute gilasartdatabase --remote --command="PRAGMA table_info(users)" --json
-          echo '--- categories columns ---'
-          npx wrangler d1 execute gilasartdatabase --remote --command="PRAGMA table_info(categories)" --json
-          echo '--- orders columns ---'
-          npx wrangler d1 execute gilasartdatabase --remote --command="PRAGMA table_info(orders)" --json
-          echo '--- payments columns ---'
-          npx wrangler d1 execute gilasartdatabase --remote --command="PRAGMA table_info(payments)" --json
+          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT 'migration_history' AS item, COALESCE(group_concat(name, '|'),'EMPTY') AS value FROM d1_migrations UNION ALL SELECT 'tables', group_concat(name, '|') FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' UNION ALL SELECT 'users_columns', COALESCE((SELECT group_concat(name, '|') FROM pragma_table_info('users')),'MISSING') UNION ALL SELECT 'categories_columns', COALESCE((SELECT group_concat(name, '|') FROM pragma_table_info('categories')),'MISSING') UNION ALL SELECT 'orders_columns', COALESCE((SELECT group_concat(name, '|') FROM pragma_table_info('orders')),'MISSING') UNION ALL SELECT 'payments_columns', COALESCE((SELECT group_concat(name, '|') FROM pragma_table_info('payments')),'MISSING')" --remote --json
 
       - name: Apply remote D1 migrations
         run: npx wrangler d1 migrations apply gilasartdatabase --remote
