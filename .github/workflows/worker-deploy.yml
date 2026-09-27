@@ -33,7 +33,7 @@ jobs:
           test -n "$ADMIN_BOOTSTRAP_MOBILE" || echo "::warning::ADMIN_BOOTSTRAP_MOBILE is not configured; existing DB admin assignments remain unchanged"
 
       - name: Apply remote D1 migrations
-        run: npx wrangler d1 migrations apply gilasartdatabase --remote --yes
+        run: npx wrangler d1 migrations apply gilasartdatabase --remote
 
       - name: Sync admin bootstrap secret
         if: env.ADMIN_BOOTSTRAP_MOBILE != ''
