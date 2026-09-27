@@ -8,6 +8,11 @@ import Reports from './pages/Reports.js';
 import Roles from './pages/Roles.js';
 import AuditLogs from './pages/AuditLogs.js';
 import Settings from './pages/Settings.js';
+import Categories from './pages/Categories.js';
+import Coupons from './pages/Coupons.js';
+import Discounts from './pages/Discounts.js';
+import SmsSettings from './pages/SmsSettings.js';
+import PaymentSettings from './pages/PaymentSettings.js';
 
 export default function adminRouter(){
 
@@ -23,7 +28,12 @@ export default function adminRouter(){
   reports:Reports,
   roles:Roles,
   audit:AuditLogs,
-  settings:Settings
+  settings:Settings,
+  categories:Categories,
+  coupons:Coupons,
+  discounts:Discounts,
+  sms:SmsSettings,
+  payment:PaymentSettings
  };
 
  
