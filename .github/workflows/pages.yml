@@ -81,11 +81,14 @@ jobs:
       - name: Upload maintenance artifact
         uses: actions/upload-pages-artifact@v4
         with:
+          name: github-pages-maintenance
           path: dist
 
       - name: Deploy maintenance screen
         id: maintenance_deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-maintenance
 
       - name: Build frontend
         run: npm run build
@@ -93,8 +96,11 @@ jobs:
       - name: Upload production artifact
         uses: actions/upload-pages-artifact@v4
         with:
+          name: github-pages-production
           path: dist
 
       - name: Deploy Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-production
