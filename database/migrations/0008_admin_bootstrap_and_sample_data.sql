@@ -50,8 +50,9 @@ WHERE name IN ('products.read','products.write','customers.read','reviews.read',
 INSERT OR IGNORE INTO users(id,mobile,name)
 VALUES('usr_admin_gilasart','09153090907','مدیر گیلاس آرت');
 
-INSERT OR REPLACE INTO admin_users(user_id,role_id,active)
+INSERT OR IGNORE INTO admin_users(user_id,role_id,active)
 SELECT id,'admin-role',1 FROM users WHERE mobile='09153090907';
+UPDATE admin_users SET role_id='admin-role',active=1 WHERE user_id=(SELECT id FROM users WHERE mobile='09153090907' LIMIT 1);
 
 INSERT OR IGNORE INTO roles(id,name) VALUES('role-admin','admin');
 INSERT OR IGNORE INTO user_roles(user_id,role_id)
