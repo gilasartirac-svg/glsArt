@@ -39,6 +39,15 @@ async function requirePermission(u,env,name){
  const pp=await permissions(u,env);
  return pp.includes(name);
 }
+async function canAssignRole(actor,env,roleId){
+ const actorPermissions=new Set(await permissions(actor,env));
+ const role=await env.DB.prepare('SELECT id,name FROM admin_roles WHERE id=?').bind(roleId).first();
+ if(!role)return {ok:false,error:'role_not_found'};
+ const rp=await env.DB.prepare('SELECT p.name FROM permissions p JOIN role_permissions r ON r.permission_id=p.id WHERE r.role_id=?').bind(roleId).all();
+ const missing=(rp.results||[]).map(x=>x.name).filter(p=>!actorPermissions.has(p));
+ if(missing.length)return {ok:false,error:'role_exceeds_actor_permissions'};
+ return {ok:true,role};
+}
 
 function csv(rows){
  if(!rows || !rows.length) return '';
@@ -158,6 +167,12 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
 
   const id=u.pathname.split('/')[4];
   const b=await body(req);
+  if(!b.roleId)return json({error:'role_required'},400);
+  if(id===me.id)return json({error:'self_role_change_forbidden'},403);
+  const target=await env.DB.prepare('SELECT id FROM users WHERE id=?').bind(id).first();
+  if(!target)return json({error:'user_not_found'},404);
+  const allowed=await canAssignRole(me,env,String(b.roleId));
+  if(!allowed.ok)return json({error:allowed.error},allowed.error==='role_not_found'?404:403);
 
   const before=await env.DB.prepare(
    'SELECT * FROM admin_users WHERE user_id=?'
@@ -166,7 +181,7 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
 
   await env.DB.prepare(
    'INSERT OR REPLACE INTO admin_users(user_id,role_id,active) VALUES(?,?,1)'
-  ).bind(id,b.roleId).run();
+  ).bind(id,String(b.roleId)).run();
 
 
   await audit(
@@ -195,10 +210,14 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
 
   const id=u.pathname.split('/')[4];
   const b=await body(req);
+  if(id===me.id && !b.active)return json({error:'self_deactivation_forbidden'},403);
+  const target=await env.DB.prepare('SELECT id FROM users WHERE id=?').bind(id).first();
+  if(!target)return json({error:'user_not_found'},404);
 
   const before=await env.DB.prepare(
    'SELECT * FROM admin_users WHERE user_id=?'
   ).bind(id).first();
+  if(!before)return json({error:'admin_user_not_found'},404);
 
 
   await env.DB.prepare(
