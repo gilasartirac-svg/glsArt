@@ -15,7 +15,7 @@ test('worker has no hard-coded admin mobile or OTP fallback secret',()=>{
 test('frontend does not use a hard-coded admin mobile and escapes dynamic HTML',()=>{
   assert.doesNotMatch(frontend,/09153090907/);
   assert.match(frontend,/function isAdminUser\(\)\{return state\.roles/);
-  assert.match(frontend,/function escapeHtml/);
+  assert.match(frontend,/const escapeHtml=/);
   assert.match(frontend,/escapeHtml\(p\.name\)/);
   assert.match(frontend,/escapeHtml\(r\.body\|\|''\)/);
 });
