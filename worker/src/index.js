@@ -113,7 +113,56 @@ async function ensureAdminBootstrap(env){
 async function rate(env,key,limit,minutes){const h=await env.DB.prepare('SELECT COUNT(*) n FROM otp_challenges WHERE request_ip=? AND created_at>datetime(\'now\',?)').bind(key,`-${minutes} minutes`).first();return (h?.n||0)<limit}
 async function releaseReservation(env,orderId,orderStatus='FAILED'){const r=await env.DB.prepare('SELECT product_id,quantity FROM stock_reservations WHERE order_id=?').bind(orderId).all();const items=r.results||[];if(!items.length)return false;const statements=items.map(x=>env.DB.prepare('UPDATE inventory SET quantity=quantity+?,updated_at=CURRENT_TIMESTAMP WHERE product_id=?').bind(x.quantity,x.product_id));statements.push(env.DB.prepare('DELETE FROM stock_reservations WHERE order_id=?').bind(orderId));statements.push(env.DB.prepare("UPDATE payments SET status='CANCELLED',updated_at=CURRENT_TIMESTAMP WHERE order_id=? AND status!='PAID'").bind(orderId));statements.push(env.DB.prepare('UPDATE orders SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND status=\'PENDING\'').bind(orderStatus,orderId));await env.DB.batch(statements);return true}
 async function cleanupExpiredReservations(env){const r=await env.DB.prepare("SELECT DISTINCT sr.order_id FROM stock_reservations sr JOIN orders o ON o.id=sr.order_id JOIN payments p ON p.order_id=o.id WHERE o.status='PENDING' AND p.status!='PAID' AND sr.reserved_until<=CURRENT_TIMESTAMP").all();for(const x of (r.results||[])){try{await releaseReservation(env,x.order_id,'FAILED')}catch(e){console.error('reservation_cleanup_failed',x.order_id,e?.message||e)}}}
-async function zarin(env,endpoint,payload){const base=env.PAYMENT_ENV==='production'?'https://api.zarinpal.com/pg/v4/payment':'https://sandbox.zarinpal.com/pg/v4/payment';const r=await fetch(base+'/'+endpoint,{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify({...payload,merchant_id:env.ZARINPAL_MERCHANT_ID})});return r.json()}
+async function siteSetting(env,key,fallback=''){
+  try{const r=await env.DB.prepare('SELECT value FROM site_settings WHERE key=?').bind(key).first();return r?.value ?? fallback}catch{return fallback}
+}
+async function paymentEnvironment(env){const v=String(await siteSetting(env,'zarinpal_environment',env.PAYMENT_ENV||'production')).toLowerCase();return v==='sandbox'?'sandbox':'production'}
+async function cartPricing(env,me,couponCode=''){
+  const c=await env.DB.prepare('SELECT id FROM carts WHERE user_id=?').bind(me.id).first();
+  if(!c)return {items:[],subtotal_irt:0,automatic_discount_irt:0,coupon_discount_irt:0,discount_irt:0,shipping_irt:0,total_irt:0,coupon:null,discounts:[]};
+  const rows=(await env.DB.prepare('SELECT ci.product_id,ci.quantity,p.sku,p.name,p.price_irt,p.category_id,c.slug category_slug,c.name category_name,pi.path image,i.quantity stock FROM cart_items ci JOIN products p ON p.id=ci.product_id LEFT JOIN categories c ON c.id=p.category_id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 LEFT JOIN inventory i ON i.product_id=p.id WHERE ci.cart_id=? AND p.active=1 ORDER BY p.created_at DESC').bind(c.id).all()).results||[];
+  if(!rows.length)return {items:[],subtotal_irt:0,automatic_discount_irt:0,coupon_discount_irt:0,discount_irt:0,shipping_irt:0,total_irt:0,coupon:null,discounts:[]};
+  const subtotal=rows.reduce((s,x)=>s+Number(x.price_irt||0)*Number(x.quantity||0),0);
+  const discounts=(await env.DB.prepare("SELECT * FROM discounts WHERE active=1 AND (starts_at IS NULL OR starts_at<=CURRENT_TIMESTAMP) AND (ends_at IS NULL OR ends_at>=CURRENT_TIMESTAMP) AND (max_uses IS NULL OR usage_count<max_uses) ORDER BY created_at DESC").all()).results||[];
+  const dp=(await env.DB.prepare('SELECT discount_id,product_id FROM discount_products').all()).results||[],dc=(await env.DB.prepare('SELECT discount_id,category_id FROM discount_categories').all()).results||[];
+  const productTargets=new Map(),categoryTargets=new Map();
+  for(const x of dp){if(!productTargets.has(x.discount_id))productTargets.set(x.discount_id,new Set());productTargets.get(x.discount_id).add(x.product_id)}
+  for(const x of dc){if(!categoryTargets.has(x.discount_id))categoryTargets.set(x.discount_id,new Set());categoryTargets.get(x.discount_id).add(x.category_id)}
+  const chosen=new Map();
+  for(const row of rows){
+    const base=Number(row.price_irt||0)*Number(row.quantity||0);let best=null;
+    for(const d of discounts){
+      if(subtotal<Number(d.min_order_irt||0))continue;
+      const pt=productTargets.get(d.id),ct=categoryTargets.get(d.id),targeted=pt?.has(row.product_id)||ct?.has(row.category_id),global=!pt?.size&&!ct?.size;
+      if(!targeted&&!global)continue;
+      const amount=d.kind==='PERCENT'?Math.floor(base*Math.min(100,Number(d.value||0))/100):Math.min(base,Math.max(0,Number(d.value||0)));
+      if(amount>0&&(!best||amount>best.amount))best={id:d.id,title:d.title,amount};
+    }
+    if(best)chosen.set(row.product_id,best);
+  }
+  const automaticDiscount=Array.from(chosen.values()).reduce((s,x)=>s+x.amount,0);
+  let coupon=null,couponDiscount=0;const code=String(couponCode||'').trim().toUpperCase();
+  if(code){
+    const cpn=await env.DB.prepare('SELECT * FROM coupons WHERE code=?').bind(code).first();if(!cpn)throw new Error('coupon_not_found');
+    const nowOk=Number(cpn.active)===1&&(!cpn.starts_at||new Date(cpn.starts_at).getTime()<=Date.now())&&(!cpn.expires_at||new Date(cpn.expires_at).getTime()>=Date.now());
+    if(!nowOk)throw new Error('coupon_expired_or_inactive');
+    if(subtotal<Number(cpn.min_order_irt||0))throw new Error('coupon_min_order');
+    if(cpn.max_uses!==null&&cpn.max_uses!==undefined){const used=await env.DB.prepare('SELECT COUNT(*) n FROM coupon_usages WHERE coupon_id=?').bind(cpn.id).first();if(Number(used?.n||0)>=Number(cpn.max_uses))throw new Error('coupon_usage_limit')}
+    if(await env.DB.prepare('SELECT 1 FROM coupon_usages WHERE coupon_id=? AND user_id=?').bind(cpn.id,me.id).first())throw new Error('coupon_already_used');
+    const cp=(await env.DB.prepare('SELECT product_id FROM coupon_products WHERE coupon_id=?').bind(cpn.id).all()).results||[],cc=(await env.DB.prepare('SELECT category_id FROM coupon_categories WHERE coupon_id=?').bind(cpn.id).all()).results||[];
+    const cps=new Set(cp.map(x=>x.product_id)),ccs=new Set(cc.map(x=>x.category_id));
+    const eligible=rows.filter(x=>(!cps.size&&!ccs.size)||cps.has(x.product_id)||ccs.has(x.category_id)),eligibleBase=eligible.reduce((s,x)=>s+Number(x.price_irt||0)*Number(x.quantity||0),0);
+    if(!eligibleBase)throw new Error('coupon_not_applicable');
+    const couponBase=Math.max(0,eligibleBase-automaticDiscount);
+    couponDiscount=cpn.kind==='PERCENT'?Math.floor(couponBase*Math.min(100,Number(cpn.value||0))/100):Math.min(couponBase,Math.max(0,Number(cpn.value||0)));
+    coupon={id:cpn.id,code:cpn.code,kind:cpn.kind,value:cpn.value,discount_irt:couponDiscount};
+  }
+  const discountIrt=Math.min(subtotal,automaticDiscount+couponDiscount),shipping=subtotal>=10000000?0:500000,total=Math.max(0,subtotal-discountIrt+shipping);
+  return {items:rows,subtotal_irt:subtotal,automatic_discount_irt:automaticDiscount,coupon_discount_irt:couponDiscount,discount_irt:discountIrt,shipping_irt:shipping,total_irt:total,coupon,discounts:Array.from(chosen.values()).map(x=>x.id)};
+}
+function promotionErrorCode(e){const c=String(e?.message||'');return ['coupon_not_found','coupon_expired_or_inactive','coupon_min_order','coupon_usage_limit','coupon_already_used','coupon_not_applicable'].includes(c)?c:null}
+
+async function zarin(env,endpoint,payload){const mode=await paymentEnvironment(env);const base=mode==='production'?'https://api.zarinpal.com/pg/v4/payment':'https://sandbox.zarinpal.com/pg/v4/payment';const r=await fetch(base+'/'+endpoint,{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify({...payload,merchant_id:env.ZARINPAL_MERCHANT_ID})});return r.json()}
 async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req,env)});
  if(u.pathname==='/api/health')return json({ok:true,service:'gilasartworker',db:!!env.DB,paymentEnv:env.PAYMENT_ENV||'sandbox'});
  if(u.pathname==='/api/categories'&&req.method==='GET'){const r=await env.DB.prepare('SELECT id,slug,name,description FROM categories WHERE active=1 ORDER BY name').all();return json({items:r.results||[]})}
