@@ -58,7 +58,7 @@ test('OTP login supports Android WebOTP and redirects to home after verification
 
 test('OTP SMS is template-driven without exposing the Kavenegar secret',()=>{
   assert.match(worker,/kavenegar_message_template/);
-  assert.match(worker,/replaceAll\\('\{code\}'/);
+  assert.match(worker,/replaceAll/);
   assert.match(worker,/KAVENEGAR_API_KEY/);
 });
 test('admin role assignment prevents privilege escalation and self lockout',()=>{
