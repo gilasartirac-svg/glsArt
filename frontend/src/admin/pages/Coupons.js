@@ -1,53 +1,10 @@
+import {api} from '../services/api.js';
 import {setupDataGrid} from '../components/Table.js';
-import {api} from '../services/api.js?v=20260926.3';
-
+const n=v=>new Intl.NumberFormat('fa-IR').format(Number(v||0));
 export default function Coupons(){
-  setTimeout(()=>{load();document.querySelector('#coupon-form')?.addEventListener('submit',submit)},0);
-
-  async function load(){
-    try{
-      const d=await api('/api/admin/coupons');
-      const el=document.querySelector('#coupon-table');
-      if(!el)return;
-      el.innerHTML=(d.items||[]).map(x=>`<tr><td><b>${x.code}</b></td><td>${x.kind==='PERCENT'?'درصدی':'مبلغ ثابت'}</td><td>${new Intl.NumberFormat('fa-IR').format(x.value||0)}</td><td><span class="pill">${x.active?'فعال':'غیرفعال'}</span></td><td><button class="btn danger" data-id="${x.id}">حذف</button></td></tr>`).join('')||'<tr><td colspan="5">کد تخفیفی وجود ندارد.</td></tr>';
-      setupDataGrid('coupon-grid');el.querySelectorAll('.danger').forEach(b=>b.onclick=async()=>{
-        if(!confirm('این کد تخفیف حذف شود؟'))return;
-        try{await api('/api/admin/coupons/'+b.dataset.id,{method:'DELETE'});await load()}catch(e){alert(e.message)}
-      });
-    }catch(e){
-      const er=document.querySelector('#coupon-error');if(er)er.textContent=e.message;
-    }
-  }
-
-  async function submit(e){
-    e.preventDefault();
-    const f=new FormData(e.currentTarget);
-    try{
-      await api('/api/admin/coupons',{method:'POST',body:JSON.stringify({
-        code:String(f.get('code')||'').trim(),
-        kind:f.get('kind'),
-        value:Number(f.get('value')||0),
-        maxUses:f.get('maxUses')||null,
-        expiresAt:f.get('expiresAt')||null
-      })});
-      e.currentTarget.reset();
-      await load();
-    }catch(x){alert(x.message)}
-  }
-
-  return `<div class="admin-page" dir="rtl">
-    <div class="admin-title"><div><h2>کدهای تخفیف</h2><span class="muted">ساخت و مدیریت کدهای تخفیف</span></div></div>
-    <div id="coupon-error" class="error"></div>
-    <div class="panel"><form id="coupon-form" class="form">
-      <div class="form-grid">
-        <label>کد<input name="code" required maxlength="40"></label>
-        <label>نوع<select name="kind"><option value="PERCENT">درصدی</option><option value="FIXED">مبلغ ثابت</option></select></label>
-        <label>مقدار<input name="value" type="number" min="0" required></label>
-        <label>حداکثر استفاده<input name="maxUses" type="number" min="1"></label>
-        <label>انقضا<input name="expiresAt" type="datetime-local"></label>
-      </div>
-      <button class="btn primary">ثبت کد تخفیف</button>
-    </form></div>
-    <div class="panel"><div class="table-scroll"><table class="admin-table"><thead><tr><th>کد</th><th>نوع</th><th>مقدار</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="coupon-grid"><tr><td colspan="5">در حال دریافت...</td></tr></tbody></table></div></div>
-  </div>`;
+ setTimeout(async()=>{try{const [pd,cd]=await Promise.all([api('/api/admin/products'),api('/api/admin/categories')]);document.querySelector('#c-products').innerHTML=(pd.items||[]).map(x=>'<option value="'+x.id+'">'+x.name+' — '+x.sku+'</option>').join('');document.querySelector('#c-category').innerHTML='<option value="">همه محصولات</option>'+(cd.items||[]).map(x=>'<option value="'+x.id+'">'+x.name+'</option>').join('');document.querySelector('#coupon-form').addEventListener('submit',submit);load()}catch(e){document.querySelector('#coupon-error').textContent=e.message}},0);
+ async function load(){try{const d=await api('/api/admin/coupons'),el=document.querySelector('#coupon-grid');el.innerHTML=(d.items||[]).map(x=>'<tr><td><b>'+x.code+'</b></td><td>'+(x.kind==='PERCENT'?'درصدی':'مبلغ ثابت')+'</td><td>'+n(x.value)+'</td><td>'+n(x.max_uses)+'</td><td>'+(x.active?'فعال':'غیرفعال')+'</td><td><button class="btn ghost edit" data-id="'+x.id+'">ویرایش</button> <button class="btn danger del" data-id="'+x.id+'">حذف</button></td></tr>').join('')||'<tr><td colspan="6">کوپنی وجود ندارد.</td></tr>';setupDataGrid('coupon-grid');el.querySelectorAll('.edit').forEach(b=>b.onclick=()=>edit((d.items||[]).find(x=>x.id===b.dataset.id)));el.querySelectorAll('.del').forEach(b=>b.onclick=async()=>{if(confirm('کوپن حذف شود؟')){await api('/api/admin/coupons/'+b.dataset.id,{method:'DELETE'});load()}})}catch(e){document.querySelector('#coupon-error').textContent=e.message}}
+ function edit(x){const f=document.querySelector('#coupon-form');f.dataset.id=x.id;f.elements.kind.value=x.kind;f.elements.value.value=x.value;f.elements.maxUses.value=x.max_uses||'';f.elements.minOrderIrt.value=x.min_order_irt||0;f.elements.startsAt.value=x.starts_at?x.starts_at.slice(0,16):'';f.elements.expiresAt.value=x.expires_at?x.expires_at.slice(0,16):'';f.elements.active.checked=!!x.active;const ids=(x.products||[]).map(y=>y.product_id);document.querySelectorAll('#c-products option').forEach(o=>o.selected=ids.includes(o.value));document.querySelector('#c-category').value=x.categories?.[0]?.category_id||'';document.querySelector('#coupon-form-title').textContent='ویرایش کوپن '+x.code}
+ async function submit(e){e.preventDefault();const f=e.currentTarget,b={kind:f.elements.kind.value,value:Number(f.elements.value.value),maxUses:f.elements.maxUses.value||null,minOrderIrt:Number(f.elements.minOrderIrt.value||0),startsAt:f.elements.startsAt.value||null,expiresAt:f.elements.expiresAt.value||null,active:f.elements.active.checked,productIds:[...document.querySelector('#c-products').selectedOptions].map(x=>x.value),categoryId:document.querySelector('#c-category').value||null};try{const id=f.dataset.id;const d=await api(id?'/api/admin/coupons/'+id:'/api/admin/coupons',{method:id?'PUT':'POST',body:JSON.stringify(b)});f.reset();delete f.dataset.id;document.querySelector('#coupon-form-title').textContent='ساخت کوپن جدید';if(d.code)alert('کد تولید شد: '+d.code);await load()}catch(x){alert(x.message)}}
+ return '<div class="admin-page" dir="rtl"><div class="admin-title"><div><h2>کوپن‌های تخفیف</h2><span class="muted">کد کوپن همیشه توسط سیستم با پیشوند GLS تولید می‌شود.</span></div></div><div id="coupon-error" class="error"></div><div class="panel"><h3 id="coupon-form-title">ساخت کوپن جدید</h3><form id="coupon-form" class="form"><div class="form-grid"><label>نوع<select name="kind"><option value="PERCENT">درصدی</option><option value="FIXED">مبلغ ثابت</option></select></label><label>مقدار<input name="value" type="number" min="0" required></label><label>حداکثر استفاده<input name="maxUses" type="number" min="1"></label><label>حداقل خرید (ریال)<input name="minOrderIrt" type="number" min="0"></label><label>شروع<input name="startsAt" type="datetime-local"></label><label>پایان<input name="expiresAt" type="datetime-local"></label></div><label>محصولات مجاز<select id="c-products" multiple size="6"></select></label><label>دسته مجاز<select id="c-category"></select></label><label class="check"><input name="active" type="checkbox" checked> فعال باشد</label><button class="btn primary">تولید و ذخیره کوپن</button></form></div><div class="panel"><div class="table-scroll"><table class="admin-table"><thead><tr><th>کد</th><th>نوع</th><th>مقدار</th><th>حداکثر</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="coupon-grid"><tr><td colspan="6">در حال دریافت...</td></tr></tbody></table></div></div></div>';
 }

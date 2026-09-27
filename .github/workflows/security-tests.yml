@@ -25,4 +25,4 @@ jobs:
       - name: Static checks
         run: npm run check
       - name: Security regression tests
-        run: node --test tests/security-hardening.test.mjs
+        run: node --test tests/*.test.mjs

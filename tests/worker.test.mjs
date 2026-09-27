@@ -12,3 +12,8 @@ test('payment finalization uses one atomic D1 batch and guards duplicate callbac
 test('checkout idempotency is enforced server-side',()=>{assert.match(worker,/idempotency_key_required/);assert.match(worker,/checkout_key/);assert.match(schema,/CREATE TABLE orders/);});
 
 test('admin control panel uses RBAC and secret-backed bootstrap',()=>{assert.match(worker,/async function canAssignRole/);assert.match(worker,/ADMIN_BOOTSTRAP_MOBILE/);assert.doesNotMatch(worker,/09153090907/);const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');assert.match(app,/function isAdminUser\(\)\{return state\.roles/);assert.doesNotMatch(app,/09153090907/);});
+
+const promotions=readFileSync(new URL('../database/migrations/0011_promotions_integrations.sql',import.meta.url),'utf8');
+test('promotion schema and generated coupon prefix are present',()=>{for(const name of ['discounts','discount_products','discount_categories','discount_usages','coupon_products','coupon_categories'])assert.match(promotions,new RegExp('CREATE TABLE '+name));assert.match(promotions,/ALTER TABLE coupons ADD COLUMN starts_at/);});
+test('backend pricing is authoritative for coupons and discounts',()=>{assert.match(worker,/async function cartPricing/);assert.match(worker,/\/api\/cart\/price/);assert.match(worker,/coupon_not_applicable/);assert.match(worker,/discount_usages/);assert.match(worker,/coupon_usages/);});
+test('integration secrets stay in Worker env and are not returned as values',()=>{assert.match(worker,/apiKeyConfigured:!!env\.KAVENEGAR_API_KEY/);assert.match(worker,/merchantConfigured:!!env\.ZARINPAL_MERCHANT_ID/);assert.doesNotMatch(worker,/apiKey:env\.KAVENEGAR_API_KEY/);assert.doesNotMatch(worker,/merchantId:env\.ZARINPAL_MERCHANT_ID/);});
