@@ -24,6 +24,7 @@ test('admin grids provide Persian date formatting, sorting and filtering',()=>{
   assert.match(table,/setupDataGrid/);
   assert.match(table,/data-grid-search/);
   assert.match(table,/sortDir/);
+  assert.match(table,/tagName==='TBODY'/,'data grids must resolve tbody ids to their parent table');
   for(const file of files.filter(x=>x!=='Dashboard.js'&&x!=='Settings.js')){
     const src=readFileSync(resolve(dir,file),'utf8');
     assert.match(src,/setupDataGrid\('/,file+' must initialize a data grid');
