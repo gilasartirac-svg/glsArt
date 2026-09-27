@@ -3,7 +3,7 @@ export default function Sidebar(){
   const items=[
     ['dashboard','داشبورد'],['products','محصولات'],['categories','دسته‌بندی‌ها'],['orders','سفارشات'],
     ['customers','مشتریان'],['inventory','موجودی'],['payments','پرداخت‌ها'],['discounts','تخفیف‌ها'],['coupons','کوپن‌ها'],
-    ['reviews','نظرات'],['reports','گزارش‌ها'],['roles','دسترسی‌ها'],['audit','لاگ سیستم'],['settings','SEO و تنظیمات'],['sms','سیستم پیامکی'],['payment','درگاه زرین‌پال']
+    ['reviews','نظرات'],['reports','گزارش‌ها'],['roles','دسترسی‌ها'],['audit','لاگ سیستم'],['settings','SEO و تنظیمات'],['sms','سیستم پیامکی'],['payment','درگاه زرین‌پال'],['visitors','بازدیدکنندگان']
   ];
   return `<nav class="admin-sidebar" dir="rtl">
     <div class="admin-brand">گیلاس آرت <small>GILAS ART / ADMIN</small></div>

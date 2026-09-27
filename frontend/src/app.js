@@ -1,4 +1,8 @@
 const API=window.GILASART_API||'https://gilasartworker.gilasart-ir-ac.workers.dev';
+const visitorSessionKey=(()=>{try{let k=localStorage.getItem('GilasArtVisitorSession');if(!k){const a=new Uint8Array(24);crypto.getRandomValues(a);k=Array.from(a,x=>x.toString(16).padStart(2,'0')).join('');localStorage.setItem('GilasArtVisitorSession',k)}return k}catch{return ''}})();
+async function visitorHeartbeat(){if(!visitorSessionKey)return;try{await fetch(API+'/api/visitors/heartbeat',{method:'POST',credentials:'include',cache:'no-store',headers:{'content-type':'application/json'},body:JSON.stringify({sessionKey:visitorSessionKey})})}catch{}}
+visitorHeartbeat();setInterval(visitorHeartbeat,60000);
+
 let csrfToken='';
 const app=document.querySelector('#app');let state={products:[],categories:[],user:null,roles:[],cart:null};
 const fa=n=>new Intl.NumberFormat('fa-IR').format(Number(n||0));

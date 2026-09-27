@@ -61,6 +61,26 @@ function csv(rows){
  ].join('\n');
 }
 
+async function recordVisitor(req,env,sessionKey){
+ const me=await user(req,env),ip=(req.headers.get('CF-Connecting-IP')||'').trim().slice(0,128);if(!sessionKey||!ip)return;
+ const country=(req.headers.get('CF-IPCountry')||'').trim().toUpperCase().slice(0,8),ua=(req.headers.get('User-Agent')||'').slice(0,500);
+ await env.DB.prepare(`INSERT INTO visitor_sessions(id,session_key,user_id,ip_address,country_code,country_name,last_seen_at,user_agent)
+ VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP,?)
+ ON CONFLICT(session_key) DO UPDATE SET user_id=excluded.user_id,ip_address=excluded.ip_address,country_code=excluded.country_code,country_name=excluded.country_name,last_seen_at=CURRENT_TIMESTAMP,user_agent=excluded.user_agent`)
+ .bind(uid(),sessionKey,me?.id||null,ip,country||null,country||null,ua).run();
+}
+async function visitorAdminList(req,env){
+ const me=await user(req,env);if(!await requirePermission(me,env,'visitors.read'))return json({error:'forbidden'},403);
+ const u=new URL(req.url),limit=Math.min(100,Math.max(1,Number(u.searchParams.get('limit')||50))),offset=Math.max(0,Number(u.searchParams.get('offset')||0));
+ const r=await env.DB.prepare(`SELECT vs.id,CASE WHEN vs.user_id IS NOT NULL THEN COALESCE(u.mobile,vs.ip_address) ELSE vs.ip_address END visitor,
+ vs.ip_address,vs.country_code,vs.country_name,vs.first_seen_at,vs.last_seen_at,
+ CASE WHEN datetime(vs.last_seen_at)>=datetime('now','-5 minutes') THEN 1 ELSE 0 END online
+ FROM visitor_sessions vs LEFT JOIN users u ON u.id=vs.user_id
+ ORDER BY vs.first_seen_at DESC LIMIT ? OFFSET ?`).bind(limit,offset).all();
+ const c=await env.DB.prepare('SELECT COUNT(*) n FROM visitor_sessions').first();
+ const on=await env.DB.prepare("SELECT COUNT(*) n FROM visitor_sessions WHERE datetime(last_seen_at)>=datetime('now','-5 minutes')").first();
+ return json({items:r.results||[],total:Number(c?.n||0),onlineCount:Number(on?.n||0)});
+}
 async function audit(env,actor,action,type,id,meta,req){
  await env.DB.prepare(
  'INSERT INTO audit_logs(id,actor_user_id,action,entity_type,entity_id,metadata_json,before_json,after_json,ip) VALUES(?,?,?,?,?,?,?,?,?)'
@@ -88,7 +108,7 @@ async function ensureAdminBootstrap(env){
   }
   const statements=[
     env.DB.prepare("INSERT OR IGNORE INTO admin_roles(id,name,description) VALUES('admin-role','admin','دسترسی کامل پنل مدیریت گیلاس آرت')"),
-    env.DB.prepare("INSERT OR IGNORE INTO permissions(id,name) VALUES('perm_products_read','products.read'),('perm_products_write','products.write'),('perm_orders_read','orders.read'),('perm_orders_write','orders.write'),('perm_customers_read','customers.read'),('perm_customers_write','customers.write'),('perm_payments_read','payments.read'),('perm_reports_read','reports.read'),('perm_settings_read','settings.read'),('perm_settings_write','settings.write'),('perm_inventory_read','inventory.read'),('perm_inventory_write','inventory.write'),('perm_coupons_read','coupons.read'),('perm_coupons_write','coupons.write'),('perm_reviews_read','reviews.read'),('perm_reviews_write','reviews.write'),('perm_users_write','users.write'),('perm_users_manage','users.manage'),('perm_roles_manage','roles.manage')"),
+    env.DB.prepare("INSERT OR IGNORE INTO permissions(id,name) VALUES('perm_products_read','products.read'),('perm_products_write','products.write'),('perm_orders_read','orders.read'),('perm_orders_write','orders.write'),('perm_customers_read','customers.read'),('perm_customers_write','customers.write'),('perm_payments_read','payments.read'),('perm_reports_read','reports.read'),('perm_settings_read','settings.read'),('perm_settings_write','settings.write'),('perm_inventory_read','inventory.read'),('perm_inventory_write','inventory.write'),('perm_coupons_read','coupons.read'),('perm_coupons_write','coupons.write'),('perm_reviews_read','reviews.read'),('perm_reviews_write','reviews.write'),('perm_users_write','users.write'),('perm_users_manage','users.manage'),('perm_roles_manage','roles.manage'),('perm_visitors_read','visitors.read')"),
     env.DB.prepare("INSERT OR IGNORE INTO role_permissions(role_id,permission_id) SELECT 'admin-role',id FROM permissions"),
     env.DB.prepare("INSERT OR IGNORE INTO users(id,mobile,name) VALUES(?,?,?)").bind('usr_admin_gilasart',bootstrapMobile,'مدیر گیلاس آرت'),
     env.DB.prepare("INSERT OR REPLACE INTO admin_users(user_id,role_id,active) SELECT id,'admin-role',1 FROM users WHERE mobile=?").bind(bootstrapMobile),
@@ -168,6 +188,12 @@ function allowedImagePath(v){try{const s=String(v||'').trim();if(s.startsWith('/
 
 async function zarin(env,endpoint,payload){const mode=await paymentEnvironment(env);const base=mode==='production'?'https://api.zarinpal.com/pg/v4/payment':'https://sandbox.zarinpal.com/pg/v4/payment';const r=await fetch(base+'/'+endpoint,{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify({...payload,merchant_id:env.ZARINPAL_MERCHANT_ID})});return r.json()}
 async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req,env)});
+ if(u.pathname==='/api/visitors/heartbeat'&&req.method==='POST'){
+  const b=await body(req),key=String(b.sessionKey||'').replace(/[^A-Za-z0-9_-]/g,'').slice(0,80);
+  if(key.length<16)return json({error:'invalid_session_key'},400);
+  await recordVisitor(req,env,key);return json({ok:true});
+ }
+ if(u.pathname==='/api/admin/visitors'&&req.method==='GET')return visitorAdminList(req,env);
  if(u.pathname==='/api/health')return json({ok:true,service:'gilasartworker',db:!!env.DB,paymentEnv:env.PAYMENT_ENV||'sandbox'});
  if(u.pathname==='/api/categories'&&req.method==='GET'){const r=await env.DB.prepare('SELECT id,slug,name,description FROM categories WHERE active=1 ORDER BY name').all();return json({items:r.results||[]})}
  if(u.pathname==='/api/products'&&req.method==='GET'){const q=(u.searchParams.get('q')||'').trim(),cat=u.searchParams.get('category'),limit=Math.min(60,Math.max(1,Number(u.searchParams.get('limit')||12))),offset=Math.max(0,Math.min(10000,Number(u.searchParams.get('offset')||0)));let sql='SELECT p.id,p.slug,p.sku,p.name,p.description,p.price_irt,p.category_id,pi.path image FROM products p LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.active=1';const args=[];if(q){sql+=' AND (p.name LIKE ? OR p.description LIKE ? OR p.sku LIKE ?)';args.push(`%${q}%`,`%${q}%`,`%${q}%`)}if(cat){sql+=' AND p.category_id=?';args.push(cat)}sql+=' ORDER BY p.created_at DESC,p.id DESC LIMIT ? OFFSET ?';args.push(limit,offset);const r=await env.DB.prepare(sql).bind(...args).all();return json({items:r.results||[],limit,offset})}
