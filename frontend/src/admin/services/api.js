@@ -41,6 +41,7 @@ function showAdminLoadError(message){
 }
 
 async function request(path,options,attempt=0){
+ if(window.GilasArtProgress)window.GilasArtProgress.start();
  const method=(options.method||'GET').toUpperCase();
  const headers={...(options.headers||{})};
  if(options.body&&!headers['content-type'])headers['content-type']='application/json';
@@ -74,6 +75,7 @@ async function request(path,options,attempt=0){
   throw e;
  }finally{
   clearTimeout(timeout);
+  if(window.GilasArtProgress)window.GilasArtProgress.end();
  }
 }
 
