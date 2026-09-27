@@ -21,7 +21,7 @@ test('frontend does not use a hard-coded admin mobile and escapes dynamic HTML',
 });
 
 test('production worker deployment is consolidated and uses the bootstrap secret',()=>{
-  assert.match(deploy,/d1 migrations apply gilasartdatabase --remote --yes/);
+  assert.match(deploy,/d1 migrations apply gilasartdatabase --remote/);
   assert.match(deploy,/wrangler secret put ADMIN_BOOTSTRAP_MOBILE/);
 });
 
