@@ -25,7 +25,6 @@ test('production worker deployment is consolidated and uses the bootstrap secret
   assert.match(deploy,/wrangler secret put ADMIN_BOOTSTRAP_MOBILE/);
 });
 
-
 test('payment settlement requires an active stock reservation',()=>{
   assert.match(worker,/stock_reservations WHERE order_id=\?/);
   assert.match(worker,/stock_reservation_missing/);
@@ -33,7 +32,6 @@ test('payment settlement requires an active stock reservation',()=>{
   assert.match(worker,/DELETE FROM stock_reservations WHERE order_id=\?/);
   assert.doesNotMatch(worker,/UPDATE inventory SET quantity=quantity-\? WHERE product_id=\?/);
 });
-
 
 test('checkout uses stock reservations before payment',()=>{
   assert.match(worker,/INSERT INTO stock_reservations/);
@@ -53,12 +51,13 @@ test('OTP login supports Android WebOTP and redirects to home after verification
   assert.match(frontend,/autocomplete="one-time-code"/);
   assert.match(frontend,/OTPCredential/);
   assert.match(frontend,/navigator\.credentials\.get/);
-  assert.match(frontend,/location\.hash='\\/'/);
+  assert.match(frontend,/location\.hash='\/'/);
   assert.match(frontend,/function accountLink\(\)/);
   assert.match(frontend,/state\.user\?/);
 });
-test('OTP SMS includes the WebOTP origin-bound format',()=>{
-  assert.match(worker,/@\$\{new URL\(frontend\(env\)\)\.host\} #\$\{code\}/);
+
+test('OTP SMS uses the current GilasArt login message format',()=>{
+  assert.match(worker,/گیلاس آرت\\nکد ورود : \$\{code\}/);
 });
 
 test('admin role assignment prevents privilege escalation and self lockout',()=>{
