@@ -1,9 +1,12 @@
-export default function Table(rows=[]){
-
-return `
-<table>
-${rows.map(r=>`<tr>${Object.values(r).map(v=>`<td>${v}</td>`).join('')}</tr>`).join('')}
-</table>
-`;
-
+const PERSIAN_DATE=new Intl.DateTimeFormat('fa-IR-u-ca-persian',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+const toDate=(v)=>{if(!v)return '';const s=String(v).trim().replace(' ','T');const d=new Date(/Z$|[+-]\d\d:\d\d$/.test(s)?s:s+'Z');return Number.isNaN(d.getTime())?v:PERSIAN_DATE.format(d)};
+const sortValue=(text)=>{const s=String(text||'').trim().replace(/[۰-۹]/g,c=>String('۰۱۲۳۴۵۶۷۸۹'.indexOf(c))).replace(/[,٬]/g,'');const n=Number(s.replace(/[^0-9.-]/g,''));return s!==''&&!Number.isNaN(n)&&/\d/.test(s)?n:s.toLocaleLowerCase()};
+export function setupDataGrid(tableId,{searchPlaceholder='جستجو در جدول…',dateColumns=[]}={}){
+ let table=document.getElementById(tableId);if(table?.tagName==='TBODY')table=table.closest('table');if(!table||table.dataset.gridReady)return;table.dataset.gridReady='1';
+ const bar=document.createElement('div');bar.className='data-grid-toolbar';bar.innerHTML='<input class="data-grid-search" type="search" placeholder="'+searchPlaceholder+'" aria-label="فیلتر جدول"><span class="data-grid-count"></span><button type="button" class="btn ghost data-grid-clear">پاک کردن فیلتر</button>';
+ table.parentNode.insertBefore(bar,table);const tbody=table.tBodies[0],headers=[...table.tHead?.rows[0]?.cells||[]];
+ dateColumns.forEach(i=>[...tbody.rows].forEach(r=>{const td=r.cells[i];if(td){td.dataset.gridDate=td.textContent.trim();td.dataset.sortRaw=td.textContent.trim();td.textContent=toDate(td.dataset.gridDate)}}));
+ headers.forEach((th,i)=>{th.classList.add('sortable');th.setAttribute('role','button');th.tabIndex=0;th.dataset.sortDir='none';const original=th.textContent.trim();th.innerHTML='<span>'+original+'</span><span class="sort-indicator" aria-hidden="true">↕</span>';const sort=()=>{const dir=th.dataset.sortDir==='asc'?'desc':'asc';headers.forEach(h=>{h.dataset.sortDir='none';if(h.querySelector('.sort-indicator'))h.querySelector('.sort-indicator').textContent='↕'});th.dataset.sortDir=dir;th.querySelector('.sort-indicator').textContent=dir==='asc'?'↑':'↓';const rows=[...tbody.rows];rows.sort((a,b)=>{const av=sortValue(a.cells[i]?.dataset.sortRaw||a.cells[i]?.textContent),bv=sortValue(b.cells[i]?.dataset.sortRaw||b.cells[i]?.textContent);return(av<bv?-1:av>bv?1:0)*(dir==='asc'?1:-1)});rows.forEach(r=>tbody.appendChild(r));filter()};th.addEventListener('click',sort);th.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();sort()}})});
+ const search=bar.querySelector('.data-grid-search'),count=bar.querySelector('.data-grid-count');function filter(){const q=search.value.trim().toLocaleLowerCase();let visible=0;[...tbody.rows].forEach(r=>{const ok=!q||r.textContent.toLocaleLowerCase().includes(q);r.hidden=!ok;if(ok)visible++});count.textContent=visible+' مورد'}search.addEventListener('input',filter);bar.querySelector('.data-grid-clear').addEventListener('click',()=>{search.value='';filter()});filter();
 }
+export default function Table(rows=[]){return '<table class="admin-table"><tbody>'+rows.map(r=>'<tr>'+Object.values(r).map(v=>'<td>'+String(v??'')+'</td>').join('')+'</tr>').join('')+'</tbody></table>';}

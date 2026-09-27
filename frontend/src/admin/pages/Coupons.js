@@ -1,3 +1,4 @@
+import {setupDataGrid} from '../components/Table.js';
 import {api} from '../services/api.js?v=20260926.3';
 
 export default function Coupons(){
@@ -9,7 +10,7 @@ export default function Coupons(){
       const el=document.querySelector('#coupon-table');
       if(!el)return;
       el.innerHTML=(d.items||[]).map(x=>`<tr><td><b>${x.code}</b></td><td>${x.kind==='PERCENT'?'درصدی':'مبلغ ثابت'}</td><td>${new Intl.NumberFormat('fa-IR').format(x.value||0)}</td><td><span class="pill">${x.active?'فعال':'غیرفعال'}</span></td><td><button class="btn danger" data-id="${x.id}">حذف</button></td></tr>`).join('')||'<tr><td colspan="5">کد تخفیفی وجود ندارد.</td></tr>';
-      el.querySelectorAll('.danger').forEach(b=>b.onclick=async()=>{
+      setupDataGrid('coupon-grid');el.querySelectorAll('.danger').forEach(b=>b.onclick=async()=>{
         if(!confirm('این کد تخفیف حذف شود؟'))return;
         try{await api('/api/admin/coupons/'+b.dataset.id,{method:'DELETE'});await load()}catch(e){alert(e.message)}
       });
@@ -47,6 +48,6 @@ export default function Coupons(){
       </div>
       <button class="btn primary">ثبت کد تخفیف</button>
     </form></div>
-    <div class="panel"><div class="table-scroll"><table class="admin-table"><thead><tr><th>کد</th><th>نوع</th><th>مقدار</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="coupon-table"><tr><td colspan="5">در حال دریافت...</td></tr></tbody></table></div></div>
+    <div class="panel"><div class="table-scroll"><table class="admin-table"><thead><tr><th>کد</th><th>نوع</th><th>مقدار</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="coupon-grid"><tr><td colspan="5">در حال دریافت...</td></tr></tbody></table></div></div>
   </div>`;
 }

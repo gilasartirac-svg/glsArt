@@ -16,3 +16,17 @@ test('all admin page modules compile without syntax errors',()=>{
     assert.doesNotThrow(()=>new Function(src),file);
   }
 });
+
+test('admin grids provide Persian date formatting, sorting and filtering',()=>{
+  const table=readFileSync(resolve('frontend/src/admin/components/Table.js'),'utf8');
+  assert.match(table,/fa-IR-u-ca-persian/);
+  assert.match(table,/Asia\/Tehran/);
+  assert.match(table,/setupDataGrid/);
+  assert.match(table,/data-grid-search/);
+  assert.match(table,/sortDir/);
+  assert.match(table,/tagName==='TBODY'/,'data grids must resolve tbody ids to their parent table');
+  for(const file of files.filter(x=>x!=='Dashboard.js'&&x!=='Settings.js')){
+    const src=readFileSync(resolve(dir,file),'utf8');
+    assert.match(src,/setupDataGrid\('/,file+' must initialize a data grid');
+  }
+});
