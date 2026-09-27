@@ -13,6 +13,7 @@ import Coupons from './pages/Coupons.js';
 import Discounts from './pages/Discounts.js';
 import SmsSettings from './pages/SmsSettings.js';
 import PaymentSettings from './pages/PaymentSettings.js';
+import Visitors from './pages/Visitors.js';
 
 export default function adminRouter(){
 
@@ -33,7 +34,8 @@ export default function adminRouter(){
   coupons:Coupons,
   discounts:Discounts,
   sms:SmsSettings,
-  payment:PaymentSettings
+  payment:PaymentSettings,
+  visitors:Visitors
  };
 
  
