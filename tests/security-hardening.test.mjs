@@ -58,5 +58,5 @@ test('OTP login supports Android WebOTP and redirects to home after verification
   assert.match(frontend,/state\.user\?/);
 });
 test('OTP SMS includes the WebOTP origin-bound format',()=>{
-  assert.match(worker,/@\\$\\{new URL\\(frontend\\(env\\)\\)\\.host\\} #\\$\\{code\\}/);
+  assert.match(worker,/@\$\{new URL\(frontend\(env\)\)\.host\} #\$\{code\}/);
 });
