@@ -113,22 +113,22 @@ INSERT OR IGNORE INTO payment_attempts(
 ('attempt_sample_pending','pay_sample_pending','SAMPLE-AUTH-1002',100,NULL,'PENDING','SAMPLE');
 
 INSERT OR IGNORE INTO order_status_history(id,order_id,old_status,new_status,changed_by,note) VALUES
-('osh_sample_paid_01','ord_sample_paid','PENDING','PAID','usr_admin_gilasart','نمونه برای تست پنل'),
+('osh_sample_paid_01','ord_sample_paid','PENDING','PAID',(SELECT id FROM users WHERE mobile='09153090907' LIMIT 1),'نمونه برای تست پنل'),
 ('osh_sample_pending_01','ord_sample_pending',NULL,'PENDING',NULL,'نمونه برای تست پنل'),
-('osh_sample_cancel_01','ord_sample_cancelled','PENDING','CANCELLED','usr_admin_gilasart','نمونه برای تست پنل');
+('osh_sample_cancel_01','ord_sample_cancelled','PENDING','CANCELLED',(SELECT id FROM users WHERE mobile='09153090907' LIMIT 1),'نمونه برای تست پنل');
 
 INSERT OR IGNORE INTO order_notes(id,order_id,admin_id,note) VALUES
-('on_sample_paid','ord_sample_paid','usr_admin_gilasart','یادداشت نمونه — پرداخت موفق'),
-('on_sample_pending','ord_sample_pending','usr_admin_gilasart','یادداشت نمونه — در انتظار پرداخت');
+('on_sample_paid','ord_sample_paid',(SELECT id FROM users WHERE mobile='09153090907' LIMIT 1),'یادداشت نمونه — پرداخت موفق'),
+('on_sample_pending','ord_sample_pending',(SELECT id FROM users WHERE mobile='09153090907' LIMIT 1),'یادداشت نمونه — در انتظار پرداخت');
 
 INSERT OR IGNORE INTO shipping_tracking(order_id,method,tracking_code,shipped_at)
 VALUES('ord_sample_paid','پست','SAMPLE-TRACK-1001',CURRENT_TIMESTAMP);
 
 -- Sample inventory activity without altering the catalog stock.
 INSERT OR IGNORE INTO inventory_transactions(id,product_id,quantity,type,note,created_by) VALUES
-('inv_tx_sample_01','sample_mehr',8,'INITIAL','موجودی نمونه برای تست پنل','usr_admin_gilasart'),
-('inv_tx_sample_02','sample_shab',6,'INITIAL','موجودی نمونه برای تست پنل','usr_admin_gilasart'),
-('inv_tx_sample_03','sample_khak',10,'INITIAL','موجودی نمونه برای تست پنل','usr_admin_gilasart');
+('inv_tx_sample_01','sample_mehr',8,'INITIAL','موجودی نمونه برای تست پنل',(SELECT id FROM users WHERE mobile='09153090907' LIMIT 1)),
+('inv_tx_sample_02','sample_shab',6,'INITIAL','موجودی نمونه برای تست پنل',(SELECT id FROM users WHERE mobile='09153090907' LIMIT 1)),
+('inv_tx_sample_03','sample_khak',10,'INITIAL','موجودی نمونه برای تست پنل',(SELECT id FROM users WHERE mobile='09153090907' LIMIT 1));
 
 -- Sample coupons.
 INSERT OR IGNORE INTO coupons(id,code,kind,value,max_uses,active,expires_at) VALUES
@@ -197,5 +197,5 @@ INSERT OR IGNORE INTO campaigns(id,title,type,active) VALUES
 
 -- Sample audit records make the audit page immediately testable.
 INSERT OR IGNORE INTO audit_logs(id,actor_user_id,action,entity_type,entity_id,metadata_json,ip) VALUES
-('audit_sample_01','usr_admin_gilasart','sample.seed','catalog','sample_mehr','{"sample":true,"source":"migration"}','127.0.0.1'),
-('audit_sample_02','usr_admin_gilasart','sample.seed','order','ord_sample_paid','{"sample":true,"source":"migration"}','127.0.0.1');
+('audit_sample_01',(SELECT id FROM users WHERE mobile='09153090907' LIMIT 1),'sample.seed','catalog','sample_mehr','{"sample":true,"source":"migration"}','127.0.0.1'),
+('audit_sample_02',(SELECT id FROM users WHERE mobile='09153090907' LIMIT 1),'sample.seed','order','ord_sample_paid','{"sample":true,"source":"migration"}','127.0.0.1');
