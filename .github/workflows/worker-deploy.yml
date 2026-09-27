@@ -32,9 +32,9 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID" || (echo "::error::CLOUDFLARE_ACCOUNT_ID is missing"; exit 1)
           test -n "$ADMIN_BOOTSTRAP_MOBILE" || echo "::warning::ADMIN_BOOTSTRAP_MOBILE is not configured; existing DB admin assignments remain unchanged"
 
-      - name: Inspect remote D1 schema before migrations
+      - name: Adopt existing D1 baseline migration
         run: |
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT COALESCE((SELECT group_concat(name,'|') FROM d1_migrations),'EMPTY') migrations, COALESCE((SELECT group_concat(name,'|') FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'),'EMPTY') tables, COALESCE((SELECT group_concat(name,'|') FROM pragma_table_info('users')),'MISSING') users_columns, COALESCE((SELECT group_concat(name,'|') FROM pragma_table_info('categories')),'MISSING') categories_columns, COALESCE((SELECT group_concat(name,'|') FROM pragma_table_info('orders')),'MISSING') orders_columns, COALESCE((SELECT group_concat(name,'|') FROM pragma_table_info('payments')),'MISSING') payments_columns" --remote --json
+          npx wrangler d1 execute gilasartdatabase --remote --command="CREATE TABLE IF NOT EXISTS d1_migrations(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT UNIQUE,applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL); INSERT OR IGNORE INTO d1_migrations(name) SELECT '0001_initial.sql' WHERE (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('users','sessions','otp_challenges','roles','permissions','user_roles','categories','products','product_images','inventory','addresses','carts','cart_items','orders','order_items','payments','payment_attempts','favorites','reviews','coupons','coupon_usages','audit_logs'))=22 AND NOT EXISTS (SELECT 1 FROM d1_migrations WHERE name='0001_initial.sql');" --remote --json
 
       - name: Apply remote D1 migrations
         run: npx wrangler d1 migrations apply gilasartdatabase --remote
