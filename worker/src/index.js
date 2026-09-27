@@ -157,8 +157,9 @@ async function cartPricing(env,me,couponCode=''){
     couponDiscount=cpn.kind==='PERCENT'?Math.floor(couponBase*Math.min(100,Number(cpn.value||0))/100):Math.min(couponBase,Math.max(0,Number(cpn.value||0)));
     coupon={id:cpn.id,code:cpn.code,kind:cpn.kind,value:cpn.value,discount_irt:couponDiscount};
   }
+  const appliedDiscounts=new Map();for(const d of chosen.values()){const x=appliedDiscounts.get(d.id)||{id:d.id,title:d.title,amount:0};x.amount+=d.amount;appliedDiscounts.set(d.id,x)}
   const discountIrt=Math.min(subtotal,automaticDiscount+couponDiscount),shipping=subtotal>=10000000?0:500000,total=Math.max(0,subtotal-discountIrt+shipping);
-  return {items:rows,subtotal_irt:subtotal,automatic_discount_irt:automaticDiscount,coupon_discount_irt:couponDiscount,discount_irt:discountIrt,shipping_irt:shipping,total_irt:total,coupon,discounts:Array.from(chosen.values())};
+  return {items:rows,subtotal_irt:subtotal,automatic_discount_irt:automaticDiscount,coupon_discount_irt:couponDiscount,discount_irt:discountIrt,shipping_irt:shipping,total_irt:total,coupon,discounts:Array.from(appliedDiscounts.values())};
 }
 function promotionErrorCode(e){const c=String(e?.message||'');return ['coupon_not_found','coupon_expired_or_inactive','coupon_min_order','coupon_usage_limit','coupon_already_used','coupon_not_applicable'].includes(c)?c:null}
 function allowedImagePath(v){try{const s=String(v||'').trim();if(s.startsWith('/glsArt/art/'))return true;const u=new URL(s);return u.protocol==='https:'&&u.hostname==='raw.githubusercontent.com'&&((u.pathname.startsWith('/gilasartirac-svg/gls-media/main/image/')&&/\.(png|jpe?g|webp|gif|svg)$/i.test(u.pathname))||(u.pathname.startsWith('/gilasartirac-svg/glsArt/main/frontend/public/art/')&&/\.(png|jpe?g|webp|gif|svg)$/i.test(u.pathname)))}catch{return false}}
