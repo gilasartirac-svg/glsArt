@@ -24,3 +24,14 @@ test('production worker deployment is consolidated and uses the bootstrap secret
   assert.match(deploy,/d1 migrations apply gilasartdatabase --remote --yes/);
   assert.match(deploy,/wrangler secret put ADMIN_BOOTSTRAP_MOBILE/);
 });
+
+
+test('payment settlement guards stock before marking payment paid',()=>{
+  const paymentPos=worker.indexOf("UPDATE payments SET status='PAID'");
+  const inventoryPos=worker.indexOf("UPDATE inventory SET quantity=quantity-?");
+  assert.ok(paymentPos>0 && inventoryPos>paymentPos);
+  const settlement=worker.slice(paymentPos,inventoryPos+500);
+  assert.match(settlement,/NOT EXISTS \(SELECT 1 FROM order_items oi LEFT JOIN inventory inv/);
+  assert.match(settlement,/inv\.quantity<oi\.quantity/);
+  assert.match(settlement,/quantity>=\?/);
+});
