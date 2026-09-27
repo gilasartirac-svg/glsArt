@@ -1,3 +1,4 @@
+import {setupDataGrid} from '../components/Table.js';
 import {api} from '../services/api.js?v=20260926.3';
 
 export default function Coupons(){
@@ -47,6 +48,6 @@ export default function Coupons(){
       </div>
       <button class="btn primary">ثبت کد تخفیف</button>
     </form></div>
-    <div class="panel"><div class="table-scroll"><table class="admin-table"><thead><tr><th>کد</th><th>نوع</th><th>مقدار</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="coupon-table"><tr><td colspan="5">در حال دریافت...</td></tr></tbody></table></div></div>
+    <div class="panel"><div class="table-scroll"><table class="admin-table"><thead><tr><th>کد</th><th>نوع</th><th>مقدار</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="coupon-grid"><tr><td colspan="5">در حال دریافت...</td></tr></tbody></table></div></div>
   </div>`;
 }
