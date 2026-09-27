@@ -1,0 +1,15 @@
+import {api} from '../services/api.js';
+import {setupDataGrid} from '../components/Table.js';
+const faDate=v=>v?new Intl.DateTimeFormat('fa-IR-u-ca-persian',{dateStyle:'short',timeStyle:'medium',timeZone:'Asia/Tehran'}).format(new Date(String(v).includes('T')?v:v.replace(' ','T')+'Z')):'—';
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export default function Visitors(){
+ setTimeout(load,0);
+ async function load(){try{const d=await api('/api/admin/visitors?limit=100');const rows=d.items||[];const online=rows.filter(x=>Number(x.online)===1);
+ document.querySelector('#visitor-total').textContent=Number(d.total||0).toLocaleString('fa-IR');
+ document.querySelector('#online-total').textContent=Number(d.onlineCount||online.length).toLocaleString('fa-IR');
+ document.querySelector('#visitor-grid').innerHTML=rows.map(x=>'<tr><td>'+esc(x.visitor)+'</td><td>'+esc(x.ip_address)+'</td><td>'+esc(x.country_name||x.country_code||'نامشخص')+'</td><td data-sort-value="'+esc(x.first_seen_at)+'">'+faDate(x.first_seen_at)+'</td><td data-sort-value="'+esc(x.last_seen_at)+'">'+faDate(x.last_seen_at)+'</td><td>'+(x.online?'آنلاین':'آفلاین')+'</td></tr>').join('')||'<tr><td colspan="6">بازدیدی ثبت نشده است.</td></tr>';
+ document.querySelector('#online-grid').innerHTML=online.map(x=>'<tr><td>'+esc(x.visitor)+'</td><td>'+esc(x.ip_address)+'</td><td>'+esc(x.country_name||x.country_code||'نامشخص')+'</td><td data-sort-value="'+esc(x.last_seen_at)+'">'+faDate(x.last_seen_at)+'</td><td><span class="online-dot">●</span> آنلاین</td></tr>').join('')||'<tr><td colspan="5">در حال حاضر بازدیدکننده آنلاینی ثبت نشده است.</td></tr>';
+ setupDataGrid('visitor-grid');setupDataGrid('online-grid',{dateColumns:[3]});
+ }catch(e){document.querySelector('#visitor-error').textContent=e.message}}
+ return '<div class="admin-page" dir="rtl"><div class="admin-title"><div><h2>بازدیدکنندگان</h2><span class="muted">بازدیدهای ثبت‌شده و وضعیت آنلاین سایت</span></div></div><div id="visitor-error" class="error"></div><div class="stats-grid"><div class="stat-card"><span>کل بازدیدکنندگان</span><strong id="visitor-total">۰</strong></div><div class="stat-card"><span>بازدیدکنندگان آنلاین</span><strong id="online-total">۰</strong></div></div><div class="panel"><div class="sectionhead"><h3>بازدیدکنندگان آنلاین</h3><span class="muted">آخرین فعالیت در ۵ دقیقه اخیر</span></div><div class="table-scroll"><table class="admin-table"><thead><tr><th>کاربر / IP</th><th>IP</th><th>کشور</th><th>آخرین فعالیت</th><th>وضعیت</th></tr></thead><tbody id="online-grid"><tr><td colspan="5">در حال دریافت...</td></tr></tbody></table></div></div><div class="panel"><div class="sectionhead"><h3>گزارش بازدیدکنندگان</h3><span class="muted">تاریخ‌ها بر اساس تقویم شمسی و منطقه زمانی تهران نمایش داده می‌شوند.</span></div><div class="table-scroll"><table class="admin-table"><thead><tr><th>کاربر / IP</th><th>IP</th><th>کشور</th><th>تاریخ و زمان ورود</th><th>آخرین فعالیت</th><th>وضعیت</th></tr></thead><tbody id="visitor-grid"><tr><td colspan="6">در حال دریافت...</td></tr></tbody></table></div></div></div>';
+}
