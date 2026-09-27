@@ -60,3 +60,11 @@ test('OTP login supports Android WebOTP and redirects to home after verification
 test('OTP SMS includes the WebOTP origin-bound format',()=>{
   assert.match(worker,/@\$\{new URL\(frontend\(env\)\)\.host\} #\$\{code\}/);
 });
+
+test('admin role assignment prevents privilege escalation and self lockout',()=>{
+  assert.match(worker,/async function canAssignRole/);
+  assert.match(worker,/role_exceeds_actor_permissions/);
+  assert.match(worker,/self_role_change_forbidden/);
+  assert.match(worker,/self_deactivation_forbidden/);
+  assert.match(worker,/user_not_found/);
+});
