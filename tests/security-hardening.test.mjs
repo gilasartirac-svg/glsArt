@@ -68,3 +68,13 @@ test('admin role assignment prevents privilege escalation and self lockout',()=>
   assert.match(worker,/self_deactivation_forbidden/);
   assert.match(worker,/user_not_found/);
 });
+
+test('storefront uses dynamic three-item infinite scrolling',()=>{
+  assert.match(frontend,/pageSize=3/);
+  assert.match(frontend,/IntersectionObserver/);
+  assert.match(frontend,/offset:String\(offset\)/);
+  assert.match(frontend,/insertAdjacentHTML\('beforeend'/);
+  assert.match(frontend,/GALLERY COLLECTION/);
+  assert.match(frontend,/هنرکده گیلاس آرت/);
+  assert.match(frontend,/تولید کننده ی برتر تابلو های معرق مس در ایران/);
+});
