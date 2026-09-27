@@ -38,8 +38,16 @@ jobs:
           npx wrangler d1 execute gilasartdatabase --remote --command="SELECT id,name,applied_at FROM d1_migrations ORDER BY id" --json || true
           echo '--- tables ---'
           npx wrangler d1 execute gilasartdatabase --remote --command="SELECT name,type FROM sqlite_master WHERE type IN ('table','view') ORDER BY type,name" --json
-          echo '--- key columns ---'
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT 'users' table_name,name,type FROM pragma_table_info('users') UNION ALL SELECT 'orders',name,type FROM pragma_table_info('orders') UNION ALL SELECT 'inventory',name,type FROM pragma_table_info('inventory') UNION ALL SELECT 'payments',name,type FROM pragma_table_info('payments') ORDER BY table_name,cid" --json
+          echo '--- migration rows ---'
+          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT * FROM d1_migrations" --json || true
+          echo '--- users columns ---'
+          npx wrangler d1 execute gilasartdatabase --remote --command="PRAGMA table_info(users)" --json
+          echo '--- categories columns ---'
+          npx wrangler d1 execute gilasartdatabase --remote --command="PRAGMA table_info(categories)" --json
+          echo '--- orders columns ---'
+          npx wrangler d1 execute gilasartdatabase --remote --command="PRAGMA table_info(orders)" --json
+          echo '--- payments columns ---'
+          npx wrangler d1 execute gilasartdatabase --remote --command="PRAGMA table_info(payments)" --json
 
       - name: Apply remote D1 migrations
         run: npx wrangler d1 migrations apply gilasartdatabase --remote
