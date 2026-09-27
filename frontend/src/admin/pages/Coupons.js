@@ -10,7 +10,7 @@ export default function Coupons(){
       const el=document.querySelector('#coupon-table');
       if(!el)return;
       el.innerHTML=(d.items||[]).map(x=>`<tr><td><b>${x.code}</b></td><td>${x.kind==='PERCENT'?'درصدی':'مبلغ ثابت'}</td><td>${new Intl.NumberFormat('fa-IR').format(x.value||0)}</td><td><span class="pill">${x.active?'فعال':'غیرفعال'}</span></td><td><button class="btn danger" data-id="${x.id}">حذف</button></td></tr>`).join('')||'<tr><td colspan="5">کد تخفیفی وجود ندارد.</td></tr>';
-      el.querySelectorAll('.danger').forEach(b=>b.onclick=async()=>{
+      setupDataGrid('coupon-grid');el.querySelectorAll('.danger').forEach(b=>b.onclick=async()=>{
         if(!confirm('این کد تخفیف حذف شود؟'))return;
         try{await api('/api/admin/coupons/'+b.dataset.id,{method:'DELETE'});await load()}catch(e){alert(e.message)}
       });
