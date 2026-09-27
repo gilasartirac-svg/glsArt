@@ -56,10 +56,11 @@ test('OTP login supports Android WebOTP and redirects to home after verification
   assert.match(frontend,/state\.user\?/);
 });
 
-test('OTP SMS uses the current GilasArt login message format',()=>{
-  assert.match(worker,/گیلاس آرت\\nکد ورود : \$\{code\}/);
+test('OTP SMS is template-driven without exposing the Kavenegar secret',()=>{
+  assert.match(worker,/kavenegar_message_template/);
+  assert.match(worker,/replaceAll\\('\{code\}'/);
+  assert.match(worker,/KAVENEGAR_API_KEY/);
 });
-
 test('admin role assignment prevents privilege escalation and self lockout',()=>{
   assert.match(worker,/async function canAssignRole/);
   assert.match(worker,/role_exceeds_actor_permissions/);
