@@ -2,7 +2,7 @@ const PERSIAN_DATE=new Intl.DateTimeFormat('fa-IR-u-ca-persian',{timeZone:'Asia/
 const toDate=(v)=>{if(!v)return '';const s=String(v).trim().replace(' ','T');const d=new Date(/Z$|[+-]\d\d:\d\d$/.test(s)?s:s+'Z');return Number.isNaN(d.getTime())?v:PERSIAN_DATE.format(d)};
 const sortValue=(text)=>{const s=String(text||'').trim().replace(/[۰-۹]/g,c=>String('۰۱۲۳۴۵۶۷۸۹'.indexOf(c))).replace(/[,٬]/g,'');const n=Number(s.replace(/[^0-9.-]/g,''));return s!==''&&!Number.isNaN(n)&&/\d/.test(s)?n:s.toLocaleLowerCase()};
 export function setupDataGrid(tableId,{searchPlaceholder='جستجو در جدول…',dateColumns=[]}={}){
- const table=document.getElementById(tableId);if(!table||table.dataset.gridReady)return;table.dataset.gridReady='1';
+ let table=document.getElementById(tableId);if(table?.tagName==='TBODY')table=table.closest('table');if(!table||table.dataset.gridReady)return;table.dataset.gridReady='1';
  const bar=document.createElement('div');bar.className='data-grid-toolbar';bar.innerHTML='<input class="data-grid-search" type="search" placeholder="'+searchPlaceholder+'" aria-label="فیلتر جدول"><span class="data-grid-count"></span><button type="button" class="btn ghost data-grid-clear">پاک کردن فیلتر</button>';
  table.parentNode.insertBefore(bar,table);const tbody=table.tBodies[0],headers=[...table.tHead?.rows[0]?.cells||[]];
  dateColumns.forEach(i=>[...tbody.rows].forEach(r=>{const td=r.cells[i];if(td){td.dataset.gridDate=td.textContent.trim();td.dataset.sortRaw=td.textContent.trim();td.textContent=toDate(td.dataset.gridDate)}}));
