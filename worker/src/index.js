@@ -129,14 +129,16 @@ async function cartPricing(env,me,couponCode=''){
   for(const x of dp){if(!productTargets.has(x.discount_id))productTargets.set(x.discount_id,new Set());productTargets.get(x.discount_id).add(x.product_id)}
   for(const x of dc){if(!categoryTargets.has(x.discount_id))categoryTargets.set(x.discount_id,new Set());categoryTargets.get(x.discount_id).add(x.category_id)}
   const chosen=new Map();
+  const usedGlobalFixed=new Set();
   for(const row of rows){
     const base=Number(row.price_irt||0)*Number(row.quantity||0);let best=null;
     for(const d of discounts){
       if(subtotal<Number(d.min_order_irt||0))continue;
       const pt=productTargets.get(d.id),ct=categoryTargets.get(d.id),targeted=pt?.has(row.product_id)||ct?.has(row.category_id),global=!pt?.size&&!ct?.size;
       if(!targeted&&!global)continue;
+      if(global&&d.kind==='FIXED'&&usedGlobalFixed.has(d.id))continue;
       const amount=d.kind==='PERCENT'?Math.floor(base*Math.min(100,Number(d.value||0))/100):Math.min(base,Math.max(0,Number(d.value||0)));
-      if(amount>0&&(!best||amount>best.amount))best={id:d.id,title:d.title,amount};
+      if(amount>0&&(!best||amount>best.amount)){best={id:d.id,title:d.title,amount};if(global&&d.kind==='FIXED')usedGlobalFixed.add(d.id)}
     }
     if(best)chosen.set(row.product_id,best);
   }
