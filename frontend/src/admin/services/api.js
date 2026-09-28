@@ -95,6 +95,7 @@ export const admin={
  me:()=>api('/api/admin/me'),
  stats:()=>api('/api/admin/stats'),
  products:()=>api('/api/admin/products'),
+ inventory:()=>api('/api/admin/inventory'),
  orders:()=>api('/api/admin/orders'),
  customers:()=>api('/api/admin/reports/customers'),
  reports:()=>api('/api/admin/reports/sales'),
