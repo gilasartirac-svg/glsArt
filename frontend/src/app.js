@@ -91,7 +91,15 @@ async function account(){await loadMe();if(state.user){layout(`<section class="w
  send.hidden=true;send.disabled=true;mobileEl.hidden=true;mobileEl.setAttribute('aria-hidden','true');step.innerHTML='<div class="otp-loading" role="status">در حال ارسال کد به پیامک…</div>';
  try{
  const mobile=mobileEl.value;
- const d=await api('/api/auth/request-otp',{method:'POST',body:JSON.stringify({mobile})});
+ let d;
+ try{
+  d=await api('/api/auth/request-otp',{method:'POST',body:JSON.stringify({mobile})});
+ }catch(e){
+  send.hidden=false;send.disabled=false;mobileEl.hidden=false;mobileEl.removeAttribute('aria-hidden');
+  step.innerHTML='<p class="error">'+escapeHtml(e.message||'ارسال کد ناموفق بود.')+'</p>';
+  mobileEl.focus();
+  return;
+ }
  step.innerHTML='<label>کد تایید<input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" aria-label="کد تایید"></label><button class="btn primary" id="verify">تایید</button><p id="otp-status" class="muted">کد پیامک‌شده را وارد کنید؛ در گوشی‌های پشتیبانی‌شده به‌صورت خودکار تکمیل می‌شود.</p>';
  const otp=document.querySelector('#otp'),verify=document.querySelector('#verify'),status=document.querySelector('#otp-status');
  let verifying=false;
