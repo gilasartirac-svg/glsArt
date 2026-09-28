@@ -1,7 +1,7 @@
 export default function Sidebar(){
   const current=location.hash.replace('#/admin/','')||'dashboard';
   const items=[
-    ['dashboard','داشبورد','⌂'],['products','محصولات','▣'],['categories','دسته‌بندی‌ها','◈'],['orders','سفارشات','◫'],
+    ['dashboard','داشبورد','⌂'],['products','محصولات','▣'],['categories','دسته‌بندی‌ها','◈'],['orders','سفارشات','◫'],['site-rules','قوانین سایت','§'],
     ['customers','مشتریان','♙'],['inventory','موجودی','▤'],['payments','پرداخت‌ها','◇'],['discounts','تخفیف‌ها','%'],['coupons','کوپن‌ها','▱'],
     ['reviews','نظرات','✦'],['reports','گزارش‌ها','▥'],['roles','دسترسی‌ها','♢'],['audit','لاگ سیستم','◉'],['settings','SEO و تنظیمات','⚙'],['sms','سیستم پیامکی','⌁'],['payment','درگاه زرین‌پال','₿'],['visitors','بازدیدکنندگان','◌'],['support','تیکت‌های پشتیبانی','?'],['about','درباره ما','i'],['contact','تماس با ما','⌁'],['news','اخبار گیلاس آرت','◍'],['articles','مقالات','≡']
   ];
