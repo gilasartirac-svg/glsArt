@@ -50,7 +50,8 @@ async function request(path,options,attempt=0){
   if(token)headers['x-csrf-token']=token;
  }
  const controller=new AbortController();
- const timeout=setTimeout(()=>controller.abort(),10000);
+ const timeoutMs=method==='GET'?10000:30000;
+ const timeout=setTimeout(()=>controller.abort(),timeoutMs);
  try{
   const res=await fetch(API+path,{credentials:'include',cache:'no-store',...options,headers,signal:controller.signal});
   const data=await res.json().catch(()=>({}));
@@ -67,7 +68,7 @@ async function request(path,options,attempt=0){
   return data;
  }catch(e){
   if(e.name==='AbortError'){
-   const err=new Error('پاسخ سرور در زمان مقرر دریافت نشد؛ اتصال Worker یا D1 در دسترس نیست.');
+   const err=new Error(method==='GET'?'پاسخ سرور در زمان مقرر دریافت نشد؛ اتصال Worker یا D1 در دسترس نیست.':'ذخیره‌سازی بیشتر از زمان مجاز طول کشید؛ لطفاً اتصال Worker و وضعیت D1 را بررسی می‌کنیم.');
    showAdminLoadError(err.message);
    throw err;
   }
