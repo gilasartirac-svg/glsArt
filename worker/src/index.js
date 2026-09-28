@@ -109,7 +109,7 @@ async function verifyMathCaptcha(env,token,answer){
  if(!payload||Number(payload.exp||0)<Date.now()||!Number.isInteger(payload.a)||!Number.isInteger(payload.b)||!['+','-'].includes(payload.op)||String(payload.n||'').length<12)return false;
  const expected=payload.op==='+'?payload.a+payload.b:payload.a-payload.b;
  if(Number(a)!==expected)return false;
- const sig=await sha(\`\${secret}:\${parts[0]}:\${a}\`);
+ const sig=await sha(`${secret}:${parts[0]}:${a}`);
  return sig===parts[1];
 }
 function makeMathCaptcha(env){
@@ -117,7 +117,7 @@ function makeMathCaptcha(env){
  const a=1+(raw[0]%9),b=1+(raw[1]%9),op='+';
  const payload={a,b,op,n:uid(),exp:Date.now()+5*60*1000};
  const encoded=btoa(JSON.stringify(payload)).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');
- return sha(\`\${env.OTP_PEPPER}:\${encoded}:\${op==='+'?a+b:a-b}\`).then(sig=>({question:op==='+'?\`\${a} + \${b} = ؟\`:\`\${a} − \${b} = ؟\`,token:\`\${encoded}.\${sig}\`,expiresIn:300}));
+ return sha(`${env.OTP_PEPPER}:${encoded}:${op==='+'?a+b:a-b}`).then(sig=>({question:op==='+'?`${a} + ${b} = ؟`:`${a} − ${b} = ؟`,token:`${encoded}.${sig}`,expiresIn:300}));
 }
 
 async function requireUser(req,env){const u=await user(req,env);return u}
