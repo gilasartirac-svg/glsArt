@@ -80,7 +80,15 @@ async function request(path,options,attempt=0){
 }
 
 export async function api(path,options={}){
+ const method=(options.method||'GET').toUpperCase();
+ if(path.startsWith('/api/admin/')&&method==='GET')await requireAdminSession();
  return request(path,options,0);
+}
+
+async function requireAdminSession(){
+ const d=await api('/api/me');
+ if(!d?.user)return Object.assign(new Error('نشست کاربر در سرور معتبر نیست. لطفاً یک‌بار از حساب خارج و دوباره وارد شوید.'),{code:'admin_session_missing'});
+ return d;
 }
 
 export const admin={
