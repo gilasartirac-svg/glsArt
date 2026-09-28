@@ -288,8 +288,8 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  const me=await requireUser(req,env);
  if(u.pathname==='/api/site-rules'&&req.method==='GET'){
  const r=await env.DB.prepare("SELECT key,value,updated_at FROM site_settings WHERE key IN ('site_rules_title','site_rules_body') ORDER BY key").all();
- const map=Object.fromEntries((r.results||[]).map(x=>[x.key,x.value]));
- return json({item:{title:map.site_rules_title||'قوانین سایت',body:map.site_rules_body||'ثبت سفارش و پرداخت به معنی پذیرش قوانین و شرایط فروش گیلاس آرت است.',updated_at:map.site_rules_body?map.site_rules_body_updated_at:null}});
+ const rows=r.results||[],map=Object.fromEntries(rows.map(x=>[x.key,x.value])),updated=rows.map(x=>x.updated_at).filter(Boolean).sort().pop()||null;
+ return json({item:{title:map.site_rules_title||'قوانین سایت',body:map.site_rules_body||'ثبت سفارش و پرداخت به معنی پذیرش قوانین و شرایط فروش گیلاس آرت است.',updated_at:updated}});
 }
 
 if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
