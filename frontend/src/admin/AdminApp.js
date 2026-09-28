@@ -1,6 +1,6 @@
 import Sidebar from './components/Sidebar.js';
 import Header from './components/Header.js';
-import adminRouter from './router.js';
+import adminRouter from './router.js?v=20260928.4';
 
 export default function AdminApp(){
 
