@@ -1,0 +1,39 @@
+name: Product Features Smoke Test
+
+on:
+  push:
+    branches: [feature/product-options-video-grid-fix]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Static checks
+        run: |
+          npm run check
+          npm run build
+          npm test
+      - name: Apply product feature migration to remote D1
+        run: npx wrangler d1 migrations apply gilasartdatabase --remote
+      - name: Verify real D1 product data and pricing fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute gilasartdatabase --remote --json --command="SELECT COUNT(*) AS n FROM products WHERE sku LIKE 'GRID-TEST-%';" > /tmp/products.json
+          node -e "const x=require('/tmp/products.json'); const n=Number(x[0]?.results?.[0]?.results?.[0]?.n ?? x[0]?.results?.[0]?.n ?? -1); if(n<3) throw new Error('Expected at least 3 real D1 grid test products, got '+n); console.log('D1 grid products:',n)"
+          npx wrangler d1 execute gilasartdatabase --remote --json --command="SELECT a.name attribute,o.name option,o.is_default,o.price_delta_irt FROM product_attributes a JOIN product_attribute_options o ON o.attribute_id=a.id WHERE a.id IN ('attr_frame_color','attr_size') ORDER BY a.id,o.sort_order;" > /tmp/options.json
+          node -e "const x=require('/tmp/options.json'); const rows=x[0]?.results?.[0]?.results||[]; if(rows.length<6) throw new Error('Expected at least 6 real D1 product options, got '+rows.length); const gold=rows.find(r=>r.option==='طلایی'); const size=rows.find(r=>r.option==='50×100'); if(Number(gold?.price_delta_irt)!==100000||Number(size?.price_delta_irt)!==300000) throw new Error('Option price deltas are incorrect'); console.log('D1 option fixtures verified:',rows.length)"
+          npx wrangler d1 execute gilasartdatabase --remote --json --command="SELECT p.sku,p.price_irt,group_concat(o.price_delta_irt,'+') AS deltas FROM products p JOIN product_attribute_assignments pa ON pa.product_id=p.id JOIN product_attribute_options o ON o.attribute_id=pa.attribute_id WHERE p.sku='GRID-TEST-001' GROUP BY p.id;" > /tmp/pricing.json
+          node -e "const x=require('/tmp/pricing.json'); const r=x[0]?.results?.[0]?.results?.[0]; const total=Number(r?.price_irt||0)+100000+300000; if(total!==4500000) throw new Error('Expected 4,500,000 IRR for test base 4,100,000 + 100,000 + 300,000; got '+total); console.log('D1 pricing arithmetic verified:',total)"
+          npx wrangler d1 execute gilasartdatabase --remote --json --command="SELECT name FROM pragma_table_info('products') WHERE name='video_url';" > /tmp/video.json
+          node -e "const x=require('/tmp/video.json'); if(!(x[0]?.results?.[0]?.results||[]).length) throw new Error('video_url column missing'); console.log('D1 video_url column verified')"
