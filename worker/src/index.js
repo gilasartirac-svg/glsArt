@@ -217,6 +217,9 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  if(u.pathname==='/api/me'&&req.method==='GET'){if(adminBootstrapConfigured(env)){try{await ensureAdminBootstrap(env)}catch(e){console.error('admin bootstrap failed',e?.message||e)}}const u0=await user(req,env);const csrfToken=cookies(req)['gs_csrf']||null;return json({user:u0,roles:await roles(u0,env),permissions:await permissions(u0,env),csrfToken})}
  if(u.pathname==='/api/auth/logout'&&req.method==='POST'){if(!requireCsrf(req))return json({error:'forbidden'},403);const sid=cookies(req)['__Host-gs_session'];if(sid)await env.DB.prepare("UPDATE sessions SET revoked_at=datetime('now') WHERE id=?").bind(sid).run();return json({ok:true},200,{'set-cookie':['__Host-gs_session=; Path=/; HttpOnly; Secure; SameSite=None; Partitioned; Max-Age=0','gs_csrf=; Path=/; Secure; SameSite=None; Partitioned; Max-Age=0']})}
  const me=await requireUser(req,env);
+ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
+  const parts=u.pathname.split('/').filter(Boolean);const section=String(parts[2]||'').toLowerCase(),slug=decodeURIComponent(parts.slice(3).join('/'));if(!['news','articles'].includes(section)||!slug)return json({error:'invalid_content'},400);const x=await env.DB.prepare('SELECT id,section,title,slug,summary,body,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE section=? AND slug=? AND active=1').bind(section,slug).first();if(!x)return json({error:'not_found'},404);return json({item:x});
+ }
  if(u.pathname.startsWith('/api/content')&&req.method==='GET'){
   const section=String(u.searchParams.get('section')||'').trim().toLowerCase();
   if(!['about','contact','news','articles'].includes(section))return json({error:'invalid_section'},400);
