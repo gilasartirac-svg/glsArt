@@ -114,7 +114,7 @@ async function verifyMathCaptcha(env,token,answer){
 }
 function makeMathCaptcha(env){
  const raw=new Uint32Array(3);crypto.getRandomValues(raw);
- const a=1+(raw[0]%9),b=1+(raw[1]%9),op=(raw[2]&1)?'+':'-';
+ const a=1+(raw[0]%9),b=1+(raw[1]%9),op='+';
  const payload={a,b,op,n:uid(),exp:Date.now()+5*60*1000};
  const encoded=btoa(JSON.stringify(payload)).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');
  return sha(\`\${env.OTP_PEPPER}:\${encoded}:\${op==='+'?a+b:a-b}\`).then(sig=>({question:op==='+'?\`\${a} + \${b} = ؟\`:\`\${a} − \${b} = ؟\`,token:\`\${encoded}.\${sig}\`,expiresIn:300}));
