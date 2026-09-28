@@ -26,7 +26,7 @@ test('CMS content schema, permissions and samples are present',()=>{
  assert.match(cmsSchema,/CREATE TABLE IF NOT EXISTS cms_entries/);
  for(const x of ['about','contact','news','articles','content.read','content.write'])assert.ok(cmsSchema.includes(x));
  assert.ok(cmsSchema.includes('cms_news_01'));assert.ok(cmsSchema.includes('cms_article_01'));assert.ok(cmsSchema.includes('cms_contact_01'));
- assert.match(worker,/\/api\/content.*section/);assert.match(worker,/\/api\/admin\/cms/);
+ assert.ok(worker.includes("u.pathname.startsWith('/api/content')"));assert.ok(worker.includes("searchParams.get('section')"));assert.match(worker,/\/api\/admin\/cms/);
 });
 test('OTP request hides UI before network request and login returns roles',()=>{
  const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
