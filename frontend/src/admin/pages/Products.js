@@ -10,13 +10,30 @@ const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 export default function Products(){
  let attributes=[];
  const load=async()=>{
-  const [pd,cd,ad]=await Promise.all([admin.products(),api('/api/admin/categories'),api('/api/admin/product-attributes')]);
-  attributes=ad.items||[];
-  const cat=document.querySelector('#p-category');
-  if(cat)cat.innerHTML='<option value="">بدون دسته</option>'+(cd.items||[]).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
+  try{
+   const pd=await admin.products();
+   render(pd.items||[]);
+  }catch(e){
+   const el=document.querySelector('#products-grid');
+   if(el)el.innerHTML=`<tr><td colspan="6" class="error-cell">${esc(e.message||'خطا در دریافت محصولات')}</td></tr>`;
+   throw e;
+  }
+  try{
+   const cd=await api('/api/admin/categories');
+   const cat=document.querySelector('#p-category');
+   if(cat)cat.innerHTML='<option value="">بدون دسته</option>'+(cd.items||[]).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
+  }catch(e){
+   const el=document.querySelector('#products-error');if(el)el.textContent='اطلاعات دسته‌بندی در دسترس نیست؛ فهرست محصولات همچنان قابل استفاده است.';
+  }
+  try{
+   const ad=await api('/api/admin/product-attributes');
+   attributes=ad.items||[];
+  }catch(e){
+   attributes=[];
+   const el=document.querySelector('#products-error');if(el)el.textContent='ویژگی‌های محصول هنوز در دسترس نیست؛ فهرست محصولات همچنان قابل استفاده است.';
+  }
   renderAttributeManager();
   renderAttributeChoices();
-  render(pd.items||[]);
  };
  setTimeout(async()=>{
   try{await load()}catch(e){const el=document.querySelector('#products-error');if(el)el.textContent=e.message}
