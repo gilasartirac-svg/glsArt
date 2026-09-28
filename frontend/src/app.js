@@ -91,7 +91,25 @@ async function product(slug){
  const recalc=()=>{let delta=0;document.querySelectorAll('.product-option option:checked').forEach(o=>delta+=Number(o.dataset.delta||0));const total=Number(p.price_irt||0)+delta;document.querySelector('#product-live-price').textContent=fa(total)+' ریال';document.querySelector('#product-price-breakdown').textContent=delta?'قیمت پایه: '+fa(p.price_irt)+' ریال + افزایش ویژگی‌ها: '+fa(delta)+' ریال':'';return total};
  document.querySelectorAll('.product-option select').forEach(x=>x.addEventListener('change',recalc));recalc();
  document.querySelector('#add').onclick=async()=>{try{await ensureLogin();await api('/api/cart',{method:'POST',body:JSON.stringify({productId:p.id,quantity:1,options:selections()}),headers:{'x-csrf-token':csrf()}});alert('به سبد خرید اضافه شد')}catch(e){alert(e.message)}};
- document.querySelector('#fav').onclick=async()=>{try{await ensureLogin();await api('/api/favorites',{method:'POST',body:JSON.stringify({productId:p.id}),headers:{'x-csrf-token':csrf()}});alert('ذخیره شد')}catch(e){alert(e.message)}};\ndocument.querySelector('#review-form')?.addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target),m=document.querySelector('#review-msg');try{await ensureLogin();await api('/api/products/'+encodeURIComponent(slug)+'/reviews',{method:'POST',body:JSON.stringify({rating:Number(f.get('rating')),body:f.get('body')}),headers:{'x-csrf-token':csrf()}});m.innerHTML='<span class="ok">نظر شما ثبت شد و پس از بررسی منتشر می‌شود.</span>';e.target.reset()}catch(err){m.innerHTML='<span class="error">'+escapeHtml(err.message||'ثبت نظر انجام نشد.')+'</span>'}});
+  document.querySelector('#fav').onclick=async()=>{
+    try{
+      await ensureLogin();
+      await api('/api/favorites',{method:'POST',body:JSON.stringify({productId:p.id}),headers:{'x-csrf-token':csrf()}});
+      alert('ذخیره شد');
+    }catch(e){alert(e.message)}
+  };
+  document.querySelector('#review-form')?.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const f=new FormData(e.target),m=document.querySelector('#review-msg');
+    try{
+      await ensureLogin();
+      await api('/api/products/'+encodeURIComponent(slug)+'/reviews',{method:'POST',body:JSON.stringify({rating:Number(f.get('rating')),body:f.get('body')}),headers:{'x-csrf-token':csrf()}});
+      m.innerHTML='<span class="ok">نظر شما ثبت شد و پس از بررسی منتشر می‌شود.</span>';
+      e.target.reset();
+    }catch(err){
+      m.innerHTML='<span class="error">'+escapeHtml(err.message||'ثبت نظر انجام نشد.')+'</span>';
+    }
+  });
 }
 async function ensureLogin(){if(state.user)return;await account();if(!state.user)throw new Error('ابتدا وارد حساب شوید')}
 async function loadMe(){try{const d=await api('/api/me');state.user=d.user||null;state.roles=d.roles||[];state.permissions=d.permissions||[];csrfToken=d.csrfToken||csrfToken;return d}catch(e){return null}}
