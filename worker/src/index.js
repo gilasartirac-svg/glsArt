@@ -150,21 +150,90 @@ async function siteSetting(env,key,fallback=''){
   try{const r=await env.DB.prepare('SELECT value FROM site_settings WHERE key=?').bind(key).first();return r?.value ?? fallback}catch{return fallback}
 }
 async function paymentEnvironment(env){const v=String(await siteSetting(env,'zarinpal_environment',env.PAYMENT_ENV||'production')).toLowerCase();return v==='sandbox'?'sandbox':'production'}
+
+function validVideoUrl(v){
+  if(v===null||v===undefined||String(v).trim()==='')return null;
+  try{const u=new URL(String(v).trim());return u.protocol==='https:'?u.href:null}catch{return null}
+}
+async function loadProductAttributes(env,productId){
+  const rows=(await env.DB.prepare(`
+    SELECT a.id attribute_id,a.name attribute_name,a.active attribute_active,a.sort_order attribute_sort,
+           o.id option_id,o.name option_name,o.active option_active,o.is_default,o.price_delta_irt,o.sort_order option_sort
+    FROM product_attribute_assignments pa
+    JOIN product_attributes a ON a.id=pa.attribute_id
+    JOIN product_attribute_options o ON o.attribute_id=a.id
+    WHERE pa.product_id=?
+    ORDER BY pa.sort_order,a.sort_order,o.sort_order
+  `).bind(productId).all()).results||[];
+  const map=new Map();
+  for(const r of rows){
+    if(!map.has(r.attribute_id))map.set(r.attribute_id,{id:r.attribute_id,name:r.attribute_name,active:Number(r.attribute_active)===1,required:true,options:[]});
+    if(Number(r.attribute_active)===1&&Number(r.option_active)===1)map.get(r.attribute_id).options.push({
+      id:r.option_id,name:r.option_name,is_default:Number(r.is_default)===1,price_delta_irt:Number(r.price_delta_irt||0)
+    });
+  }
+  return [...map.values()].filter(a=>a.active&&a.options.length);
+}
+async function resolveProductOptions(env,productId,raw){
+  let requested=[];
+  try{requested=Array.isArray(raw)?raw:raw?JSON.parse(raw):[]}catch{throw new Error('invalid_product_options')}
+  if(requested.length>50)throw new Error('invalid_product_options');
+  const attrs=await loadProductAttributes(env,productId);
+  const byAttr=new Map(attrs.map(a=>[a.id,a]));
+  const chosen=new Map();
+  for(const x of requested){
+    const attributeId=String(x?.attributeId||'');
+    const optionId=String(x?.optionId||'');
+    if(!attributeId||!optionId||chosen.has(attributeId))throw new Error('invalid_product_options');
+    const a=byAttr.get(attributeId),o=a?.options.find(v=>v.id===optionId);
+    if(!a||!o)throw new Error('invalid_product_options');
+    chosen.set(attributeId,o);
+  }
+  const normalized=[];
+  let adjustment=0;
+  for(const a of attrs){
+    let o=chosen.get(a.id);
+    if(!o)o=a.options.find(v=>v.is_default);
+    if(!o){
+      if(a.required)throw new Error('product_options_required');
+      continue;
+    }
+    normalized.push({attributeId:a.id,attributeName:a.name,optionId:o.id,optionName:o.name,priceDeltaIrt:Number(o.price_delta_irt||0)});
+    adjustment+=Number(o.price_delta_irt||0);
+  }
+  if(chosen.size!==normalized.length)throw new Error('invalid_product_options');
+  return {options:normalized,adjustment_irt:adjustment};
+}
+async function saveProductAttributeAssignments(env,productId,attributeIds){
+  const ids=[...new Set((Array.isArray(attributeIds)?attributeIds:[]).map(x=>String(x||'')).filter(Boolean))].slice(0,50);
+  const valid=ids.length?await env.DB.prepare(`SELECT id FROM product_attributes WHERE active=1 AND id IN (${ids.map(()=>'?').join(',')})`).bind(...ids).all():{results:[]};
+  const validIds=new Set((valid.results||[]).map(x=>x.id));
+  if(validIds.size!==ids.length)throw new Error('invalid_product_attribute');
+  const stmts=[env.DB.prepare('DELETE FROM product_attribute_assignments WHERE product_id=?').bind(productId)];
+  ids.forEach((id,i)=>stmts.push(env.DB.prepare('INSERT INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) VALUES(?,?,1,?)').bind(productId,id,i+1)));
+  if(stmts.length)await env.DB.batch(stmts);
+}
+
 async function cartPricing(env,me,couponCode=''){
   const c=await env.DB.prepare('SELECT id FROM carts WHERE user_id=?').bind(me.id).first();
   if(!c)return {items:[],subtotal_irt:0,automatic_discount_irt:0,coupon_discount_irt:0,discount_irt:0,shipping_irt:0,total_irt:0,coupon:null,discounts:[]};
-  const rows=(await env.DB.prepare('SELECT ci.product_id,ci.quantity,p.sku,p.name,p.price_irt,p.category_id,c.slug category_slug,c.name category_name,pi.path image,i.quantity stock FROM cart_items ci JOIN products p ON p.id=ci.product_id LEFT JOIN categories c ON c.id=p.category_id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 LEFT JOIN inventory i ON i.product_id=p.id WHERE ci.cart_id=? AND p.active=1 ORDER BY p.created_at DESC').bind(c.id).all()).results||[];
+  const rows=(await env.DB.prepare('SELECT ci.product_id,ci.quantity,ci.options_json,p.sku,p.name,p.price_irt,p.category_id,c.slug category_slug,c.name category_name,pi.path image,i.quantity stock FROM cart_items ci JOIN products p ON p.id=ci.product_id LEFT JOIN categories c ON c.id=p.category_id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 LEFT JOIN inventory i ON i.product_id=p.product_id WHERE ci.cart_id=? AND p.active=1 ORDER BY p.created_at DESC').bind(c.id).all()).results||[];
   if(!rows.length)return {items:[],subtotal_irt:0,automatic_discount_irt:0,coupon_discount_irt:0,discount_irt:0,shipping_irt:0,total_irt:0,coupon:null,discounts:[]};
-  const subtotal=rows.reduce((s,x)=>s+Number(x.price_irt||0)*Number(x.quantity||0),0);
+  for(const row of rows){
+    const resolved=await resolveProductOptions(env,row.product_id,row.options_json);
+    row.selected_options=resolved.options;
+    row.option_adjustment_irt=resolved.adjustment_irt;
+    row.unit_price_irt=Number(row.price_irt||0)+resolved.adjustment_irt;
+  }
+  const subtotal=rows.reduce((s,x)=>s+Number(x.unit_price_irt||0)*Number(x.quantity||0),0);
   const discounts=(await env.DB.prepare("SELECT * FROM discounts WHERE active=1 AND (starts_at IS NULL OR starts_at<=CURRENT_TIMESTAMP) AND (ends_at IS NULL OR ends_at>=CURRENT_TIMESTAMP) AND (max_uses IS NULL OR usage_count<max_uses) ORDER BY created_at DESC").all()).results||[];
   const dp=(await env.DB.prepare('SELECT discount_id,product_id FROM discount_products').all()).results||[],dc=(await env.DB.prepare('SELECT discount_id,category_id FROM discount_categories').all()).results||[];
   const productTargets=new Map(),categoryTargets=new Map();
   for(const x of dp){if(!productTargets.has(x.discount_id))productTargets.set(x.discount_id,new Set());productTargets.get(x.discount_id).add(x.product_id)}
   for(const x of dc){if(!categoryTargets.has(x.discount_id))categoryTargets.set(x.discount_id,new Set());categoryTargets.get(x.discount_id).add(x.category_id)}
-  const chosen=new Map();
-  const usedGlobalFixed=new Set();
+  const chosen=new Map(),usedGlobalFixed=new Set();
   for(const row of rows){
-    const base=Number(row.price_irt||0)*Number(row.quantity||0);let best=null;
+    const base=Number(row.unit_price_irt||0)*Number(row.quantity||0);let best=null;
     for(const d of discounts){
       if(subtotal<Number(d.min_order_irt||0))continue;
       const pt=productTargets.get(d.id),ct=categoryTargets.get(d.id),targeted=pt?.has(row.product_id)||ct?.has(row.category_id),global=!pt?.size&&!ct?.size;
@@ -186,7 +255,7 @@ async function cartPricing(env,me,couponCode=''){
     if(await env.DB.prepare('SELECT 1 FROM coupon_usages WHERE coupon_id=? AND user_id=?').bind(cpn.id,me.id).first())throw new Error('coupon_already_used');
     const cp=(await env.DB.prepare('SELECT product_id FROM coupon_products WHERE coupon_id=?').bind(cpn.id).all()).results||[],cc=(await env.DB.prepare('SELECT category_id FROM coupon_categories WHERE coupon_id=?').bind(cpn.id).all()).results||[];
     const cps=new Set(cp.map(x=>x.product_id)),ccs=new Set(cc.map(x=>x.category_id));
-    const eligible=rows.filter(x=>(!cps.size&&!ccs.size)||cps.has(x.product_id)||ccs.has(x.category_id)),eligibleBase=eligible.reduce((s,x)=>s+Number(x.price_irt||0)*Number(x.quantity||0),0);
+    const eligible=rows.filter(x=>(!cps.size&&!ccs.size)||cps.has(x.product_id)||ccs.has(x.category_id)),eligibleBase=eligible.reduce((s,x)=>s+Number(x.unit_price_irt||0)*Number(x.quantity||0),0);
     if(!eligibleBase)throw new Error('coupon_not_applicable');
     const couponBase=Math.max(0,eligibleBase-automaticDiscount);
     couponDiscount=cpn.kind==='PERCENT'?Math.floor(couponBase*Math.min(100,Number(cpn.value||0))/100):Math.min(couponBase,Math.max(0,Number(cpn.value||0)));
@@ -209,8 +278,8 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  if(u.pathname==='/api/admin/visitors'&&req.method==='GET')return visitorAdminList(req,env);
  if(u.pathname==='/api/health')return json({ok:true,service:'gilasartworker',db:!!env.DB,paymentEnv:env.PAYMENT_ENV||'sandbox',smsConfigured:!!env.KAVENEGAR_API_KEY,smsSenderConfigured:!!String(env.KAVENEGAR_SENDER||'')});
  if(u.pathname==='/api/categories'&&req.method==='GET'){const r=await env.DB.prepare('SELECT id,slug,name,description FROM categories WHERE active=1 ORDER BY name').all();return json({items:r.results||[]})}
- if(u.pathname==='/api/products'&&req.method==='GET'){const q=(u.searchParams.get('q')||'').trim(),cat=u.searchParams.get('category'),limit=Math.min(60,Math.max(1,Number(u.searchParams.get('limit')||12))),offset=Math.max(0,Math.min(10000,Number(u.searchParams.get('offset')||0)));let sql='SELECT p.id,p.slug,p.sku,p.name,p.description,p.price_irt,p.category_id,p.flash_sale_active,p.flash_sale_ends_at,p.flash_sale_price_irt,pi.path image FROM products p LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.active=1';const args=[];if(q){sql+=' AND (p.name LIKE ? OR p.description LIKE ? OR p.sku LIKE ?)';args.push(`%${q}%`,`%${q}%`,`%${q}%`)}if(cat){sql+=' AND p.category_id=?';args.push(cat)}sql+=' ORDER BY p.created_at DESC,p.id DESC LIMIT ? OFFSET ?';args.push(limit,offset);const r=await env.DB.prepare(sql).bind(...args).all();return json({items:r.results||[],limit,offset})}
- if(u.pathname.startsWith('/api/products/')&&req.method==='GET'){const slug=decodeURIComponent(u.pathname.split('/').pop());const p=await env.DB.prepare('SELECT p.*,c.name category_name,pi.path image FROM products p LEFT JOIN categories c ON c.id=p.category_id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.slug=? AND p.active=1').bind(slug).first();if(!p)return json({error:'not_found'},404);const reviews=await env.DB.prepare('SELECT r.rating,r.body,r.created_at,u.name FROM reviews r JOIN users u ON u.id=r.user_id WHERE r.product_id=? AND r.approved=1 ORDER BY r.created_at DESC').bind(p.id).all();return json({product:p,reviews:reviews.results||[]})}
+ if(u.pathname==='/api/products'&&req.method==='GET'){const q=(u.searchParams.get('q')||'').trim(),cat=u.searchParams.get('category'),limit=Math.min(60,Math.max(1,Number(u.searchParams.get('limit')||12))),offset=Math.max(0,Math.min(10000,Number(u.searchParams.get('offset')||0)));let sql='SELECT p.id,p.slug,p.sku,p.name,p.description,p.price_irt,p.category_id,p.flash_sale_active,p.flash_sale_ends_at,p.flash_sale_price_irt,p.video_url,pi.path image FROM products p LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.active=1';const args=[];if(q){sql+=' AND (p.name LIKE ? OR p.description LIKE ? OR p.sku LIKE ?)';args.push(`%${q}%`,`%${q}%`,`%${q}%`)}if(cat){sql+=' AND p.category_id=?';args.push(cat)}sql+=' ORDER BY p.created_at DESC,p.id DESC LIMIT ? OFFSET ?';args.push(limit,offset);const r=await env.DB.prepare(sql).bind(...args).all();return json({items:r.results||[],limit,offset})}
+ if(u.pathname.startsWith('/api/products/')&&req.method==='GET'){const slug=decodeURIComponent(u.pathname.split('/').pop());const p=await env.DB.prepare('SELECT p.*,c.name category_name,pi.path image FROM products p LEFT JOIN categories c ON c.id=p.category_id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.slug=? AND p.active=1').bind(slug).first();if(!p)return json({error:'not_found'},404);const images=(await env.DB.prepare('SELECT path,alt_text,sort_order,is_primary FROM product_images WHERE product_id=? ORDER BY sort_order,is_primary DESC').bind(p.id).all()).results||[];const attributes=await loadProductAttributes(env,p.id);const reviews=await env.DB.prepare('SELECT r.rating,r.body,r.created_at,u.name FROM reviews r JOIN users u ON u.id=r.user_id WHERE r.product_id=? AND r.approved=1 ORDER BY r.created_at DESC').bind(p.id).all();return json({product:p,images,attributes,reviews:reviews.results||[]})}
  if(u.pathname==='/api/flash-sales'&&req.method==='GET'){const r=await env.DB.prepare("SELECT p.id,p.slug,p.sku,p.name,p.description,p.price_irt,p.flash_sale_price_irt,p.flash_sale_ends_at,pi.path image FROM products p LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.active=1 AND p.flash_sale_active=1 AND p.flash_sale_ends_at IS NOT NULL AND julianday(p.flash_sale_ends_at)>julianday('now') ORDER BY p.flash_sale_ends_at ASC,p.created_at DESC LIMIT 20").all();return json({items:r.results||[]})}
  if(u.pathname==='/api/auth/request-otp'&&req.method==='POST'){if(!env.OTP_PEPPER)return json({error:'otp_not_configured'},503);const b=await body(req),mobile=String(b.mobile||'').replace(/\D/g,''),ip=req.headers.get('CF-Connecting-IP')||'unknown';if(!/^09\d{9}$/.test(mobile))return json({error:'invalid_mobile'},400);const okM=await rate(env,mobile,3,10),okI=await rate(env,ip,12,10);if(!okM||!okI)return json({error:'rate_limited'},429);const raw=new Uint32Array(1);crypto.getRandomValues(raw);const code=String(100000+(raw[0]%900000));const challenge=uid();await env.DB.prepare('INSERT INTO otp_challenges(id,mobile,code_hash,expires_at,request_ip) VALUES(?,?,?,?,?)').bind(challenge,mobile,await sha(`${env.OTP_PEPPER}:${code}`),new Date(Date.now()+120000).toISOString(),ip).run();if(env.KAVENEGAR_API_KEY){const template=String(await siteSetting(env,'kavenegar_message_template','گیلاس آرت\\nکد ورود : {code}')).slice(0,500);const message=template.replaceAll('{code}',code).replaceAll('{0}',code);const sender=String(await siteSetting(env,'kavenegar_sender',env.KAVENEGAR_SENDER||'')).slice(0,50);if(!sender)return json({error:'sms_sender_not_configured'},503);const p=new URLSearchParams({receptor:mobile,message,sender});let sr;try{sr=await fetch(`https://api.kavenegar.com/v1/${env.KAVENEGAR_API_KEY}/sms/send.json`,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:p})}catch(e){console.error('kavenegar_network_error',e?.message||e);return json({error:'sms_unavailable'},502)}let sj=null;try{sj=await sr.json()}catch{}const rs=Number(sj?.return?.status);if(!sr.ok||!Number.isFinite(rs)||rs!==200){console.error('kavenegar_rejected',JSON.stringify({httpStatus:sr.status,returnStatus:Number.isFinite(rs)?rs:null,returnMessage:sj?.return?.message||null,senderConfigured:!!sender}));return json({error:'sms_provider_rejected'},502)}}else return json({error:'otp_provider_not_configured'},503);return json({ok:true,challengeId:challenge,expiresIn:120})}
  if(u.pathname==='/api/auth/verify-otp'&&req.method==='POST'){const b=await body(req),c=await env.DB.prepare("SELECT * FROM otp_challenges WHERE id=? AND consumed_at IS NULL AND unixepoch(expires_at)>unixepoch('now')").bind(String(b.challengeId||'')).first();if(!c||c.attempts>=5)return json({error:'invalid_or_locked'},400);const ok=await sha(`${env.OTP_PEPPER}:${String(b.code||'')}`)===c.code_hash;await env.DB.prepare('UPDATE otp_challenges SET attempts=attempts+1 WHERE id=?').bind(c.id).run();if(!ok)return json({error:'invalid_or_locked'},400);let u0=await env.DB.prepare('SELECT id,mobile,name FROM users WHERE mobile=?').bind(c.mobile).first();if(!u0){u0={id:uid(),mobile:c.mobile};await env.DB.prepare('INSERT INTO users(id,mobile) VALUES(?,?)').bind(u0.id,u0.mobile).run()}const sid=uid(),csrf=uid().replaceAll('-','');await env.DB.prepare("INSERT INTO sessions(id,user_id,expires_at) VALUES(?,?,datetime('now','+30 days'))").bind(sid,u0.id).run();await env.DB.prepare("UPDATE otp_challenges SET consumed_at=datetime('now') WHERE id=?").bind(c.id).run();return json({ok:true,user:u0,roles:await roles(u0,env),permissions:await permissions(u0,env),csrfToken:csrf},200,{'set-cookie':[`__Host-gs_session=${sid}; Path=/; HttpOnly; Secure; SameSite=None; Partitioned; Max-Age=2592000`,`gs_csrf=${csrf}; Path=/; Secure; SameSite=None; Partitioned; Max-Age=2592000`]})}
@@ -372,7 +441,7 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const slug=u.pathname.split('/')[3],p=await env.DB.prepare('SELECT id FROM products WHERE slug=? AND active=1').bind(slug).first();if(!p)return json({error:'not_found'},404);const b=await body(req),rating=Number(b.rating),txt=String(b.body||'').trim();if(!Number.isInteger(rating)||rating<1||rating>5||txt.length<3||txt.length>1000)return json({error:'invalid_review'},400);await env.DB.prepare('INSERT INTO reviews(id,user_id,product_id,rating,body,approved) VALUES(?,?,?,?,?,0)').bind(uid(),me.id,p.id,rating,txt).run();return json({ok:true})}
  if(u.pathname==='/api/cart'&&req.method==='GET'){if(!me)return json({items:[],subtotal_irt:0,discount_irt:0,shipping_irt:0,total_irt:0});try{return json(await cartPricing(env,me,''))}catch(e){return json({error:'cart_pricing_failed'},500)}}
  if(u.pathname==='/api/cart/price'&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const b=await body(req),code=String(b.code||'').trim().toUpperCase();if(!code)return json({error:'coupon_required'},400);try{return json(await cartPricing(env,me,code))}catch(e){const c=promotionErrorCode(e);if(c)return json({error:c},400);return json({error:'cart_pricing_failed'},500)}}
- if(u.pathname==='/api/cart'&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const b=await body(req),pid=String(b.productId||''),qty=Math.max(1,Math.min(99,Number(b.quantity)||1));const p=await env.DB.prepare('SELECT id FROM products WHERE id=? AND active=1').bind(pid).first();if(!p)return json({error:'product_not_found'},404);let c=await env.DB.prepare('SELECT id FROM carts WHERE user_id=?').bind(me.id).first();if(!c){c={id:uid()};await env.DB.prepare('INSERT INTO carts(id,user_id) VALUES(?,?)').bind(c.id,me.id).run()}await env.DB.prepare('INSERT INTO cart_items(cart_id,product_id,quantity) VALUES(?,?,?) ON CONFLICT(cart_id,product_id) DO UPDATE SET quantity=excluded.quantity').bind(c.id,pid,qty).run();return json({ok:true})}
+ if(u.pathname==='/api/cart'&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const b=await body(req),pid=String(b.productId||''),qty=Math.max(1,Math.min(99,Number(b.quantity)||1));const p=await env.DB.prepare('SELECT id FROM products WHERE id=? AND active=1').bind(pid).first();if(!p)return json({error:'product_not_found'},404);let resolved;try{resolved=await resolveProductOptions(env,pid,b.options||[])}catch(e){return json({error:e.message||'invalid_product_options'},400)}let c=await env.DB.prepare('SELECT id FROM carts WHERE user_id=?').bind(me.id).first();if(!c){c={id:uid()};await env.DB.prepare('INSERT INTO carts(id,user_id) VALUES(?,?)').bind(c.id,me.id).run()}await env.DB.prepare('INSERT INTO cart_items(cart_id,product_id,quantity,options_json) VALUES(?,?,?,?) ON CONFLICT(cart_id,product_id) DO UPDATE SET quantity=excluded.quantity,options_json=excluded.options_json').bind(c.id,pid,qty,JSON.stringify(resolved.options)).run();return json({ok:true,unitPriceIrt:Number((await env.DB.prepare('SELECT price_irt FROM products WHERE id=?').bind(pid).first())?.price_irt||0)+resolved.adjustment_irt,options:resolved.options})}
  if(u.pathname==='/api/cart'&&req.method==='DELETE'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const pid=u.searchParams.get('productId');const c=await env.DB.prepare('SELECT id FROM carts WHERE user_id=?').bind(me.id).first();if(c&&pid)await env.DB.prepare('DELETE FROM cart_items WHERE cart_id=? AND product_id=?').bind(c.id,pid).run();return json({ok:true})}
  if(u.pathname==='/api/orders'&&req.method==='POST'){
   if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);
@@ -393,7 +462,7 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
   for(const d of discounts){orderSql+=" AND (SELECT COUNT(*) FROM discount_usages WHERE order_id=? AND discount_id=?)=1";orderArgs.push(oid,d.id)}
   if(pricing.coupon){orderSql+=" AND (SELECT COUNT(*) FROM coupon_usages WHERE order_id=? AND coupon_id=?)=1";orderArgs.push(oid,pricing.coupon.id)}
   stmts.push(env.DB.prepare(orderSql).bind(...orderArgs));
-  for(const x of rows)stmts.push(env.DB.prepare('INSERT INTO order_items(id,order_id,product_id,sku,name,unit_price_irt,quantity,line_total_irt) VALUES(?,?,?,?,?,?,?,?)').bind(uid(),oid,x.product_id,x.sku,x.name,x.price_irt,x.quantity,x.price_irt*x.quantity));
+  for(const x of rows)stmts.push(env.DB.prepare('INSERT INTO order_items(id,order_id,product_id,sku,name,unit_price_irt,quantity,line_total_irt,options_json) VALUES(?,?,?,?,?,?,?,?,?)').bind(uid(),oid,x.product_id,x.sku,x.name,x.unit_price_irt,x.quantity,x.unit_price_irt*x.quantity,JSON.stringify(x.selected_options||[])));
   stmts.push(env.DB.prepare('INSERT INTO payments(id,order_id,status,amount_irt) VALUES(?,?,\'CREATED\',?)').bind(pay,oid,pricing.total_irt));
   for(const x of rows)stmts.push(env.DB.prepare('UPDATE inventory SET quantity=quantity-?,updated_at=CURRENT_TIMESTAMP WHERE product_id=? AND quantity>=?').bind(x.quantity,x.product_id,x.quantity));
   for(const d of discounts)stmts.push(env.DB.prepare('UPDATE discounts SET usage_count=usage_count+1,updated_at=CURRENT_TIMESTAMP WHERE id=? AND EXISTS(SELECT 1 FROM discount_usages WHERE discount_id=? AND order_id=?)').bind(d.id,d.id,oid));
@@ -430,8 +499,45 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
   return json({items:r.results||[]});
  }
 
- if(u.pathname==='/api/admin/products'&&req.method==='GET'){if(!(await requirePermission(me,env,'products.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT p.*,i.quantity stock,pi.path image FROM products p LEFT JOIN inventory i ON i.product_id=p.id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 ORDER BY p.created_at DESC').all();return json({items:r.results||[]})}
- if(u.pathname==='/api/admin/products'&&req.method==='POST'){if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const b=await body(req);if(b.imagePath&&!allowedImagePath(b.imagePath))return json({error:'invalid_image_path'},400);let flash;try{flash=flashSaleValues(b)}catch(e){return json({error:e.message},400)}const id=uid();await env.DB.batch([env.DB.prepare('INSERT INTO products(id,category_id,slug,sku,name,description,price_irt,active,seo_title,seo_description,flash_sale_active,flash_sale_ends_at,flash_sale_price_irt) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(id,b.categoryId||null,b.slug,b.sku,b.name,b.description||'',Number(b.priceIrt)||0,b.active===false?0:1,b.seoTitle||b.name,b.seoDescription||'',flash.active,flash.end,flash.price),env.DB.prepare('INSERT INTO inventory(product_id,quantity) VALUES(?,?)').bind(id,Math.max(0,Number(b.stock)||0)),...(b.imagePath?[env.DB.prepare('INSERT INTO product_images(id,product_id,path,alt_text,is_primary) VALUES(?,?,?,?,1)').bind(uid(),id,String(b.imagePath),String(b.imageAlt||b.name))]:[])]);await audit(env,me,'admin.product.create','product',id,{
+
+ if(u.pathname==='/api/admin/product-attributes'&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'products.read')))return json({error:'forbidden'},403);
+  const attrs=(await env.DB.prepare('SELECT * FROM product_attributes ORDER BY sort_order,name').all()).results||[];
+  const opts=(await env.DB.prepare('SELECT * FROM product_attribute_options ORDER BY attribute_id,sort_order,name').all()).results||[];
+  return json({items:attrs.map(a=>({...a,active:Number(a.active)===1,options:opts.filter(o=>o.attribute_id===a.id).map(o=>({...o,active:Number(o.active)===1,is_default:Number(o.is_default)===1,price_delta_irt:Number(o.price_delta_irt||0)}))}))});
+ }
+ if(u.pathname==='/api/admin/product-attributes'&&req.method==='POST'){
+  if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+  const b=await body(req),name=String(b.name||'').trim().slice(0,120);if(!name)return json({error:'invalid_attribute'},400);
+  const id=uid();try{await env.DB.prepare('INSERT INTO product_attributes(id,name,active,sort_order) VALUES(?,?,?,?)').bind(id,name,b.active===false?0:1,Number(b.sortOrder)||0).run()}catch(e){return json({error:'attribute_exists'},409)}return json({ok:true,id});
+ }
+ if(u.pathname.startsWith('/api/admin/product-attributes/')&&req.method==='PUT'){
+  if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+  const id=u.pathname.split('/')[4],b=await body(req);const before=await env.DB.prepare('SELECT * FROM product_attributes WHERE id=?').bind(id).first();if(!before)return json({error:'not_found'},404);
+  await env.DB.prepare('UPDATE product_attributes SET name=?,active=?,sort_order=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(String(b.name||before.name).trim().slice(0,120),b.active===false?0:1,Number(b.sortOrder??before.sort_order)||0,id).run();return json({ok:true});
+ }
+ if(u.pathname.startsWith('/api/admin/product-attributes/')&&u.pathname.endsWith('/options')&&req.method==='POST'){
+  if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+  const id=u.pathname.split('/')[4],a=await env.DB.prepare('SELECT id FROM product_attributes WHERE id=?').bind(id).first();if(!a)return json({error:'not_found'},404);
+  const b=await body(req),name=String(b.name||'').trim().slice(0,120),delta=Math.max(0,Math.trunc(Number(b.priceDeltaIrt)||0));if(!name)return json({error:'invalid_option'},400);
+  const oid=uid(),isDefault=b.isDefault===true||b.isDefault===1||b.isDefault==='1';
+  try{if(isDefault)await env.DB.prepare('UPDATE product_attribute_options SET is_default=0,updated_at=CURRENT_TIMESTAMP WHERE attribute_id=?').bind(id).run();await env.DB.prepare('INSERT INTO product_attribute_options(id,attribute_id,name,active,is_default,price_delta_irt,sort_order) VALUES(?,?,?,?,?,?,?)').bind(oid,id,name,b.active===false?0:1,isDefault?1:0,delta,Number(b.sortOrder)||0).run()}catch(e){return json({error:'option_exists'},409)}return json({ok:true,id:oid});
+ }
+ if(u.pathname.startsWith('/api/admin/product-attribute-options/')&&req.method==='PUT'){
+  if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+  const id=u.pathname.split('/')[4],before=await env.DB.prepare('SELECT * FROM product_attribute_options WHERE id=?').bind(id).first();if(!before)return json({error:'not_found'},404);
+  const b=await body(req),isDefault=b.isDefault===true||b.isDefault===1||b.isDefault==='1';
+  if(isDefault)await env.DB.prepare('UPDATE product_attribute_options SET is_default=0,updated_at=CURRENT_TIMESTAMP WHERE attribute_id=?').bind(before.attribute_id).run();
+  await env.DB.prepare('UPDATE product_attribute_options SET name=?,active=?,is_default=?,price_delta_irt=?,sort_order=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(String(b.name||before.name).trim().slice(0,120),b.active===false?0:1,isDefault?1:0,Math.max(0,Math.trunc(Number(b.priceDeltaIrt??before.price_delta_irt)||0)),Number(b.sortOrder??before.sort_order)||0,id).run();return json({ok:true});
+ }
+ if(u.pathname.startsWith('/api/admin/product-attribute-options/')&&req.method==='DELETE'){
+  if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+  const id=u.pathname.split('/')[4];await env.DB.prepare('DELETE FROM product_attribute_options WHERE id=?').bind(id).run();return json({ok:true});
+ }
+
+ if(u.pathname==='/api/admin/products'&&req.method==='GET'){if(!(await requirePermission(me,env,'products.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT p.*,i.quantity stock,pi.path image FROM products p LEFT JOIN inventory i ON i.product_id=p.id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 ORDER BY p.created_at DESC').all();const items=r.results||[];const a=await env.DB.prepare('SELECT product_id,attribute_id FROM product_attribute_assignments ORDER BY sort_order').all();const by=new Map();for(const x of (a.results||[])){if(!by.has(x.product_id))by.set(x.product_id,[]);by.get(x.product_id).push(x.attribute_id)}for(const x of items)x.attribute_ids=by.get(x.id)||[];return json({items})}
+ if(u.pathname==='/api/admin/products'&&req.method==='POST'){if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const b=await body(req);if(b.imagePath&&!allowedImagePath(b.imagePath))return json({error:'invalid_image_path'},400);const videoUrl=validVideoUrl(b.videoUrl);if(b.videoUrl&&!videoUrl)return json({error:'invalid_video_url'},400);let flash;try{flash=flashSaleValues(b)}catch(e){return json({error:e.message},400)}const id=uid();await env.DB.batch([env.DB.prepare('INSERT INTO products(id,category_id,slug,sku,name,description,price_irt,active,seo_title,seo_description,video_url,flash_sale_active,flash_sale_ends_at,flash_sale_price_irt) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(id,b.categoryId||null,b.slug,b.sku,b.name,b.description||'',Number(b.priceIrt)||0,b.active===false?0:1,b.seoTitle||b.name,b.seoDescription||'',videoUrl,flash.active,flash.end,flash.price),env.DB.prepare('INSERT INTO inventory(product_id,quantity) VALUES(?,?)').bind(id,Math.max(0,Number(b.stock)||0)),...(b.imagePath?[env.DB.prepare('INSERT INTO product_images(id,product_id,path,alt_text,is_primary) VALUES(?,?,?,?,1)').bind(uid(),id,String(b.imagePath),String(b.imageAlt||b.name))]:[])]);await saveProductAttributeAssignments(env,id,b.attributeIds||[]);
+  await audit(env,me,'admin.product.create','product',id,{
  before:null,
  after:{
   sku:b.sku,
@@ -459,6 +565,7 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
 
   const b=await body(req);
   if(b.imagePath&&!allowedImagePath(b.imagePath))return json({error:'invalid_image_path'},400);
+  const videoUrl=b.videoUrl===undefined?before.video_url:validVideoUrl(b.videoUrl);if(b.videoUrl!==undefined&&b.videoUrl!==''&&!videoUrl)return json({error:'invalid_video_url'},400);
   let flash;try{flash=flashSaleValues(b,before)}catch(e){return json({error:e.message},400)}
 
   await env.DB.prepare(`
@@ -470,6 +577,7 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
     active=?,
     seo_title=?,
     seo_description=?,
+    video_url=?,
     flash_sale_active=?,
     flash_sale_ends_at=?,
     flash_sale_price_irt=?,
@@ -482,11 +590,13 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
    b.active===false?0:1,
    b.seoTitle||before.seo_title,
    b.seoDescription||before.seo_description,
+   videoUrl,
    flash.active,flash.end,flash.price,
    id
   ).run();
   if(b.categoryId!==undefined)await env.DB.prepare('UPDATE products SET category_id=? WHERE id=?').bind(b.categoryId||null,id).run();
   if(b.imagePath){await env.DB.prepare('DELETE FROM product_images WHERE product_id=?').bind(id).run();await env.DB.prepare('INSERT INTO product_images(id,product_id,path,alt_text,is_primary) VALUES(?,?,?,?,1)').bind(uid(),id,String(b.imagePath),String(b.imageAlt||before.name),).run();}
+  if(b.attributeIds!==undefined)await saveProductAttributeAssignments(env,id,b.attributeIds);
 
   const after=await env.DB.prepare(
    'SELECT * FROM products WHERE id=?'
