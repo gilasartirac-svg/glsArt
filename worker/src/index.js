@@ -286,7 +286,13 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  if(u.pathname==='/api/me'&&req.method==='GET'){if(adminBootstrapConfigured(env)){try{await ensureAdminBootstrap(env)}catch(e){console.error('admin bootstrap failed',e?.message||e)}}const u0=await user(req,env);const csrfToken=cookies(req)['gs_csrf']||null;return json({user:u0,roles:await roles(u0,env),permissions:await permissions(u0,env),csrfToken})}
  if(u.pathname==='/api/auth/logout'&&req.method==='POST'){if(!requireCsrf(req))return json({error:'forbidden'},403);const sid=cookies(req)['__Host-gs_session'];if(sid)await env.DB.prepare("UPDATE sessions SET revoked_at=datetime('now') WHERE id=?").bind(sid).run();return json({ok:true},200,{'set-cookie':['__Host-gs_session=; Path=/; HttpOnly; Secure; SameSite=None; Partitioned; Max-Age=0','gs_csrf=; Path=/; Secure; SameSite=None; Partitioned; Max-Age=0']})}
  const me=await requireUser(req,env);
- if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
+ if(u.pathname==='/api/site-rules'&&req.method==='GET'){
+ const r=await env.DB.prepare("SELECT key,value,updated_at FROM site_settings WHERE key IN ('site_rules_title','site_rules_body') ORDER BY key").all();
+ const map=Object.fromEntries((r.results||[]).map(x=>[x.key,x.value]));
+ return json({item:{title:map.site_rules_title||'قوانین سایت',body:map.site_rules_body||'ثبت سفارش و پرداخت به معنی پذیرش قوانین و شرایط فروش گیلاس آرت است.',updated_at:map.site_rules_body?map.site_rules_body_updated_at:null}});
+}
+
+if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
   const parts=u.pathname.split('/').filter(Boolean);const section=String(parts[2]||'').toLowerCase(),slug=decodeURIComponent(parts.slice(3).join('/'));if(!['news','articles'].includes(section)||!slug)return json({error:'invalid_content'},400);const x=await env.DB.prepare('SELECT id,section,title,slug,summary,body,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE section=? AND slug=? AND active=1').bind(section,slug).first();if(!x)return json({error:'not_found'},404);return json({item:x});
  }
  if(u.pathname.startsWith('/api/content')&&req.method==='GET'){
@@ -729,6 +735,24 @@ if(u.pathname.startsWith('/api/admin/cms/')&&req.method==='DELETE'){
  if(!(await requirePermission(me,env,'content.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
  const id=u.pathname.split('/').pop(),before=await env.DB.prepare('SELECT * FROM cms_entries WHERE id=?').bind(id).first();if(!before)return json({error:'not_found'},404);
  await env.DB.prepare('DELETE FROM cms_entries WHERE id=?').bind(id).run();await audit(env,me,'admin.cms.delete','cms',id,{before,after:null},req);return json({ok:true});
+}
+
+if(u.pathname==='/api/admin/site-rules'&&req.method==='GET'){
+ if(!(await requirePermission(me,env,'settings.read')))return json({error:'forbidden'},403);
+ const r=await env.DB.prepare("SELECT key,value,updated_at FROM site_settings WHERE key IN ('site_rules_title','site_rules_body') ORDER BY key").all();
+ const map=Object.fromEntries((r.results||[]).map(x=>[x.key,x.value]));
+ return json({item:{title:map.site_rules_title||'قوانین سایت',body:map.site_rules_body||'ثبت سفارش و پرداخت به معنی پذیرش قوانین و شرایط فروش گیلاس آرت است.',updated_at:map.site_rules_body_updated_at||null}});
+}
+if(u.pathname==='/api/admin/site-rules'&&req.method==='PUT'){
+ if(!(await requirePermission(me,env,'settings.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+ const b=await body(req),title=String(b.title||'').trim().slice(0,180),rules=String(b.body||'').trim().slice(0,30000);
+ if(!title||!rules)return json({error:'invalid_site_rules'},400);
+ await env.DB.batch([
+  env.DB.prepare("INSERT INTO site_settings(key,value,updated_at) VALUES(?,?,CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP").bind('site_rules_title',title),
+  env.DB.prepare("INSERT INTO site_settings(key,value,updated_at) VALUES(?,?,CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP").bind('site_rules_body',rules)
+ ]);
+ await audit(env,me,'admin.site_rules.update','site_rules','site_rules',{after:{title,body_length:rules.length}},req);
+ return json({ok:true});
 }
 
 if(u.pathname==='/api/admin/settings'&&req.method==='GET'){if(!(await requirePermission(me,env,'settings.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare("SELECT key,value,updated_at FROM site_settings ORDER BY key").all();return json({items:r.results||[]})}
