@@ -366,3 +366,5 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
  .admin-brand-copy strong{font-size:16px}
  .admin-nav-group a{min-height:52px!important}
 }
+
+.admin-status-badge{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:5px 10px;border:1px solid color-mix(in srgb,var(--ui-success) 20%,var(--ui-line));border-radius:999px;background:color-mix(in srgb,var(--ui-success) 7%,var(--ui-surface));color:var(--ui-success);font-size:11px;font-weight:700}.admin-status-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 0 4px color-mix(in srgb,currentColor 10%,transparent)}@media(max-width:700px){.admin-status-badge{display:none}}
