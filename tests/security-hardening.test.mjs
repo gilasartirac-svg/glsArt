@@ -78,3 +78,24 @@ test('storefront uses dynamic three-item infinite scrolling',()=>{
   assert.match(frontend,/هنرکده گیلاس آرت/);
   assert.match(frontend,/تولید کننده ی برتر تابلو های معرق مس در ایران/);
 });
+
+
+test('Turnstile is enforced server-side with action, hostname and timeout checks',()=>{
+  assert.match(worker,/TURNSTILE_SECRET_KEY/);
+  assert.match(worker,/TURNSTILE_HOSTNAMES/);
+  assert.match(worker,/action==='gilasart_form'/);
+  assert.match(worker,/AbortSignal\.timeout\(10000\)/);
+  assert.match(worker,/String\(token\)\.length>2048/);
+  assert.match(worker,/d\.success===true/);
+});
+
+test('protected frontend forms are gated until Turnstile succeeds',async()=>{
+  const captcha=await readFile(new URL('../frontend/src/captcha.js',import.meta.url),'utf8');
+  assert.match(captcha,/TURNSTILE/);
+  assert.match(captcha,/action:PROTECTED_ACTION/);
+  assert.match(captcha,/standaloneButton/);
+  assert.match(captcha,/\/api\/auth\/request-otp/);
+  assert.match(captcha,/\/api\/support\/tickets/);
+  assert.match(captcha,/\/reviews/);
+  assert.match(captcha,/turnstile\.reset/);
+});
