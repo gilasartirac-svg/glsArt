@@ -115,6 +115,11 @@ function otpSmsMessage(env,code,template){
 async function ensureAdminBootstrap(env){
   const bootstrapMobile=String(env.ADMIN_BOOTSTRAP_MOBILE||'').replace(/\D/g,'');
   if(!/^09\d{9}$/.test(bootstrapMobile)) return false;
+  // Avoid replaying the full bootstrap batch on every /api/me request.
+  try{
+    const marker=await env.DB.prepare("SELECT value FROM site_settings WHERE key='admin_bootstrap_v1' LIMIT 1").first();
+    if(marker?.value==='ready') return true;
+  }catch{}
   try{
     await env.DB.prepare('SELECT is_sample FROM orders LIMIT 1').first();
   }catch{
