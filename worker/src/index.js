@@ -100,7 +100,7 @@ function requireCsrf(req){return req.headers.get('X-CSRF-Token')&&req.headers.ge
 async function verifyMathCaptcha(env,token,answer){
  const secret=String(env.OTP_PEPPER||'').trim();
  const raw=String(token||'');
- const a=String(answer||'').trim();
+ const a=String(answer||'').trim().replace(/[۰-۹]/g,d=>String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[٠-٩]/g,d=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
  if(!secret||!raw||raw.length>4096||!/^[0-9]{1,2}$/.test(a))return false;
  const parts=raw.split('.');
  if(parts.length!==2)return false;
