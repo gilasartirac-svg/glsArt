@@ -7,12 +7,16 @@ workers_dev = true
 binding = "DB"
 database_name = "gilasartdatabase"
 database_id = "3e6741e8-e50c-4c8d-b50a-33d9db2dfd4c"
-    migrations_dir = "database/migrations"
+migrations_dir = "database/migrations"
 
 [vars]
 APP_ORIGIN = "https://gilasartirac-svg.github.io"
 FRONTEND_URL = "https://gilasartirac-svg.github.io/glsArt"
 PAYMENT_ENV = "production"
+TURNSTILE_SITE_KEY = "0x4AAAAAAFG7j4wxLr72J4SS"
+
+[secrets]
+required = ["TURNSTILE_SECRET_KEY"]
 
 [triggers]
 crons = ["*/15 * * * *"]
