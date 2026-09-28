@@ -19,15 +19,7 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
-      - name: Create temporary admin session in D1
-        id: session
-        shell: bash
-        run: |
-          set -euo pipefail
-          SID=$(openssl rand -hex 32)
-          echo "sid=$SID" >> "$GITHUB_OUTPUT"
-          npx wrangler d1 execute gilasartdatabase --remote --command="INSERT INTO sessions(id,user_id,expires_at) VALUES('$SID','usr_admin_gilasart',datetime('now','+10 minutes'));"
-      - name: Verify admin products API against real D1
+      - name: Create temporary admin session in D1\n        id: session\n        shell: bash\n        run: |\n          set -euo pipefail\n          npx wrangler d1 execute gilasartdatabase --remote --json --command="SELECT u.id FROM users u JOIN admin_users au ON au.user_id=u.id AND au.active=1 ORDER BY u.id LIMIT 1;" > /tmp/admin.json\n          ADMIN_ID=$(node -e "const x=require('/tmp/admin.json'); const r=x[0]?.results?.[0]?.results?.[0]; if(!r?.id) throw new Error('No active admin user exists in D1'); process.stdout.write(r.id)")\n          SID=$(openssl rand -hex 32)\n          echo "sid=$SID" >> "$GITHUB_OUTPUT"\n          npx wrangler d1 execute gilasartdatabase --remote --command="INSERT INTO sessions(id,user_id,expires_at) VALUES('$SID','$ADMIN_ID',datetime('now','+10 minutes'));"\n      - name: Verify admin products API against real D1
         run: |
           set -euo pipefail
           body=$(curl -fsS --retry 5 --retry-delay 5 -H "Cookie: __Host-gs_session=${{ steps.session.outputs.sid }}" "$WORKER_URL/api/admin/products")
