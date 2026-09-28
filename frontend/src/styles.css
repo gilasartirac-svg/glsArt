@@ -419,3 +419,6 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
     transform:translate3d(0,0,0)!important;
   }
 }
+
+/* Cloudflare Turnstile — low-friction security */
+.gilasart-captcha{min-height:65px;display:flex;align-items:center;justify-content:flex-start;margin:10px 0;overflow:hidden}.gilasart-captcha iframe{max-width:100%}.gilasart-captcha .error{display:block;font-size:13px}.form button:disabled{opacity:.5;cursor:not-allowed}@media(max-width:520px){.gilasart-captcha{min-height:70px}}
