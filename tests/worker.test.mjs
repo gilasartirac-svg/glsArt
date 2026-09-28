@@ -30,7 +30,7 @@ test('CMS content schema, permissions and samples are present',()=>{
 });
 test('OTP request hides UI before network request and login returns roles',()=>{
  const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
- assert.match(app,/send\.hidden=true;send\.disabled=true;mobileEl\.hidden=true/);
+ assert.match(app,/const hideMobile=\(\)=>\{mobileLabel\.hidden=true;mobileLabel\.setAttribute\('aria-hidden','true'\);mobileEl\.disabled=true;send\.hidden=true;send\.disabled=true\}/);
  assert.match(worker,/ok:true,user:u0,roles:await roles\(u0,env\),permissions:await permissions\(u0,env\),csrfToken:csrf/);
  assert.ok(worker.includes('if(adminBootstrapConfigured(env)){try{await ensureAdminBootstrap(env)}'));
 });
@@ -45,4 +45,21 @@ test('Kavenegar OTP delivery checks provider response and supports both code pla
  assert.ok(app.includes("sms_provider_rejected"));
  assert.ok(app.includes("sj?.return?.status"));
  assert.ok(app.includes("sms_sender_not_configured"));
+});
+
+
+const featureSchema=readFileSync(new URL('../database/migrations/0014_flash_sales_support.sql',import.meta.url),'utf8');
+test('flash sale and CRM schema are present',()=>{
+ assert.match(featureSchema,/flash_sale_active/);assert.match(featureSchema,/flash_sale_ends_at/);assert.match(featureSchema,/support_tickets/);assert.match(featureSchema,/ticket_messages/);assert.match(featureSchema,/faq_entries/);assert.match(featureSchema,/support\.read/);assert.match(featureSchema,/support\.write/);
+});
+test('flash sales API and secure product fields exist',()=>{
+ assert.match(worker,/\/api\/flash-sales/);assert.match(worker,/julianday\(p\.flash_sale_ends_at\)>julianday\('now'\)/);assert.match(worker,/flashSaleValues/);assert.match(worker,/invalid_flash_sale_end/);
+});
+test('WebOTP SMS is origin-bound and session cookies support cross-site GitHub Pages authentication',()=>{
+ assert.match(worker,/otpSmsMessage/);assert.match(worker,/@\$\{host\} #\$\{code\}/);assert.match(worker,/Partitioned/);assert.match(worker,/otp-credentials=\(self\)/);
+});
+test('support CRM and infinite CMS pagination are exposed',()=>{
+ assert.match(worker,/\/api\/support\/tickets/);assert.match(worker,/\/api\/admin\/tickets/);assert.match(worker,/\/api\/faq/);assert.match(worker,/searchParams\.get\('limit'\)/);assert.match(worker,/searchParams\.get\('offset'\)/);
+ const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+ assert.ok(app.includes('سبد خرید'));assert.ok(app.includes('پیشنهاد شگفت‌انگیز'));assert.ok(app.includes('flash-timer'));assert.ok(app.includes('02:00'));assert.ok(app.includes('autocomplete="one-time-code"'));assert.ok(app.includes('پرتال CRM پشتیبانی'));assert.ok(app.includes('IntersectionObserver'));
 });
