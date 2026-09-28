@@ -53,11 +53,6 @@ VALUES
 ('opt_size_50x100','attr_size','50×100',1,0,300000,2),
 ('opt_size_50x130','attr_size','50×130',1,0,500000,3);
 
-INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order)
-VALUES
-('test_grid_01','attr_frame_color',1,1),
-('test_grid_01','attr_size',1,2);
-
 INSERT OR IGNORE INTO products(
   id,category_id,slug,sku,name,description,price_irt,active,seo_title,seo_description
 )
@@ -68,3 +63,8 @@ VALUES
 
 INSERT OR IGNORE INTO inventory(product_id,quantity)
 VALUES('test_grid_01',7),('test_grid_02',11),('test_grid_03',5);
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order)
+VALUES
+('test_grid_01','attr_frame_color',1,1),
+('test_grid_01','attr_size',1,2);
+
