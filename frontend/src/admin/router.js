@@ -42,7 +42,7 @@ export default function adminRouter(){
   sms:SmsSettings,
   payment:PaymentSettings,
   visitors:Visitors,
-  about:About,contact:Contact,news:News,articles:Articles,support:SupportTickets,site-rules:SiteRules
+  about:About,contact:Contact,news:News,articles:Articles,support:SupportTickets,'site-rules':SiteRules
  };
 
  
