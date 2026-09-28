@@ -80,6 +80,8 @@ async function request(path,options,attempt=0){
 }
 
 export async function api(path,options={}){
+ const method=(options.method||'GET').toUpperCase();
+ if(path.startsWith('/api/admin/')&&method==='GET')await requireAdminSession();
  return request(path,options,0);
 }
 
