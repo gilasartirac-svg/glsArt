@@ -3,6 +3,7 @@ name: Product API E2E Verification
 on:
   push:
     branches: [feature/product-options-video-grid-fix]
+  pull_request:
 
 jobs:
   e2e:
