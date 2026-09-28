@@ -20,3 +20,21 @@ test('integration secrets stay in Worker env and are not returned as values',()=
 
 const visitorSchema=readFileSync(new URL('../database/migrations/0012_visitor_sessions.sql',import.meta.url),'utf8');
 test('visitor analytics stores IP, country, identity and online heartbeat fields',()=>{for(const x of ['visitor_sessions','session_key','user_id','ip_address','country_code','first_seen_at','last_seen_at'])assert.match(visitorSchema,new RegExp(x));assert.match(worker,/CF-Connecting-IP/);assert.match(worker,/CF-IPCountry/);assert.match(worker,/visitorAdminList/);assert.match(worker,/datetime\(vs\.last_seen_at\)>=datetime\('now','-5 minutes'\)/);assert.match(worker,/visitors\.read/);});
+
+const cmsSchema=readFileSync(new URL('../database/migrations/0013_cms_content.sql',import.meta.url),'utf8');
+test('CMS content schema, permissions and samples are present',()=>{
+ assert.match(cmsSchema,/CREATE TABLE IF NOT EXISTS cms_entries/);
+ for(const x of ['about','contact','news','articles','content.read','content.write'])assert.ok(cmsSchema.includes(x));
+ assert.ok(cmsSchema.includes('cms_news_01'));assert.ok(cmsSchema.includes('cms_article_01'));assert.ok(cmsSchema.includes('cms_contact_01'));
+ assert.ok(worker.includes("u.pathname.startsWith('/api/content')"));assert.ok(worker.includes("searchParams.get('section')"));assert.match(worker,/\/api\/admin\/cms/);
+});
+test('OTP request hides UI before network request and login returns roles',()=>{
+ const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+ assert.match(app,/send\.hidden=true;send\.disabled=true;mobileEl\.hidden=true/);
+ assert.match(worker,/ok:true,user:u0,roles:await roles\(u0,env\),permissions:await permissions\(u0,env\),csrfToken:csrf/);
+ assert.ok(worker.includes('if(adminBootstrapConfigured(env)){try{await ensureAdminBootstrap(env)}'));
+});
+test('main navigation and footer expose requested customer content areas',()=>{
+ const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+ for(const x of ['#/contact','#/news','#/articles','#/terms','#/support','نماد اعتماد','تیکت پشتیبانی'])assert.ok(app.includes(x),x);
+});
