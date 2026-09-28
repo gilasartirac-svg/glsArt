@@ -4,7 +4,7 @@ import adminRouter from './router.js';
 
 export default function AdminApp(){
 
-setTimeout(()=>{
+requestAnimationFrame(()=>{
  const b=document.getElementById('admin-mobile-menu'),d=document.getElementById('admin-mobile-drawer'),o=document.getElementById('admin-mobile-backdrop');
  if(b&&d&&o&&!b.dataset.bound){
   b.dataset.bound='1';
