@@ -431,3 +431,16 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 .gilasart-captcha .error{display:block;font-size:13px}
 .form button:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:520px){.gilasart-captcha{min-height:100px}.gilasart-captcha .math-captcha{padding:9px}.gilasart-captcha .math-answer{width:58px}}
+
+/* Security CAPTCHA — always visible in auth/support/review forms */
+.gilasart-captcha{display:block;width:100%;min-height:96px;margin:10px 0 4px}
+.gilasart-captcha .math-captcha{display:flex;align-items:center;flex-wrap:wrap;gap:9px;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025);color:var(--text)}
+.gilasart-captcha label{display:flex;align-items:center;gap:9px;flex-wrap:wrap;width:auto;margin:0;color:var(--muted);font-size:13px}
+.gilasart-captcha .math-question{direction:ltr;unicode-bidi:isolate;color:var(--gold-2,var(--gold));font-size:16px;font-weight:800;white-space:nowrap}
+.gilasart-captcha .math-answer{width:70px!important;height:40px!important;padding:6px 8px!important;text-align:center!important;border:1px solid var(--line)!important;border-radius:9px!important;background:#0f0f12!important;color:var(--text)!important}
+.gilasart-captcha .math-refresh{min-height:40px;padding:6px 11px}
+.gilasart-captcha .captcha-hint{width:100%;font-size:11px;color:var(--muted);opacity:.85}
+.gilasart-captcha .captcha-loading{justify-content:center;min-height:64px;color:var(--muted)}
+.gilasart-captcha .captcha-error{justify-content:space-between;min-height:64px}
+.form button:disabled{opacity:.5;cursor:not-allowed;filter:saturate(.65)}
+@media(max-width:520px){.gilasart-captcha{min-height:104px}.gilasart-captcha .math-captcha{padding:10px}.gilasart-captcha .math-answer{width:62px!important}}
