@@ -14,6 +14,10 @@ import Discounts from './pages/Discounts.js';
 import SmsSettings from './pages/SmsSettings.js';
 import PaymentSettings from './pages/PaymentSettings.js';
 import Visitors from './pages/Visitors.js';
+import About from './pages/About.js';
+import Contact from './pages/Contact.js';
+import News from './pages/News.js';
+import Articles from './pages/Articles.js';
 
 export default function adminRouter(){
 
@@ -35,7 +39,8 @@ export default function adminRouter(){
   discounts:Discounts,
   sms:SmsSettings,
   payment:PaymentSettings,
-  visitors:Visitors
+  visitors:Visitors,
+  about:About,contact:Contact,news:News,articles:Articles
  };
 
  
