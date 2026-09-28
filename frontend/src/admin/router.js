@@ -19,6 +19,7 @@ import Contact from './pages/Contact.js?v=20260928.2';
 import News from './pages/News.js?v=20260928.2';
 import Articles from './pages/Articles.js?v=20260928.2';
 import SupportTickets from './pages/SupportTickets.js?v=20260928.2';
+import SiteRules from './pages/SiteRules.js?v=20260928.1';
 
 export default function adminRouter(){
 
@@ -41,7 +42,7 @@ export default function adminRouter(){
   sms:SmsSettings,
   payment:PaymentSettings,
   visitors:Visitors,
-  about:About,contact:Contact,news:News,articles:Articles,support:SupportTickets
+  about:About,contact:Contact,news:News,articles:Articles,support:SupportTickets,site-rules:SiteRules
  };
 
  
@@ -49,7 +50,7 @@ const view=(pages[page]||Dashboard)();
 
 setTimeout(async()=>{
 
- const mod = await import(`./pages/${page.charAt(0).toUpperCase()+page.slice(1)}.js?v=20260928.2`)
+ const mod = await import(`./pages/${page==='site-rules'?'SiteRules':page.charAt(0).toUpperCase()+page.slice(1)}.js?v=${page==='site-rules'?'20260928.1':'20260928.2'}`)
    .catch(()=>null);
 
  if(mod && mod.mount){
