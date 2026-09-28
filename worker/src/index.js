@@ -467,6 +467,9 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
     active=?,
     seo_title=?,
     seo_description=?,
+    flash_sale_active=?,
+    flash_sale_ends_at=?,
+    flash_sale_price_irt=?,
     updated_at=CURRENT_TIMESTAMP
    WHERE id=?
   `).bind(
