@@ -60,6 +60,7 @@ export default function Products(){
   const attributeForm=document.querySelector('#attribute-form');
   attributeForm?.addEventListener('submit',async e=>{e.preventDefault();const x=new FormData(attributeForm);try{await api('/api/admin/product-attributes',{method:'POST',body:JSON.stringify({name:x.get('name'),active:true})});attributeForm.reset();await load()}catch(err){alert(err.message)}});
   const form=document.querySelector('#product-form');
+  document.querySelector('#product-reset')?.addEventListener('click',resetForm);
   form?.addEventListener('submit',async e=>{
    e.preventDefault();const f=new FormData(form);const id=form.dataset.editId;
    const payload={name:f.get('name'),sku:f.get('sku'),slug:f.get('slug'),categoryId:f.get('categoryId')||null,priceIrt:Number(f.get('priceIrt')),stock:Number(f.get('stock')),description:f.get('description'),seoTitle:f.get('seoTitle'),seoDescription:f.get('seoDescription'),imagePath:f.get('imagePath'),imageAlt:f.get('imageAlt'),videoUrl:String(f.get('videoUrl')||'').trim()||null,attributeIds:selectedAttributeIds(),flashSaleActive:f.get('flashSaleActive')==='on',flashSaleEndsAt:isoDateTime(f.get('flashSaleEndsAt')),flashSalePriceIrt:f.get('flashSalePriceIrt')?Number(f.get('flashSalePriceIrt')):null};
