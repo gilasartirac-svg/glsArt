@@ -96,7 +96,9 @@ async function audit(env,actor,action,type,id,meta,req){
  req.headers.get('CF-Connecting-IP')||''
  ).run()
 }
-function requireCsrf(req){return req.headers.get('X-CSRF-Token')&&req.headers.get('X-CSRF-Token')===cookies(req)['gs_csrf']}\nasync function verifyTurnstile(req,env,token){const secret=String(env.TURNSTILE_SECRET_KEY||'').trim();if(!secret||!token)return false;try{const ip=req.headers.get('CF-Connecting-IP')||'';const r=await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({secret,response:String(token),remoteip:ip})});const d=await r.json().catch(()=>({}));return d.success===true}catch{return false}}\n
+function requireCsrf(req){return req.headers.get('X-CSRF-Token')&&req.headers.get('X-CSRF-Token')===cookies(req)['gs_csrf']}
+async function verifyTurnstile(req,env,token){const secret=String(env.TURNSTILE_SECRET_KEY||'').trim();const allowed=new Set(String(env.TURNSTILE_HOSTNAMES||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean));if(!secret||!token||String(token).length>2048)return false;try{const ip=req.headers.get('CF-Connecting-IP')||'';const r=await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},signal:AbortSignal.timeout(10000),body:new URLSearchParams({secret,response:String(token),remoteip:ip})});if(!r.ok)return false;const d=await r.json().catch(()=>({}));const hostname=String(d.hostname||'').trim().toLowerCase();return d.success===true&&d.action==='gilasart_form'&&allowed.has(hostname)}catch{return false}}
+
 async function requireUser(req,env){const u=await user(req,env);return u}
 function flashSaleValues(b,before={}){
  const active=b.flashSaleActive===true||b.flashSaleActive===1||b.flashSaleActive==='1';
