@@ -420,5 +420,14 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
   }
 }
 
-/* Cloudflare Turnstile — low-friction security */
-.gilasart-captcha{min-height:65px;display:flex;align-items:center;justify-content:flex-start;margin:10px 0;overflow:hidden}.gilasart-captcha iframe{max-width:100%}.gilasart-captcha .error{display:block;font-size:13px}.form button:disabled{opacity:.5;cursor:not-allowed}@media(max-width:520px){.gilasart-captcha{min-height:70px}}
+/* Simple math CAPTCHA */
+.gilasart-captcha{min-height:92px;margin:12px 0;display:block}
+.gilasart-captcha .math-captcha{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border:1px solid #d8d1c5;border-radius:12px;background:rgba(255,255,255,.04)}
+.gilasart-captcha .math-captcha label{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;line-height:1.8}
+.gilasart-captcha .math-question{font-size:16px;direction:ltr;unicode-bidi:isolate}
+.gilasart-captcha .math-answer{width:64px;height:40px;border:1px solid #bfb7aa;border-radius:8px;padding:0 8px;text-align:center;font-size:16px;background:transparent;color:inherit}
+.gilasart-captcha .math-refresh{min-height:40px;padding:0 10px}
+.gilasart-captcha .captcha-hint{width:100%;font-size:11px;opacity:.7}
+.gilasart-captcha .error{display:block;font-size:13px}
+.form button:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:520px){.gilasart-captcha{min-height:100px}.gilasart-captcha .math-captcha{padding:9px}.gilasart-captcha .math-answer{width:58px}}
