@@ -217,7 +217,7 @@ async function saveProductAttributeAssignments(env,productId,attributeIds){
 async function cartPricing(env,me,couponCode=''){
   const c=await env.DB.prepare('SELECT id FROM carts WHERE user_id=?').bind(me.id).first();
   if(!c)return {items:[],subtotal_irt:0,automatic_discount_irt:0,coupon_discount_irt:0,discount_irt:0,shipping_irt:0,total_irt:0,coupon:null,discounts:[]};
-  const rows=(await env.DB.prepare('SELECT ci.product_id,ci.quantity,ci.options_json,p.sku,p.name,p.price_irt,p.category_id,c.slug category_slug,c.name category_name,pi.path image,i.quantity stock FROM cart_items ci JOIN products p ON p.id=ci.product_id LEFT JOIN categories c ON c.id=p.category_id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 LEFT JOIN inventory i ON i.product_id=p.product_id WHERE ci.cart_id=? AND p.active=1 ORDER BY p.created_at DESC').bind(c.id).all()).results||[];
+  const rows=(await env.DB.prepare('SELECT ci.product_id,ci.quantity,ci.options_json,p.sku,p.name,p.price_irt,p.category_id,c.slug category_slug,c.name category_name,pi.path image,i.quantity stock FROM cart_items ci JOIN products p ON p.id=ci.product_id LEFT JOIN categories c ON c.id=p.category_id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 LEFT JOIN inventory i ON i.product_id=p.id WHERE ci.cart_id=? AND p.active=1 ORDER BY p.created_at DESC').bind(c.id).all()).results||[];
   if(!rows.length)return {items:[],subtotal_irt:0,automatic_discount_irt:0,coupon_discount_irt:0,discount_irt:0,shipping_irt:0,total_irt:0,coupon:null,discounts:[]};
   for(const row of rows){
     const resolved=await resolveProductOptions(env,row.product_id,row.options_json);
