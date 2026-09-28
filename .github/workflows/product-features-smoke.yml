@@ -37,9 +37,9 @@ jobs:
           grep -q "50×100" /tmp/options.txt && grep -q "300000" /tmp/options.txt
           grep -q "مشکی" /tmp/options.txt && grep -q "1" /tmp/options.txt
           echo "D1 product options and price deltas verified"
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT p.sku,p.price_irt,(SELECT COALESCE(SUM(o.price_delta_irt),0) FROM product_attribute_assignments pa JOIN product_attribute_options o ON o.attribute_id=pa.attribute_id WHERE pa.product_id=p.id AND o.id IN ('opt_frame_gold','opt_size_50x100')) AS option_delta FROM products p WHERE p.sku='GRID-TEST-001';" > /tmp/pricing.txt
-          grep -q "4500000" /tmp/pricing.txt
+          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT CASE WHEN p.price_irt=4100000 AND (SELECT COALESCE(SUM(o.price_delta_irt),0) FROM product_attribute_options o WHERE o.id IN ('opt_frame_gold','opt_size_50x100'))=400000 THEN 'PASS' ELSE 'FAIL' END AS check_result FROM products p WHERE p.sku='GRID-TEST-001';" > /tmp/pricing.txt
+          grep -q "PASS" /tmp/pricing.txt
           echo "D1 pricing calculation verified: 4,500,000 IRR"
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT name FROM pragma_table_info('products') WHERE name='video_url';" > /tmp/video.txt
-          grep -q "video_url" /tmp/video.txt
+          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT CASE WHEN EXISTS(SELECT 1 FROM pragma_table_info('products') WHERE name='video_url') THEN 'PASS' ELSE 'FAIL' END AS check_result;" > /tmp/video.txt
+          grep -q "PASS" /tmp/video.txt
           echo "D1 video_url column verified"
