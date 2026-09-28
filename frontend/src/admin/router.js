@@ -18,6 +18,7 @@ import About from './pages/About.js';
 import Contact from './pages/Contact.js';
 import News from './pages/News.js';
 import Articles from './pages/Articles.js';
+import SupportTickets from './pages/SupportTickets.js';
 
 export default function adminRouter(){
 
@@ -40,7 +41,7 @@ export default function adminRouter(){
   sms:SmsSettings,
   payment:PaymentSettings,
   visitors:Visitors,
-  about:About,contact:Contact,news:News,articles:Articles
+  about:About,contact:Contact,news:News,articles:Articles,support:SupportTickets
  };
 
  
