@@ -55,16 +55,16 @@ VALUES
 
 INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order)
 VALUES
-('sample_mehr','attr_frame_color',1,1),
-('sample_mehr','attr_size',1,2);
+('test_grid_01','attr_frame_color',1,1),
+('test_grid_01','attr_size',1,2);
 
 INSERT OR IGNORE INTO products(
   id,category_id,slug,sku,name,description,price_irt,active,seo_title,seo_description
 )
 VALUES
-('test_grid_01','cat_abstract','test-grid-01','GRID-TEST-001','محصول تست کاتالوگ ۱','داده تست کنترل پنل؛ برای بررسی اتصال Grid به D1.',4100000,0,'محصول تست کاتالوگ ۱','داده تست داخلی کنترل پنل'),
-('test_grid_02','cat_modern','test-grid-02','GRID-TEST-002','محصول تست کاتالوگ ۲','داده تست کنترل پنل؛ برای بررسی Search و Sort.',5200000,0,'محصول تست کاتالوگ ۲','داده تست داخلی کنترل پنل'),
-('test_grid_03','cat_minimal','test-grid-03','GRID-TEST-003','محصول تست کاتالوگ ۳','داده تست کنترل پنل؛ برای بررسی Pagination و Mapping.',6300000,0,'محصول تست کاتالوگ ۳','داده تست داخلی کنترل پنل');
+('test_grid_01',NULL,'test-grid-01','GRID-TEST-001','محصول تست کاتالوگ ۱','داده تست کنترل پنل؛ برای بررسی اتصال Grid به D1.',4100000,0,'محصول تست کاتالوگ ۱','داده تست داخلی کنترل پنل'),
+('test_grid_02',NULL,'test-grid-02','GRID-TEST-002','محصول تست کاتالوگ ۲','داده تست کنترل پنل؛ برای بررسی Search و Sort.',5200000,0,'محصول تست کاتالوگ ۲','داده تست داخلی کنترل پنل'),
+('test_grid_03',NULL,'test-grid-03','GRID-TEST-003','محصول تست کاتالوگ ۳','داده تست کنترل پنل؛ برای بررسی Pagination و Mapping.',6300000,0,'محصول تست کاتالوگ ۳','داده تست داخلی کنترل پنل');
 
 INSERT OR IGNORE INTO inventory(product_id,quantity)
 VALUES('test_grid_01',7),('test_grid_02',11),('test_grid_03',5);
