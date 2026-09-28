@@ -1,5 +1,5 @@
 import Dashboard from './pages/Dashboard.js';
-import Products from './pages/Products.js';
+import Products from './pages/Products.js?v=20260928-products-grid';
 import Orders from './pages/Orders.js';
 import Customers from './pages/Customers.js';
 import Inventory from './pages/Inventory.js';
