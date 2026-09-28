@@ -3,6 +3,7 @@ name: Product Features Smoke Test
 on:
   push:
     branches: [feature/product-options-video-grid-fix]
+  pull_request:
 
 jobs:
   smoke:
