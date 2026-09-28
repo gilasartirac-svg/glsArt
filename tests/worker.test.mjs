@@ -30,7 +30,7 @@ test('CMS content schema, permissions and samples are present',()=>{
 });
 test('OTP request hides UI before network request and login returns roles',()=>{
  const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
- assert.match(app,/send\.hidden=true;send\.disabled=true;mobileEl\.hidden=true/);
+ assert.match(app,/const hideMobile=\(\)=>\{mobileLabel\.hidden=true;mobileLabel\.setAttribute\('aria-hidden','true'\);mobileEl\.disabled=true;send\.hidden=true;send\.disabled=true\}/);
  assert.match(worker,/ok:true,user:u0,roles:await roles\(u0,env\),permissions:await permissions\(u0,env\),csrfToken:csrf/);
  assert.ok(worker.includes('if(adminBootstrapConfigured(env)){try{await ensureAdminBootstrap(env)}'));
 });
