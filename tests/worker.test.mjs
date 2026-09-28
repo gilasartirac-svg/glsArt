@@ -53,7 +53,7 @@ test('flash sale and CRM schema are present',()=>{
  assert.match(featureSchema,/flash_sale_active/);assert.match(featureSchema,/flash_sale_ends_at/);assert.match(featureSchema,/support_tickets/);assert.match(featureSchema,/ticket_messages/);assert.match(featureSchema,/faq_entries/);assert.match(featureSchema,/support\.read/);assert.match(featureSchema,/support\.write/);
 });
 test('flash sales API and secure product fields exist',()=>{
- assert.match(worker,/\/api\/flash-sales/);assert.match(worker,/julianday\(p\.flash_sale_ends_at\)>julianday\('now'\)/);assert.match(worker,/flashSaleValues/);
+ assert.match(worker,/\/api\/flash-sales/);assert.match(worker,/julianday\(p\.flash_sale_ends_at\)>julianday\('now'\)/);assert.match(worker,/flashSaleValues/);assert.match(worker,/invalid_flash_sale_end/);
 });
 test('WebOTP SMS is origin-bound and session cookies support cross-site GitHub Pages authentication',()=>{
  assert.match(worker,/otpSmsMessage/);assert.match(worker,/@\$\{host\} #\$\{code\}/);assert.match(worker,/Partitioned/);assert.match(worker,/otp-credentials=\(self\)/);
