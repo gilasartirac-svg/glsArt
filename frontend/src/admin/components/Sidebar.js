@@ -11,8 +11,5 @@ export default function Sidebar(){
     <div class="admin-brand">گیلاس آرت <small>GILAS ART / ADMIN</small></div>
     <div class="admin-nav-group">${items.map(([id,label])=>`<a href="#/admin/${id}" class="${current===id?'active':''}" ${current===id?'aria-current="page"':''}>${label}</a>`).join('')}</div>
     <a class="admin-back" href="#/">بازگشت به فروشگاه</a>
-  </nav>
-  <script>
-  (()=>{const b=document.getElementById('admin-mobile-menu'),d=document.getElementById('admin-mobile-drawer'),o=document.getElementById('admin-mobile-backdrop');if(!b||!d||!o)return;const close=()=>{d.classList.remove('open');o.classList.remove('open');b.setAttribute('aria-expanded','false');document.body.classList.remove('admin-menu-open')};b.addEventListener('click',()=>{const open=!d.classList.contains('open');d.classList.toggle('open',open);o.classList.toggle('open',open);b.setAttribute('aria-expanded',String(open));document.body.classList.toggle('admin-menu-open',open)});o.addEventListener('click',close);d.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));window.addEventListener('hashchange',close)})();
-  </script>`;
+  </nav>`;
 }
