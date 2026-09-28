@@ -38,3 +38,11 @@ test('main navigation and footer expose requested customer content areas',()=>{
  const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
  for(const x of ['#/contact','#/news','#/articles','#/terms','#/support','نماد اعتماد','تیکت پشتیبانی'])assert.ok(app.includes(x),x);
 });
+
+test('Kavenegar OTP delivery checks provider response and supports both code placeholders',()=>{
+ const app=readFileSync(new URL('../worker/src/index.js',import.meta.url),'utf8');
+ assert.ok(app.includes("replaceAll('{code}',code).replaceAll('{0}',code)"));
+ assert.ok(app.includes("sms_provider_rejected"));
+ assert.ok(app.includes("sj?.return?.status"));
+ assert.ok(app.includes("sms_sender_not_configured"));
+});
