@@ -94,10 +94,10 @@ async function requireAdminSession(){
 export const admin={
  me:()=>api('/api/admin/me'),
  stats:()=>api('/api/admin/stats'),
- products:()=>requireAdminSession().then(()=>api('/api/admin/products')),
- orders:()=>requireAdminSession().then(()=>api('/api/admin/orders')),
- customers:()=>requireAdminSession().then(()=>api('/api/admin/reports/customers')),
- reports:()=>requireAdminSession().then(()=>api('/api/admin/reports/sales')),
- audit:()=>requireAdminSession().then(()=>api('/api/admin/audit')),
- roles:()=>requireAdminSession().then(()=>api('/api/admin/roles'))
+ products:()=>api('/api/admin/products'),
+ orders:()=>api('/api/admin/orders'),
+ customers:()=>api('/api/admin/reports/customers'),
+ reports:()=>api('/api/admin/reports/sales'),
+ audit:()=>api('/api/admin/audit'),
+ roles:()=>api('/api/admin/roles')
 };
