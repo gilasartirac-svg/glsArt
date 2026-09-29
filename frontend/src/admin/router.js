@@ -1,6 +1,6 @@
 import Dashboard from './pages/Dashboard.js?v=20260928.2';
 import Products from './pages/Products.js?v=20260929-products-grid';
-import Orders from './pages/Orders.js?v=20260929-orders';
+import Orders from './pages/Orders.js?v=20260929-orders-2';
 import Customers from './pages/Customers.js?v=20260928.2';
 import Inventory from './pages/Inventory.js?v=20260928.2';
 import Payments from './pages/Payments.js?v=20260928.2';
@@ -49,17 +49,6 @@ export default function adminRouter(){
 
  
 const view=(pages[page]||Dashboard)();
-
-setTimeout(async()=>{
-
- const mod = await import(`./pages/${page==='site-rules'?'SiteRules':page.charAt(0).toUpperCase()+page.slice(1)}.js?v=${page==='site-rules'?'20260929.1':'20260929.3'}`)
-   .catch(()=>null);
-
- if(mod && mod.mount){
-   await mod.mount();
- }
-
-},0);
 
 return view;
 
