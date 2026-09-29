@@ -200,7 +200,7 @@ async function account(){
   resend.onclick=async()=>{try{const mobile=mobileEl.value;hideMobile();resend.disabled=true;status.textContent='در حال ارسال کد جدید...';const nd=await api('/api/auth/request-otp',{method:'POST',body:JSON.stringify({mobile})});renderOtp(nd)}catch(e){resend.disabled=false;showMobile();status.textContent=e.message||'ارسال کد ناموفق بود.'}};
   if('OTPCredential' in window&&navigator.credentials?.get){try{const ac=new AbortController();setTimeout(()=>ac.abort(),130000);const credential=await navigator.credentials.get({otp:{transport:['sms']},signal:ac.signal});if(credential?.code)await finish(credential.code)}catch{}}
  };
- send.onclick=async()=>{hideMobile();step.innerHTML='<div class="otp-loading" role="status">در حال ارسال کد به پیامک…</div>';try{const mobile=mobileEl.value;const d=await api('/api/auth/request-otp',{method:'POST',body:JSON.stringify({mobile}));showMobile();renderOtp(d)}catch(e){showMobile();step.textContent=e.message||'ارسال کد ناموفق بود.'}};
+ send.onclick=async()=>{hideMobile();step.innerHTML='<div class="otp-loading" role="status">در حال ارسال کد به پیامک…</div>';try{const mobile=mobileEl.value;const d=await api('/api/auth/request-otp',{method:'POST',body:JSON.stringify({mobile})});showMobile();renderOtp(d)}catch(e){showMobile();step.textContent=e.message||'ارسال کد ناموفق بود.'}};
 }
 async function checkout(){
  await loadMe();if(!state.user){location.hash='/account';return}
