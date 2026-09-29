@@ -20,6 +20,7 @@ export default function Orders(){
  let rows=[];
  let selectedId='';
  const markup=`
+ <div class="admin-page orders-admin" dir="rtl">
   <div class="admin-title orders-title">
    <div><h2>سفارشات</h2><span class="muted">مدیریت، پیگیری و تغییر وضعیت سفارش مشتریان</span></div>
    <button id="orders-refresh" class="btn ghost" type="button">به‌روزرسانی</button>
@@ -38,7 +39,8 @@ export default function Orders(){
    <aside id="order-detail" class="panel order-detail" aria-live="polite">
     <div class="order-detail-empty"><span>‹</span><strong>جزئیات سفارش</strong><p>برای نمایش اطلاعات، یک سفارش را از جدول انتخاب کنید.</p></div>
    </aside>
-  </div>`;
+  </div>
+ </div>`;
  setTimeout(()=>mount(),0);
  async function mount(){
   const liveRoot=document.querySelector('#admin-page .orders-admin');
