@@ -12,7 +12,7 @@ test('all admin page modules compile without syntax errors',()=>{
   for(const file of files){
     let src=readFileSync(resolve(dir,file),'utf8');
     src=src.replace(/^import[^;]+;\s*/gm,'');
-    src=src.replace(/^export default /m,'');
+    src=src.replace(/^export\s+(?:default\s+)?/gm,'');
     assert.doesNotThrow(()=>new Function(src),file);
   }
 });
