@@ -23,7 +23,9 @@ function friendlyError(data,status,path){
  if(status===401||code==='unauthorized')return 'نشست مدیریت معتبر نیست یا منقضی شده است.';
  if(status===403||code==='forbidden')return 'دسترسی این کاربر به این بخش تأیید نشد.';
  if(status===404||code==='not_found')return 'مسیر یا اطلاعات در سرور پیدا نشد.';
- if(status===409&&code==='category_slug_exists')return 'این Slug قبلاً برای یک دسته‌بندی ثبت شده است؛ یک Slug یکتا وارد کنید.';\n if(status===409)return 'این عملیات با وضعیت فعلی داده‌ها سازگار نیست.';\n if(code==='invalid_category_slug')return 'Slug نامعتبر است؛ فقط حروف انگلیسی کوچک، عدد، خط تیره و زیرخط مجاز است.';
+ if(status===409&&code==='category_slug_exists')return 'این Slug قبلاً برای یک دسته‌بندی ثبت شده است؛ یک Slug یکتا وارد کنید.';
+ if(status===409)return 'این عملیات با وضعیت فعلی داده‌ها سازگار نیست.';
+ if(code==='invalid_category_slug')return 'Slug نامعتبر است؛ فقط حروف انگلیسی کوچک، عدد، خط تیره و زیرخط مجاز است.';
  if(status>=500||code==='internal_error')return 'سرور هنگام خواندن اطلاعات با خطا روبه‌رو شد.';
  return data?.message||data?.error||`HTTP ${status} · ${path}`;
 }
