@@ -14,8 +14,8 @@ function openInvoice(order,invoiceSettings={}){
  const customerPhone=o.address_mobile||o.mobile||'-';
  const customerAddress=[o.province,o.city,o.address].filter(Boolean).join('، ')||'ثبت نشده';
  const base=location.pathname.includes('/glsArt/')?'/glsArt':'';
- const logoPath=(window.GILASART_INVOICE_LOGO||location.origin+base+'/invoice/logo.svg');
- const signaturePath=(window.GILASART_INVOICE_SIGNATURE||location.origin+base+'/invoice/stamp-signature.png');
+ const logoPath=(window.GILASART_INVOICE_LOGO||invoiceSettings.logoPath||location.origin+base+'/invoice/logo.svg');
+ const signaturePath=(window.GILASART_INVOICE_SIGNATURE||invoiceSettings.signaturePath||location.origin+base+'/invoice/stamp-signature.png');
  const rows=items.map((x,i)=>'<tr><td>'+money(i+1)+'</td><td><strong>'+esc(x.name)+'</strong><small>'+esc(x.sku||'')+'</small></td><td>'+money(x.quantity)+'</td><td>'+money(x.unit_price_irt)+' ریال</td><td>'+money(x.line_total_irt)+' ریال</td></tr>').join('');
  const html='<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>'+esc(invoiceTitle(status))+' | '+esc(String(o.id||'').slice(-10))+'</title><style>'+
  '@import url("https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css");'+
