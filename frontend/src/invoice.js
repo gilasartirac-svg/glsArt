@@ -14,8 +14,17 @@ function openInvoice(order,invoiceSettings={}){
  const customerPhone=o.address_mobile||o.mobile||'-';
  const customerAddress=[o.province,o.city,o.address].filter(Boolean).join('، ')||'ثبت نشده';
  const base=location.pathname.includes('/glsArt/')?'/glsArt':'';
- const logoPath=(window.GILASART_INVOICE_LOGO||invoiceSettings.logoPath||invoiceSettings.invoice_logo_path||location.origin+base+'/invoice/logo.svg');
- const signaturePath=(window.GILASART_INVOICE_SIGNATURE||invoiceSettings.signaturePath||invoiceSettings.invoice_signature_path||location.origin+base+'/invoice/stamp-signature.png');
+ const resolveAssetPath=(value,fallback)=>{
+  const raw=String(value||fallback||'').trim();
+  if(!raw)return '';
+  try{
+   if(/^https?:\\/\\//i.test(raw))return raw;
+   if(raw.startsWith('/'))return new URL(raw,location.origin).href;
+   return new URL(raw,location.origin+(base?base+'/':'/')).href;
+  }catch{return new URL(fallback,location.origin+(base?base+'/':'/')).href}
+ };
+ const logoPath=resolveAssetPath(window.GILASART_INVOICE_LOGO||invoiceSettings.logoPath||invoiceSettings.invoice_logo_path,base+'/invoice/logo.svg');
+ const signaturePath=resolveAssetPath(window.GILASART_INVOICE_SIGNATURE||invoiceSettings.signaturePath||invoiceSettings.invoice_signature_path,base+'/invoice/stamp-signature.png');
  const rows=items.map((x,i)=>'<tr><td>'+money(i+1)+'</td><td><strong>'+esc(x.name)+'</strong><small>'+esc(x.sku||'')+'</small></td><td>'+money(x.quantity)+'</td><td>'+money(x.unit_price_irt)+' ریال</td><td>'+money(x.line_total_irt)+' ریال</td></tr>').join('');
  const html='<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>'+esc(invoiceTitle(status))+' | '+esc(String(o.id||'').slice(-10))+'</title><style>'+
  '@import url("https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css");'+
