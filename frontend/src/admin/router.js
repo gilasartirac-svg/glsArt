@@ -31,8 +31,7 @@ export default async function adminRouter(){
  try{
   const mod=await loader();
   const html=(mod.default||mod)();
-  if(typeof mod.mount==='function')await mod.mount();
-  return html;
+  return {html,mount:typeof mod.mount==='function'?mod.mount:null};
  }catch(e){
   console.error('GilasArt admin page load failed',page,e);
   return '<div class="admin-page panel" dir="rtl"><h2>خطا در بارگذاری کنترل پنل</h2><p class="error">'+String(e?.message||e||'خطای ناشناخته')+'</p><p class="muted">لطفاً صفحه را دوباره بارگذاری کنید.</p></div>';
