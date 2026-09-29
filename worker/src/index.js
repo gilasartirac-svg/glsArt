@@ -513,6 +513,35 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
  if(u.pathname==='/api/cart/price'&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const b=await body(req),code=String(b.code||'').trim().toUpperCase();if(!code)return json({error:'coupon_required'},400);try{return json(await cartPricing(env,me,code))}catch(e){const c=promotionErrorCode(e);if(c)return json({error:c},400);return json({error:'cart_pricing_failed'},500)}}
  if(u.pathname==='/api/cart'&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const b=await body(req),pid=String(b.productId||''),qty=Math.max(1,Math.min(99,Number(b.quantity)||1));const p=await env.DB.prepare('SELECT id FROM products WHERE id=? AND active=1').bind(pid).first();if(!p)return json({error:'product_not_found'},404);let resolved;try{resolved=await resolveProductOptions(env,pid,b.options||[])}catch(e){return json({error:e.message||'invalid_product_options'},400)}let c=await env.DB.prepare('SELECT id FROM carts WHERE user_id=?').bind(me.id).first();if(!c){c={id:uid()};await env.DB.prepare('INSERT INTO carts(id,user_id) VALUES(?,?)').bind(c.id,me.id).run()}await env.DB.prepare('INSERT INTO cart_items(cart_id,product_id,quantity,options_json) VALUES(?,?,?,?) ON CONFLICT(cart_id,product_id) DO UPDATE SET quantity=excluded.quantity,options_json=excluded.options_json').bind(c.id,pid,qty,JSON.stringify(resolved.options)).run();return json({ok:true,unitPriceIrt:Number((await env.DB.prepare('SELECT price_irt FROM products WHERE id=?').bind(pid).first())?.price_irt||0)+resolved.adjustment_irt,options:resolved.options})}
  if(u.pathname==='/api/cart'&&req.method==='DELETE'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const pid=u.searchParams.get('productId');const c=await env.DB.prepare('SELECT id FROM carts WHERE user_id=?').bind(me.id).first();if(c&&pid)await env.DB.prepare('DELETE FROM cart_items WHERE cart_id=? AND product_id=?').bind(c.id,pid).run();return json({ok:true})}
+ if(u.pathname==='/api/account/orders'&&req.method==='GET'){
+  if(!me)return json({error:'unauthorized'},401);
+  const r=await env.DB.prepare(`
+   SELECT o.*,u.mobile,u.name,
+          a.recipient_name,a.mobile address_mobile,a.province,a.city,a.address,a.postal_code
+   FROM orders o
+   JOIN users u ON u.id=o.user_id
+   LEFT JOIN addresses a ON a.id=o.address_id
+   WHERE o.user_id=?
+   ORDER BY o.created_at DESC
+   LIMIT 100
+  `).bind(me.id).all();
+  const orders=r.results||[];
+  const histories=[],items=[];
+  for(const o of orders){
+   const [h,it,p]=await Promise.all([
+    env.DB.prepare('SELECT h.*,u.name changed_by_name FROM order_status_history h LEFT JOIN users u ON u.id=h.changed_by_user_id WHERE h.order_id=? ORDER BY h.changed_at ASC').bind(o.id).all(),
+    env.DB.prepare('SELECT id,product_id,sku,name,unit_price_irt,quantity,line_total_irt,options_json FROM order_items WHERE order_id=? ORDER BY id').bind(o.id).all(),
+    env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at FROM payments WHERE order_id=?').bind(o.id).first()
+   ]);
+   histories.push({orderId:o.id,history:h.results||[]});
+   items.push({orderId:o.id,items:it.results||[],payment:p||null});
+  }
+  const historyMap=Object.fromEntries(histories.map(x=>[x.orderId,x.history]));
+  const itemMap=Object.fromEntries(items.map(x=>[x.orderId,{items:x.items,payment:x.payment}]));
+  const s=await env.DB.prepare("SELECT key,value FROM site_settings WHERE key IN ('invoice_seller_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address')").all();
+  const settings=Object.fromEntries((s.results||[]).map(x=>[x.key,x.value]));
+  return json({items:orders.map(o=>({...o,history:historyMap[o.id]||[],items:itemMap[o.id]?.items||[],payment:itemMap[o.id]?.payment||null})),invoice:{sellerName:settings.invoice_seller_name||'فروشگاه صنایع دستی گیلاس آرت',economicCode:settings.invoice_economic_code||'',phone:settings.invoice_phone||'',mobile:settings.invoice_mobile||'',address:settings.invoice_address||''}});
+ }
  if(u.pathname==='/api/orders'&&req.method==='POST'){
   if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);
   const b=await body(req),addressId=String(b.addressId||''),couponCode=String(b.couponCode||'').trim().toUpperCase();
@@ -802,7 +831,7 @@ if(u.pathname==='/api/admin/site-rules'&&req.method==='PUT'){
 }
 
 if(u.pathname==='/api/admin/settings'&&req.method==='GET'){if(!(await requirePermission(me,env,'settings.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare("SELECT key,value,updated_at FROM site_settings ORDER BY key").all();return json({items:r.results||[]})}
-if(u.pathname==='/api/admin/settings'&&req.method==='PUT'){if(!(await requirePermission(me,env,'settings.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const b=await body(req),allowed=['site_name','site_description','seo_title','seo_description','seo_keywords','og_image'];for(const key of allowed)if(Object.prototype.hasOwnProperty.call(b,key))await env.DB.prepare("INSERT INTO site_settings(key,value,updated_at) VALUES(?,?,CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP").bind(key,String(b[key]??'').slice(0,2000)).run();await audit(env,me,'admin.settings.update','settings','site_settings',{updated:allowed.filter(k=>Object.prototype.hasOwnProperty.call(b,k))},req);return json({ok:true})}
+if(u.pathname==='/api/admin/settings'&&req.method==='PUT'){if(!(await requirePermission(me,env,'settings.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const b=await body(req),allowed=['site_name','site_description','seo_title','seo_description','seo_keywords','og_image','invoice_seller_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address'];for(const key of allowed)if(Object.prototype.hasOwnProperty.call(b,key))await env.DB.prepare("INSERT INTO site_settings(key,value,updated_at) VALUES(?,?,CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP").bind(key,String(b[key]??'').slice(0,2000)).run();await audit(env,me,'admin.settings.update','settings','site_settings',{updated:allowed.filter(k=>Object.prototype.hasOwnProperty.call(b,k))},req);return json({ok:true})}
 
 if(u.pathname==='/api/admin/integrations'&&req.method==='GET'){
  if(!(await requirePermission(me,env,'settings.read')))return json({error:'forbidden'},403);
