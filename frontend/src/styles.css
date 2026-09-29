@@ -627,3 +627,111 @@ input,textarea,select,button,[contenteditable="true"]{-webkit-user-select:none;u
 .cart-qty-btn:disabled{opacity:.55;cursor:wait}
 #rm{direction:ltr!important;text-align:left!important;unicode-bidi:plaintext}
 @media(max-width:600px){.cartline{align-items:flex-start;flex-wrap:wrap}.cartline .cart-product-link{min-width:calc(100% - 70px)}.cartline .cart-qty{margin-right:71px}.cartline .del{margin-right:auto}}
+
+/* Final responsive main navigation override */
+@media (max-width: 900px){
+  .top .nav{
+    position:relative;
+    min-width:0;
+    gap:8px;
+  }
+  .top .links{
+    display:none !important;
+    position:absolute;
+    top:calc(100% + 10px);
+    right:0;
+    left:0;
+    z-index:100;
+    width:auto;
+    max-width:none !important;
+    min-width:0;
+    overflow:visible;
+    flex-direction:column;
+    align-items:stretch;
+    gap:5px;
+    padding:10px;
+    background:var(--ui-surface, #151519);
+    border:1px solid var(--ui-line, #2b2a2d);
+    border-radius:18px;
+    box-shadow:0 20px 55px rgba(0,0,0,.38);
+  }
+  .top .links.is-open{
+    display:flex !important;
+  }
+  .top .links a{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    width:100%;
+    min-height:46px;
+    padding:10px 14px;
+    border-radius:12px;
+    white-space:nowrap;
+    font-size:14px;
+  }
+  .top .mobile-menu-toggle{
+    display:flex !important;
+    position:relative;
+    z-index:101;
+    order:10;
+  }
+  .top .theme-toggle{
+    order:7;
+    flex:0 0 auto;
+  }
+  .top .cart-link{
+    order:8;
+    flex:0 0 auto;
+  }
+  .top .profile-link{
+    order:9;
+    flex:0 0 auto;
+  }
+}
+@media (max-width: 520px){
+  .top .nav{
+    height:64px;
+    gap:6px;
+  }
+  .top .brand{
+    font-size:18px;
+    flex:0 1 auto;
+    min-width:0;
+  }
+  .top .brand small{display:none}
+  .top .theme-toggle,
+  .top .cart-link,
+  .top .mobile-menu-toggle{
+    width:40px;
+    min-width:40px;
+    height:40px;
+    flex-basis:40px;
+    padding:7px;
+    border-radius:12px;
+  }
+  .top .theme-toggle span,
+  .top .cart-link span{
+    display:none !important;
+  }
+  .top .profile-link{
+    min-width:40px;
+    width:40px;
+    justify-content:center;
+    font-size:0;
+  }
+  .top .profile-link .profile-dot{
+    display:block;
+  }
+  .top .links{
+    top:calc(100% + 8px);
+    right:0;
+    left:0;
+    padding:9px;
+    border-radius:16px;
+  }
+  .top .links a{
+    min-height:48px;
+    font-size:15px;
+    padding:11px 14px;
+  }
+}
