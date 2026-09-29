@@ -165,7 +165,7 @@ async function recordOrderStatusChange(env,orderId,fromStatus,toStatus,changedBy
  if(key&&sender){
   try{
    const p=new URLSearchParams({receptor:String(order.mobile),message,sender});
-   const sr=await fetch('https://api.kavenegar.com/v1/'+key+'/sms/send.json',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:p});
+   const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),8000);let sr;try{sr=await fetch('https://api.kavenegar.com/v1/'+key+'/sms/send.json',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:p,signal:controller.signal})}finally{clearTimeout(timer)}
    let sj=null;try{sj=await sr.json()}catch{}
    providerStatus=Number.isFinite(Number(sj?.return?.status))?Number(sj.return.status):null;
    deliveryStatus=sr.ok&&providerStatus===200?'SENT':'FAILED';
