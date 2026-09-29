@@ -80,22 +80,10 @@ test('storefront uses dynamic three-item infinite scrolling',()=>{
 });
 
 
-test('Turnstile is enforced server-side with action, hostname and timeout checks',()=>{
-  assert.match(worker,/TURNSTILE_SECRET_KEY/);
-  assert.match(worker,/TURNSTILE_HOSTNAMES/);
-  assert.match(worker,/action==='gilasart_form'/);
-  assert.match(worker,/AbortSignal\.timeout\(10000\)/);
-  assert.match(worker,/String\(token\)\.length>2048/);
-  assert.match(worker,/d\.success===true/);
-});
-
-test('protected frontend forms are gated until Turnstile succeeds',async()=>{
-  const captcha=await readFile(new URL('../frontend/src/captcha.js',import.meta.url),'utf8');
-  assert.match(captcha,/TURNSTILE/);
-  assert.match(captcha,/action:PROTECTED_ACTION/);
-  assert.match(captcha,/standaloneButton/);
-  assert.match(captcha,/\/api\/auth\/request-otp/);
-  assert.match(captcha,/\/api\/support\/tickets/);
-  assert.match(captcha,/\/reviews/);
-  assert.match(captcha,/turnstile\.reset/);
+test('CAPTCHA integration is currently disabled and not loaded',async()=>{
+  assert.doesNotMatch(worker,/TURNSTILE_SECRET_KEY|TURNSTILE_HOSTNAMES/);
+  assert.doesNotMatch(worker,/api\/security\/captcha/);
+  assert.doesNotMatch(frontend,/captcha-host|GilasArtCaptcha/);
+  const index=await readFile(new URL('../frontend/src/index.html',import.meta.url),'utf8');
+  assert.doesNotMatch(index,/captcha\.js/);
 });
