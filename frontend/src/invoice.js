@@ -18,7 +18,7 @@ function openInvoice(order,invoiceSettings={}){
   const raw=String(value||fallback||'').trim();
   if(!raw)return '';
   try{
-   if(/^https?:\\/\\//i.test(raw))return raw;
+   if(raw.startsWith('http://')||raw.startsWith('https://'))return raw;
    if(raw.startsWith('/'))return new URL(raw,location.origin).href;
    return new URL(raw,location.origin+(base?base+'/':'/')).href;
   }catch{return new URL(fallback,location.origin+(base?base+'/':'/')).href}
