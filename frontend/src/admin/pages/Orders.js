@@ -1,6 +1,116 @@
 import {setupDataGrid} from '../components/Table.js';
-import {admin,api} from '../services/api.js?v=20260926.2';
+import {admin,api} from '../services/api.js?v=20260929-orders';
+
+const STATUS_LABELS={
+ PENDING:'در انتظار پرداخت',
+ PAID:'پرداخت شد',
+ PROCESSING:'در حال پردازش',
+ SHIPPED:'ارسال شد',
+ DELIVERED:'تحویل شد',
+ CANCELLED:'لغو شد',
+ FAILED:'ناموفق'
+};
+const statusLabel=s=>STATUS_LABELS[String(s||'').toUpperCase()]||String(s||'نامشخص');
+const money=v=>new Intl.NumberFormat('fa-IR').format(Number(v||0));
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dateFa=v=>{if(!v)return '-';const d=new Date(String(v).replace(' ','T')+(String(v).endsWith('Z')?'':'Z'));return Number.isNaN(d.getTime())?esc(v):new Intl.DateTimeFormat('fa-IR-u-ca-persian',{dateStyle:'medium',timeStyle:'short'}).format(d)};
+const optionHtml=s=>Object.entries(STATUS_LABELS).map(([k,v])=>'<option value="'+k+'" '+(s===k?'selected':'')+'>'+v+'</option>').join('');
+
 export default function Orders(){
- setTimeout(async()=>{try{const d=await admin.orders();const el=document.querySelector('#orders-grid');if(el)el.innerHTML=(d.items||[]).map(o=>`<tr><td>${o.id}</td><td>${o.mobile||'-'}</td><td>${new Intl.NumberFormat('fa-IR').format(o.total_irt||0)}</td><td><select class="order-status" data-id="${o.id}"><option ${o.status==='PENDING'?'selected':''}>PENDING</option><option ${o.status==='PAID'?'selected':''}>PAID</option><option ${o.status==='PROCESSING'?'selected':''}>PROCESSING</option><option ${o.status==='SHIPPED'?'selected':''}>SHIPPED</option><option ${o.status==='DELIVERED'?'selected':''}>DELIVERED</option><option ${o.status==='CANCELLED'?'selected':''}>CANCELLED</option></select></td><td>${o.created_at||''}</td></tr>`).join('')||'<tr><td colspan="5">سفارشی وجود ندارد.</td></tr>';setupDataGrid('orders-grid',{dateColumns:[4]});el?.querySelectorAll('.order-status').forEach(x=>x.onchange=async()=>{try{await api('/api/admin/orders/'+x.dataset.id+'/status',{method:'PUT',body:JSON.stringify({status:x.value})})}catch(e){alert(e.message);location.hash='#/admin/orders'}})}catch(e){const el=document.querySelector('#orders-error');if(el)el.textContent=e.message}},0);
- return `<div class="admin-page" dir="rtl"><div class="admin-title"><h2>سفارشات</h2><span class="muted">مدیریت وضعیت سفارش‌ها</span></div><div id="orders-error" class="error"></div><div class="panel"><table class="admin-table"><thead><tr><th>شناسه</th><th>موبایل</th><th>مبلغ</th><th>وضعیت</th><th>تاریخ</th></tr></thead><tbody id="orders-grid"><tr><td colspan="5">در حال دریافت...</td></tr></tbody></table></div></div>`;
+ let rows=[];
+ let selectedId='';
+ const root=document.createElement('div');
+ root.className='admin-page orders-admin';
+ root.dir='rtl';
+ root.innerHTML=`
+  <div class="admin-title orders-title">
+   <div><h2>سفارشات</h2><span class="muted">مدیریت، پیگیری و تغییر وضعیت سفارش مشتریان</span></div>
+   <button id="orders-refresh" class="btn ghost" type="button">به‌روزرسانی</button>
+  </div>
+  <div id="orders-error" class="error"></div>
+  <div class="orders-layout">
+   <section class="panel orders-master">
+    <div class="orders-master-head"><div><strong>آخرین سفارش‌ها</strong><small>برای مشاهده جزئیات، یک ردیف را انتخاب کنید.</small></div><span id="orders-count" class="orders-count">۰ سفارش</span></div>
+    <div class="orders-table-wrap">
+     <table class="admin-table orders-table">
+      <thead><tr><th>سفارش</th><th>مشتری</th><th>مبلغ</th><th>وضعیت</th><th>ثبت</th></tr></thead>
+      <tbody id="orders-grid"><tr><td colspan="5">در حال دریافت...</td></tr></tbody>
+     </table>
+    </div>
+   </section>
+   <aside id="order-detail" class="panel order-detail" aria-live="polite">
+    <div class="order-detail-empty"><span>‹</span><strong>جزئیات سفارش</strong><p>برای نمایش اطلاعات، یک سفارش را از جدول انتخاب کنید.</p></div>
+   </aside>
+  </div>`;
+ setTimeout(()=>mount(),0);
+ async function mount(){
+  const grid=root.querySelector('#orders-grid');
+  const detail=root.querySelector('#order-detail');
+  const error=root.querySelector('#orders-error');
+  const count=root.querySelector('#orders-count');
+  const refresh=root.querySelector('#orders-refresh');
+  async function load(){
+   error.textContent='';
+   grid.innerHTML='<tr><td colspan="5">در حال دریافت سفارش‌ها...</td></tr>';
+   try{
+    const d=await admin.orders();
+    rows=d.items||[];
+    count.textContent=new Intl.NumberFormat('fa-IR').format(rows.length)+' سفارش';
+    grid.innerHTML=rows.map(o=>`
+     <tr class="order-master-row ${o.id===selectedId?'is-selected':''}" data-id="${esc(o.id)}">
+      <td><strong>#${esc(String(o.id).slice(-8))}</strong><small>${esc(o.id)}</small></td>
+      <td><strong>${esc(o.mobile||'-')}</strong><small>${esc(o.name||'مشتری')}</small></td>
+      <td><strong>${money(o.total_irt)}</strong><small>تومان</small></td>
+      <td><select class="order-status" data-id="${esc(o.id)}" aria-label="وضعیت سفارش">${optionHtml(o.status)}</select></td>
+      <td><span class="order-date">${dateFa(o.created_at)}</span></td>
+     </tr>`).join('')||'<tr><td colspan="5">سفارشی وجود ندارد.</td></tr>';
+    if(!grid.closest('table').dataset.gridReady)setupDataGrid(grid.closest('table').querySelector('tbody').id,{dateColumns:[]});
+    bindRows();
+    if(selectedId&&rows.some(x=>x.id===selectedId))await showDetail(selectedId);
+   }catch(e){grid.innerHTML='<tr><td colspan="5" class="error-cell">دریافت سفارش‌ها انجام نشد.</td></tr>';error.textContent=e.message||'خطا در دریافت اطلاعات';}
+  }
+  function bindRows(){
+   grid.querySelectorAll('.order-master-row').forEach(row=>row.onclick=async e=>{
+    if(e.target.closest('select,button,a'))return;
+    await showDetail(row.dataset.id);
+   });
+   grid.querySelectorAll('.order-status').forEach(sel=>sel.onchange=async e=>{
+    e.stopPropagation();
+    const id=sel.dataset.id,old=rows.find(x=>x.id===id)?.status,next=sel.value;
+    sel.disabled=true;
+    try{
+     const r=await api('/api/admin/orders/'+encodeURIComponent(id)+'/status',{method:'PUT',body:JSON.stringify({status:next})});
+     if(r.changed!==false){const item=rows.find(x=>x.id===id);if(item)item.status=next;}
+     await showDetail(id);
+     bindRows();
+    }catch(err){sel.value=old||sel.value;error.textContent=err.message||'تغییر وضعیت انجام نشد.';}
+    finally{sel.disabled=false;}
+   });
+  }
+  async function showDetail(id){
+   selectedId=id;
+   grid.querySelectorAll('.order-master-row').forEach(r=>r.classList.toggle('is-selected',r.dataset.id===id));
+   detail.innerHTML='<div class="order-detail-loading">در حال دریافت جزئیات سفارش…</div>';
+   try{
+    const d=await admin.order(id),o=d.order||{},items=d.items||[],history=d.history||[],p=d.payment;
+    detail.innerHTML=`
+     <div class="order-detail-head">
+      <div><span class="order-detail-kicker">سفارش</span><h3>#${esc(String(o.id||'').slice(-8))}</h3><small>${esc(o.id||'')}</small></div>
+      <span class="order-status-badge status-${esc(String(o.status||'').toLowerCase())}">${esc(statusLabel(o.status))}</span>
+     </div>
+     <div class="order-detail-grid">
+      <div><span>مشتری</span><b>${esc(o.name||'مشتری')}</b><small>${esc(o.mobile||'-')}</small></div>
+      <div><span>مبلغ نهایی</span><b>${money(o.total_irt)} تومان</b><small>ثبت: ${dateFa(o.created_at)}</small></div>
+      <div><span>پرداخت</span><b>${esc(p?.status||'-')}</b><small>${p?.paid_at?'پرداخت: '+dateFa(p.paid_at):'هنوز پرداخت نشده'}</small></div>
+      <div><span>گیرنده</span><b>${esc(o.recipient_name||o.name||'-')}</b><small>${esc(o.address_mobile||o.mobile||'-')}</small></div>
+     </div>
+     <section class="order-detail-section"><h4>اقلام سفارش</h4><div class="order-items-list">${items.map(x=>'<div class="order-item"><div><b>'+esc(x.name)+'</b><small>'+esc(x.sku||'')+' · تعداد '+esc(x.quantity)+'</small></div><strong>'+money(x.line_total_irt)+' تومان</strong></div>').join('')||'<div class="order-empty">آیتمی ثبت نشده است.</div>'}</div></section>
+     <section class="order-detail-section"><h4>تاریخچه وضعیت</h4><div class="order-history">${history.length?history.map(h=>'<div class="order-history-row"><i></i><div><b>'+esc(statusLabel(h.to_status))+'</b><small>'+dateFa(h.changed_at)+(h.changed_by_name?' · توسط '+esc(h.changed_by_name):'')+'</small></div></div>').join(''):'<div class="order-empty">تاریخچه‌ای ثبت نشده است.</div>'}</div></section>
+     ${o.city||o.address?'<section class="order-detail-section"><h4>نشانی ارسال</h4><p class="order-address">'+esc([o.province,o.city,o.address].filter(Boolean).join('، '))+'</p></section>':''}`;
+   }catch(e){detail.innerHTML='<div class="order-detail-empty"><strong>جزئیات سفارش دریافت نشد.</strong><p>'+esc(e.message||'خطای سرور')+'</p></div>';}
+  }
+  refresh.onclick=load;
+  await load();
+ }
+ return root;
 }
