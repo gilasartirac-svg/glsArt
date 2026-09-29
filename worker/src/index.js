@@ -798,12 +798,14 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
   const id=u.pathname.split('/')[4];if(!id)return json({error:'not_found'},404);
   const order=await env.DB.prepare('SELECT o.*,u.mobile,u.name,address.recipient_name,address.mobile address_mobile,address.province,address.city,address.address,address.postal_code FROM orders o JOIN users u ON u.id=o.user_id LEFT JOIN addresses address ON address.id=o.address_id WHERE o.id=?').bind(id).first();
   if(!order)return json({error:'not_found'},404);
-  const [items,history,payment]=await Promise.all([
+  const [items,history,payment,seller]=await Promise.all([
    env.DB.prepare('SELECT id,product_id,sku,name,unit_price_irt,quantity,line_total_irt,options_json FROM order_items WHERE order_id=? ORDER BY id').bind(id).all(),
    env.DB.prepare('SELECT h.*,u.name changed_by_name,u.mobile changed_by_mobile FROM order_status_history h LEFT JOIN users u ON u.id=h.changed_by_user_id WHERE h.order_id=? ORDER BY h.changed_at DESC').bind(id).all(),
-   env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at FROM payments WHERE order_id=?').bind(id).first()
+   env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at FROM payments WHERE order_id=?').bind(id).first(),
+   env.DB.prepare("SELECT key,value FROM site_settings WHERE key IN ('invoice_seller_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address')").all()
   ]);
-  return json({order,items:items.results||[],history:history.results||[],payment});
+  const sm=Object.fromEntries((seller.results||[]).map(x=>[x.key,x.value]));
+  return json({order,items:items.results||[],history:history.results||[],payment,invoice:{sellerName:sm.invoice_seller_name||'فروشگاه صنایع دستی گیلاس آرت',economicCode:sm.invoice_economic_code||'',phone:sm.invoice_phone||'',mobile:sm.invoice_mobile||'',address:sm.invoice_address||''}});
  }
  if(u.pathname==='/api/admin/orders'&&req.method==='GET'){if(!(await requirePermission(me,env,'orders.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT o.*,u.mobile FROM orders o JOIN users u ON u.id=o.user_id ORDER BY o.created_at DESC LIMIT 200').all();return json({items:r.results||[]})}
  if(u.pathname==='/api/settings'&&req.method==='GET'){const r=await env.DB.prepare("SELECT key,value FROM site_settings").all();const out={};for(const x of (r.results||[]))out[x.key]=x.value;return json({settings:out})}
