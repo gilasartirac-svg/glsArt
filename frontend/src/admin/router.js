@@ -1,30 +1,38 @@
-import Dashboard from './pages/Dashboard.js?v=20260928.2';
-import Products from './pages/Products.js?v=20260929-products-grid';
-import Orders from './pages/Orders.js?v=20260929-invoice';
-import Customers from './pages/Customers.js?v=20260928.2';
-import Inventory from './pages/Inventory.js?v=20260928.2';
-import Payments from './pages/Payments.js?v=20260928.2';
-import Reports from './pages/Reports.js?v=20260928.2';
-import Roles from './pages/Roles.js?v=20260929.1';
-import AccessControl from './pages/AccessControl.js?v=20260929.1';
-import AuditLogs from './pages/AuditLogs.js?v=20260928.2';
-import Settings from './pages/Settings.js?v=20260929.1';
-import InvoiceSettings from './pages/InvoiceSettings.js?v=20260929.1';
-import Categories from './pages/Categories.js?v=20260929-categories';
-import Coupons from './pages/Coupons.js?v=20260928.2';
-import Discounts from './pages/Discounts.js?v=20260928.2';
-import SmsSettings from './pages/SmsSettings.js?v=20260928.2';
-import PaymentSettings from './pages/PaymentSettings.js?v=20260928.2';
-import Visitors from './pages/Visitors.js?v=20260928.2';
-import About from './pages/About.js?v=20260928.2';
-import Contact from './pages/Contact.js?v=20260928.2';
-import News from './pages/News.js?v=20260928.2';
-import Articles from './pages/Articles.js?v=20260928.2';
-import SupportTickets from './pages/SupportTickets.js?v=20260928.2';
-import SiteRules from './pages/SiteRules.js?v=20260928.1';
+const loaders={
+ dashboard:()=>import('./pages/Dashboard.js?v=20260929-admin'),
+ products:()=>import('./pages/Products.js?v=20260929-admin'),
+ orders:()=>import('./pages/Orders.js?v=20260929-admin'),
+ customers:()=>import('./pages/Customers.js?v=20260929-admin'),
+ inventory:()=>import('./pages/Inventory.js?v=20260929-admin'),
+ payments:()=>import('./pages/Payments.js?v=20260929-admin'),
+ reports:()=>import('./pages/Reports.js?v=20260929-admin'),
+ roles:()=>import('./pages/Roles.js?v=20260929-admin'),
+ 'access-control':()=>import('./pages/AccessControl.js?v=20260929-admin'),
+ audit:()=>import('./pages/AuditLogs.js?v=20260929-admin'),
+ settings:()=>import('./pages/Settings.js?v=20260929-admin'),
+ 'invoice-settings':()=>import('./pages/InvoiceSettings.js?v=20260929-admin'),
+ categories:()=>import('./pages/Categories.js?v=20260929-admin'),
+ coupons:()=>import('./pages/Coupons.js?v=20260929-admin'),
+ discounts:()=>import('./pages/Discounts.js?v=20260929-admin'),
+ sms:()=>import('./pages/SmsSettings.js?v=20260929-admin'),
+ payment:()=>import('./pages/PaymentSettings.js?v=20260929-admin'),
+ visitors:()=>import('./pages/Visitors.js?v=20260929-admin'),
+ about:()=>import('./pages/About.js?v=20260929-admin'),
+ contact:()=>import('./pages/Contact.js?v=20260929-admin'),
+ news:()=>import('./pages/News.js?v=20260929-admin'),
+ articles:()=>import('./pages/Articles.js?v=20260929-admin'),
+ support:()=>import('./pages/SupportTickets.js?v=20260929-admin'),
+ 'site-rules':()=>import('./pages/SiteRules.js?v=20260929-admin')
+};
 
-export default function adminRouter(){
- const page=location.hash.replace('#/admin/','') || 'dashboard';
- const pages={dashboard:Dashboard,products:Products,orders:Orders,customers:Customers,inventory:Inventory,payments:Payments,reports:Reports,roles:Roles,'access-control':AccessControl,audit:AuditLogs,settings:Settings,'invoice-settings':InvoiceSettings,categories:Categories,coupons:Coupons,discounts:Discounts,sms:SmsSettings,payment:PaymentSettings,visitors:Visitors,about:About,contact:Contact,news:News,articles:Articles,support:SupportTickets,'site-rules':SiteRules};
- return (pages[page]||Dashboard)();
+export default async function adminRouter(){
+ const page=location.hash.replace('#/admin/','')||'dashboard';
+ const loader=loaders[page]||loaders.dashboard;
+ try{
+  const mod=await loader();
+  return (mod.default||mod)();
+ }catch(e){
+  console.error('GilasArt admin page load failed',page,e);
+  return '<div class="admin-page panel" dir="rtl"><h2>خطا در بارگذاری کنترل پنل</h2><p class="error">'+String(e?.message||e||'خطای ناشناخته')+'</p><p class="muted">لطفاً صفحه را دوباره بارگذاری کنید.</p></div>';
+ }
 }
