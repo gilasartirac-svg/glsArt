@@ -1,5 +1,6 @@
 import {setupDataGrid} from '../components/Table.js';
 import {admin,api} from '../services/api.js?v=20260929-orders';
+import {openInvoice} from '../../invoice.js?v=20260929-invoice';
 
 const STATUS_LABELS={
  PENDING:'در انتظار پرداخت',
@@ -111,7 +112,7 @@ export default function Orders(){
     detail.innerHTML=`
      <div class="order-detail-head">
       <div><span class="order-detail-kicker">سفارش</span><h3>#${esc(String(o.id||'').slice(-8))}</h3><small>${esc(o.id||'')}</small></div>
-      <span class="order-status-badge status-${esc(String(o.status||'').toLowerCase())}">${esc(statusLabel(o.status))}</span>
+      <div class="order-detail-actions"><button id="order-detail-invoice" class="btn primary" type="button">▣ ${o.status==='PENDING'?'پیش‌فاکتور':'فاکتور فروش'}</button><span class="order-status-badge status-${esc(String(o.status||'').toLowerCase())}">${esc(statusLabel(o.status))}</span></div>
      </div>
      <div class="order-detail-grid">
       <div><span>مشتری</span><b>${esc(o.name||'مشتری')}</b><small>${esc(o.mobile||'-')}</small></div>
@@ -125,6 +126,7 @@ export default function Orders(){
    }catch(e){detail.innerHTML='<div class="order-detail-empty"><strong>جزئیات سفارش دریافت نشد.</strong><p>'+esc(e.message||'خطای سرور')+'</p></div>';}
   }
   refresh.onclick=load;
+  document.addEventListener('click',e=>{if(e.target?.id==='order-detail-invoice'){admin.order(selectedId).then(d=>openInvoice({...d.order,items:d.items||[]},d.invoice||{})).catch(err=>{error.textContent=err.message||'فاکتور دریافت نشد.'})}});
   await load();
  }
  return markup;
