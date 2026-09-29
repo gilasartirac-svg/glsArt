@@ -183,7 +183,7 @@ async function siteSetting(env,key,fallback=''){
 async function paymentEnvironment(env){const v=String(await siteSetting(env,'zarinpal_environment',env.PAYMENT_ENV||'production')).toLowerCase();return v==='sandbox'?'sandbox':'production'}
 
 async function invoiceSettings(env){
- const keys=['invoice_store_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address','invoice_logo_path','invoice_signature_path'];
+ const keys=['invoice_store_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address','invoice_logo_path','invoice_signature_path','invoice_logo_path','invoice_signature_path'];
  const out={};
  for(const key of keys)out[key]=await siteSetting(env,key,key==='invoice_store_name'?'فروشگاه صنایع دستی گیلاس آرت':'');
  return out;
@@ -547,7 +547,7 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
   const itemMap=Object.fromEntries(items.map(x=>[x.orderId,{items:x.items,payment:x.payment}]));
   const s=await env.DB.prepare("SELECT key,value FROM site_settings WHERE key IN ('invoice_seller_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address')").all();
   const settings=Object.fromEntries((s.results||[]).map(x=>[x.key,x.value]));
-  return json({items:orders.map(o=>({...o,history:historyMap[o.id]||[],items:itemMap[o.id]?.items||[],payment:itemMap[o.id]?.payment||null})),invoice:{sellerName:settings.invoice_seller_name||'فروشگاه صنایع دستی گیلاس آرت',economicCode:settings.invoice_economic_code||'',phone:settings.invoice_phone||'',mobile:settings.invoice_mobile||'',address:settings.invoice_address||''}});
+  return json({items:orders.map(o=>({...o,history:historyMap[o.id]||[],items:itemMap[o.id]?.items||[],payment:itemMap[o.id]?.payment||null})),invoice:{sellerName:settings.invoice_seller_name||'فروشگاه صنایع دستی گیلاس آرت',economicCode:settings.invoice_economic_code||'',phone:settings.invoice_phone||'',mobile:settings.invoice_mobile||'',address:settings.invoice_address||'',logoPath:settings.invoice_logo_path||'',signaturePath:settings.invoice_signature_path||''}});
  }
  if(u.pathname==='/api/orders'&&req.method==='POST'){
   if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);
@@ -805,7 +805,7 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
    env.DB.prepare("SELECT key,value FROM site_settings WHERE key IN ('invoice_seller_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address')").all()
   ]);
   const sm=Object.fromEntries((seller.results||[]).map(x=>[x.key,x.value]));
-  return json({order,items:items.results||[],history:history.results||[],payment,invoice:{sellerName:sm.invoice_seller_name||'فروشگاه صنایع دستی گیلاس آرت',economicCode:sm.invoice_economic_code||'',phone:sm.invoice_phone||'',mobile:sm.invoice_mobile||'',address:sm.invoice_address||''}});
+  return json({order,items:items.results||[],history:history.results||[],payment,invoice:{sellerName:sm.invoice_seller_name||'فروشگاه صنایع دستی گیلاس آرت',economicCode:sm.invoice_economic_code||'',phone:sm.invoice_phone||'',mobile:sm.invoice_mobile||'',address:sm.invoice_address||'',logoPath:sm.invoice_logo_path||'',signaturePath:sm.invoice_signature_path||''}});
  }
  if(u.pathname==='/api/admin/orders'&&req.method==='GET'){if(!(await requirePermission(me,env,'orders.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT o.*,u.mobile FROM orders o JOIN users u ON u.id=o.user_id ORDER BY o.created_at DESC LIMIT 200').all();return json({items:r.results||[]})}
  if(u.pathname==='/api/settings'&&req.method==='GET'){const r=await env.DB.prepare("SELECT key,value FROM site_settings").all();const out={};for(const x of (r.results||[]))out[x.key]=x.value;return json({settings:out})}
