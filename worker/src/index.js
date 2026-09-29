@@ -582,9 +582,11 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
   if(!me)return json({items:[]});
   const orders=(await env.DB.prepare(`SELECT o.*,a.recipient_name,a.mobile address_mobile,a.province,a.city,a.address,a.postal_code FROM orders o LEFT JOIN addresses a ON a.id=o.address_id WHERE o.user_id=? ORDER BY o.created_at DESC LIMIT 100`).bind(me.id).all()).results||[];
   const invoice=await invoiceSettings(env);
-  const items=(await env.DB.prepare('SELECT * FROM order_items WHERE order_id IN ('+orders.map(()=>'?').join(',')+') ORDER BY order_id,id').bind(...orders.map(x=>x.id)).all()).results||[];
-  const history=(await env.DB.prepare('SELECT * FROM order_status_history WHERE order_id IN ('+orders.map(()=>'?').join(',')+') ORDER BY changed_at ASC').bind(...orders.map(x=>x.id)).all()).results||[];
-  const payments=(await env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at,order_id FROM payments WHERE order_id IN ('+orders.map(()=>'?').join(',')+')').bind(...orders.map(x=>x.id)).all()).results||[];
+  if(!orders.length)return json({items:[],invoice});
+  const ids=orders.map(x=>x.id),marks=ids.map(()=>'?').join(',');
+  const items=(await env.DB.prepare('SELECT * FROM order_items WHERE order_id IN ('+marks+') ORDER BY order_id,id').bind(...ids).all()).results||[];
+  const history=(await env.DB.prepare('SELECT * FROM order_status_history WHERE order_id IN ('+marks+') ORDER BY changed_at ASC').bind(...ids).all()).results||[];
+  const payments=(await env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at,order_id FROM payments WHERE order_id IN ('+marks+')').bind(...ids).all()).results||[];
   const by=(arr,key)=>arr.reduce((m,x)=>{(m[x[key]]??=[]).push(x);return m},Object.create(null));
   const im=by(items,'order_id'),hm=by(history,'order_id'),pm=by(payments,'order_id');
   return json({items:orders.map(o=>({...o,items:im[o.id]||[],history:hm[o.id]||[],payment:(pm[o.id]||[])[0]||null})),invoice});
