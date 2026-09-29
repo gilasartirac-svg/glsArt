@@ -448,6 +448,6 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 
 /* Mobile interaction policy — production touch behavior */
 html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:pan-x pan-y;}
-body{overscroll-behavior-x:none;-webkit-user-select:none;user-select:none;}
+body{overscroll-behavior-x:none;}
 input,textarea,select,[contenteditable="true"]{-webkit-user-select:text;user-select:text;touch-action:pan-x pan-y;}
 img,svg{touch-action:pan-x pan-y;-webkit-user-drag:none;}
