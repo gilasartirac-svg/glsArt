@@ -13,7 +13,7 @@ export default function AdminApp(){
    window.addEventListener('hashchange',close);
   }
   window.dispatchEvent(new Event('admin-mounted'));
-  import('./router.js?v=20260929-admin').then(m=>m.default()).then(html=>{const page=document.getElementById('admin-page');if(page)page.innerHTML=html}).catch(e=>{const page=document.getElementById('admin-page');if(page)page.innerHTML='<div class="admin-page panel" dir="rtl"><h2>خطا در بارگذاری کنترل پنل</h2><p class="error">'+String(e?.message||e)+'</p></div>'});
+  import('./router.js?v=20260929-admin').then(m=>m.default()).then(result=>{const page=document.getElementById('admin-page');if(!page)return;page.innerHTML=result.html;if(typeof result.mount==='function')return result.mount()}).catch(e=>{const page=document.getElementById('admin-page');if(page)page.innerHTML='<div class="admin-page panel" dir="rtl"><h2>خطا در بارگذاری کنترل پنل</h2><p class="error">'+String(e?.message||e)+'</p></div>'});
  });
  return `
 <div class="admin-layout" dir="rtl">
