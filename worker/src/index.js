@@ -353,6 +353,21 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
  }
 
 
+ if(u.pathname==='/api/admin/users'&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'users.manage'))&&!(await requirePermission(me,env,'roles.manage')))
+   return json({error:'forbidden'},403);
+  const r=await env.DB.prepare(`
+   SELECT u.id,u.mobile,u.name,u.created_at,
+          au.active AS admin_active,ar.id AS role_id,ar.name AS role_name,ar.description AS role_description
+   FROM users u
+   LEFT JOIN admin_users au ON au.user_id=u.id
+   LEFT JOIN admin_roles ar ON ar.id=au.role_id
+   ORDER BY u.created_at DESC
+   LIMIT 500
+  `).all();
+  return json({items:r.results||[]});
+ }
+
  if(u.pathname==='/api/admin/roles'&&req.method==='GET'){
   if(!(await requirePermission(me,env,'roles.manage')))
    return json({error:'forbidden'},403);
@@ -407,6 +422,22 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
   return json({ok:true});
  }
 
+
+ if(u.pathname.startsWith('/api/admin/users/') &&
+    u.pathname.endsWith('/roles') &&
+    req.method==='DELETE'){
+  if(!(await requirePermission(me,env,'roles.manage'))||!requireCsrf(req))
+   return json({error:'forbidden'},403);
+  const id=u.pathname.split('/')[4];
+  if(id===me.id)return json({error:'self_role_change_forbidden'},403);
+  const target=await env.DB.prepare('SELECT id FROM users WHERE id=?').bind(id).first();
+  if(!target)return json({error:'user_not_found'},404);
+  const before=await env.DB.prepare('SELECT * FROM admin_users WHERE user_id=?').bind(id).first();
+  if(!before)return json({error:'admin_user_not_found'},404);
+  await env.DB.prepare('DELETE FROM admin_users WHERE user_id=?').bind(id).run();
+  await audit(env,me,'admin.role.revoke','user',id,{before,after:null},req);
+  return json({ok:true});
+ }
 
  if(u.pathname.startsWith('/api/admin/users/') &&
     u.pathname.endsWith('/status') &&
