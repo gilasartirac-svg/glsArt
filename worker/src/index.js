@@ -183,7 +183,7 @@ async function siteSetting(env,key,fallback=''){
 async function paymentEnvironment(env){const v=String(await siteSetting(env,'zarinpal_environment',env.PAYMENT_ENV||'production')).toLowerCase();return v==='sandbox'?'sandbox':'production'}
 
 async function invoiceSettings(env){
- const keys=['invoice_store_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address','invoice_logo_path','invoice_signature_path'];
+ const keys=['invoice_store_name','invoice_national_id','invoice_economic_code','invoice_registration_number','invoice_phone','invoice_mobile','invoice_postal_code','invoice_address','invoice_logo_path','invoice_signature_path'];
  const out={};
  for(const key of keys)out[key]=await siteSetting(env,key,key==='invoice_store_name'?await siteSetting(env,'invoice_seller_name','فروشگاه صنایع دستی گیلاس آرت'):'');
  return out;
@@ -870,7 +870,7 @@ if(u.pathname==='/api/admin/invoice-settings'&&req.method==='GET'){
 if(u.pathname==='/api/admin/invoice-settings'&&req.method==='PUT'){
  if(!(await requirePermission(me,env,'settings.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
  const b=await body(req);
- const allowed=['invoice_store_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address','invoice_logo_path','invoice_signature_path'];
+ const allowed=['invoice_store_name','invoice_national_id','invoice_economic_code','invoice_registration_number','invoice_phone','invoice_mobile','invoice_postal_code','invoice_address','invoice_logo_path','invoice_signature_path'];
  const updates={};
  for(const key of allowed)if(Object.prototype.hasOwnProperty.call(b,key))updates[key]=String(b[key]??'').trim().slice(0,2000);
  if(Object.prototype.hasOwnProperty.call(updates,'invoice_store_name')&&!updates.invoice_store_name)return json({error:'invoice_store_name_required'},400);
