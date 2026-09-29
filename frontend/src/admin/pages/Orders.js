@@ -1,6 +1,6 @@
 import {setupDataGrid} from '../components/Table.js';
 import {admin,api} from '../services/api.js?v=20260929-orders';
-import {openInvoice} from '../../invoice.js?v=20260929-invoice-3';
+import {openInvoice} from '../../invoice.js?v=20260929-invoice-4';
 
 const STATUS_LABELS={
  PENDING:'در انتظار پرداخت',
