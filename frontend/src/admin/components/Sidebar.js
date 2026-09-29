@@ -3,7 +3,7 @@ export default function Sidebar(){
   const items=[
     ['dashboard','داشبورد','⌂'],['products','محصولات','▣'],['categories','دسته‌بندی‌ها','◈'],['orders','سفارشات','◫'],['site-rules','قوانین سایت','§'],
     ['customers','مشتریان','♙'],['inventory','موجودی','▤'],['payments','پرداخت‌ها','◇'],['discounts','تخفیف‌ها','%'],['coupons','کوپن‌ها','▱'],
-    ['reviews','نظرات','✦'],['reports','گزارش‌ها','▥'],['access-control','سطح دسترسی','♢'],['audit','لاگ سیستم','◉'],['settings','SEO و تنظیمات','⚙'],['sms','سیستم پیامکی','⌁'],['payment','درگاه زرین‌پال','₿'],['visitors','بازدیدکنندگان','◌'],['support','تیکت‌های پشتیبانی','?'],['about','درباره ما','i'],['contact','تماس با ما','⌁'],['news','اخبار گیلاس آرت','◍'],['articles','مقالات','≡']
+    ['reviews','نظرات','✦'],['reports','گزارش‌ها','▥'],['access-control','سطح دسترسی','♢'],['audit','لاگ سیستم','◉'],['settings','SEO و تنظیمات','⚙'],['invoice-settings','تنظیمات فاکتور','▤'],['sms','سیستم پیامکی','⌁'],['payment','درگاه زرین‌پال','₿'],['visitors','بازدیدکنندگان','◌'],['support','تیکت‌های پشتیبانی','?'],['about','درباره ما','i'],['contact','تماس با ما','⌁'],['news','اخبار گیلاس آرت','◍'],['articles','مقالات','≡']
   ];
   return `<button class="admin-mobile-menu" id="admin-mobile-menu" type="button" aria-label="باز کردن منوی مدیریت" aria-controls="admin-mobile-drawer" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="admin-mobile-backdrop" id="admin-mobile-backdrop" aria-hidden="true"></div>
