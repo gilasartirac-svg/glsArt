@@ -5,7 +5,8 @@ import Customers from './pages/Customers.js?v=20260928.2';
 import Inventory from './pages/Inventory.js?v=20260928.2';
 import Payments from './pages/Payments.js?v=20260928.2';
 import Reports from './pages/Reports.js?v=20260928.2';
-import Roles from './pages/Roles.js?v=20260928.2';
+import Roles from './pages/Roles.js?v=20260929.1';
+import AccessControl from './pages/AccessControl.js?v=20260929.1';
 import AuditLogs from './pages/AuditLogs.js?v=20260928.2';
 import Settings from './pages/Settings.js?v=20260928.2';
 import Categories from './pages/Categories.js?v=20260928.2';
@@ -34,6 +35,7 @@ export default function adminRouter(){
   payments:Payments,
   reports:Reports,
   roles:Roles,
+  'access-control':AccessControl,
   audit:AuditLogs,
   settings:Settings,
   categories:Categories,
