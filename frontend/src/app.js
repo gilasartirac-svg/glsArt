@@ -175,3 +175,23 @@ async function router(){const p=location.hash.slice(2).split('/');try{if(!p[0])r
   const bodyEl=document.querySelector('#terms-body');if(bodyEl)bodyEl.textContent='قوانین سایت در حال حاضر قابل دریافت نیست.';
  }
  return}if(p[0]==='support')return p[1]?supportDetail(decodeURIComponent(p[1])):support();if(p[0]==='payment'){layout(`<section class="wrap page"><div class="panel"><h1>${p[1]==='success'?'پرداخت با موفقیت تایید شد':'پرداخت ناموفق بود'}</h1><a class="btn primary" href="#/">بازگشت به فروشگاه</a></div></section>`);return}home()}catch(e){layout(`<section class="wrap page"><div class="panel"><h2>خطا</h2><p class="error">${escapeHtml(e.message)}</p></div></section>`)}}window.addEventListener('hashchange',()=>router());router();loadMe().then(()=>{if(location.hash===''||location.hash==='#/' )router()});
+
+/* GilasArt interaction guard */
+(()=>{
+ const editable=e=>{const el=e?.target;return !!el&&(el.matches('input,textarea,select,[contenteditable="true"]')||el.isContentEditable)};
+ document.addEventListener('contextmenu',e=>e.preventDefault(),{capture:true});
+ document.addEventListener('copy',e=>{e.preventDefault();}, {capture:true});
+ document.addEventListener('cut',e=>{e.preventDefault();}, {capture:true});
+ document.addEventListener('dragstart',e=>e.preventDefault(),{capture:true});
+ document.addEventListener('auxclick',e=>{if(e.button===1){e.preventDefault();e.stopPropagation()}},{capture:true});
+ document.addEventListener('click',e=>{
+   const link=e.target?.closest?.('a[href]');
+   if(link && (link.target==='_blank'||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey)){e.preventDefault();e.stopPropagation();}
+ },{capture:true});
+ document.addEventListener('keydown',e=>{
+   const k=String(e.key||'').toLowerCase();
+   if((e.ctrlKey||e.metaKey)&&['c','x','u','s','p'].includes(k)){e.preventDefault();e.stopPropagation();}
+   if(e.key==='ContextMenu'||(e.shiftKey&&e.key==='F10')){e.preventDefault();e.stopPropagation();}
+ },{capture:true});
+ window.addEventListener('beforeprint',e=>e.preventDefault?.());
+})();
