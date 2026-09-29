@@ -6,8 +6,6 @@ CREATE TABLE IF NOT EXISTS order_status_history(
  changed_by_user_id TEXT REFERENCES users(id),
  changed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX IF NOT EXISTS idx_order_status_history_order ON order_status_history(order_id,changed_at DESC);
-
 CREATE TABLE IF NOT EXISTS order_sms_notifications(
  id TEXT PRIMARY KEY,
  order_id TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
