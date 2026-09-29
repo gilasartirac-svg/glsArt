@@ -52,7 +52,7 @@ const view=(pages[page]||Dashboard)();
 
 setTimeout(async()=>{
 
- const mod = await import(`./pages/${page==='site-rules'?'SiteRules':page.charAt(0).toUpperCase()+page.slice(1)}.js?v=${page==='site-rules'?'20260928.1':'20260928.2'}`)
+ const mod = await import(`./pages/${page==='site-rules'?'SiteRules':page.charAt(0).toUpperCase()+page.slice(1)}.js?v=${page==='site-rules'?'20260929.1':'20260929.3'}`)
    .catch(()=>null);
 
  if(mod && mod.mount){
