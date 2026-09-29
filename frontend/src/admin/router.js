@@ -8,7 +8,8 @@ import Reports from './pages/Reports.js?v=20260928.2';
 import Roles from './pages/Roles.js?v=20260929.1';
 import AccessControl from './pages/AccessControl.js?v=20260929.1';
 import AuditLogs from './pages/AuditLogs.js?v=20260928.2';
-import Settings from './pages/Settings.js?v=20260928.2';
+import Settings from './pages/Settings.js?v=20260929.1';
+import InvoiceSettings from './pages/InvoiceSettings.js?v=20260929.1';
 import Categories from './pages/Categories.js?v=20260929-categories';
 import Coupons from './pages/Coupons.js?v=20260928.2';
 import Discounts from './pages/Discounts.js?v=20260928.2';
@@ -23,34 +24,7 @@ import SupportTickets from './pages/SupportTickets.js?v=20260928.2';
 import SiteRules from './pages/SiteRules.js?v=20260928.1';
 
 export default function adminRouter(){
-
  const page=location.hash.replace('#/admin/','') || 'dashboard';
-
- const pages={
-  dashboard:Dashboard,
-  products:Products,
-  orders:Orders,
-  customers:Customers,
-  inventory:Inventory,
-  payments:Payments,
-  reports:Reports,
-  roles:Roles,
-  'access-control':AccessControl,
-  audit:AuditLogs,
-  settings:Settings,
-  categories:Categories,
-  coupons:Coupons,
-  discounts:Discounts,
-  sms:SmsSettings,
-  payment:PaymentSettings,
-  visitors:Visitors,
-  about:About,contact:Contact,news:News,articles:Articles,support:SupportTickets,'site-rules':SiteRules
- };
-
- 
-const view=(pages[page]||Dashboard)();
-
-return view;
-
-
+ const pages={dashboard:Dashboard,products:Products,orders:Orders,customers:Customers,inventory:Inventory,payments:Payments,reports:Reports,roles:Roles,'access-control':AccessControl,audit:AuditLogs,settings:Settings,'invoice-settings':InvoiceSettings,categories:Categories,coupons:Coupons,discounts:Discounts,sms:SmsSettings,payment:PaymentSettings,visitors:Visitors,about:About,contact:Contact,news:News,articles:Articles,support:SupportTickets,'site-rules':SiteRules};
+ return (pages[page]||Dashboard)();
 }
