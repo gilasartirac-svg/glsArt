@@ -1,5 +1,74 @@
 import {setupDataGrid} from '../components/Table.js';
-import {api} from '../services/api.js?v=20260926.2';
-export default function Categories(){setTimeout(async()=>{await load();document.querySelector('#cat-form')?.addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.currentTarget);try{await api('/api/admin/categories',{method:'POST',body:JSON.stringify({name:f.get('name'),slug:f.get('slug'),description:f.get('description')})});e.currentTarget.reset();await load()}catch(x){alert(x.message)}})},0);
-async function load(){try{const d=await api('/api/admin/categories');document.querySelector('#cat-grid').innerHTML=(d.items||[]).map(x=>`<tr><td>${x.name}</td><td>${x.slug}</td><td>${x.active?'فعال':'غیرفعال'}</td><td><button class="btn danger" data-id="${x.id}">حذف</button></td></tr>`).join('')||'<tr><td colspan="4">دسته‌ای نیست.</td></tr>';setupDataGrid('cat-grid');document.querySelectorAll('#cat-grid .danger').forEach(b=>b.onclick=async()=>{try{await api('/api/admin/categories/'+b.dataset.id,{method:'DELETE'});load()}catch(e){alert(e.message)}})}catch(e){document.querySelector('#cat-error').textContent=e.message}}
-return `<div class="admin-page" dir="rtl"><div class="admin-title"><h2>دسته‌بندی‌ها</h2></div><div id="cat-error" class="error"></div><div class="panel"><form id="cat-form" class="form"><div class="form-grid"><label>نام دسته<input name="name" required></label><label>Slug<input name="slug" required></label></div><label>توضیح<textarea name="description"></textarea></label><button class="btn primary">ثبت دسته</button></form></div><div class="panel"><table class="admin-table"><thead><tr><th>نام</th><th>Slug</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="cat-grid"></tbody></table></div></div>`}
+import {api} from '../services/api.js?v=20260929-categories';
+
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const errorText=e=>String(e?.message||'خطا در انجام عملیات').replace(/^خطا در دریافت اطلاعات:\s*/,'');
+let gridReady=false;
+
+export default function Categories(){
+ return `<div class="admin-page" dir="rtl">
+  <div class="admin-title"><div><h2>دسته‌بندی‌ها</h2><p class="muted">مدیریت دسته‌بندی‌های فروشگاه</p></div></div>
+  <div id="cat-error" class="error"></div>
+  <div class="panel">
+   <form id="cat-form" class="form">
+    <div class="form-grid">
+     <label>نام دسته<input name="name" maxlength="160" required></label>
+     <label>Slug<input name="slug" maxlength="120" dir="ltr" required></label>
+    </div>
+    <label>توضیح<textarea name="description" maxlength="1000"></textarea></label>
+    <button id="cat-submit" class="btn primary" type="submit">ثبت دسته</button>
+   </form>
+  </div>
+  <div class="panel">
+   <div class="panel-head"><strong>دسته‌بندی‌های ثبت‌شده</strong><button id="cat-refresh" class="btn ghost" type="button">بروزرسانی</button></div>
+   <div class="table-wrap"><table class="admin-table"><thead><tr><th>نام</th><th>Slug</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="cat-grid"><tr><td colspan="4">در حال دریافت...</td></tr></tbody></table></div>
+  </div>
+ </div>`;
+}
+
+export async function mount(){
+ const grid=document.querySelector('#cat-grid'),form=document.querySelector('#cat-form'),err=document.querySelector('#cat-error'),submit=document.querySelector('#cat-submit');
+ if(!grid||!form)return;
+ const showError=e=>{err.textContent=errorText(e)};
+ const bindActions=()=>{
+  grid.querySelectorAll('.cat-delete').forEach(btn=>btn.onclick=async()=>{
+   if(btn.disabled)return;
+   btn.disabled=true;err.textContent='';
+   try{
+    await api('/api/admin/categories/'+encodeURIComponent(btn.dataset.id),{method:'DELETE'});
+    await load();
+   }catch(e){showError(e);btn.disabled=false}
+  });
+ };
+ const load=async()=>{
+  grid.innerHTML='<tr><td colspan="4">در حال دریافت...</td></tr>';
+  try{
+   const d=await api('/api/admin/categories?_ts='+Date.now());
+   const items=d.items||[];
+   grid.innerHTML=items.length?items.map(x=>`<tr><td>${esc(x.name)}</td><td dir="ltr">${esc(x.slug)}</td><td>${x.active?'فعال':'غیرفعال'}</td><td><button type="button" class="btn danger cat-delete" data-id="${esc(x.id)}">حذف</button></td></tr>`).join(''):'<tr><td colspan="4">دسته‌ای ثبت نشده است.</td></tr>';
+   if(!gridReady){
+    setupDataGrid('cat-grid');
+    gridReady=true;
+   }
+   bindActions();
+  }catch(e){
+   grid.innerHTML='<tr><td colspan="4" class="error-cell">دریافت دسته‌بندی‌ها انجام نشد.</td></tr>';
+   showError(e);
+  }
+ };
+ form.addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(submit.disabled)return;
+  err.textContent='';
+  const f=new FormData(form);
+  submit.disabled=true;submit.textContent='در حال ذخیره...';
+  try{
+   await api('/api/admin/categories',{method:'POST',body:JSON.stringify({name:String(f.get('name')||'').trim(),slug:String(f.get('slug')||'').trim(),description:String(f.get('description')||'').trim()})});
+   form.reset();
+   await load();
+  }catch(e){showError(e)}
+  finally{submit.disabled=false;submit.textContent='ثبت دسته'}
+ });
+ document.querySelector('#cat-refresh')?.addEventListener('click',load);
+ await load();
+}
