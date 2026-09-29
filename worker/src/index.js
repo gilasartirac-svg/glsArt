@@ -183,9 +183,9 @@ async function siteSetting(env,key,fallback=''){
 async function paymentEnvironment(env){const v=String(await siteSetting(env,'zarinpal_environment',env.PAYMENT_ENV||'production')).toLowerCase();return v==='sandbox'?'sandbox':'production'}
 
 async function invoiceSettings(env){
- const keys=['invoice_store_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address','invoice_logo_path','invoice_signature_path','invoice_logo_path','invoice_signature_path'];
+ const keys=['invoice_store_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address','invoice_logo_path','invoice_signature_path'];
  const out={};
- for(const key of keys)out[key]=await siteSetting(env,key,key==='invoice_store_name'?'فروشگاه صنایع دستی گیلاس آرت':'');
+ for(const key of keys)out[key]=await siteSetting(env,key,key==='invoice_store_name'?await siteSetting(env,'invoice_seller_name','فروشگاه صنایع دستی گیلاس آرت'):'');
  return out;
 }
 
@@ -863,8 +863,25 @@ if(u.pathname==='/api/admin/site-rules'&&req.method==='PUT'){
  return json({ok:true});
 }
 
+if(u.pathname==='/api/admin/invoice-settings'&&req.method==='GET'){
+ if(!(await requirePermission(me,env,'settings.read')))return json({error:'forbidden'},403);
+ return json({item:await invoiceSettings(env)});
+}
+if(u.pathname==='/api/admin/invoice-settings'&&req.method==='PUT'){
+ if(!(await requirePermission(me,env,'settings.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+ const b=await body(req);
+ const allowed=['invoice_store_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address','invoice_logo_path','invoice_signature_path'];
+ const updates={};
+ for(const key of allowed)if(Object.prototype.hasOwnProperty.call(b,key))updates[key]=String(b[key]??'').trim().slice(0,2000);
+ if(Object.prototype.hasOwnProperty.call(updates,'invoice_store_name')&&!updates.invoice_store_name)return json({error:'invoice_store_name_required'},400);
+ for(const [key,value] of Object.entries(updates)){
+  await env.DB.prepare("INSERT INTO site_settings(key,value,updated_at) VALUES(?,?,CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP").bind(key,value).run();
+ }
+ await audit(env,me,'admin.invoice_settings.update','invoice_settings','invoice_settings',{updated:Object.keys(updates)},req);
+ return json({ok:true,item:await invoiceSettings(env)});
+}
 if(u.pathname==='/api/admin/settings'&&req.method==='GET'){if(!(await requirePermission(me,env,'settings.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare("SELECT key,value,updated_at FROM site_settings ORDER BY key").all();return json({items:r.results||[]})}
-if(u.pathname==='/api/admin/settings'&&req.method==='PUT'){if(!(await requirePermission(me,env,'settings.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const b=await body(req),allowed=['site_name','site_description','seo_title','seo_description','seo_keywords','og_image','invoice_seller_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address'];for(const key of allowed)if(Object.prototype.hasOwnProperty.call(b,key))await env.DB.prepare("INSERT INTO site_settings(key,value,updated_at) VALUES(?,?,CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP").bind(key,String(b[key]??'').slice(0,2000)).run();await audit(env,me,'admin.settings.update','settings','site_settings',{updated:allowed.filter(k=>Object.prototype.hasOwnProperty.call(b,k))},req);return json({ok:true})}
+if(u.pathname==='/api/admin/settings'&&req.method==='PUT'){if(!(await requirePermission(me,env,'settings.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const b=await body(req),allowed=['site_name','site_description','seo_title','seo_description','seo_keywords','og_image'];for(const key of allowed)if(Object.prototype.hasOwnProperty.call(b,key))await env.DB.prepare("INSERT INTO site_settings(key,value,updated_at) VALUES(?,?,CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP").bind(key,String(b[key]??'').slice(0,2000)).run();await audit(env,me,'admin.settings.update','settings','site_settings',{updated:allowed.filter(k=>Object.prototype.hasOwnProperty.call(b,k))},req);return json({ok:true})}
 
 if(u.pathname==='/api/admin/integrations'&&req.method==='GET'){
  if(!(await requirePermission(me,env,'settings.read')))return json({error:'forbidden'},403);
