@@ -8,8 +8,9 @@ CREATE TABLE order_status_history(
  changed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 INSERT INTO order_status_history(id,order_id,from_status,to_status,changed_by_user_id,changed_at)
-SELECT id,order_id,NULL,to_status,NULL,CURRENT_TIMESTAMP
-FROM order_status_history_legacy;
+SELECT h.id,h.order_id,NULL,COALESCE(o.status,'PENDING'),NULL,CURRENT_TIMESTAMP
+FROM order_status_history_legacy h
+LEFT JOIN orders o ON o.id=h.order_id;
 INSERT INTO order_status_history(id,order_id,from_status,to_status,changed_by_user_id,changed_at)
 SELECT 'bootstrap-'||o.id,o.id,NULL,o.status,NULL,o.created_at
 FROM orders o
