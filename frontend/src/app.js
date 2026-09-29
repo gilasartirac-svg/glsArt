@@ -178,7 +178,6 @@ async function router(){const p=location.hash.slice(2).split('/');try{if(!p[0])r
 
 /* GilasArt interaction guard */
 (()=>{
- const editable=e=>{const el=e?.target;return !!el&&(el.matches('input,textarea,select,[contenteditable="true"]')||el.isContentEditable)};
  document.addEventListener('contextmenu',e=>e.preventDefault(),{capture:true});
  document.addEventListener('copy',e=>{e.preventDefault();}, {capture:true});
  document.addEventListener('cut',e=>{e.preventDefault();}, {capture:true});
