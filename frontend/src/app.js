@@ -117,22 +117,65 @@ async function ensureLogin(){if(state.user)return;await account();if(!state.user
 async function loadMe(){try{const d=await api('/api/me');state.user=d.user||null;state.roles=d.roles||[];state.permissions=d.permissions||[];csrfToken=d.csrfToken||csrfToken;return d}catch(e){return null}}
 async function cart(){
  await loadMe();
- if(!state.user){layout('<section class="wrap page"><div class="panel"><h2>سبد خرید</h2><p>برای دیدن سبد خرید وارد حساب شوید.</p><a class="btn primary" href="#/account">ورود</a></div></section>');return}
- let d=await api('/api/cart'),couponCode='';
+ if(!state.user){
+  layout('<section class="wrap page"><div class="panel"><h2>سبد خرید</h2><p>برای دیدن سبد خرید وارد حساب شوید.</p><a class="btn primary" href="#/account">ورود</a></div></section>');
+  return;
+ }
+ let d=await api('/api/cart'),couponCode='',couponMessage='';
+ const idempotencyKey=()=>((crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)).replace(/-/g,''));
  const render=(p=d)=>{
   const items=p.items||[];
   const lines=items.map(x=>{
    const opts=x.selected_options?.length?'<div class="cart-options">'+x.selected_options.map(o=>escapeHtml(o.attributeName)+': '+escapeHtml(o.optionName)+(Number(o.priceDeltaIrt||0)?' (+'+fa(o.priceDeltaIrt)+' ریال)':'')).join(' · ')+'</div>':'';
-   return '<div class="cartline"><div class="grow"><b>'+escapeHtml(x.name)+'</b><div class="muted">'+fa(x.unit_price_irt??x.price_irt)+' × '+fa(x.quantity)+' ریال</div>'+opts+'</div><button class="btn ghost del" data-id="'+escapeHtml(x.product_id)+'">حذف</button></div>';
+   const href='#/product/'+encodeURIComponent(x.slug||x.product_slug||'');
+   return '<article class="cartline"><a class="cart-product-link" href="'+href+'" aria-label="مشاهده '+escapeHtml(x.name)+'"><span class="cart-product-thumb">'+(x.image?'<img src="'+escapeHtml(safeUrl(x.image))+'" alt="'+escapeHtml(x.name)+'">':'<span>گیلاس آرت</span>')+'</span><span class="grow"><b>'+escapeHtml(x.name)+'</b><span class="muted">'+fa(x.unit_price_irt??x.price_irt)+' ریال × '+fa(x.quantity)+'</span>'+opts+'</span></a><button class="btn ghost del" data-id="'+escapeHtml(x.product_id)+'" type="button">حذف</button></article>';
   }).join('');
-  const summary=items.length?'<hr><div class="sectionhead"><b>جمع کالاها</b><strong class="price">'+fa(p.subtotal_irt)+' ریال</strong></div><div class="coupon-box"><label>کد تخفیف خود را وارد کنید<input id="coupon-code" value="'+escapeHtml(couponCode)+'" placeholder="GLS________" autocomplete="off"></label><button class="btn primary" id="apply-coupon">اعمال کوپن</button><div id="coupon-message" class="muted"></div></div><div class="price-summary"><p>مبلغ اولیه: <b>'+fa(p.subtotal_irt)+' ریال</b></p><p>تخفیف: <b>'+fa(p.discount_irt)+' ریال</b></p><p>ارسال: <b>'+fa(p.shipping_irt)+' ریال</b></p><p>مبلغ قابل پرداخت: <strong class="price">'+fa(p.total_irt)+' ریال</strong></p></div><a class="btn primary" href="#/checkout">ادامه و ثبت سفارش</a>':'';
-  layout('<section class="wrap page"><h1>سبد خرید</h1><div class="panel">'+(lines||'<p class="muted">سبد شما خالی است.</p>')+summary+'</div></section>');
+  const empty=!items.length;
+  const summary=empty?'':'<div class="cart-section cart-pricing"><div class="cart-section-title"><div><span class="eyebrow">ORDER SUMMARY</span><h2>خلاصه سفارش</h2></div><span class="cart-items-count">'+fa(items.length)+' محصول</span></div><div class="coupon-box cart-coupon"><div><label for="coupon-code">کد تخفیف</label><input id="coupon-code" dir="ltr" inputmode="text" autocomplete="off" value="'+escapeHtml(couponCode)+'" placeholder="GLS________"></div><button class="btn ghost" id="apply-coupon" type="button">اعمال کوپن</button><div id="coupon-message" class="'+(couponMessage?'ok':'muted')+'">'+escapeHtml(couponMessage)+'</div></div><div class="price-summary cart-total-list"><div><span>جمع کالاها</span><b>'+fa(p.subtotal_irt)+' ریال</b></div><div><span>تخفیف</span><b>'+fa(p.discount_irt)+' ریال</b></div><div><span>هزینه ارسال</span><b>'+fa(p.shipping_irt)+' ریال</b></div><div class="cart-grand-total"><span>مبلغ قابل پرداخت</span><strong>'+fa(p.total_irt)+' ریال</strong></div></div></div>';
+  const address=empty?'':'<div class="cart-section cart-address"><div class="cart-section-title"><div><span class="eyebrow">DELIVERY</span><h2>اطلاعات تحویل</h2><p class="muted">این اطلاعات برای ثبت سفارش و ارسال تابلو استفاده می‌شود.</p></div><span class="cart-secure-note">اطلاعات شما امن ارسال می‌شود</span></div><div class="cart-address-grid"><label>نام گیرنده<input id="rn" value="'+escapeHtml(state.user.name||'')+'" autocomplete="name" required></label><label>استان<input id="pr" autocomplete="address-level1" required></label><label>شهر<input id="ct" autocomplete="address-level2" required></label><label class="cart-address-wide">نشانی کامل<textarea id="ad" autocomplete="street-address" rows="4" required></textarea></label><label>کد پستی<input id="pc" inputmode="numeric" maxlength="10" autocomplete="postal-code" dir="ltr" required></label><div class="cart-mobile-field"><span>شماره همراه</span><strong dir="ltr">'+escapeHtml(state.user.mobile||'—')+'</strong><small>شماره حساب کاربری</small></div></div></div>';
+  const action=empty?'':'<div class="cart-checkout-bar"><div><span>مبلغ نهایی</span><strong>'+fa(p.total_irt)+' ریال</strong><small>با کلیک روی پرداخت، سفارش ثبت و به درگاه امن منتقل می‌شوید.</small></div><button class="btn primary cart-pay-btn" id="order" type="button">ثبت سفارش و پرداخت</button></div><div id="msg" class="cart-order-message" aria-live="polite"></div>';
+  layout('<section class="wrap page cart-page"><div class="cart-hero"><div><span class="eyebrow">GILASART CHECKOUT</span><h1>سبد خرید</h1><p>همه چیز برای تکمیل خرید شما در همین صفحه آماده است.</p></div><div class="cart-hero-badge">'+fa(items.length)+' محصول</div></div><div class="cart-layout"><div class="cart-main"><div class="panel cart-items-panel"><div class="cart-section-title"><div><span class="eyebrow">YOUR ARTWORKS</span><h2>محصولات انتخاب‌شده</h2></div><span class="cart-items-count">'+fa(items.length)+' محصول</span></div><div class="cart-items-list">'+(lines||'<div class="cart-empty"><strong>سبد خرید شما خالی است.</strong><p>آثار مورد علاقه‌تان را از فروشگاه انتخاب کنید.</p><a class="btn primary" href="#/shop">مشاهده فروشگاه</a></div>')+'</div></div>'+address+summary+action+'</div><aside class="cart-side"><div class="cart-trust"><span class="eyebrow">GILASART</span><h3>خریدی ساده و مطمئن</h3><p>اطلاعات تحویل، تخفیف و مبلغ نهایی را قبل از پرداخت یکجا بررسی کنید.</p><div class="cart-trust-item">✓ اطلاعات سفارش قبل از پرداخت قابل بررسی است</div><div class="cart-trust-item">✓ پرداخت از طریق درگاه فروشگاه انجام می‌شود</div><div class="cart-trust-item">✓ شماره همراه از حساب شما دریافت می‌شود</div></div></aside></div></section>');
  };
- document.querySelectorAll('.del').forEach(b=>b.onclick=async()=>{await api('/api/cart?productId='+b.dataset.id,{method:'DELETE',headers:{'x-csrf-token':csrf()}});cart()});
- document.querySelector('#apply-coupon')?.addEventListener('click',async()=>{const code=document.querySelector('#coupon-code').value.trim();try{const priced=await api('/api/cart/price',{method:'POST',body:JSON.stringify({code}),headers:{'x-csrf-token':csrf()}});couponCode=code;render(priced);const m=document.querySelector('#coupon-message');if(m)m.textContent='کوپن اعمال شد: '+fa(priced.coupon_discount_irt)+' ریال تخفیف';}catch(e){const m=document.querySelector('#coupon-message');if(m)m.textContent=e.message==='coupon_not_found'?'کد کوپن معتبر نیست.':e.message==='coupon_expired_or_inactive'?'کد کوپن منقضی یا غیرفعال است.':e.message==='coupon_usage_limit'?'سقف استفاده از این کوپن تکمیل شده است.':e.message==='coupon_already_used'?'این کوپن قبلاً برای حساب شما استفاده شده است.':e.message==='coupon_not_applicable'?'این کوپن برای محصولات سبد شما قابل استفاده نیست.':e.message==='coupon_min_order'?'حداقل مبلغ خرید این کوپن رعایت نشده است.':'اعمال کوپن با خطا مواجه شد.'}});
- render(d);
-}
-const ORDER_STATUS_LABELS_PUBLIC={PENDING:'در انتظار پرداخت',PAID:'پرداخت شد',PROCESSING:'در حال پردازش',SHIPPED:'ارسال شد',DELIVERED:'تحویل شد',CANCELLED:'لغو شد',FAILED:'ناموفق'};
+ const bind=()=>{
+  document.querySelectorAll('.del').forEach(b=>b.onclick=async()=>{
+   if(b.disabled)return;
+   b.disabled=true;
+   try{await api('/api/cart?productId='+encodeURIComponent(b.dataset.id),{method:'DELETE',headers:{'x-csrf-token':csrf()}});await cart()}catch(e){b.disabled=false;alert(e.message||'حذف محصول انجام نشد.')}
+  });
+  document.querySelector('#apply-coupon')?.addEventListener('click',async()=>{
+   const input=document.querySelector('#coupon-code'),code=String(input?.value||'').trim();
+   const m=document.querySelector('#coupon-message');
+   if(!code){if(m){m.className='error';m.textContent='کد تخفیف را وارد کنید.'}return}
+   try{
+    const priced=await api('/api/cart/price',{method:'POST',body:JSON.stringify({code}),headers:{'x-csrf-token':csrf()}});
+    couponCode=code;couponMessage='کوپن اعمال شد: '+fa(priced.coupon_discount_irt||0)+' ریال تخفیف';
+    render(priced);bind();
+   }catch(e){
+    if(m){m.className='error';m.textContent=e.message==='coupon_not_found'?'کد کوپن معتبر نیست.':e.message==='coupon_expired_or_inactive'?'کد کوپن منقضی یا غیرفعال است.':e.message==='coupon_usage_limit'?'سقف استفاده از این کوپن تکمیل شده است.':e.message==='coupon_already_used'?'این کوپن قبلاً برای حساب شما استفاده شده است.':e.message==='coupon_not_applicable'?'این کوپن برای محصولات سبد شما قابل استفاده نیست.':e.message==='coupon_min_order'?'حداقل مبلغ خرید این کوپن رعایت نشده است.':'اعمال کوپن با خطا مواجه شد.'}
+   }
+  });
+  document.querySelector('#order')?.addEventListener('click',async()=>{
+   const button=document.querySelector('#order'),msg=document.querySelector('#msg');
+   const values={recipientName:String(document.querySelector('#rn')?.value||'').trim(),province:String(document.querySelector('#pr')?.value||'').trim(),city:String(document.querySelector('#ct')?.value||'').trim(),address:String(document.querySelector('#ad')?.value||'').trim(),postalCode:String(document.querySelector('#pc')?.value||'').trim()};
+   if(!values.recipientName||!values.province||!values.city||!values.address||!values.postalCode){if(msg)msg.innerHTML='<span class="error">لطفاً همه اطلاعات تحویل را کامل کنید.</span>';return}
+   if(!/^\d{10}$/.test(values.postalCode.replace(/[^0-9]/g,''))){if(msg)msg.innerHTML='<span class="error">کد پستی باید ۱۰ رقم باشد.</span>';return}
+   if(button.disabled)return;
+   button.disabled=true;button.textContent='در حال ثبت سفارش…';if(msg)msg.textContent='';
+   try{
+    const a=await api('/api/addresses',{method:'POST',body:JSON.stringify(values),headers:{'x-csrf-token':csrf()}});
+    const o=await api('/api/orders',{method:'POST',body:JSON.stringify({addressId:a.addressId,idempotencyKey:idempotencyKey(),couponCode}),headers:{'x-csrf-token':csrf()}});
+    const pay=await api('/api/orders/'+encodeURIComponent(o.orderId)+'/pay',{method:'POST',headers:{'x-csrf-token':csrf()}});
+    if(!pay?.url)throw new Error('آدرس درگاه پرداخت از سرور دریافت نشد.');
+    if(msg)msg.innerHTML='<span class="ok">سفارش ثبت شد؛ در حال انتقال به درگاه پرداخت…</span>';
+    location.href=pay.url;
+   }catch(e){
+    button.disabled=false;button.textContent='ثبت سفارش و پرداخت';
+    if(msg)msg.innerHTML='<span class="error">'+escapeHtml(e.message||'ثبت سفارش یا پرداخت انجام نشد.')+'</span>';
+   }
+  });
+ };
+ render(d);bind();
+}const ORDER_STATUS_LABELS_PUBLIC={PENDING:'در انتظار پرداخت',PAID:'پرداخت شد',PROCESSING:'در حال پردازش',SHIPPED:'ارسال شد',DELIVERED:'تحویل شد',CANCELLED:'لغو شد',FAILED:'ناموفق'};
 const orderStatusPublic=s=>ORDER_STATUS_LABELS_PUBLIC[String(s||'').toUpperCase()]||String(s||'نامشخص');
 function invoiceHtmlData(d){
  const o=d.order||{},items=d.items||[],p=d.payment||{},cfg=d.invoice||{};
