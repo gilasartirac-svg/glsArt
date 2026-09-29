@@ -1,6 +1,6 @@
 import Dashboard from './pages/Dashboard.js?v=20260928.2';
 import Products from './pages/Products.js?v=20260929-products-grid';
-import Orders from './pages/Orders.js?v=20260928.2';
+import Orders from './pages/Orders.js?v=20260929-orders';
 import Customers from './pages/Customers.js?v=20260928.2';
 import Inventory from './pages/Inventory.js?v=20260928.2';
 import Payments from './pages/Payments.js?v=20260928.2';
