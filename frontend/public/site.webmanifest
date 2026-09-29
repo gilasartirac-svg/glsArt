@@ -1,0 +1,12 @@
+{
+  "name": "GilasArt",
+  "short_name": "GilasArt",
+  "lang": "fa-IR",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0b0d",
+  "theme_color": "#0b0b0d"
+}
