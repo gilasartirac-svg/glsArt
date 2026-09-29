@@ -165,7 +165,7 @@ function orderTimeline(order){
 async function account(){
  await loadMe();
  if(state.user){
-  const invoiceModule=await import('./invoice.js?v=20260929-invoice');
+  const invoiceModule=await import('./invoice.js?v=20260929-invoice-2');
   let ordersData={items:[],invoice:{}};
   try{ordersData=await api('/api/account/orders')}catch(e){ordersData={items:[],invoice:{},error:e.message||'سفارش‌ها قابل دریافت نیستند'}}
   const orders=ordersData.items||[],invoiceSettings=ordersData.invoice||{};
