@@ -1,5 +1,5 @@
 import {setupDataGrid} from '../components/Table.js';
-import {api} from '../services/api.js?v=20260928-products-grid';
+import {admin,api} from '../services/api.js?v=20260929-products-grid';
 import {bindImagePicker} from '../components/ImagePicker.js';
 
 const localDateTime=v=>{if(!v)return '';const d=new Date(v);if(Number.isNaN(d.getTime()))return '';const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`};
@@ -11,7 +11,7 @@ export default function Products(){
  let attributes=[];
  const load=async()=>{
   try{
-   const pd=await api('/api/admin/products');
+   const pd=await admin.products();
    if(!Array.isArray(pd.items))throw new Error('پاسخ API محصولات ساختار معتبر ندارد.');
    render(pd.items);
   }catch(e){
@@ -45,11 +45,11 @@ export default function Products(){
  function render(items){
   const el=document.querySelector('#products-grid');if(!el)return;
   el.innerHTML=items.map(p=>`<tr><td><b>${esc(p.name)}</b><div class="muted">${esc(p.slug)}</div></td><td>${esc(p.sku)}</td><td>${money(p.price_irt)} ریال</td><td>${p.stock??0}</td><td><span class="pill">${p.active?'فعال':'غیرفعال'}</span></td><td><button class="btn ghost edit" data-id="${esc(p.id)}">ویرایش</button> <button class="btn danger del" data-id="${esc(p.id)}">حذف</button></td></tr>`).join('')||'<tr><td colspan="6">محصولی وجود ندارد.</td></tr>';
-  setupDataGrid('products-grid');
+  try{setupDataGrid('products-grid')}catch(err){console.warn('Products data-grid enhancement failed; catalog rendering preserved.',err)}
   el.querySelectorAll('.edit').forEach(b=>b.onclick=()=>edit(items.find(x=>x.id===b.dataset.id)));
   el.querySelectorAll('.del').forEach(b=>b.onclick=async()=>{if(!confirm('حذف شود؟'))return;try{await api('/api/admin/products/'+encodeURIComponent(b.dataset.id),{method:'DELETE'});await refresh();}catch(e){alert(e.message)}});
  }
- async function refresh(){const d=await api('/api/admin/products');if(!Array.isArray(d.items))throw new Error('پاسخ API محصولات ساختار معتبر ندارد.');render(d.items)}
+ async function refresh(){const d=await admin.products();if(!Array.isArray(d.items))throw new Error('پاسخ API محصولات ساختار معتبر ندارد.');render(d.items)}
  function renderAttributeChoices(selected=[]){
   const box=document.querySelector('#product-attributes');if(!box)return;
   box.innerHTML=attributes.filter(a=>a.active).map(a=>`<label class="attribute-check"><input type="checkbox" value="${esc(a.id)}" ${selected.includes(a.id)?'checked':''}><span><b>${esc(a.name)}</b><small>${a.options?.length||0} گزینه</small></span></label>`).join('')||'<span class="muted">هنوز ویژگی فعالی تعریف نشده است.</span>';
