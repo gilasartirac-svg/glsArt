@@ -150,7 +150,32 @@ async function ensureAdminBootstrap(env){
   return true;
 }
 async function rate(env,key,limit,minutes){const h=await env.DB.prepare('SELECT COUNT(*) n FROM otp_challenges WHERE request_ip=? AND created_at>datetime(\'now\',?)').bind(key,`-${minutes} minutes`).first();return (h?.n||0)<limit}
-async function releaseReservation(env,orderId,orderStatus='FAILED'){const r=await env.DB.prepare('SELECT product_id,quantity FROM stock_reservations WHERE order_id=?').bind(orderId).all();const items=r.results||[];if(!items.length)return false;const statements=items.map(x=>env.DB.prepare('UPDATE inventory SET quantity=quantity+?,updated_at=CURRENT_TIMESTAMP WHERE product_id=?').bind(x.quantity,x.product_id));statements.push(env.DB.prepare('DELETE FROM stock_reservations WHERE order_id=?').bind(orderId));statements.push(env.DB.prepare("UPDATE payments SET status='CANCELLED',updated_at=CURRENT_TIMESTAMP WHERE order_id=? AND status!='PAID'").bind(orderId));statements.push(env.DB.prepare('UPDATE orders SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND status=\'PENDING\'').bind(orderStatus,orderId));await env.DB.batch(statements);return true}
+const ORDER_STATUS_LABELS={PENDING:'در انتظار پرداخت',PAID:'پرداخت شد',PROCESSING:'در حال پردازش',SHIPPED:'ارسال شد',DELIVERED:'تحویل شد',CANCELLED:'لغو شد',FAILED:'ناموفق'};
+const ORDER_STATUSES=new Set(Object.keys(ORDER_STATUS_LABELS));
+function orderStatusLabel(status){return ORDER_STATUS_LABELS[String(status||'').toUpperCase()]||String(status||'نامشخص')}
+async function recordOrderStatusChange(env,orderId,fromStatus,toStatus,changedByUserId=null){
+ if(!toStatus||fromStatus===toStatus)return {sent:false,reason:'unchanged'};
+ await env.DB.prepare('INSERT INTO order_status_history(id,order_id,from_status,to_status,changed_by_user_id) VALUES(?,?,?,?,?)').bind(uid(),orderId,fromStatus||null,toStatus,changedByUserId||null).run();
+ const order=await env.DB.prepare('SELECT o.id,u.mobile FROM orders o JOIN users u ON u.id=o.user_id WHERE o.id=?').bind(orderId).first();
+ if(!order?.mobile)return {sent:false,reason:'mobile_missing'};
+ const message='گیلاس آرت\nوضعیت سفارش: '+orderStatusLabel(toStatus);
+ let deliveryStatus='SKIPPED',providerStatus=null;
+ const key=String(env.KAVENEGAR_API_KEY||'');
+ const sender=String(await siteSetting(env,'kavenegar_sender',env.KAVENEGAR_SENDER||'')).trim().slice(0,50);
+ if(key&&sender){
+  try{
+   const p=new URLSearchParams({receptor:String(order.mobile),message,sender});
+   const sr=await fetch('https://api.kavenegar.com/v1/'+key+'/sms/send.json',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:p});
+   let sj=null;try{sj=await sr.json()}catch{}
+   providerStatus=Number.isFinite(Number(sj?.return?.status))?Number(sj.return.status):null;
+   deliveryStatus=sr.ok&&providerStatus===200?'SENT':'FAILED';
+   if(deliveryStatus==='FAILED')console.error('order_status_sms_rejected',JSON.stringify({orderId,providerStatus,httpStatus:sr.status}));
+  }catch(e){deliveryStatus='FAILED';console.error('order_status_sms_network_error',orderId,e?.message||e)}
+ }
+ await env.DB.prepare('INSERT INTO order_sms_notifications(id,order_id,mobile,from_status,to_status,message,delivery_status,provider_status) VALUES(?,?,?,?,?,?,?,?)').bind(uid(),orderId,String(order.mobile),fromStatus||null,toStatus,message,deliveryStatus,providerStatus).run();
+ return {sent:deliveryStatus==='SENT',deliveryStatus};
+}
+async function releaseReservation(env,orderId,orderStatus='FAILED'){const before=await env.DB.prepare('SELECT status FROM orders WHERE id=?').bind(orderId).first();const r=await env.DB.prepare('SELECT product_id,quantity FROM stock_reservations WHERE order_id=?').bind(orderId).all();const items=r.results||[];if(!items.length)return false;const statements=items.map(x=>env.DB.prepare('UPDATE inventory SET quantity=quantity+?,updated_at=CURRENT_TIMESTAMP WHERE product_id=?').bind(x.quantity,x.product_id));statements.push(env.DB.prepare('DELETE FROM stock_reservations WHERE order_id=?').bind(orderId));statements.push(env.DB.prepare("UPDATE payments SET status='CANCELLED',updated_at=CURRENT_TIMESTAMP WHERE order_id=? AND status!='PAID'").bind(orderId));statements.push(env.DB.prepare('UPDATE orders SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND status=\'PENDING\'').bind(orderStatus,orderId));await env.DB.batch(statements);const after=await env.DB.prepare('SELECT status FROM orders WHERE id=?').bind(orderId).first();if(before?.status!==after?.status)await recordOrderStatusChange(env,orderId,before?.status,after?.status,null);return true}
 async function cleanupExpiredReservations(env){const r=await env.DB.prepare("SELECT DISTINCT sr.order_id FROM stock_reservations sr JOIN orders o ON o.id=sr.order_id JOIN payments p ON p.order_id=o.id WHERE o.status='PENDING' AND p.status!='PAID' AND sr.reserved_until<=CURRENT_TIMESTAMP").all();for(const x of (r.results||[])){try{await releaseReservation(env,x.order_id,'FAILED')}catch(e){console.error('reservation_cleanup_failed',x.order_id,e?.message||e)}}}
 async function siteSetting(env,key,fallback=''){
   try{const r=await env.DB.prepare('SELECT value FROM site_settings WHERE key=?').bind(key).first();return r?.value ?? fallback}catch{return fallback}
@@ -507,6 +532,7 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
   for(const d of discounts){orderSql+=" AND (SELECT COUNT(*) FROM discount_usages WHERE order_id=? AND discount_id=?)=1";orderArgs.push(oid,d.id)}
   if(pricing.coupon){orderSql+=" AND (SELECT COUNT(*) FROM coupon_usages WHERE order_id=? AND coupon_id=?)=1";orderArgs.push(oid,pricing.coupon.id)}
   stmts.push(env.DB.prepare(orderSql).bind(...orderArgs));
+  stmts.push(env.DB.prepare('INSERT INTO order_status_history(id,order_id,from_status,to_status,changed_by_user_id) VALUES(?,?,?,?,?)').bind(uid(),oid,null,'PENDING',me.id));
   for(const x of rows)stmts.push(env.DB.prepare('INSERT INTO order_items(id,order_id,product_id,sku,name,unit_price_irt,quantity,line_total_irt,options_json) VALUES(?,?,?,?,?,?,?,?,?)').bind(uid(),oid,x.product_id,x.sku,x.name,x.unit_price_irt,x.quantity,x.unit_price_irt*x.quantity,JSON.stringify(x.selected_options||[])));
   stmts.push(env.DB.prepare('INSERT INTO payments(id,order_id,status,amount_irt) VALUES(?,?,\'CREATED\',?)').bind(pay,oid,pricing.total_irt));
   for(const x of rows)stmts.push(env.DB.prepare('UPDATE inventory SET quantity=quantity-?,updated_at=CURRENT_TIMESTAMP WHERE product_id=? AND quantity>=?').bind(x.quantity,x.product_id,x.quantity));
@@ -518,7 +544,7 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
  }
  if(u.pathname.startsWith('/api/orders/')&&req.method==='GET'){if(!me)return json({error:'unauthorized'},401);const oid=u.pathname.split('/')[3];const o=await env.DB.prepare('SELECT * FROM orders WHERE id=? AND user_id=?').bind(oid,me.id).first();if(!o)return json({error:'not_found'},404);const items=(await env.DB.prepare('SELECT * FROM order_items WHERE order_id=?').bind(oid).all()).results||[];const pay=await env.DB.prepare('SELECT status,amount_irt,ref_id,authority FROM payments WHERE order_id=?').bind(oid).first();return json({order:o,items,payment:pay})}
  if(u.pathname.startsWith('/api/orders/')&&u.pathname.endsWith('/pay')&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const oid=u.pathname.split('/')[3],o=await env.DB.prepare('SELECT * FROM orders WHERE id=? AND user_id=? AND status=\'PENDING\'').bind(oid,me.id).first();if(!o)return json({error:'order_not_payable'},400);const p=await env.DB.prepare('SELECT * FROM payments WHERE order_id=?').bind(oid).first();if(!p)return json({error:'payment_missing'},500);if(p.status==='PAID')return json({ok:true,url:frontend(env)+'/#/payment/success?order='+oid,reused:true});if(p.authority&&['REDIRECTED','CALLBACK','VERIFYING'].includes(p.status)){const mode=await paymentEnvironment(env);const host=mode==='production'?'https://www.zarinpal.com':'https://sandbox.zarinpal.com';return json({ok:true,url:host+'/pg/StartPay/'+p.authority,reused:true})}if(!env.ZARINPAL_MERCHANT_ID)return json({error:'payment_not_configured'},503);const reqz=await zarin(env,'request.json',{amount:o.total_irt,description:'GilasArt Order '+oid,callback_url:await siteSetting(env,'zarinpal_callback_url',env.PAYMENT_CALLBACK_URL||new URL(req.url).origin+'/api/payment/callback'),metadata:{mobile:me.mobile}});const data=reqz.data||{},code=Number(data.code||reqz.code||0),authority=data.authority;if(code!==100||!authority)return json({error:'payment_request_failed',details:reqz.errors||[]},502);await env.DB.batch([env.DB.prepare("UPDATE payments SET status='REDIRECTED',authority=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND status!='PAID'").bind(authority,p.id),env.DB.prepare('INSERT INTO payment_attempts(id,payment_id,authority,request_code,raw_status) VALUES(?,?,?,?,?)').bind(uid(),p.id,authority,code,JSON.stringify({code,message:data.message||null}))]);const mode=await paymentEnvironment(env);const host=mode==='production'?'https://www.zarinpal.com':'https://sandbox.zarinpal.com';return json({ok:true,url:host+'/pg/StartPay/'+authority})}
- if(u.pathname==='/api/payment/callback'&&req.method==='GET'){const authority=u.searchParams.get('Authority'),status=u.searchParams.get('Status');if(!authority)return json({error:'missing_authority'},400);const p=await env.DB.prepare('SELECT p.*,o.status order_status FROM payments p JOIN orders o ON o.id=p.order_id WHERE p.authority=?').bind(authority).first();if(!p)return json({error:'payment_not_found'},404);if(status!=='OK'){await releaseReservation(env,p.order_id,'FAILED');return Response.redirect(frontend(env)+'/#/payment/failed?order='+p.order_id,302)}if(p.status==='PAID')return Response.redirect(frontend(env)+'/#/payment/success?order='+p.order_id,302);if(!env.ZARINPAL_MERCHANT_ID)return json({error:'payment_not_configured'},503);const vr=await zarin(env,'verify.json',{amount:p.amount_irt,authority});const code=Number(vr.code||vr.data?.code||0),ref=vr.data?.ref_id,ok=code===100||code===101;await env.DB.prepare('INSERT INTO payment_attempts(id,payment_id,authority,verify_code,callback_status,raw_status) VALUES(?,?,?,?,?,?)').bind(uid(),p.id,authority,code||null,status,JSON.stringify({code,message:vr.message||vr.data?.message||null})).run();if(!ok){await env.DB.prepare("UPDATE payments SET status='FAILED',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status!='PAID'").bind(p.id).run();return Response.redirect(frontend(env)+'/#/payment/failed?order='+p.order_id,302)}const reservationCount=await env.DB.prepare('SELECT COUNT(*) n FROM stock_reservations WHERE order_id=?').bind(p.order_id).first();if(!reservationCount?.n)return json({error:'stock_reservation_missing'},409);const statements=[env.DB.prepare("UPDATE payments SET status='PAID',ref_id=COALESCE(?,ref_id),paid_at=COALESCE(paid_at,CURRENT_TIMESTAMP),updated_at=CURRENT_TIMESTAMP WHERE id=? AND status!='PAID' AND EXISTS (SELECT 1 FROM orders oo WHERE oo.id=payments.order_id AND oo.status='PENDING')").bind(ref,p.id),env.DB.prepare("UPDATE orders SET status='PAID',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='PENDING' AND EXISTS (SELECT 1 FROM payments pp WHERE pp.order_id=orders.id AND pp.status='PAID')").bind(p.order_id),env.DB.prepare('DELETE FROM stock_reservations WHERE order_id=?').bind(p.order_id)];await env.DB.batch(statements);return Response.redirect(frontend(env)+'/#/payment/success?order='+p.order_id+'&ref='+encodeURIComponent(ref||''),302)}
+ if(u.pathname==='/api/payment/callback'&&req.method==='GET'){const authority=u.searchParams.get('Authority'),status=u.searchParams.get('Status');if(!authority)return json({error:'missing_authority'},400);const p=await env.DB.prepare('SELECT p.*,o.status order_status FROM payments p JOIN orders o ON o.id=p.order_id WHERE p.authority=?').bind(authority).first();if(!p)return json({error:'payment_not_found'},404);if(status!=='OK'){await releaseReservation(env,p.order_id,'FAILED');return Response.redirect(frontend(env)+'/#/payment/failed?order='+p.order_id,302)}if(p.status==='PAID')return Response.redirect(frontend(env)+'/#/payment/success?order='+p.order_id,302);if(!env.ZARINPAL_MERCHANT_ID)return json({error:'payment_not_configured'},503);const vr=await zarin(env,'verify.json',{amount:p.amount_irt,authority});const code=Number(vr.code||vr.data?.code||0),ref=vr.data?.ref_id,ok=code===100||code===101;await env.DB.prepare('INSERT INTO payment_attempts(id,payment_id,authority,verify_code,callback_status,raw_status) VALUES(?,?,?,?,?,?)').bind(uid(),p.id,authority,code||null,status,JSON.stringify({code,message:vr.message||vr.data?.message||null})).run();if(!ok){await env.DB.prepare("UPDATE payments SET status='FAILED',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status!='PAID'").bind(p.id).run();return Response.redirect(frontend(env)+'/#/payment/failed?order='+p.order_id,302)}const reservationCount=await env.DB.prepare('SELECT COUNT(*) n FROM stock_reservations WHERE order_id=?').bind(p.order_id).first();if(!reservationCount?.n)return json({error:'stock_reservation_missing'},409);const beforeOrderStatus=p.order_status;const statements=[env.DB.prepare("UPDATE payments SET status='PAID',ref_id=COALESCE(?,ref_id),paid_at=COALESCE(paid_at,CURRENT_TIMESTAMP),updated_at=CURRENT_TIMESTAMP WHERE id=? AND status!='PAID' AND EXISTS (SELECT 1 FROM orders oo WHERE oo.id=payments.order_id AND oo.status='PENDING')").bind(ref,p.id),env.DB.prepare("UPDATE orders SET status='PAID',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='PENDING' AND EXISTS (SELECT 1 FROM payments pp WHERE pp.order_id=payments.id AND pp.status='PAID')").bind(p.order_id,p.id),env.DB.prepare('DELETE FROM stock_reservations WHERE order_id=?').bind(p.order_id)];await env.DB.batch(statements);const paidOrder=await env.DB.prepare('SELECT status FROM orders WHERE id=?').bind(p.order_id).first();if(beforeOrderStatus!==paidOrder?.status)await recordOrderStatusChange(env,p.order_id,beforeOrderStatus,paidOrder.status,null);return Response.redirect(frontend(env)+'/#/payment/success?order='+p.order_id+'&ref='+encodeURIComponent(ref||''),302)}
  if(u.pathname==='/api/favorites'&&req.method==='GET'){if(!me)return json({items:[]});const r=await env.DB.prepare('SELECT p.id,p.slug,p.name,p.price_irt,pi.path image FROM favorites f JOIN products p ON p.id=f.product_id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE f.user_id=?').bind(me.id).all();return json({items:r.results||[]})}
  if(u.pathname==='/api/favorites'&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const b=await body(req);await env.DB.prepare('INSERT OR IGNORE INTO favorites(user_id,product_id) VALUES(?,?)').bind(me.id,String(b.productId||'')).run();return json({ok:true})}
  if(u.pathname==='/api/favorites'&&req.method==='DELETE'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const pid=u.searchParams.get('productId');await env.DB.prepare('DELETE FROM favorites WHERE user_id=? AND product_id=?').bind(me.id,pid).run();return json({ok:true})}
@@ -694,50 +720,31 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
  }
 
 
- if(u.pathname.startsWith('/api/admin/orders/') &&
-    u.pathname.endsWith('/status') &&
-    req.method==='PUT'){
-
-  if(!(await requirePermission(me,env,'orders.write'))||!requireCsrf(req))
-   return json({error:'forbidden'},403);
-
-  const id=u.pathname.split('/')[4];
-
-  const before=await env.DB.prepare(
-   'SELECT * FROM orders WHERE id=?'
-  ).bind(id).first();
-
-  if(!before)
-   return json({error:'not_found'},404);
-
-  const b=await body(req);
-
-  await env.DB.prepare(`
-   UPDATE orders
-   SET status=?, updated_at=CURRENT_TIMESTAMP
-   WHERE id=?
-  `).bind(
-   String(b.status||before.status),
-   id
-  ).run();
-
-  const after=await env.DB.prepare(
-   'SELECT * FROM orders WHERE id=?'
-  ).bind(id).first();
-
-  await audit(
-   env,
-   me,
-   'admin.order.status.change',
-   'order',
-   id,
-   {before,after},
-   req
-  );
-
-  return json({ok:true});
+ if(u.pathname.startsWith('/api/admin/orders/') && u.pathname.endsWith('/status') && req.method==='PUT'){
+  if(!(await requirePermission(me,env,'orders.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+  const id=u.pathname.split('/')[4],before=await env.DB.prepare('SELECT * FROM orders WHERE id=?').bind(id).first();
+  if(!before)return json({error:'not_found'},404);
+  const b=await body(req),next=String(b.status||'').trim().toUpperCase();
+  if(!ORDER_STATUSES.has(next))return json({error:'invalid_order_status'},400);
+  if(next===before.status)return json({ok:true,changed:false,status:before.status});
+  await env.DB.prepare('UPDATE orders SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(next,id).run();
+  const after=await env.DB.prepare('SELECT * FROM orders WHERE id=?').bind(id).first();
+  const sms=await recordOrderStatusChange(env,id,before.status,after.status,me.id);
+  await audit(env,me,'admin.order.status.change','order',id,{before,after,sms},req);
+  return json({ok:true,changed:true,status:after.status,sms});
  }
-
+ if(u.pathname.startsWith('/api/admin/orders/') && req.method==='GET'){
+  if(!(await requirePermission(me,env,'orders.read')))return json({error:'forbidden'},403);
+  const id=u.pathname.split('/')[4];if(!id)return json({error:'not_found'},404);
+  const order=await env.DB.prepare('SELECT o.*,u.mobile,u.name,address.recipient_name,address.mobile address_mobile,address.province,address.city,address.address,address.postal_code FROM orders o JOIN users u ON u.id=o.user_id LEFT JOIN addresses address ON address.id=o.address_id WHERE o.id=?').bind(id).first();
+  if(!order)return json({error:'not_found'},404);
+  const [items,history,payment]=await Promise.all([
+   env.DB.prepare('SELECT id,product_id,sku,name,unit_price_irt,quantity,line_total_irt,options_json FROM order_items WHERE order_id=? ORDER BY id').bind(id).all(),
+   env.DB.prepare('SELECT h.*,u.name changed_by_name,u.mobile changed_by_mobile FROM order_status_history h LEFT JOIN users u ON u.id=h.changed_by_user_id WHERE h.order_id=? ORDER BY h.changed_at DESC').bind(id).all(),
+   env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at FROM payments WHERE order_id=?').bind(id).first()
+  ]);
+  return json({order,items:items.results||[],history:history.results||[],payment});
+ }
  if(u.pathname==='/api/admin/orders'&&req.method==='GET'){if(!(await requirePermission(me,env,'orders.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT o.*,u.mobile FROM orders o JOIN users u ON u.id=o.user_id ORDER BY o.created_at DESC LIMIT 200').all();return json({items:r.results||[]})}
  if(u.pathname==='/api/settings'&&req.method==='GET'){const r=await env.DB.prepare("SELECT key,value FROM site_settings").all();const out={};for(const x of (r.results||[]))out[x.key]=x.value;return json({settings:out})}
  if(u.pathname==='/api/admin/categories'&&req.method==='GET'){if(!(await requirePermission(me,env,'products.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT id,slug,name,description,active FROM categories ORDER BY name').all();return json({items:r.results||[]})}
