@@ -100,6 +100,7 @@ export const admin={
  products:()=>api('/api/admin/products'),
  inventory:()=>api('/api/admin/inventory'),
  orders:()=>api('/api/admin/orders'),
+ order:(id)=>api('/api/admin/orders/'+encodeURIComponent(id)),
  customers:()=>api('/api/admin/reports/customers'),
  reports:()=>api('/api/admin/reports/sales'),
  audit:()=>api('/api/admin/audit'),
