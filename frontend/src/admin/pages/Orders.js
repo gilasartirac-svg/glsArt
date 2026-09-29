@@ -44,11 +44,13 @@ export default function Orders(){
   </div>`;
  setTimeout(()=>mount(),0);
  async function mount(){
-  const grid=root.querySelector('#orders-grid');
-  const detail=root.querySelector('#order-detail');
-  const error=root.querySelector('#orders-error');
-  const count=root.querySelector('#orders-count');
-  const refresh=root.querySelector('#orders-refresh');
+  const liveRoot=document.querySelector('#admin-page .orders-admin');
+  if(!liveRoot)return;
+  const grid=liveRoot.querySelector('#orders-grid');
+  const detail=liveRoot.querySelector('#order-detail');
+  const error=liveRoot.querySelector('#orders-error');
+  const count=liveRoot.querySelector('#orders-count');
+  const refresh=liveRoot.querySelector('#orders-refresh');
   async function load(){
    error.textContent='';
    grid.innerHTML='<tr><td colspan="5">در حال دریافت سفارش‌ها...</td></tr>';
@@ -112,5 +114,5 @@ export default function Orders(){
   refresh.onclick=load;
   await load();
  }
- return root;
+ return root.outerHTML;
 }
