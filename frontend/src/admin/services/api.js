@@ -101,5 +101,8 @@ export const admin={
  customers:()=>api('/api/admin/reports/customers'),
  reports:()=>api('/api/admin/reports/sales'),
  audit:()=>api('/api/admin/audit'),
- roles:()=>api('/api/admin/roles')
+ roles:()=>api('/api/admin/roles'),
+ users:()=>api('/api/admin/users'),
+ assignRole:(userId,roleId)=>api('/api/admin/users/'+encodeURIComponent(userId)+'/roles',{method:'POST',body:JSON.stringify({roleId})}),
+ revokeRole:userId=>api('/api/admin/users/'+encodeURIComponent(userId)+'/roles',{method:'DELETE'})
 };
