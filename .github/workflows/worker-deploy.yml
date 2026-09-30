@@ -48,7 +48,7 @@ jobs:
         run: printf '%s' "$ADMIN_BOOTSTRAP_MOBILE" | npx wrangler secret put ADMIN_BOOTSTRAP_MOBILE --config wrangler.toml
 
       - name: Inspect D1 import state
-        run: npx wrangler d1 execute gilasartdatabase --remote --command="SELECT (SELECT COUNT(*) FROM products) products,(SELECT COUNT(*) FROM products WHERE id LIKE 'xls_%') excel_products,(SELECT COUNT(*) FROM product_images WHERE id LIKE 'xlsimg_%') excel_images,(SELECT COUNT(*) FROM users WHERE id LIKE 'cust_%') excel_customers,(SELECT COUNT(*) FROM orders WHERE is_sample=1) sample_orders,(SELECT COUNT(*) FROM users WHERE id='usr_admin_gilasart') admin_user; SELECT id,sku,name FROM products ORDER BY id LIMIT 50;" --json
+        run: npx wrangler d1 execute gilasartdatabase --remote --command="SELECT (SELECT COUNT(*) FROM products) products,(SELECT COUNT(*) FROM products WHERE id LIKE 'xls_%') excel_products,(SELECT COUNT(*) FROM product_images WHERE id LIKE 'xlsimg_%') excel_images,(SELECT COUNT(*) FROM users WHERE id LIKE 'cust_%') excel_customers,(SELECT COUNT(*) FROM orders WHERE is_sample=1) sample_orders,(SELECT COUNT(*) FROM users WHERE id='usr_admin_gilasart') admin_user; SELECT id,sku,name FROM products ORDER BY id LIMIT 50; SELECT o.id,o.status,oi.product_id,oi.sku,oi.name FROM orders o JOIN order_items oi ON oi.order_id=o.id ORDER BY o.created_at DESC LIMIT 50;" --json
 
       - name: Deploy Worker
         run: npx wrangler deploy --config wrangler.toml
