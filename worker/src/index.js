@@ -967,7 +967,7 @@ if(u.pathname.startsWith('/api/admin/coupons/')&&req.method==='DELETE'){
 
 if(u.pathname==='/api/admin/media-images'&&req.method==='GET'){
  if(!(await requirePermission(me,env,'products.read')))return json({error:'forbidden'},403);
- const sources=[['media','gilasartirac-svg/gls-media','image'],['catalog','gilasartirac-svg/glsArt','frontend/public/art']];
+ const sources=[['media','gilasartirac-svg/gls-media','image'],['catalog','gilasartirac-svg/glsArt','frontend/public/art'],['uploaded','gilasartirac-svg/glsArt','frontend/public/uploaded']];
  const items=[];
  for(const [source,repo,path] of sources){try{const rr=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path,{headers:{accept:'application/vnd.github+json','user-agent':'GilasArt-Admin'}});if(!rr.ok)continue;const data=await rr.json();for(const x of Array.isArray(data)?data:[]){if(x.type==='file'&&/\.(png|jpe?g|webp|gif|svg)$/i.test(x.name))items.push({source,name:x.name,path:x.path,url:'https://raw.githubusercontent.com/'+repo+'/main/'+x.path})}}catch{}}
  return json({items});
