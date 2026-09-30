@@ -48,6 +48,26 @@ test('Kavenegar OTP delivery checks provider response and supports both code pla
 });
 
 
+test('admin product save accepts current and legacy GitHub Pages image paths',()=>{
+ const worker=readFileSync(new URL('../worker/src/index.js',import.meta.url),'utf8');
+ assert.match(worker,/startsWith\('\/glsArt\/art\/'\)/);
+ assert.match(worker,/startsWith\('\/glsArt\/uploaded\/'\)/);
+ assert.match(worker,/frontend\/public\/uploaded/);
+ assert.match(worker,/gilasartirac-svg\.github\.io/);
+ assert.match(worker,/invalid_image_path/);
+});
+
+test('admin product attributes support creation, options and product assignment',()=>{
+ const worker=readFileSync(new URL('../worker/src/index.js',import.meta.url),'utf8');
+ const products=readFileSync(new URL('../frontend/src/admin/pages/Products.js',import.meta.url),'utf8');
+ assert.match(worker,/\/api\/admin\/product-attributes/);
+ assert.match(worker,/product_attribute_options/);
+ assert.match(worker,/product_attribute_assignments/);
+ assert.match(worker,/saveProductAttributeAssignments/);
+ assert.match(products,/attributeIds:selectedAttributeIds\(\)/);
+ assert.match(products,/priceDeltaIrt:Number\(x\.get\('price'\)\|\|0\)/);
+});
+
 const featureSchema=readFileSync(new URL('../database/migrations/0014_flash_sales_support.sql',import.meta.url),'utf8');
 test('flash sale and CRM schema are present',()=>{
  assert.match(featureSchema,/flash_sale_active/);assert.match(featureSchema,/flash_sale_ends_at/);assert.match(featureSchema,/support_tickets/);assert.match(featureSchema,/ticket_messages/);assert.match(featureSchema,/faq_entries/);assert.match(featureSchema,/support\.read/);assert.match(featureSchema,/support\.write/);
