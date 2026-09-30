@@ -97,10 +97,16 @@ async function product(slug){
  const showMedia=(index)=>{const i=Math.max(0,Math.min(mediaItems.length-1,index));const item=mediaItems[i];const media=document.querySelector('#product-media');if(media)media.innerHTML=mediaHtml(item);document.querySelectorAll('.product-thumb').forEach(x=>x.classList.toggle('active',Number(x.dataset.index)===i));return i};
  document.querySelectorAll('.product-thumb').forEach(b=>b.onclick=()=>showMedia(Number(b.dataset.index)));
  const media=document.querySelector('#product-media');
+ if(media){
+   media.tabIndex=0;
+   media.setAttribute('role','region');
+   media.setAttribute('aria-label','گالری تصاویر محصول');
+ }
  if(media&&mediaItems.length>1){
    let touchStartX=0,touchStartY=0;
    media.addEventListener('touchstart',e=>{const t=e.changedTouches[0];touchStartX=t.clientX;touchStartY=t.clientY},{passive:true});
    media.addEventListener('touchend',e=>{const t=e.changedTouches[0],dx=t.clientX-touchStartX,dy=t.clientY-touchStartY;if(Math.abs(dx)<45||Math.abs(dx)<Math.abs(dy))return;const active=Number(document.querySelector('.product-thumb.active')?.dataset.index||0);showMedia(active+(dx<0?1:-1))},{passive:true});
+   media.addEventListener('keydown',e=>{if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;e.preventDefault();const active=Number(document.querySelector('.product-thumb.active')?.dataset.index||0);showMedia(active+(e.key==='ArrowLeft'?-1:1))});
  }
  const selections=()=>[...document.querySelectorAll('.product-option select')].map(x=>({attributeId:x.dataset.attributeId,optionId:x.value}));
  const recalc=()=>{let delta=0;document.querySelectorAll('.product-option option:checked').forEach(o=>delta+=Number(o.dataset.delta||0));const total=Number(p.price_irt||0)+delta;document.querySelector('#product-live-price').textContent=fa(total)+' ریال';document.querySelector('#product-price-breakdown').textContent=delta?'قیمت پایه: '+fa(p.price_irt)+' ریال + افزایش ویژگی‌ها: '+fa(delta)+' ریال':'';return total};
