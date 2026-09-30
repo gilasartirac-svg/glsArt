@@ -47,7 +47,7 @@ test('failed and expired payments release reservations',()=>{
   assert.match(worker,/async function cleanupExpiredReservations/);
 });
 
-test('OTP login supports Android WebOTP and redirects to home after verification',()=>{
+test('OTP login supports Android WebOTP and redirects to account/admin after verification',()=>{
   assert.match(frontend,/autocomplete="one-time-code"/);
   assert.match(frontend,/OTPCredential/);
   assert.match(frontend,/navigator\.credentials\.get/);
