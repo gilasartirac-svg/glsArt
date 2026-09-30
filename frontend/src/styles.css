@@ -751,3 +751,20 @@ input,textarea,select,button,[contenteditable="true"]{-webkit-user-select:none;u
 @keyframes welcomePulse{0%,100%{transform:scale(.9);opacity:.7}50%{transform:scale(1.08);opacity:1}}
 @keyframes welcomeProgress{0%{transform:translateX(210%)}100%{transform:translateX(-260%)}}
 @media(prefers-reduced-motion:reduce){.welcome-glow,.welcome-card,.welcome-progress span{animation:none}.welcome-progress span{width:70%}}
+
+/* Mobile storefront: fixed app-style header + two-column artwork grid */
+@media (max-width:900px){
+  .top{position:fixed;top:0;left:0;right:0;width:100%;z-index:1000;}
+  body{padding-top:68px;}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .product-grid,.products-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media (max-width:520px){
+  .top{position:fixed;top:0;left:0;right:0;}
+  body{padding-top:64px;}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  .product-grid,.products-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  .product-card h3,.product-item h3{font-size:13px;line-height:1.55;}
+  .product-card .cardbody,.product-item .cardbody{padding:10px;}
+  .product-card .price,.product-item .price{font-size:13px;}
+}
