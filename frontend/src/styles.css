@@ -1385,3 +1385,7 @@ main#main-content{min-height:60vh}
  .product-showcase,.btn{transition:none}
  .product-showcase:hover,.btn:hover{transform:none}
 }
+
+/* Editorial reading rhythm */
+.page p,.page article p,.page section p,.page li{ text-align:justify; text-justify:inter-word; hyphens:auto; }
+.page .eyebrow,.page .muted,.page .btn,.page label,.page legend,.page button{hyphens:none}
