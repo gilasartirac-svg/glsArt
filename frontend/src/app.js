@@ -305,9 +305,9 @@ async function cmsPage(section){
 }
 async function contentDetail(section,slug){
  const labels={news:'اخبار گیلاس آرت',articles:'مقالات'},title=labels[section]||'گیلاس آرت';
- layout('<section class="wrap page cms-page"><article class="panel cms-detail"><div class="cms-loading" aria-live="polite">در حال دریافت محتوا...</div></article></section>');
+ layout('<section class="wrap page cms-page">'+visual+'<article class="panel cms-detail"><div class="cms-loading" aria-live="polite">در حال دریافت محتوا...</div></article></section>');
  try{
-  const d=await api('/api/content/'+encodeURIComponent(section)+'/'+encodeURIComponent(slug)),x=d.item||{},bodyText=v=>escapeHtml(String(v||'')).replace(/\r?\n/g,'<br>');
+  const [d,featured]=await Promise.all([api('/api/content/'+encodeURIComponent(section)+'/'+encodeURIComponent(slug)),api('/api/products?limit=1')]),x=d.item||{},fp=(featured.items||[])[0]||null,fi=fp?safeUrl(fp.image):'',visual=fi?'<div class="cms-page-visual"><img src="'+escapeHtml(fi)+'" alt="'+escapeHtml(fp.name||'اثر هنری')+'" loading="eager" decoding="async"><span><small>GILAS ART</small><strong>'+escapeHtml(fp.name||'اثر منتخب')+'</strong></span></div>':'',bodyText=v=>escapeHtml(String(v||'')).replace(/\r?\n/g,'<br>');
   layout('<section class="wrap page cms-page"><article class="panel cms-detail"><div class="cms-detail-head"><div><span class="eyebrow">'+(section==='news'?'NEWS':'ARTICLE')+'</span><h1>'+escapeHtml(x.title||title)+'</h1>'+(x.published_at?'<time class="cms-date" datetime="'+escapeHtml(x.published_at)+'">'+escapeHtml(jalaliDate(x.published_at))+'</time>':'')+'</div><a class="btn ghost" href="#/'+section+'">← بازگشت</a></div>'+(x.summary?'<p class="cms-detail-lead">'+escapeHtml(x.summary)+'</p>':'')+'<div class="cms-body">'+bodyText(x.body||'')+'</div><div class="cms-detail-footer"><a class="btn ghost" href="#/'+section+'">مطالب بیشتر</a><a class="btn primary" href="#/shop">مشاهده آثار</a></div></article></section>');
   setSeo({title:(x.title||title)+' | گیلاس آرت',description:x.summary||''});
  }catch(e){layout('<section class="wrap page cms-page"><div class="panel cms-empty"><h1>محتوا یافت نشد</h1><p class="error">'+escapeHtml(e.message||'این محتوا قابل دریافت نیست.')+'</p><a class="btn ghost" href="#/'+section+'">بازگشت</a></div></section>')}
