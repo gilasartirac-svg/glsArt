@@ -1,8 +1,3 @@
-PRAGMA foreign_keys = ON;
-
--- Product-specific option pricing/visibility.
--- Global attributes/options remain reusable; this table allows each product
--- to define its own active/default state and price delta.
 CREATE TABLE IF NOT EXISTS product_attribute_option_overrides(
   product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   option_id TEXT NOT NULL REFERENCES product_attribute_options(id) ON DELETE CASCADE,
@@ -11,79 +6,246 @@ CREATE TABLE IF NOT EXISTS product_attribute_option_overrides(
   price_delta_irt INTEGER NOT NULL DEFAULT 0 CHECK(price_delta_irt>=0),
   PRIMARY KEY(product_id,option_id)
 );
-
-CREATE INDEX IF NOT EXISTS idx_product_option_overrides_product
-  ON product_attribute_option_overrides(product_id,active);
-
--- Products may belong to more than one catalog category.
+CREATE INDEX IF NOT EXISTS idx_product_option_overrides_product ON product_attribute_option_overrides(product_id,active);
 CREATE TABLE IF NOT EXISTS product_category_assignments(
   product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   category_id TEXT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
   sort_order INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY(product_id,category_id)
 );
-
-CREATE INDEX IF NOT EXISTS idx_product_category_assignments_category
-  ON product_category_assignments(category_id,sort_order);
-
--- Categories required by the first supplied product.
-INSERT OR IGNORE INTO categories(id,slug,name,description,active) VALUES
-('cat_square','square','تابلو های مربع','تابلوهای مربع گیلاس آرت.',1),
-('cat_poetry','poetry','تابلو های شعر','تابلوهای شعر گیلاس آرت.',1);
-
--- Reuse the existing attributes and add the exact option labels required by Gilas411.
-INSERT OR IGNORE INTO product_attributes(id,name,active,sort_order) VALUES
-('attr_frame_color','رنگ قاب',1,1),
-('attr_size','ابعاد',1,2);
-
-INSERT OR IGNORE INTO product_attribute_options(id,attribute_id,name,active,is_default,price_delta_irt,sort_order) VALUES
-('opt_gilas411_size_30x30','attr_size','30x30',1,1,0,10),
-('opt_gilas411_size_70x70','attr_size','70x70',1,0,0,11),
-('opt_gilas411_frame_black','attr_frame_color','مشکی',1,1,0,10),
-('opt_gilas411_frame_gold_floral','attr_frame_color','طلایی گلدار',1,0,0,11),
-('opt_gilas411_frame_white','attr_frame_color','سفید',1,0,0,12);
-
--- Configure the supplied product by SKU. If it is not yet present, these
--- statements intentionally do nothing; no fake product/base price is created.
-INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order)
-SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas411';
-INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order)
-SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas411';
-
-INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt)
-SELECT p.id,'opt_gilas411_size_30x30',1,1,0 FROM products p WHERE p.sku='Gilas411';
-INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt)
-SELECT p.id,'opt_gilas411_size_70x70',1,0,80000000 FROM products p WHERE p.sku='Gilas411';
-
-INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt)
-SELECT p.id,'opt_gilas411_frame_black',1,1,0 FROM products p WHERE p.sku='Gilas411';
-INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt)
-SELECT p.id,'opt_gilas411_frame_gold_floral',1,0,8500000 FROM products p WHERE p.sku='Gilas411';
-INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt)
-SELECT p.id,'opt_gilas411_frame_white',1,0,5500000 FROM products p WHERE p.sku='Gilas411';
-
--- Disable unrelated global options for this product's configured attributes.
-UPDATE product_attribute_option_overrides
-SET active=0,is_default=0
-WHERE product_id=(SELECT id FROM products WHERE sku='Gilas411' LIMIT 1)
-  AND option_id IN (
-    SELECT o.id FROM product_attribute_options o
-    WHERE o.attribute_id IN ('attr_size','attr_frame_color')
-  )
-  AND option_id NOT IN (
-    'opt_gilas411_size_30x30',
-    'opt_gilas411_size_70x70',
-    'opt_gilas411_frame_black',
-    'opt_gilas411_frame_gold_floral',
-    'opt_gilas411_frame_white'
-  );
-
--- Store both supplied categories while preserving the existing primary category field.
-INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order)
-SELECT id,'cat_square',1 FROM products WHERE sku='Gilas411';
-INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order)
-SELECT id,'cat_poetry',2 FROM products WHERE sku='Gilas411';
-UPDATE products
-SET category_id='cat_square'
-WHERE sku='Gilas411'
-  AND EXISTS(SELECT 1 FROM categories WHERE id='cat_square');
+CREATE INDEX IF NOT EXISTS idx_product_category_assignments_category ON product_category_assignments(category_id,sort_order);
+INSERT OR IGNORE INTO categories(id,slug,name,description,active) VALUES ('cat_gilas_square','gilas-square','تابلو های مربع','دسته‌بندی آثار گیلاس آرت.',1),('cat_gilas_poetry','gilas-poetry','تابلو های شعر','دسته‌بندی آثار گیلاس آرت.',1),('cat_gilas_horizontal','gilas-horizontal','تابلو های افقی','دسته‌بندی آثار گیلاس آرت.',1),('cat_gilas_religious','gilas-religious','تابلو های مذهبی','دسته‌بندی آثار گیلاس آرت.',1),('cat_gilas_vertical','gilas-vertical','تابلو های عمودی','دسته‌بندی آثار گیلاس آرت.',1);
+INSERT OR IGNORE INTO product_attributes(id,name,active,sort_order) VALUES ('attr_frame_color','رنگ قاب',1,1),('attr_size','ابعاد',1,2);
+INSERT OR IGNORE INTO product_attribute_options(id,attribute_id,name,active,is_default,price_delta_irt,sort_order) VALUES ('opt_gilas_size_30_30','attr_size','30x30',1,0,0,1),('opt_gilas_size_70_70','attr_size','70x70',1,0,0,2),('opt_gilas_size_30_60','attr_size','30x60',1,0,0,3),('opt_gilas_size_40_80','attr_size','40x80',1,0,0,4),('opt_gilas_size_60_110','attr_size','60x110',1,0,0,5),('opt_gilas_size_50_35','attr_size','50x35',1,0,0,6),('opt_gilas_size_50_70','attr_size','50x70',1,0,0,7),('opt_gilas_size_60_80','attr_size','60x80',1,0,0,8),('opt_gilas_size_70_20','attr_size','70x20',1,0,0,9),('opt_gilas_size_100_30','attr_size','100x30',1,0,0,10),('opt_gilas_size_80_40','attr_size','80x40',1,0,0,11),('opt_gilas_size_110_60','attr_size','110x60',1,0,0,12),('opt_gilas_size_23_60','attr_size','23x60',1,0,0,13),('opt_gilas_size_90_35','attr_size','90x35',1,0,0,14),('opt_gilas_size_30_40','attr_size','30x40',1,0,0,15),('opt_gilas_frame_black','attr_frame_color','مشکی',1,0,0,1),('opt_gilas_frame_gold_floral','attr_frame_color','طلایی گلدار',1,0,0,2),('opt_gilas_frame_white','attr_frame_color','سفید',1,0,0,3),('opt_gilas_frame_tree_brown','attr_frame_color','قهوه ای تنه درختی',1,0,0,4);
+-- Gilas411
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_square',1 FROM products WHERE sku='Gilas411';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_poetry',2 FROM products WHERE sku='Gilas411';
+UPDATE products SET category_id='cat_gilas_square' WHERE sku='Gilas411';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas411';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas411';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='30x30' WHERE p.sku='Gilas411';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,80000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='70x70' WHERE p.sku='Gilas411';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas411';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,8500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas411';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas411';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas411' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('30x30','70x70','مشکی','طلایی گلدار','سفید'));
+-- Gilas001
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_horizontal',1 FROM products WHERE sku='Gilas001';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas001';
+UPDATE products SET category_id='cat_gilas_horizontal' WHERE sku='Gilas001';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas001';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas001';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='30x60' WHERE p.sku='Gilas001';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,40000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='40x80' WHERE p.sku='Gilas001';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,80000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='60x110' WHERE p.sku='Gilas001';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas001';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas001';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas001';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas001';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas001' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('30x60','40x80','60x110','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas003
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_horizontal',1 FROM products WHERE sku='Gilas003';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas003';
+UPDATE products SET category_id='cat_gilas_horizontal' WHERE sku='Gilas003';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas003';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas003';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x35' WHERE p.sku='Gilas003';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,40000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x70' WHERE p.sku='Gilas003';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,80000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='60x80' WHERE p.sku='Gilas003';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas003';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas003';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas003';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas003';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas003' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('50x35','50x70','60x80','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas004
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_vertical',1 FROM products WHERE sku='Gilas004';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas004';
+UPDATE products SET category_id='cat_gilas_vertical' WHERE sku='Gilas004';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas004';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas004';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x35' WHERE p.sku='Gilas004';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,45000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x70' WHERE p.sku='Gilas004';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,89000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='60x80' WHERE p.sku='Gilas004';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas004';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas004';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas004';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas004';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas004' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('50x35','50x70','60x80','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas005
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_horizontal',1 FROM products WHERE sku='Gilas005';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas005';
+UPDATE products SET category_id='cat_gilas_horizontal' WHERE sku='Gilas005';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas005';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas005';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x35' WHERE p.sku='Gilas005';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,45000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x70' WHERE p.sku='Gilas005';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,89000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='60x80' WHERE p.sku='Gilas005';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas005';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas005';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas005';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas005';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas005' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('50x35','50x70','60x80','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas006
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_vertical',1 FROM products WHERE sku='Gilas006';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas006';
+UPDATE products SET category_id='cat_gilas_vertical' WHERE sku='Gilas006';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas006';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas006';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x35' WHERE p.sku='Gilas006';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,45000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x70' WHERE p.sku='Gilas006';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,89000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='60x80' WHERE p.sku='Gilas006';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas006';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas006';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas006';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas006';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas006' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('50x35','50x70','60x80','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas007
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_horizontal',1 FROM products WHERE sku='Gilas007';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas007';
+UPDATE products SET category_id='cat_gilas_horizontal' WHERE sku='Gilas007';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas007';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas007';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='70x20' WHERE p.sku='Gilas007';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,85000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='100x30' WHERE p.sku='Gilas007';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas007';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas007';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas007';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas007';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas007' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('70x20','100x30','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas008
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_vertical',1 FROM products WHERE sku='Gilas008';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas008';
+UPDATE products SET category_id='cat_gilas_vertical' WHERE sku='Gilas008';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas008';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas008';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x35' WHERE p.sku='Gilas008';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,45000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x70' WHERE p.sku='Gilas008';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,89000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='60x80' WHERE p.sku='Gilas008';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas008';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas008';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas008';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas008';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas008' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('50x35','50x70','60x80','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas010
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_vertical',1 FROM products WHERE sku='Gilas010';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas010';
+UPDATE products SET category_id='cat_gilas_vertical' WHERE sku='Gilas010';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas010';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas010';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x35' WHERE p.sku='Gilas010';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,45000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x70' WHERE p.sku='Gilas010';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,89000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='60x80' WHERE p.sku='Gilas010';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas010';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas010';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas010';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas010';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas010' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('50x35','50x70','60x80','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas011
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_horizontal',1 FROM products WHERE sku='Gilas011';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas011';
+UPDATE products SET category_id='cat_gilas_horizontal' WHERE sku='Gilas011';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas011';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas011';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='80x40' WHERE p.sku='Gilas011';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,85000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='110x60' WHERE p.sku='Gilas011';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas011';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas011';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas011';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas011';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas011' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('80x40','110x60','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas013
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_horizontal',1 FROM products WHERE sku='Gilas013';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas013';
+UPDATE products SET category_id='cat_gilas_horizontal' WHERE sku='Gilas013';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas013';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas013';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x35' WHERE p.sku='Gilas013';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,45000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x70' WHERE p.sku='Gilas013';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,89000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='60x80' WHERE p.sku='Gilas013';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas013';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas013';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas013';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas013';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas013' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('50x35','50x70','60x80','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas014
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_vertical',1 FROM products WHERE sku='Gilas014';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas014';
+UPDATE products SET category_id='cat_gilas_vertical' WHERE sku='Gilas014';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas014';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas014';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x35' WHERE p.sku='Gilas014';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,45000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x70' WHERE p.sku='Gilas014';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,89000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='60x80' WHERE p.sku='Gilas014';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas014';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas014';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas014';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas014';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas014' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('50x35','50x70','60x80','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas015
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_horizontal',1 FROM products WHERE sku='Gilas015';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas015';
+UPDATE products SET category_id='cat_gilas_horizontal' WHERE sku='Gilas015';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas015';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas015';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='80x40' WHERE p.sku='Gilas015';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,85000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='110x60' WHERE p.sku='Gilas015';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas015';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas015';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas015';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas015';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas015' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('80x40','110x60','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas016
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_vertical',1 FROM products WHERE sku='Gilas016';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas016';
+UPDATE products SET category_id='cat_gilas_vertical' WHERE sku='Gilas016';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas016';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas016';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='23x60' WHERE p.sku='Gilas016';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,85000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='90x35' WHERE p.sku='Gilas016';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas016';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas016';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas016';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas016';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas016' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('23x60','90x35','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas017
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_vertical',1 FROM products WHERE sku='Gilas017';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_poetry',2 FROM products WHERE sku='Gilas017';
+UPDATE products SET category_id='cat_gilas_vertical' WHERE sku='Gilas017';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas017';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas017';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x35' WHERE p.sku='Gilas017';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,45000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x70' WHERE p.sku='Gilas017';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,89000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='60x80' WHERE p.sku='Gilas017';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas017';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas017';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas017';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas017';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas017' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('50x35','50x70','60x80','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas018
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_vertical',1 FROM products WHERE sku='Gilas018';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas018';
+UPDATE products SET category_id='cat_gilas_vertical' WHERE sku='Gilas018';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas018';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas018';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='30x40' WHERE p.sku='Gilas018';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,65000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x70' WHERE p.sku='Gilas018';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,89000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='60x80' WHERE p.sku='Gilas018';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas018';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas018';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas018';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas018';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas018' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('30x40','50x70','60x80','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
+-- Gilas019
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_vertical',1 FROM products WHERE sku='Gilas019';
+INSERT OR IGNORE INTO product_category_assignments(product_id,category_id,sort_order) SELECT id,'cat_gilas_religious',2 FROM products WHERE sku='Gilas019';
+UPDATE products SET category_id='cat_gilas_vertical' WHERE sku='Gilas019';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_size',1,1 FROM products WHERE sku='Gilas019';
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_frame_color',1,2 FROM products WHERE sku='Gilas019';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='30x40' WHERE p.sku='Gilas019';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,65000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='50x70' WHERE p.sku='Gilas019';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,89000000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_size' AND o.name='60x80' WHERE p.sku='Gilas019';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,1,0 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='مشکی' WHERE p.sku='Gilas019';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,10500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='طلایی گلدار' WHERE p.sku='Gilas019';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,5500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='سفید' WHERE p.sku='Gilas019';
+INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) SELECT p.id,o.id,1,0,6500000 FROM products p JOIN product_attribute_options o ON o.attribute_id='attr_frame_color' AND o.name='قهوه ای تنه درختی' WHERE p.sku='Gilas019';
+UPDATE product_attribute_option_overrides SET active=0,is_default=0 WHERE product_id=(SELECT id FROM products WHERE sku='Gilas019' LIMIT 1) AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color')) AND option_id NOT IN (SELECT id FROM product_attribute_options WHERE attribute_id IN ('attr_size','attr_frame_color') AND name IN ('30x40','50x70','60x80','مشکی','طلایی گلدار','سفید','قهوه ای تنه درختی'));
