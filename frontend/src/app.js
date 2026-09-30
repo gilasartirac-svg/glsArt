@@ -285,8 +285,8 @@ async function cmsPage(section){
  layout('<section class="wrap page cms-page"><div class="cms-hero"><div><div class="eyebrow">GILAS ART</div><h1>'+escapeHtml(title)+'</h1><p class="cms-hero-lead">'+intro+'</p></div><div class="cms-hero-mark" aria-hidden="true">GA</div></div><div class="panel cms-loading" aria-live="polite">در حال دریافت اطلاعات...</div></section>');
  const bodyText=v=>escapeHtml(String(v||'')).replace(/\r?\n/g,'<br>');
  const dateLabel=v=>v?escapeHtml(jalaliDate(v)):'';
- api('/api/content?section='+encodeURIComponent(section)+'&limit=20').then(d=>{
-  const items=Array.isArray(d.items)?d.items:[];let body='';
+ Promise.all([api('/api/content?section='+encodeURIComponent(section)+'&limit=20'),api('/api/products?limit=1')]).then(([d,featured])=>{
+  const items=Array.isArray(d.items)?d.items:[];const fp=(featured.items||[])[0]||null;const fi=fp?safeUrl(fp.image):'';const visual=fi?'<div class="cms-page-visual"><img src="'+escapeHtml(fi)+'" alt="'+escapeHtml(fp.name||'اثر هنری')+'" loading="eager" decoding="async"><span><small>GILAS ART</small><strong>'+escapeHtml(fp.name||'اثر منتخب')+'</strong></span></div>':'<div class="cms-page-visual shop-page-visual-empty"><span>GILAS ART</span><strong>هنر و اصالت</strong></div>';let body='';
   if(section==='contact'){
    const x=items[0]||{}, rows=[
     x.phone?'<a class="cms-contact-item" href="tel:'+escapeHtml(x.phone)+'"><span>تلفن</span><strong>'+escapeHtml(x.phone)+'</strong></a>':'',
@@ -299,7 +299,7 @@ async function cmsPage(section){
   }else{
    body=items.length?'<div class="cms-list">'+items.map(x=>'<article class="panel cms-card"><div class="cms-card-top"><span class="eyebrow">'+(section==='news'?'NEWS':'ARTICLE')+'</span>'+(x.published_at?'<time class="cms-date" datetime="'+escapeHtml(x.published_at)+'">'+dateLabel(x.published_at)+'</time>':'')+'</div><h2>'+escapeHtml(x.title||'بدون عنوان')+'</h2>'+(x.summary?'<p class="cms-lead">'+escapeHtml(x.summary)+'</p>':'')+'<a class="btn ghost" href="#/'+section+'/'+encodeURIComponent(x.slug||'')+'">ادامه مطلب <span aria-hidden="true">←</span></a></article>').join('')+'</div>':'<div class="panel cms-empty"><strong>محتوایی برای نمایش وجود ندارد.</strong><p class="muted">به‌زودی مطالب تازه‌ای در این بخش منتشر خواهد شد.</p></div>';
   }
-  const root=document.querySelector('.cms-page');if(root)root.innerHTML='<div class="cms-hero cms-hero-compact"><div><div class="eyebrow">GILAS ART</div><h1>'+escapeHtml(title)+'</h1></div><div class="cms-hero-mark" aria-hidden="true">GA</div></div>'+body;
+  const root=document.querySelector('.cms-page');if(root)root.innerHTML=visual+'<div class="cms-hero cms-hero-compact"><div><div class="eyebrow">GILAS ART</div><h1>'+escapeHtml(title)+'</h1></div><div class="cms-hero-mark" aria-hidden="true">GA</div></div>'+body;
   setSeo({title:title+' | گیلاس آرت',description:items[0]?.summary||'اطلاعات رسمی گیلاس آرت'});
  }).catch(e=>{const root=document.querySelector('.cms-page');if(root)root.innerHTML='<div class="cms-hero cms-hero-compact"><div><div class="eyebrow">GILAS ART</div><h1>'+escapeHtml(title)+'</h1></div></div><div class="panel"><p class="error">اطلاعات این بخش از پایگاه داده دریافت نشد.</p><p class="muted">'+escapeHtml(e.message||'خطای ارتباط با سرور')+'</p><button class="btn ghost" type="button" onclick="location.reload()">تلاش دوباره</button></div>'});
 }
