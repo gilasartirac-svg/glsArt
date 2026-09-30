@@ -32,7 +32,7 @@ if len(customers)!=300:
 o=['PRAGMA foreign_keys=ON;']
 
 o += [
-"DELETE FROM payment_attempts WHERE order_id IN (SELECT id FROM orders WHERE user_id='879eda82-3879-445e-b8a7-b75f3ecab43b');",
+"DELETE FROM payment_attempts WHERE payment_id IN (SELECT id FROM payments WHERE order_id IN (SELECT id FROM orders WHERE user_id='879eda82-3879-445e-b8a7-b75f3ecab43b'));",
 "DELETE FROM payments WHERE order_id IN (SELECT id FROM orders WHERE user_id='879eda82-3879-445e-b8a7-b75f3ecab43b');",
 "DELETE FROM coupon_usages WHERE order_id IN (SELECT id FROM orders WHERE user_id='879eda82-3879-445e-b8a7-b75f3ecab43b');",
 "DELETE FROM order_notes WHERE order_id IN (SELECT id FROM orders WHERE user_id='879eda82-3879-445e-b8a7-b75f3ecab43b');",
@@ -47,7 +47,18 @@ o += [
 "DELETE FROM inventory_transactions WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03');",
 "DELETE FROM inventory WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03');",
 "DELETE FROM product_images WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03');",
-"DELETE FROM products WHERE id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03');"
+"DELETE FROM products WHERE id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03');",
+"DELETE FROM customer_group_members WHERE user_id IN ('usr_sample_01','usr_sample_02','usr_sample_03');",
+"DELETE FROM customer_blocks WHERE user_id IN ('usr_sample_01','usr_sample_02','usr_sample_03');",
+"DELETE FROM login_history WHERE user_id IN ('usr_sample_01','usr_sample_02','usr_sample_03');",
+"DELETE FROM security_sessions WHERE user_id IN ('usr_sample_01','usr_sample_02','usr_sample_03');",
+"DELETE FROM sessions WHERE user_id IN ('usr_sample_01','usr_sample_02','usr_sample_03');",
+"DELETE FROM cart_items WHERE cart_id IN (SELECT id FROM carts WHERE user_id IN ('usr_sample_01','usr_sample_02','usr_sample_03'));",
+"DELETE FROM carts WHERE user_id IN ('usr_sample_01','usr_sample_02','usr_sample_03');",
+"DELETE FROM favorites WHERE user_id IN ('usr_sample_01','usr_sample_02','usr_sample_03');",
+"DELETE FROM reviews WHERE user_id IN ('usr_sample_01','usr_sample_02','usr_sample_03');",
+"DELETE FROM addresses WHERE user_id IN ('usr_sample_01','usr_sample_02','usr_sample_03');",
+"DELETE FROM users WHERE id IN ('usr_sample_01','usr_sample_02','usr_sample_03');"
 ]
 
 o += [
