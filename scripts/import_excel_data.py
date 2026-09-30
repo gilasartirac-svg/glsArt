@@ -75,41 +75,35 @@ o += [
 "DELETE FROM coupons WHERE id IN ('coupon_sample_10','coupon_sample_fixed');"
 ]
 
+all_stmts=list(o)
+
+for n,r in enumerate(ps,1):
+    name=clean(r[0]); desc=clean(r[1]); price=int(r[4]); pic=clean(r[5]); pid=f'xls_{n:04d}'
+    all_stmts.append(
+        f"INSERT OR IGNORE INTO products(id,category_id,slug,sku,name,description,price_irt,active) "
+        f"VALUES({q(pid)},NULL,{q('product-'+str(n).zfill(4))},{q('GA-XLS-'+str(n).zfill(4))},{q(name)},{q(desc)},{price},1);"
+    )
+    all_stmts.append(
+        f"INSERT OR IGNORE INTO product_images(id,product_id,path,alt_text,sort_order,is_primary) "
+        f"VALUES({q('xlsimg_'+str(n).zfill(4))},{q(pid)},{q('/glsArt/uploaded/'+pic)},{q(name)},0,1);"
+    )
+
+for p,r in customers.items():
+    uid='cust_'+hashlib.sha256(p.encode()).hexdigest()[:24]
+    name=clean(str(r[1] or '')+' '+str(r[2] or ''))
+    all_stmts.append(
+        f"INSERT INTO users(id,mobile,name) VALUES({q(uid)},{q(p)},{q(name)}) "
+        f"ON CONFLICT(mobile) DO UPDATE SET name=excluded.name,updated_at=CURRENT_TIMESTAMP;"
+    )
+
 parts=Path('import_parts')
 parts.mkdir(exist_ok=True)
 for old in parts.glob('*.sql'):
     old.unlink()
 
-cleanup=[
-"PRAGMA foreign_keys=ON;",
-*o,
-]
-(parts/'001_cleanup.sql').write_text('\n'.join(cleanup)+'\n',encoding='utf-8')
-
-for base in range(0,len(ps),25):
-    stmts=[]
-    for n,r in enumerate(ps[base:base+25],base+1):
-        name=clean(r[0]); desc=clean(r[1]); price=int(r[4]); pic=clean(r[5]); pid=f'xls_{n:04d}'
-        stmts.append(
-            f"INSERT OR IGNORE INTO products(id,category_id,slug,sku,name,description,price_irt,active) "
-            f"VALUES({q(pid)},NULL,{q('product-'+str(n).zfill(4))},{q('GA-XLS-'+str(n).zfill(4))},{q(name)},{q(desc)},{price},1);"
-        )
-        stmts.append(
-            f"INSERT OR IGNORE INTO product_images(id,product_id,path,alt_text,sort_order,is_primary) "
-            f"VALUES({q('xlsimg_'+str(n).zfill(4))},{q(pid)},{q('/glsArt/uploaded/'+pic)},{q(name)},0,1);"
-        )
-    (parts/f'{2+base//25:03d}_products_{base+1:04d}_{min(base+25,len(ps)):04d}.sql').write_text('\n'.join(stmts)+'\n',encoding='utf-8')
-
-customer_rows=list(customers.items())
-for base in range(0,len(customer_rows),50):
-    stmts=[]
-    for p,r in customer_rows[base:base+50]:
-        uid='cust_'+hashlib.sha256(p.encode()).hexdigest()[:24]
-        name=clean(str(r[1] or '')+' '+str(r[2] or ''))
-        stmts.append(
-            f"INSERT INTO users(id,mobile,name) VALUES({q(uid)},{q(p)},{q(name)}) "
-            f"ON CONFLICT(mobile) DO UPDATE SET name=excluded.name,updated_at=CURRENT_TIMESTAMP;"
-        )
-    (parts/f'{2+((len(ps)+24)//25)+base//50:03d}_customers_{base+1:04d}_{min(base+50,len(customer_rows)):04d}.sql').write_text('\n'.join(stmts)+'\n',encoding='utf-8')
+chunk=5
+for i in range(0,len(all_stmts),chunk):
+    batch=all_stmts[i:i+chunk]
+    (parts/f'{i//chunk+1:04d}.sql').write_text('\n'.join(batch)+'\n',encoding='utf-8')
 
 print(f'validated products={len(ps)} customers={len(customers)} parts={len(list(parts.glob("*.sql")))}')
