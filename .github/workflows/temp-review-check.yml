@@ -16,8 +16,8 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
-      - name: Inspect products and review users
+      - name: Inspect product mapping
         run: |
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT id,slug,name,created_at FROM products WHERE active=1 ORDER BY created_at DESC,id DESC LIMIT 25" --json
-          echo '--- USERS ---'
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT id,name,mobile FROM users ORDER BY created_at DESC LIMIT 10" --json
+          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT COUNT(*) AS total_products, SUM(CASE WHEN active=1 THEN 1 ELSE 0 END) AS active_products FROM products" --json
+          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT row_number() OVER (ORDER BY CAST(substr(slug,6) AS INTEGER) DESC) AS rn,id,slug FROM products WHERE active=1 ORDER BY rn LIMIT 20" --json
+          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT row_number() OVER (ORDER BY created_at DESC,id DESC) AS rn,id,slug FROM products WHERE active=1 AND slug IN ('Gilas400','Gilas390') ORDER BY rn" --json
