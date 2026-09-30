@@ -59,7 +59,7 @@ jobs:
         run: python scripts/import_excel_data.py
 
       - name: Execute Excel D1 import
-        run: npx wrangler d1 execute gilasartdatabase --remote --file=import.sql --json
+        run: for f in import_parts/*.sql; do echo "Importing $f"; npx wrangler d1 execute gilasartdatabase --remote --file="$f" --json; done
 
       - name: Verify Excel D1 import
         run: npx wrangler d1 execute gilasartdatabase --remote --command="SELECT (SELECT COUNT(*) FROM products) products,(SELECT COUNT(*) FROM product_images) product_images,(SELECT COUNT(*) FROM users WHERE id LIKE 'cust_%') imported_customers,(SELECT COUNT(*) FROM orders WHERE is_sample=1) sample_orders,(SELECT COUNT(*) FROM users WHERE id='usr_admin_gilasart') admin_user;" --json
