@@ -59,3 +59,4 @@ jobs:
           npx wrangler@4.30.0 d1 execute gilasartdatabase --remote --file=import.sql --json
       - name: Verify
         run: npx wrangler@4.30.0 d1 execute gilasartdatabase --remote --command="SELECT (SELECT COUNT(*) FROM products) products,(SELECT COUNT(*) FROM product_images) product_images,(SELECT COUNT(*) FROM users WHERE id LIKE 'cust_%') imported_customers,(SELECT COUNT(*) FROM orders WHERE is_sample=1) sample_orders,(SELECT COUNT(*) FROM users WHERE id='usr_admin_gilasart') admin_user;" --json
+# one-time execution marker
