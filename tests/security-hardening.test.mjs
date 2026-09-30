@@ -51,7 +51,7 @@ test('OTP login supports Android WebOTP and redirects to account/admin after ver
   assert.match(frontend,/autocomplete="one-time-code"/);
   assert.match(frontend,/OTPCredential/);
   assert.match(frontend,/navigator\.credentials\.get/);
-  assert.match(frontend,/location\.hash='\/'/);
+  assert.match(frontend,/location\.hash=isAdminUser\(\)\?'\\/admin':'\\/account'/);
   assert.match(frontend,/function accountLink\(\)/);
   assert.match(frontend,/state\.user\?/);
 });
