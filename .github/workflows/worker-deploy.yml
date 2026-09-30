@@ -50,21 +50,8 @@ jobs:
       - name: Inspect D1 import state
         run: npx wrangler d1 execute gilasartdatabase --remote --command="SELECT (SELECT COUNT(*) FROM products) products,(SELECT COUNT(*) FROM products WHERE id LIKE 'xls_%') excel_products,(SELECT COUNT(*) FROM product_images WHERE id LIKE 'xlsimg_%') excel_images,(SELECT COUNT(*) FROM users WHERE id LIKE 'cust_%') excel_customers,(SELECT COUNT(*) FROM orders WHERE is_sample=1) sample_orders,(SELECT COUNT(*) FROM users WHERE id='usr_admin_gilasart') admin_user; SELECT id,sku,name FROM products ORDER BY id LIMIT 50; SELECT o.id,o.user_id,u.mobile,o.status,oi.product_id,oi.sku,oi.name FROM orders o JOIN users u ON u.id=o.user_id JOIN order_items oi ON oi.order_id=o.id WHERE oi.product_id IN ('prod_demo','sample_barg','sample_atiq','sample_sokoot','test_grid_01','test_grid_02','test_grid_03') ORDER BY o.created_at DESC LIMIT 100;" --json
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install Excel parser
-        run: python -m pip install --disable-pip-version-check openpyxl
-
-      - name: Build Excel D1 import SQL
-        run: python scripts/import_excel_data.py
-
-      - name: Execute Excel D1 import
-        run: for f in import_parts/*.sql; do echo "Importing $f"; npx wrangler d1 execute gilasartdatabase --remote --file="$f" --json; done
-
-      - name: Verify Excel D1 import
-        run: npx wrangler d1 execute gilasartdatabase --remote --command="SELECT (SELECT COUNT(*) FROM products WHERE id LIKE 'xls_%') excel_products,(SELECT COUNT(*) FROM product_images WHERE id LIKE 'xlsimg_%') excel_images,(SELECT COUNT(*) FROM users WHERE id LIKE 'cust_%') excel_customers,(SELECT COUNT(*) FROM orders) remaining_orders,(SELECT COUNT(*) FROM users WHERE mobile='09153090907') owner_account;" --json
+      - name: Inspect current D1 import state
+        run: npx wrangler d1 execute gilasartdatabase --remote --command="SELECT (SELECT COUNT(*) FROM products) products,(SELECT COUNT(*) FROM products WHERE id LIKE 'xls_%') excel_products,(SELECT COUNT(*) FROM product_images WHERE id LIKE 'xlsimg_%') excel_images,(SELECT COUNT(*) FROM users WHERE id LIKE 'cust_%') excel_customers,(SELECT COUNT(*) FROM orders) orders,(SELECT COUNT(*) FROM users WHERE mobile='09153090907') owner_account; SELECT id,sku,name FROM products WHERE id LIKE 'xls_%' ORDER BY id LIMIT 10;" --json
 
       - name: Deploy Worker
         run: npx wrangler deploy --config wrangler.toml
