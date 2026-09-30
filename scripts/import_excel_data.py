@@ -32,43 +32,25 @@ if len(customers)!=300:
 o=['PRAGMA foreign_keys=ON;']
 
 o += [
-"DELETE FROM payment_attempts WHERE payment_id IN (SELECT id FROM payments WHERE order_id IN (SELECT id FROM orders WHERE is_sample=1));",
-"DELETE FROM payments WHERE order_id IN (SELECT id FROM orders WHERE is_sample=1);",
-"DELETE FROM coupon_usages WHERE order_id IN (SELECT id FROM orders WHERE is_sample=1);",
-"DELETE FROM order_notes WHERE order_id IN (SELECT id FROM orders WHERE is_sample=1);",
-"DELETE FROM shipping_tracking WHERE order_id IN (SELECT id FROM orders WHERE is_sample=1);",
-"DELETE FROM order_status_history WHERE order_id IN (SELECT id FROM orders WHERE is_sample=1);",
-"DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE is_sample=1);",
-"DELETE FROM orders WHERE is_sample=1;"
+"DELETE FROM payment_attempts WHERE payment_id IN (SELECT id FROM payments WHERE order_id IN (SELECT DISTINCT order_id FROM order_items WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03')));",
+"DELETE FROM payments WHERE order_id IN (SELECT DISTINCT order_id FROM order_items WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03'));",
+"DELETE FROM coupon_usages WHERE order_id IN (SELECT DISTINCT order_id FROM order_items WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03'));",
+"DELETE FROM order_notes WHERE order_id IN (SELECT DISTINCT order_id FROM order_items WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03'));",
+"DELETE FROM shipping_tracking WHERE order_id IN (SELECT DISTINCT order_id FROM order_items WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03'));",
+"DELETE FROM order_status_history WHERE order_id IN (SELECT DISTINCT order_id FROM order_items WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03'));",
+"DELETE FROM stock_reservations WHERE order_id IN (SELECT DISTINCT order_id FROM order_items WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03'));",
+"DELETE FROM order_items WHERE order_id IN (SELECT DISTINCT order_id FROM order_items WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03'));",
+"DELETE FROM orders WHERE id NOT IN (SELECT id FROM orders) OR id IN (SELECT DISTINCT oi.order_id FROM order_items oi WHERE oi.product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03'));",
+"DELETE FROM order_status_history WHERE order_id NOT IN (SELECT id FROM orders);",
+"DELETE FROM payment_attempts WHERE payment_id NOT IN (SELECT id FROM payments);",
+"DELETE FROM product_media WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03');",
+"DELETE FROM product_seo WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','test_grid_01','test_grid_02','test_grid_03');",
+"DELETE FROM product_variants WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03');",
+"DELETE FROM inventory_transactions WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03');",
+"DELETE FROM inventory WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03');",
+"DELETE FROM product_images WHERE product_id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03');",
+"DELETE FROM products WHERE id IN ('b888d0aa-7ed2-4712-86bd-2c9a67ea5ec2','prod_demo','sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq','test_grid_01','test_grid_02','test_grid_03');"
 ]
-
-for u in ('usr_sample_01','usr_sample_02','usr_sample_03'):
-    o += [
-        f"DELETE FROM customer_group_members WHERE user_id={q(u)};",
-        f"DELETE FROM customer_blocks WHERE user_id={q(u)};",
-        f"DELETE FROM login_history WHERE user_id={q(u)};",
-        f"DELETE FROM security_sessions WHERE user_id={q(u)};",
-        f"DELETE FROM sessions WHERE user_id={q(u)};",
-        f"DELETE FROM cart_items WHERE cart_id IN (SELECT id FROM carts WHERE user_id={q(u)});",
-        f"DELETE FROM carts WHERE user_id={q(u)};",
-        f"DELETE FROM favorites WHERE user_id={q(u)};",
-        f"DELETE FROM reviews WHERE user_id={q(u)};",
-        f"DELETE FROM addresses WHERE user_id={q(u)};",
-        f"DELETE FROM users WHERE id={q(u)};"
-    ]
-
-for p in ('sample_mehr','sample_shab','sample_khak','sample_barg','sample_sokoot','sample_atiq'):
-    o += [
-        f"DELETE FROM inventory_transactions WHERE product_id={q(p)};",
-        f"DELETE FROM product_media WHERE product_id={q(p)};",
-        f"DELETE FROM product_seo WHERE product_id={q(p)};",
-        f"DELETE FROM product_variants WHERE product_id={q(p)};",
-        f"DELETE FROM product_tag_map WHERE product_id={q(p)};",
-        f"DELETE FROM related_products WHERE product_id={q(p)} OR related_product_id={q(p)};",
-        f"DELETE FROM inventory WHERE product_id={q(p)};",
-        f"DELETE FROM product_images WHERE product_id={q(p)};",
-        f"DELETE FROM products WHERE id={q(p)};"
-    ]
 
 o += [
 "DELETE FROM coupon_rules WHERE coupon_id IN ('coupon_sample_10','coupon_sample_fixed');",
