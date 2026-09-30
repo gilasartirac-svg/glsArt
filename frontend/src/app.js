@@ -261,6 +261,50 @@ async function account(){
 }
 async function support(){await loadMe();if(!state.user){layout('<section class="wrap page"><div class="panel login-required"><h1>پرتال CRM پشتیبانی</h1><p>برای ثبت و پیگیری تیکت، ابتدا وارد حساب خود شوید.</p><a class="btn primary" href="#/account">'+icon('user')+' ورود</a></div></section>');return}const f=await api('/api/faq');const d=await api('/api/support/tickets');layout(`<section class="wrap page support-portal"><div class="support-hero"><div><div class="eyebrow">CUSTOMER CRM</div><h1>پرتال پشتیبانی گیلاس آرت</h1><p class="muted">ثبت تیکت، مشاهده مرحله رسیدگی و ادامه گفت‌وگو در یک صفحه.</p></div><div class="support-orb">${icon('support')}</div></div><div class="support-grid"><div><div class="panel"><h2>${icon('plus')} ثبت تیکت جدید</h2><form id="ticket-form" class="form"><label>موضوع<input name="subject" maxlength="180" required></label><label>دسته‌بندی<select name="category"><option>عمومی</option><option>سفارش</option><option>پرداخت</option><option>محصول</option><option>سفارش سفارشی</option></select></label><label>اولویت<select name="priority"><option value="normal">عادی</option><option value="high">مهم</option><option value="low">کم</option></select></label><label>پیام<textarea name="message" required maxlength="10000"></textarea></label><button class="btn primary">${icon('send')} ثبت تیکت</button><div id="ticket-msg"></div></form></div><div class="panel"><div class="sectionhead"><h2>تیکت‌های من</h2><span class="muted">${fa((d.items||[]).length)} مورد</span></div><div class="ticket-list">${(d.items||[]).map(t=>`<a class="ticket-row" href="#/support/${encodeURIComponent(t.id)}"><div><strong>${escapeHtml(t.subject)}</strong><small>${escapeHtml(t.stage)} • ${jalaliDate(t.updated_at)}</small></div><span class="status-${escapeHtml(t.status)}">${t.status==='open'?'باز':'بسته'}</span></a>`).join('')||'<p class="muted">هنوز تیکتی ثبت نکرده‌اید.</p>'}</div></div></div><aside><div class="panel faq-panel"><div class="eyebrow">FAQ</div><h2>پرسش‌های متداول</h2>${renderFaq(f.items||[])}</div></aside></div></section>`);document.querySelector('#ticket-form').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);const m=document.querySelector('#ticket-msg');try{await api('/api/support/tickets',{method:'POST',body:JSON.stringify({subject:f.get('subject'),category:f.get('category'),priority:f.get('priority'),message:f.get('message')}),headers:{'x-csrf-token':csrf()}});m.innerHTML='<span class="ok">تیکت ثبت شد.</span>';setTimeout(()=>support(),250)}catch(err){m.innerHTML='<span class="error">'+escapeHtml(err.message)+'</span>'}}}
 async function supportDetail(id){await loadMe();if(!state.user){location.hash='/account';return}const d=await api('/api/support/tickets/'+encodeURIComponent(id));layout(`<section class="wrap page support-detail"><div class="panel"><div class="sectionhead"><div><span class="eyebrow">TICKET</span><h1>${escapeHtml(d.ticket.subject)}</h1><p class="muted">${escapeHtml(d.ticket.stage)} • ${d.ticket.status==='open'?'باز':'بسته'} • ${jalaliDate(d.ticket.created_at)}</p></div><a class="btn ghost" href="#/support">← همه تیکت‌ها</a></div><div class="ticket-thread">${(d.messages||[]).map(m=>`<div class="ticket-message ${m.author_type==='admin'?'from-admin':'from-user'}"><div class="message-meta">${m.author_type==='admin'?'پشتیبانی گیلاس آرت':'شما'} • ${jalaliDate(m.created_at)}</div><div>${escapeHtml(m.body)}</div></div>`).join('')}</div>${d.ticket.status==='open'?'<form id="reply-ticket" class="form"><label>پیام جدید<textarea name="message" required maxlength="10000"></textarea></label><button class="btn primary">'+icon('send')+' ارسال پاسخ</button><div id="reply-msg"></div></form>':'<div class="notice">این تیکت بسته شده است.</div>'}</div></section>`);document.querySelector('#reply-ticket')?.addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target);try{await api('/api/support/tickets/'+encodeURIComponent(id),{method:'POST',body:JSON.stringify({message:f.get('message')}),headers:{'x-csrf-token':csrf()}});supportDetail(id)}catch(err){document.querySelector('#reply-msg').textContent=err.message}})}
+async function cmsPage(section){
+ const allowed={about:'درباره ما',contact:'تماس با ما',news:'اخبار گیلاس آرت',articles:'مقالات'};
+ const title=allowed[section]||'گیلاس آرت';
+ const initial='<section class="wrap page cms-page"><div class="admin-title"><div><div class="eyebrow">GILAS ART</div><h1>'+escapeHtml(title)+'</h1></div></div><div class="panel" aria-live="polite">در حال دریافت اطلاعات...</div></section>';
+ layout(initial);
+ try{
+  const d=await api('/api/content?section='+encodeURIComponent(section)+'&limit=20');
+  const items=Array.isArray(d.items)?d.items:[];
+  let body='';
+  if(section==='contact'){
+   const x=items[0]||{};
+   body='<div class="cms-contact-grid"><div class="panel"><h2>'+escapeHtml(x.title||title)+'</h2><p>'+escapeHtml(x.body||x.summary||'اطلاعات تماس هنوز ثبت نشده است.')+'</p><div class="contact-list">'+
+    (x.phone?'<p><b>تلفن:</b> '+escapeHtml(x.phone)+'</p>':'')+
+    (x.mobile?'<p><b>موبایل:</b> '+escapeHtml(x.mobile)+'</p>':'')+
+    (x.address?'<p><b>آدرس هنرکده:</b> '+escapeHtml(x.address)+'</p>':'')+
+    (x.map_url?'<a class="btn primary" href="'+escapeHtml(safeUrl(x.map_url))+'" target="_blank" rel="noopener noreferrer">مسیریابی روی نقشه</a>':'')+
+   '</div></div></div>';
+  }else if(section==='about'){
+   const x=items[0];
+   body=x?'<article class="panel cms-rich"><span class="eyebrow">GILAS ART</span><h2>'+escapeHtml(x.title||title)+'</h2><p>'+escapeHtml(x.summary||'')+'</p><div>'+escapeHtml(x.body||'')+'</div></article>':'<div class="panel">اطلاعات درباره ما هنوز در پایگاه داده ثبت نشده است.</div>';
+  }else{
+   body=items.length?'<div class="cms-list">'+items.map(x=>'<article class="panel cms-card"><span class="eyebrow">'+(section==='news'?'NEWS':'ARTICLE')+'</span><h2>'+escapeHtml(x.title||'بدون عنوان')+'</h2><p class="muted">'+escapeHtml(x.summary||'')+'</p><a class="btn ghost" href="#/'+section+'/'+encodeURIComponent(x.slug||'')+'">ادامه مطلب</a></article>').join('')+'</div>':'<div class="panel">محتوایی برای نمایش وجود ندارد.</div>';
+  }
+  const root=document.querySelector('.cms-page');
+  if(root)root.innerHTML='<div class="admin-title"><div><div class="eyebrow">GILAS ART</div><h1>'+escapeHtml(title)+'</h1></div></div>'+body;
+  setSeo({title:title+' | گیلاس آرت',description:items[0]?.summary||'اطلاعات رسمی گیلاس آرت'});
+ }catch(e){
+  const root=document.querySelector('.cms-page');
+  if(root)root.innerHTML='<div class="admin-title"><div><div class="eyebrow">GILAS ART</div><h1>'+escapeHtml(title)+'</h1></div></div><div class="panel"><p class="error">اطلاعات این بخش از پایگاه داده دریافت نشد.</p><p class="muted">'+escapeHtml(e.message||'خطای ارتباط با سرور')+'</p></div>';
+ }
+}
+async function contentDetail(section,slug){
+ const labels={news:'اخبار گیلاس آرت',articles:'مقالات'};
+ const title=labels[section]||'گیلاس آرت';
+ layout('<section class="wrap page cms-page"><div class="panel">در حال دریافت محتوا...</div></section>');
+ try{
+  const d=await api('/api/content/'+encodeURIComponent(section)+'/'+encodeURIComponent(slug));
+  const x=d.item||{};
+  layout('<section class="wrap page cms-page"><article class="panel cms-rich"><span class="eyebrow">'+(section==='news'?'NEWS':'ARTICLE')+'</span><h1>'+escapeHtml(x.title||title)+'</h1><p class="muted">'+escapeHtml(x.published_at||'')+'</p><p>'+escapeHtml(x.summary||'')+'</p><div>'+escapeHtml(x.body||'')+'</div><a class="btn ghost" href="#/'+section+'">← بازگشت</a></article></section>');
+  setSeo({title:(x.title||title)+' | گیلاس آرت',description:x.summary||''});
+ }catch(e){
+  layout('<section class="wrap page cms-page"><div class="panel"><h1>محتوا یافت نشد</h1><p class="error">'+escapeHtml(e.message||'این محتوا قابل دریافت نیست.')+'</p><a class="btn ghost" href="#/'+section+'">بازگشت</a></div></section>');
+ }
+}
 async function checkout(){ location.hash='/cart'; }
 async function router(){const base=location.pathname.includes('/glsArt')?'/glsArt':'';const cleanPath=location.pathname.startsWith(base)?location.pathname.slice(base.length).replace(/^\/+|\/+$/g,''):location.pathname.replace(/^\/+|\/+$/g,'');const pathAdmin=cleanPath==='admin'||cleanPath.startsWith('admin/');const p=location.hash?location.hash.slice(2).split('/'):pathAdmin?['admin']:cleanPath?['product',decodeURIComponent(cleanPath)]:[''];try{if(!p[0])return home();if(p[0]==='admin'){const base=location.pathname.includes('/glsArt/')?'/glsArt':'';const {default:AdminApp}=await import(base+'/admin/AdminApp.js?v=20260929.14');await loadMe();if(!isAdminUser()){location.hash='/account';return}app.innerHTML=AdminApp();return}if(p[0]==='shop')return shop();if(p[0]==='product')return product(p[1]);if(p[0]==='cart')return cart();if(p[0]==='account')return account();if(p[0]==='checkout')return checkout();if(p[0]==='about'||p[0]==='contact')return cmsPage(p[0]);if(p[0]==='article'&&p[1])return contentDetail('articles',decodeURIComponent(p[1]));if(p[0]==='news'&&p[1])return contentDetail('news',decodeURIComponent(p[1]));if(p[0]==='news'||p[0]==='articles')return cmsPage(p[0]);if(p[0]==='terms'){
  layout('<section class="wrap page"><div class="panel"><h1 id="terms-title">قوانین سایت</h1><div id="terms-body" class="terms-content">در حال دریافت قوانین...</div></div></section>');
