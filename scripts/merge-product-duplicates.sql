@@ -1,7 +1,3 @@
-PRAGMA foreign_keys=ON;
-PRAGMA defer_foreign_keys=ON;
-BEGIN;
-
 DROP TABLE IF EXISTS temp_product_merge_map;
 CREATE TEMP TABLE temp_product_merge_map AS
 SELECT id AS product_id, MIN(id) OVER (PARTITION BY TRIM(name)) AS keep_id
@@ -70,4 +66,3 @@ UPDATE product_images SET is_primary=1
 WHERE id IN (SELECT MIN(id) FROM product_images GROUP BY product_id);
 
 DROP TABLE temp_product_merge_map;
-COMMIT;
