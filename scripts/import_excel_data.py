@@ -29,7 +29,7 @@ for r in rs:
 if len(customers)!=300:
     raise SystemExit(f'Unexpected valid customers after admin exclusion: {len(customers)}')
 
-o=['PRAGMA foreign_keys=ON;','BEGIN;']
+o=['PRAGMA foreign_keys=ON;']
 
 o += [
 "DELETE FROM payment_attempts WHERE payment_id IN (SELECT id FROM payments WHERE order_id IN (SELECT id FROM orders WHERE is_sample=1));",
@@ -82,11 +82,11 @@ for n,r in enumerate(ps,1):
     pic=clean(r[5])
     pid=f'xls_{n:04d}'
     o.append(
-        f"INSERT INTO products(id,category_id,slug,sku,name,description,price_irt,active) "
+        f"INSERT OR REPLACE INTO products(id,category_id,slug,sku,name,description,price_irt,active) "
         f"VALUES({q(pid)},NULL,{q('product-'+str(n).zfill(4))},{q('GA-XLS-'+str(n).zfill(4))},{q(name)},{q(desc)},{price},1);"
     )
     o.append(
-        f"INSERT INTO product_images(id,product_id,path,alt_text,sort_order,is_primary) "
+        f"INSERT OR REPLACE INTO product_images(id,product_id,path,alt_text,sort_order,is_primary) "
         f"VALUES({q('xlsimg_'+str(n).zfill(4))},{q(pid)},{q('/glsArt/uploaded/'+pic)},{q(name)},0,1);"
     )
 
@@ -98,6 +98,6 @@ for p,r in customers.items():
         f"ON CONFLICT(mobile) DO UPDATE SET name=excluded.name,updated_at=CURRENT_TIMESTAMP;"
     )
 
-o.append('COMMIT;')
+o.append('-- import complete')
 Path('import.sql').write_text('\n'.join(o)+'\n',encoding='utf-8')
 print(f'validated products={len(ps)} customers={len(customers)} sql_bytes={Path("import.sql").stat().st_size}')
