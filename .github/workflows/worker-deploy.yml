@@ -61,7 +61,7 @@ jobs:
         run: python -m pip install --disable-pip-version-check openpyxl
 
       - name: Resume catalog import
-        run: sed -i "s/for n,r in enumerate(ps,1):/for n,r in enumerate(ps[173:],174):/" scripts/import_excel_data.py
+        run: sed -i -e "s/for n,r in enumerate(ps,1):/for n,r in enumerate(ps[173:],174):/" -e "s/chunk=5/chunk=25/" scripts/import_excel_data.py
 
       - name: Build Excel D1 import SQL
         run: python scripts/import_excel_data.py
