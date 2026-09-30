@@ -47,9 +47,11 @@ jobs:
         if: env.ADMIN_BOOTSTRAP_MOBILE != ''
         run: printf '%s' "$ADMIN_BOOTSTRAP_MOBILE" | npx wrangler secret put ADMIN_BOOTSTRAP_MOBILE --config wrangler.toml
 
-      - name: Inspect duplicate product names for slug merge
+      - name: Merge duplicate products and sync slugs
         run: |
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT TRIM(name) AS name, COUNT(*) AS duplicate_count, GROUP_CONCAT(id) AS product_ids FROM products WHERE TRIM(name) <> '' GROUP BY TRIM(name) HAVING COUNT(*) > 1 ORDER BY name;" --remote --json
+          npx wrangler d1 execute gilasartdatabase --remote --file=scripts/merge-product-duplicates.sql
+          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT COUNT(*) AS products, COUNT(DISTINCT slug) AS unique_slugs, SUM(CASE WHEN TRIM(slug)=TRIM(name) THEN 1 ELSE 0 END) AS slugs_matching_names, SUM(CASE WHEN TRIM(name)<>'' THEN 1 ELSE 0 END) AS named_products FROM products;" --remote --json
+          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT TRIM(name) AS name, COUNT(*) AS n FROM products WHERE TRIM(name)<>'' GROUP BY TRIM(name) HAVING COUNT(*)>1;" --remote --json
 
       - name: Deploy Worker
         run: npx wrangler deploy --config wrangler.toml
