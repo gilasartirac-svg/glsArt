@@ -1,0 +1,26 @@
+INSERT OR IGNORE INTO users(id,mobile,name) VALUES
+('review_seed_user_829','09000000829','سعید کاظمی'),
+('review_seed_user_830','09000000830','مهتاب حسنی'),
+('review_seed_user_831','09000000831','سوسن زارعی'),
+('review_seed_user_832','09000000832','مهین عابدی'),
+('review_seed_user_833','09000000833','ناصر عابدی'),
+('review_seed_user_834','09000000834','آوا حسنی'),
+('review_seed_user_835','09000000835','زینب عباسی'),
+('review_seed_user_836','09000000836','آناهیتا صالحی'),
+('review_seed_user_837','09000000837','نیما اکبری'),
+('review_seed_user_838','09000000838','بابک کاظمی'),
+('review_seed_user_839','09000000839','محمدعلی صالحی'),
+('review_seed_user_840','09000000840','ترانه مرادی');
+INSERT OR IGNORE INTO reviews(id,user_id,product_id,rating,comment,approved,created_at) VALUES
+('review_seed_gilas126_001','review_seed_user_829',(SELECT id FROM products WHERE lower(sku)=lower('gilas126')),5,'رنگ قاب مشکی با مس براق ترکیب فوق‌العاده‌ای ساخته. پیشنهاد می‌کنم.',0,'1 خرداد 1402T00:00:00.000Z'),
+('review_seed_gilas126_002','review_seed_user_830',(SELECT id FROM products WHERE lower(sku)=lower('gilas126')),5,'کیفیت مطلوب. منتظر تخفیف‌های فصلی‌تون هستم.',0,'19 مرداد 1400T00:00:00.000Z'),
+('review_seed_gilas126_003','review_seed_user_831',(SELECT id FROM products WHERE lower(sku)=lower('gilas126')),5,'ترکیب مس و قاب قهوه‌ای سوخته حس سنتی زیبایی می‌ده.',0,'8 خرداد 1394T00:00:00.000Z'),
+('review_seed_gilas126_004','review_seed_user_832',(SELECT id FROM products WHERE lower(sku)=lower('gilas126')),5,'معرق مس با طرح‌های زیبا و قاب طلایی گلدارش دکوراسیون رو متحول کرد.',0,'3 مرداد 1397T00:00:00.000Z'),
+('review_seed_gilas126_005','review_seed_user_833',(SELECT id FROM products WHERE lower(sku)=lower('gilas126')),5,'رنگ قاب قهوه‌ای سوخته گرم و دلنشینه. با دکوراسیون چوبی عالی می‌شه.',0,'9 مرداد 1395T00:00:00.000Z'),
+('review_seed_gilas126_006','review_seed_user_834',(SELECT id FROM products WHERE lower(sku)=lower('gilas126')),5,'این تابلو رو به عنوان کادو تولد خریدم و طرف مقابل عاشقش شد.',0,'26 شهریور 1396T00:00:00.000Z'),
+('review_seed_gilas126_007','review_seed_user_835',(SELECT id FROM products WHERE lower(sku)=lower('gilas126')),5,'از خرید این اثر هنری دست‌ساز خیلی راضی‌ام. ممنون.',0,'2 بهمن 1402T00:00:00.000Z'),
+('review_seed_gilas126_008','review_seed_user_836',(SELECT id FROM products WHERE lower(sku)=lower('gilas126')),5,'معرق مس با این سطح از ظرافت واقعاً کم پیدا می‌شه.',0,'1 بهمن 1400T00:00:00.000Z'),
+('review_seed_gilas126_009','review_seed_user_837',(SELECT id FROM products WHERE lower(sku)=lower('gilas126')),5,'جزئیات کار واقعاً دقیق و تمیزه. ممنون از هنرتون.',0,'2 آذر 1398T00:00:00.000Z'),
+('review_seed_gilas126_010','review_seed_user_838',(SELECT id FROM products WHERE lower(sku)=lower('gilas126')),5,'رنگ قاب قهوه‌ای سوخته گرم و دلنشینه. با دکوراسیون چوبی عالی می‌شه.',0,'17 اردیبهشت 1399T00:00:00.000Z'),
+('review_seed_gilas126_011','review_seed_user_839',(SELECT id FROM products WHERE lower(sku)=lower('gilas126')),5,'معرق مس با طرح‌های زیبا و قاب طلایی گلدارش دکوراسیون رو متحول کرد.',0,'11 مرداد 1398T00:00:00.000Z'),
+('review_seed_gilas126_012','review_seed_user_840',(SELECT id FROM products WHERE lower(sku)=lower('gilas126')),5,'قاب PVC خیلی مقاوم به نظر میاد و رنگش ثابت مونده.',0,'19 آبان 1397T00:00:00.000Z');
