@@ -1481,3 +1481,14 @@ main#main-content{min-height:60vh}
  body:has(.cart-page){padding-bottom:env(safe-area-inset-bottom)}
 }
 @media(prefers-reduced-motion:reduce){.cart-product-link,.cartline{transition:none!important}.cart-product-link:hover{transform:none}}
+
+/* Product reviews */
+.review-list{display:grid;gap:14px;margin-top:16px}
+.review-card{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel2);box-shadow:0 8px 28px rgba(0,0,0,.12)}
+.review-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.review-stars{margin-top:5px;color:var(--gold);letter-spacing:1px}
+.review-body{margin:14px 0;line-height:1.95;white-space:pre-wrap}
+.review-reactions{display:flex;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.review-reaction{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:999px;padding:7px 13px;cursor:pointer}
+.review-reaction:hover,.review-reaction.active{border-color:var(--gold);background:rgba(201,168,106,.10)}
+@media(max-width:520px){.review-card{padding:14px}.review-head{flex-direction:column;gap:5px}.review-reaction{flex:1}}
