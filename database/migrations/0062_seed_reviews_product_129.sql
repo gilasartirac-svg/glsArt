@@ -1,0 +1,26 @@
+INSERT OR IGNORE INTO users(id,mobile,name) VALUES
+('review_seed_user_865','09000000865','نیما طباطبایی'),
+('review_seed_user_866','09000000866','بهنام احمدی'),
+('review_seed_user_867','09000000867','مریم سادات حیدری'),
+('review_seed_user_868','09000000868','قاسم خسروی'),
+('review_seed_user_869','09000000869','رضا نیکوکار'),
+('review_seed_user_870','09000000870','دلارام طاهری'),
+('review_seed_user_871','09000000871','احمد میرزایی'),
+('review_seed_user_872','09000000872','بهروز مقدم'),
+('review_seed_user_873','09000000873','علیرضا کرمی'),
+('review_seed_user_874','09000000874','محمدعلی سلطانی'),
+('review_seed_user_875','09000000875','گلناز هاشمی'),
+('review_seed_user_876','09000000876','مهسا صالحی');
+INSERT OR IGNORE INTO reviews(id,user_id,product_id,rating,comment,approved,created_at) VALUES
+('review_seed_gilas129_001','review_seed_user_865',(SELECT id FROM products WHERE lower(sku)=lower('gilas129')),5,'کار قشنگیه ولی ای کاش سریع‌تر ارسال می‌کردین.',0,'30 دی 1399T00:00:00.000Z'),
+('review_seed_gilas129_002','review_seed_user_866',(SELECT id FROM products WHERE lower(sku)=lower('gilas129')),5,'کیفیت PVC قاب عالیه و رنگ طلایی گلدارش محو نمی‌شه.',0,'27 آبان 1396T00:00:00.000Z'),
+('review_seed_gilas129_003','review_seed_user_867',(SELECT id FROM products WHERE lower(sku)=lower('gilas129')),5,'تابلو زیباست ولی تأخیر در ارسال کمی ناراحت‌کننده بود.',0,'29 فروردین 1395T00:00:00.000Z'),
+('review_seed_gilas129_004','review_seed_user_868',(SELECT id FROM products WHERE lower(sku)=lower('gilas129')),5,'تابلو خیلی سبک و محکمه. قابش هم کاملاً فیت شده.',0,'28 تیر 1399T00:00:00.000Z'),
+('review_seed_gilas129_005','review_seed_user_869',(SELECT id FROM products WHERE lower(sku)=lower('gilas129')),5,'معرق مس با طرح‌های زیبا و قاب طلایی گلدارش دکوراسیون رو متحول کرد.',0,'11 آذر 1404T00:00:00.000Z'),
+('review_seed_gilas129_006','review_seed_user_870',(SELECT id FROM products WHERE lower(sku)=lower('gilas129')),5,'تابلو سبک و نصبش آسونه. کیفیت ساختش عالیه.',0,'6 اردیبهشت 1405T00:00:00.000Z'),
+('review_seed_gilas129_007','review_seed_user_871',(SELECT id FROM products WHERE lower(sku)=lower('gilas129')),5,'این تابلو رو برای دفتر کارم گرفتم و همه همکاران تعریف کردن.',0,'10 آبان 1399T00:00:00.000Z'),
+('review_seed_gilas129_008','review_seed_user_872',(SELECT id FROM products WHERE lower(sku)=lower('gilas129')),5,'از خرید این اثر هنری دست‌ساز خیلی راضی‌ام. ممنون.',0,'22 شهریور 1400T00:00:00.000Z'),
+('review_seed_gilas129_009','review_seed_user_873',(SELECT id FROM products WHERE lower(sku)=lower('gilas129')),5,'تابلو سبک و نصبش آسونه. کیفیت ساختش عالیه.',0,'10 آذر 1396T00:00:00.000Z'),
+('review_seed_gilas129_010','review_seed_user_874',(SELECT id FROM products WHERE lower(sku)=lower('gilas129')),5,'رنگ طلایی گلدار قاب با درخشش مس هماهنگی بی‌نظیری داره.',0,'9 دی 1403T00:00:00.000Z'),
+('review_seed_gilas129_011','review_seed_user_875',(SELECT id FROM products WHERE lower(sku)=lower('gilas129')),5,'تابلو رو هدیه گرفتم و عاشقش شدم. قاب PVC طلایی گلدارش لوکس به نظر میاد.',0,'19 اسفند 1404T00:00:00.000Z'),
+('review_seed_gilas129_012','review_seed_user_876',(SELECT id FROM products WHERE lower(sku)=lower('gilas129')),5,'برش‌های دستی مس باعث شده هر تابلو منحصر به فرد باشه. عالیه.',0,'20 آذر 1393T00:00:00.000Z');
