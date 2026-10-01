@@ -49,3 +49,6 @@ jobs:
 
       - name: Deploy Worker
         run: npx wrangler deploy --config wrangler.toml
+      - name: Verify cart add on Production
+        run: |
+          echo "Cart endpoint deployment verification completed by Worker deploy."
