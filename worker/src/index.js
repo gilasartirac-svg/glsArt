@@ -621,7 +621,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
    if(!c){c={id:uid()};await env.DB.prepare('INSERT INTO carts(id,user_id) VALUES(?,?)').bind(c.id,me.id).run()}
    await env.DB.prepare('INSERT INTO cart_items(cart_id,product_id,quantity,options_json) VALUES(?,?,?,?) ON CONFLICT(cart_id,product_id) DO UPDATE SET quantity=excluded.quantity,options_json=excluded.options_json').bind(c.id,pid,qty,JSON.stringify(resolved.options)).run();
    return json({ok:true,unitPriceIrt:Number(p.price_irt||0)+resolved.adjustment_irt,options:resolved.options});
-  }catch(e){console.error('cart add failed',e?.message||e);return json({error:'cart_add_failed'},500)}
+  }catch(e){console.error('cart add failed',e?.message||e);return json({error:'cart_add_failed',diagnostic:String(e?.message||e).slice(0,200)},500)}
  }
  if(u.pathname==='/api/cart'&&req.method==='DELETE'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const pid=u.searchParams.get('productId');const c=await env.DB.prepare('SELECT id FROM carts WHERE user_id=?').bind(me.id).first();if(c&&pid)await env.DB.prepare('DELETE FROM cart_items WHERE cart_id=? AND product_id=?').bind(c.id,pid).run();return json({ok:true})}
  if(u.pathname==='/api/account/orders'&&req.method==='GET'){
