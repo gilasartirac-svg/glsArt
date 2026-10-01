@@ -25,6 +25,11 @@ jobs:
           npx wrangler d1 execute gilasartdatabase --remote --command="SELECT m.name table_name,p.name column_name,p.type,p.pk FROM sqlite_master m JOIN pragma_table_info(m.name) p WHERE m.type='table' AND m.name IN ('carts','cart_items') ORDER BY m.name,p.cid; SELECT name,tbl_name,sql FROM sqlite_master WHERE type='index' AND tbl_name IN ('carts','cart_items') ORDER BY tbl_name,name;" --json | tee -a /tmp/cart-diagnostic.txt
 
 
+      - name: Isolate production product option query
+        run: |
+          set -o pipefail
+          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT id,price_irt,active FROM products WHERE active=1 ORDER BY id LIMIT 1;" --json 2>&1 | tee /tmp/sql-isolation.txt
+          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT pa.product_id,a.id attribute_id,a.name attribute_name,o.id option_id,o.name option_name,o.is_default,o.price_delta_irt FROM product_attribute_assignments pa JOIN product_attributes a ON a.id=pa.attribute_id JOIN product_attribute_options o ON o.attribute_id=a.id WHERE pa.product_id=(SELECT id FROM products WHERE active=1 ORDER BY id LIMIT 1) AND a.active=1 AND o.active=1 ORDER BY pa.sort_order,a.sort_order,o.sort_order;" --json 2>&1 | tee -a /tmp/sql-isolation.txt
       - name: End-to-end cart add against production Worker
         env:
           API: https://gilasartworker.gilasart-ir-ac.workers.dev
@@ -62,3 +67,10 @@ jobs:
         with:
           name: cart-production-e2e-output
           path: diagnostic-e2e
+
+      - name: Store SQL isolation artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cart-sql-isolation
+          path: /tmp/sql-isolation.txt
