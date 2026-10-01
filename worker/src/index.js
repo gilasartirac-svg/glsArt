@@ -150,6 +150,9 @@ async function ensureAdminBootstrap(env){
   return true;
 }
 async function rate(env,key,limit,minutes){const h=await env.DB.prepare('SELECT COUNT(*) n FROM otp_challenges WHERE request_ip=? AND created_at>datetime(\'now\',?)').bind(key,`-${minutes} minutes`).first();return (h?.n||0)<limit}
+const QUANTITY_DISCOUNT_TIERS=[{min:1,percent:0},{min:2,percent:2},{min:3,percent:4},{min:4,percent:6},{min:5,percent:8},{min:6,percent:10},{min:8,percent:12},{min:10,percent:15},{min:15,percent:17},{min:20,percent:20}];
+function quantityDiscountPercent(quantity){const q=Math.max(1,Math.trunc(Number(quantity)||1));let percent=0;for(const tier of QUANTITY_DISCOUNT_TIERS){if(q>=tier.min)percent=tier.percent;else break}return percent}
+function quantityDiscountTiers(){return QUANTITY_DISCOUNT_TIERS.map(x=>({...x}));}
 const ORDER_STATUS_LABELS={PENDING:'در انتظار پرداخت',PAID:'پرداخت شد',PROCESSING:'در حال پردازش',SHIPPED:'ارسال شد',DELIVERED:'تحویل شد',CANCELLED:'لغو شد',FAILED:'ناموفق'};
 const ORDER_STATUSES=new Set(Object.keys(ORDER_STATUS_LABELS));
 function orderStatusLabel(status){return ORDER_STATUS_LABELS[String(status||'').toUpperCase()]||String(status||'نامشخص')}
@@ -304,6 +307,32 @@ async function cartPricing(env,me,couponCode=''){
     if(best)chosen.set(row.product_id,best);
   }
   const automaticDiscount=Array.from(chosen.values()).reduce((s,x)=>s+x.amount,0);
+  // Quantity discounts are per product line; only quantities >= 2 qualify.
+  // The highest qualifying tier applies and the aggregate quantity discount
+  // is capped at the remaining 20% headroom after existing automatic promotions.
+  const quantityDiscountBudget=Math.max(0,Math.floor(subtotal*0.20)-automaticDiscount);
+  const quantityCandidates=rows.map(row=>{
+    const percent=quantityDiscountPercent(row.quantity);
+    const base=Number(row.unit_price_irt||0)*Number(row.quantity||0);
+    return {row,percent,requested:percent?Math.floor(base*percent/100):0};
+  }).filter(x=>x.requested>0);
+  const requestedTotal=quantityCandidates.reduce((s,x)=>s+x.requested,0);
+  const quantityDiscounts=new Map();
+  if(requestedTotal<=quantityDiscountBudget){
+    for(const x of quantityCandidates)quantityDiscounts.set(x.row.product_id,x.requested);
+  }else if(requestedTotal>0&&quantityDiscountBudget>0){
+    let allocated=0;
+    quantityCandidates.forEach((x,i)=>{
+      const amount=i===quantityCandidates.length-1?Math.max(0,quantityDiscountBudget-allocated):Math.min(x.requested,Math.floor(quantityDiscountBudget*x.requested/requestedTotal));
+      quantityDiscounts.set(x.row.product_id,amount);allocated+=amount;
+    });
+  }
+  for(const x of quantityCandidates){
+    x.row.quantity_discount_percent=x.percent;
+    x.row.quantity_discount_irt=Number(quantityDiscounts.get(x.row.product_id)||0);
+    x.row.line_total_after_quantity_discount_irt=Math.max(0,Number(x.row.unit_price_irt||0)*Number(x.row.quantity||0)-x.row.quantity_discount_irt);
+  }
+  const quantityDiscountIrt=Array.from(quantityDiscounts.values()).reduce((s,x)=>s+x,0);
   let coupon=null,couponDiscount=0;const code=String(couponCode||'').trim().toUpperCase();
   if(code){
     const cpn=await env.DB.prepare('SELECT * FROM coupons WHERE code=?').bind(code).first();if(!cpn)throw new Error('coupon_not_found');if(cpn.user_id&&String(cpn.user_id)!==String(me.id))throw new Error('coupon_not_applicable');
@@ -316,13 +345,13 @@ async function cartPricing(env,me,couponCode=''){
     const cps=new Set(cp.map(x=>x.product_id)),ccs=new Set(cc.map(x=>x.category_id));
     const eligible=rows.filter(x=>(!cps.size&&!ccs.size)||cps.has(x.product_id)||ccs.has(x.category_id)),eligibleBase=eligible.reduce((s,x)=>s+Number(x.unit_price_irt||0)*Number(x.quantity||0),0);
     if(!eligibleBase)throw new Error('coupon_not_applicable');
-    const couponBase=Math.max(0,eligibleBase-automaticDiscount);
-    couponDiscount=cpn.kind==='PERCENT'?Math.floor(couponBase*Math.min(100,Number(cpn.value||0))/100):Math.min(couponBase,Math.max(0,Number(cpn.value||0)));if(cpn.source==='POINTS'){const maxRewardDiscount=Math.max(0,Math.floor(subtotal*0.20)-automaticDiscount);couponDiscount=Math.min(couponDiscount,maxRewardDiscount);}
+    const couponBase=Math.max(0,eligibleBase-automaticDiscount-quantityDiscountIrt);
+    couponDiscount=cpn.kind==='PERCENT'?Math.floor(couponBase*Math.min(100,Number(cpn.value||0))/100):Math.min(couponBase,Math.max(0,Number(cpn.value||0)));if(cpn.source==='POINTS'){const maxRewardDiscount=Math.max(0,Math.floor(subtotal*0.20)-automaticDiscount-quantityDiscountIrt);couponDiscount=Math.min(couponDiscount,maxRewardDiscount);}
     coupon={id:cpn.id,code:cpn.code,kind:cpn.kind,value:cpn.value,discount_irt:couponDiscount};
   }
   const appliedDiscounts=new Map();for(const d of chosen.values()){const x=appliedDiscounts.get(d.id)||{id:d.id,title:d.title,amount:0};x.amount+=d.amount;appliedDiscounts.set(d.id,x)}
-  const discountIrt=Math.min(subtotal,automaticDiscount+couponDiscount),shipping=subtotal>=10000000?0:500000,total=Math.max(0,subtotal-discountIrt+shipping);
-  return {items:rows,subtotal_irt:subtotal,automatic_discount_irt:automaticDiscount,coupon_discount_irt:couponDiscount,discount_irt:discountIrt,shipping_irt:shipping,total_irt:total,coupon,discounts:Array.from(appliedDiscounts.values())};
+  const discountIrt=Math.min(subtotal,automaticDiscount+quantityDiscountIrt+couponDiscount),shipping=subtotal>=10000000?0:500000,total=Math.max(0,subtotal-discountIrt+shipping);
+  return {items:rows,subtotal_irt:subtotal,automatic_discount_irt:automaticDiscount,quantity_discount_irt:quantityDiscountIrt,coupon_discount_irt:couponDiscount,discount_irt:discountIrt,shipping_irt:shipping,total_irt:total,coupon,discounts:Array.from(appliedDiscounts.values()),quantity_discount_tiers:quantityDiscountTiers()};
 }
 
 const REWARD_TIERS=[{points:100,percent:5},{points:200,percent:10},{points:300,percent:15},{points:400,percent:20}];
@@ -359,7 +388,7 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  if(u.pathname==='/api/health')return json({ok:true,service:'gilasartworker',db:!!env.DB,paymentEnv:env.PAYMENT_ENV||'sandbox',smsConfigured:!!env.KAVENEGAR_API_KEY,smsSenderConfigured:!!String(env.KAVENEGAR_SENDER||'')});
  if(u.pathname==='/api/categories'&&req.method==='GET'){const r=await env.DB.prepare('SELECT id,slug,name,description FROM categories WHERE active=1 ORDER BY name').all();return json({items:r.results||[]})}
  if(u.pathname==='/api/products'&&req.method==='GET'){const q=(u.searchParams.get('q')||'').trim(),cat=u.searchParams.get('category'),limit=Math.min(60,Math.max(1,Number(u.searchParams.get('limit')||12))),offset=Math.max(0,Math.min(10000,Number(u.searchParams.get('offset')||0)));let sql='SELECT p.id,p.slug,p.sku,p.name,p.description,p.price_irt,p.category_id,p.flash_sale_active,p.flash_sale_ends_at,p.flash_sale_price_irt,p.video_url,pi.path image FROM products p LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.active=1';const args=[];if(q){sql+=' AND (p.name LIKE ? OR p.description LIKE ? OR p.sku LIKE ?)';args.push(`%${q}%`,`%${q}%`,`%${q}%`)}if(cat){sql+=' AND p.category_id=?';args.push(cat)}sql+=' ORDER BY p.created_at DESC,p.id DESC LIMIT ? OFFSET ?';args.push(limit,offset);const r=await env.DB.prepare(sql).bind(...args).all();return json({items:r.results||[],limit,offset})}
- if(u.pathname.startsWith('/api/products/')&&req.method==='GET'){const slug=decodeURIComponent(u.pathname.split('/').pop());const p=await env.DB.prepare('SELECT p.*,c.name category_name,pi.path image FROM products p LEFT JOIN categories c ON c.id=p.category_id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.slug=? AND p.active=1').bind(slug).first();if(!p)return json({error:'not_found'},404);const images=(await env.DB.prepare('SELECT path,alt_text,sort_order,is_primary FROM product_images WHERE product_id=? ORDER BY sort_order,is_primary DESC').bind(p.id).all()).results||[];const attributes=await loadProductAttributes(env,p.id);const reviews=await env.DB.prepare(`SELECT r.id,r.rating,r.body,r.created_at,u.name,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='like'),0) like_count,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='dislike'),0) dislike_count FROM reviews r JOIN users u ON u.id=r.user_id WHERE r.product_id=? AND r.approved=1 ORDER BY r.created_at DESC`).bind(p.id).all();const categories=(await env.DB.prepare('SELECT c.id,c.slug,c.name FROM product_category_assignments pca JOIN categories c ON c.id=pca.category_id WHERE pca.product_id=? AND c.active=1 ORDER BY pca.sort_order,c.name').bind(p.id).all()).results||[];return json({product:p,images,attributes,reviews:reviews.results||[],categories})}
+ if(u.pathname.startsWith('/api/products/')&&req.method==='GET'){const slug=decodeURIComponent(u.pathname.split('/').pop());const p=await env.DB.prepare('SELECT p.*,c.name category_name,pi.path image FROM products p LEFT JOIN categories c ON c.id=p.category_id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.slug=? AND p.active=1').bind(slug).first();if(!p)return json({error:'not_found'},404);const images=(await env.DB.prepare('SELECT path,alt_text,sort_order,is_primary FROM product_images WHERE product_id=? ORDER BY sort_order,is_primary DESC').bind(p.id).all()).results||[];const attributes=await loadProductAttributes(env,p.id);const reviews=await env.DB.prepare(`SELECT r.id,r.rating,r.body,r.created_at,u.name,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='like'),0) like_count,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='dislike'),0) dislike_count FROM reviews r JOIN users u ON u.id=r.user_id WHERE r.product_id=? AND r.approved=1 ORDER BY r.created_at DESC`).bind(p.id).all();const categories=(await env.DB.prepare('SELECT c.id,c.slug,c.name FROM product_category_assignments pca JOIN categories c ON c.id=pca.category_id WHERE pca.product_id=? AND c.active=1 ORDER BY pca.sort_order,c.name').bind(p.id).all()).results||[];return json({product:p,images,attributes,reviews:reviews.results||[],categories,quantityDiscountTiers:quantityDiscountTiers()})}
  if(u.pathname==='/api/flash-sales'&&req.method==='GET'){const r=await env.DB.prepare("SELECT p.id,p.slug,p.sku,p.name,p.description,p.price_irt,p.flash_sale_price_irt,p.flash_sale_ends_at,pi.path image FROM products p LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.active=1 AND p.flash_sale_active=1 AND p.flash_sale_ends_at IS NOT NULL AND julianday(p.flash_sale_ends_at)>julianday('now') ORDER BY p.flash_sale_ends_at ASC,p.created_at DESC LIMIT 20").all();return json({items:r.results||[]})}
 
  if(u.pathname==='/api/auth/request-otp'&&req.method==='POST'){if(!env.OTP_PEPPER)return json({error:'otp_not_configured'},503);const b=await body(req);const mobile=String(b.mobile||'').replace(/\D/g,''),ip=req.headers.get('CF-Connecting-IP')||'unknown',referralCode=String(b.referralCode||'').trim().toUpperCase().slice(0,20);if(!/^09\d{9}$/.test(mobile))return json({error:'invalid_mobile'},400);if(referralCode&&!/^GA[A-Z0-9]{8,18}$/.test(referralCode))return json({error:'invalid_referral_code'},400);if(referralCode&&!await env.DB.prepare('SELECT 1 FROM referral_codes WHERE code=?').bind(referralCode).first())return json({error:'invalid_referral_code'},400);const okM=await rate(env,mobile,3,10),okI=await rate(env,ip,12,10);if(!okM||!okI)return json({error:'rate_limited'},429);const raw=new Uint32Array(1);crypto.getRandomValues(raw);const code=String(100000+(raw[0]%900000));const challenge=uid();await env.DB.prepare('INSERT INTO otp_challenges(id,mobile,code_hash,expires_at,request_ip,referral_code) VALUES(?,?,?,?,?,?)').bind(challenge,mobile,await sha(env.OTP_PEPPER+':'+code),new Date(Date.now()+120000).toISOString(),ip,referralCode||null).run();if(env.KAVENEGAR_API_KEY){const template=String(await siteSetting(env,'kavenegar_message_template','گیلاس آرت\\nکد ورود : {code}')).slice(0,500);const message=template.replaceAll('{code}',code).replaceAll('{0}',code);const sender=String(await siteSetting(env,'kavenegar_sender',env.KAVENEGAR_SENDER||'')).slice(0,50);if(!sender)return json({error:'sms_sender_not_configured'},503);const p=new URLSearchParams({receptor:mobile,message,sender});let sr;try{sr=await fetch(`https://api.kavenegar.com/v1/${env.KAVENEGAR_API_KEY}/sms/send.json`,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:p})}catch(e){console.error('kavenegar_network_error',e?.message||e);return json({error:'sms_unavailable'},502)}let sj=null;try{sj=await sr.json()}catch{}const rs=Number(sj?.return?.status);if(!sr.ok||!Number.isFinite(rs)||rs!==200){console.error('kavenegar_rejected',JSON.stringify({httpStatus:sr.status,returnStatus:Number.isFinite(rs)?rs:null,returnMessage:sj?.return?.message||null,senderConfigured:!!sender}));return json({error:'sms_provider_rejected'},502)}}else return json({error:'otp_provider_not_configured'},503);return json({ok:true,challengeId:challenge,expiresIn:120})}
