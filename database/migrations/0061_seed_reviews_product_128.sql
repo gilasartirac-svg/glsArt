@@ -1,0 +1,26 @@
+INSERT OR IGNORE INTO users(id,mobile,name) VALUES
+('review_seed_user_853','09000000853','رویا جعفرزاده'),
+('review_seed_user_854','09000000854','فاطمه زهرا قاسمی'),
+('review_seed_user_855','09000000855','پویا جعفرزاده'),
+('review_seed_user_856','09000000856','معصومه باقری'),
+('review_seed_user_857','09000000857','حسین عباسی'),
+('review_seed_user_858','09000000858','طاهره خلیلی'),
+('review_seed_user_859','09000000859','الهام کرمی'),
+('review_seed_user_860','09000000860','مهدی اکبری'),
+('review_seed_user_861','09000000861','فریدون بهرامی'),
+('review_seed_user_862','09000000862','شیما درویشی'),
+('review_seed_user_863','09000000863','پریسا امیری'),
+('review_seed_user_864','09000000864','ترانه کاظمی');
+INSERT OR IGNORE INTO reviews(id,user_id,product_id,rating,comment,approved,created_at) VALUES
+('review_seed_gilas128_001','review_seed_user_853',(SELECT id FROM products WHERE lower(sku)=lower('gilas128')),5,'از وقتی این تابلو رو خریدم همه مهمون‌ها تعریف می‌کنن. معرق مس دست‌ساز عالیه.',0,'20 دی 1398T00:00:00.000Z'),
+('review_seed_gilas128_002','review_seed_user_854',(SELECT id FROM products WHERE lower(sku)=lower('gilas128')),5,'رنگ قاب مشکی با مس براق ترکیب فوق‌العاده‌ای ساخته. پیشنهاد می‌کنم.',0,'24 مهر 1395T00:00:00.000Z'),
+('review_seed_gilas128_003','review_seed_user_855',(SELECT id FROM products WHERE lower(sku)=lower('gilas128')),5,'تابلو دقیقاً مطابق عکس بود و حتی قشنگ‌تر. دستتون درد نکنه.',0,'25 فروردین 1398T00:00:00.000Z'),
+('review_seed_gilas128_004','review_seed_user_856',(SELECT id FROM products WHERE lower(sku)=lower('gilas128')),5,'معرق مس با طرح‌های زیبا و قاب طلایی گلدارش دکوراسیون رو متحول کرد.',0,'22 اردیبهشت 1404T00:00:00.000Z'),
+('review_seed_gilas128_005','review_seed_user_857',(SELECT id FROM products WHERE lower(sku)=lower('gilas128')),5,'تابلوی معرق مس بهترین انتخاب برای هدیه بود. گیرنده خیلی خوشحال شد.',0,'30 مهر 1393T00:00:00.000Z'),
+('review_seed_gilas128_006','review_seed_user_858',(SELECT id FROM products WHERE lower(sku)=lower('gilas128')),5,'معرق مس با این سطح از ظرافت واقعاً کم پیدا می‌شه.',0,'14 خرداد 1401T00:00:00.000Z'),
+('review_seed_gilas128_007','review_seed_user_859',(SELECT id FROM products WHERE lower(sku)=lower('gilas128')),5,'معرق مس با این سطح از ظرافت واقعاً کم پیدا می‌شه.',0,'18 خرداد 1393T00:00:00.000Z'),
+('review_seed_gilas128_008','review_seed_user_860',(SELECT id FROM products WHERE lower(sku)=lower('gilas128')),5,'تابلو رو هدیه گرفتم و عاشقش شدم. قاب PVC طلایی گلدارش لوکس به نظر میاد.',0,'2 تیر 1397T00:00:00.000Z'),
+('review_seed_gilas128_009','review_seed_user_861',(SELECT id FROM products WHERE lower(sku)=lower('gilas128')),5,'کیفیت ساخت و ظرافت برش واقعاً قابل تقدیره. پیشنهاد ویژه.',0,'6 اسفند 1404T00:00:00.000Z'),
+('review_seed_gilas128_010','review_seed_user_862',(SELECT id FROM products WHERE lower(sku)=lower('gilas128')),5,'قاب PVC خیلی مقاوم به نظر میاد و رنگش ثابت مونده.',0,'18 اسفند 1397T00:00:00.000Z'),
+('review_seed_gilas128_011','review_seed_user_863',(SELECT id FROM products WHERE lower(sku)=lower('gilas128')),5,'از خرید این معرق مس پشیمون نشدم. ارزش هر ریالی که دادم رو داره.',0,'23 شهریور 1397T00:00:00.000Z'),
+('review_seed_gilas128_012','review_seed_user_864',(SELECT id FROM products WHERE lower(sku)=lower('gilas128')),5,'چرا این مدل گرون‌تره؟ زمان ساخت و برشش بیشتره؟',0,'1 دی 1396T00:00:00.000Z');
