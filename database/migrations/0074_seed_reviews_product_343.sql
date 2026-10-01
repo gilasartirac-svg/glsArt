@@ -1,0 +1,25 @@
+-- Seed 12 demo reviews for product 343 (gilas343)
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas343_001','سامان امیری','09343001');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas343_001',(SELECT id FROM products WHERE lower(sku)=lower('gilas343')),'review_seed_user_gilas343_001',5,'جزئیات کار واقعاً دقیق و تمیزه. ممنون از هنرتون.',0,'14 اسفند 1395');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas343_002','داریوش اکبری','09343002');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas343_002',(SELECT id FROM products WHERE lower(sku)=lower('gilas343')),'review_seed_user_gilas343_002',5,'برش‌ها تمیز و بدون پلیسه. کیفیت کار حرفه‌ای است.',0,'24 اردیبهشت 1403');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas343_003','ناصر اکبری','09343003');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas343_003',(SELECT id FROM products WHERE lower(sku)=lower('gilas343')),'review_seed_user_gilas343_003',5,'معرق مس با قاب طلایی گلدارش مثل یک اثر هنری واقعی می‌مونه. عالی بود.',0,'1 فروردین 1404');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas343_004','گیتا هاشمی','09343004');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas343_004',(SELECT id FROM products WHERE lower(sku)=lower('gilas343')),'review_seed_user_gilas343_004',5,'جزئیات کار واقعاً دقیق و تمیزه. ممنون از هنرتون.',0,'10 اردیبهشت 1397');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas343_005','حسین عابدی','09343005');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas343_005',(SELECT id FROM products WHERE lower(sku)=lower('gilas343')),'review_seed_user_gilas343_005',5,'برش دستی مس باعث شده کار کاملاً منحصر به فرد باشه. راضی‌ام.',0,'19 اسفند 1400');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas343_006','مهدی درویشی','09343006');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas343_006',(SELECT id FROM products WHERE lower(sku)=lower('gilas343')),'review_seed_user_gilas343_006',5,'کار قشنگیه ولی ای کاش سریع‌تر ارسال می‌کردین.',0,'5 آبان 1396');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas343_007','علی محمدی','09343007');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas343_007',(SELECT id FROM products WHERE lower(sku)=lower('gilas343')),'review_seed_user_gilas343_007',5,'کیفیت ساخت خیلی بالاست. معرق مس با دست برش خورده و کاملاً مشخصه.',0,'10 اسفند 1402');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas343_008','سارا کریمی','09343008');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas343_008',(SELECT id FROM products WHERE lower(sku)=lower('gilas343')),'review_seed_user_gilas343_008',5,'قاب طلایی گلدارش خیلی لوکس و شیکه. تابلو رو کامل کرده.',0,'2 خرداد 1396');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas343_009','جواد باقری','09343009');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas343_009',(SELECT id FROM products WHERE lower(sku)=lower('gilas343')),'review_seed_user_gilas343_009',5,'قاب مشکی مات با درخشش مس ترکیب مدرنی ساخته. عاشقش شدم.',0,'20 اردیبهشت 1396');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas343_010','کاوه اسماعیلی','09343010');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas343_010',(SELECT id FROM products WHERE lower(sku)=lower('gilas343')),'review_seed_user_gilas343_010',5,'ترکیب مس براق با قاب مشکی فوق‌العاده مدرن و زیباست.',0,'21 آذر 1398');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas343_011','کسری اسماعیلی','09343011');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas343_011',(SELECT id FROM products WHERE lower(sku)=lower('gilas343')),'review_seed_user_gilas343_011',5,'قاب PVC خیلی مقاوم به نظر میاد و رنگش ثابت مونده.',0,'3 اردیبهشت 1404');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas343_012','مهین قاسمی','09343012');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas343_012',(SELECT id FROM products WHERE lower(sku)=lower('gilas343')),'review_seed_user_gilas343_012',5,'از خرید این معرق مس پشیمون نشدم. ارزش هر ریالی که دادم رو داره.',0,'11 خرداد 1393');
