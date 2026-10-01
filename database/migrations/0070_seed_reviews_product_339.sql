@@ -1,0 +1,25 @@
+-- Seed 12 demo reviews for product 339 (gilas339)
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas339_001','سارا قاسمی','09339001');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas339_001',(SELECT id FROM products WHERE lower(sku)=lower('gilas339')),'review_seed_user_gilas339_001',5,'رنگ قاب قهوه‌ای سوخته با فضای سنتی خونه‌مون عالی ست شده.',0,'28 تیر 1404');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas339_002','جمشید فرهادی','09339002');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas339_002',(SELECT id FROM products WHERE lower(sku)=lower('gilas339')),'review_seed_user_gilas339_002',5,'رنگ قاب قهوه‌ای سوخته با فضای سنتی خونه‌مون عالی ست شده.',0,'15 مهر 1403');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas339_003','اردشیر عباسی','09339003');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas339_003',(SELECT id FROM products WHERE lower(sku)=lower('gilas339')),'review_seed_user_gilas339_003',5,'از وقتی نصبش کردم فضای خونه‌مون خیلی هنری‌تر شده.',0,'13 آبان 1398');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas339_004','آرش جعفری','09339004');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas339_004',(SELECT id FROM products WHERE lower(sku)=lower('gilas339')),'review_seed_user_gilas339_004',5,'برش‌های دستی مس باعث شده هر تابلو منحصر به فرد باشه. عالیه.',0,'6 مهر 1393');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas339_005','اکبر رستمی','09339005');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas339_005',(SELECT id FROM products WHERE lower(sku)=lower('gilas339')),'review_seed_user_gilas339_005',5,'این تابلو رو به عنوان کادو تولد خریدم و طرف مقابل عاشقش شد.',0,'14 خرداد 1404');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas339_006','جواد باقری','09339006');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas339_006',(SELECT id FROM products WHERE lower(sku)=lower('gilas339')),'review_seed_user_gilas339_006',5,'این تابلو رو برای سالن پذیرایی گرفتم و همه تعریف کردن.',0,'15 دی 1395');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas339_007','شیما احمدی','09339007');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas339_007',(SELECT id FROM products WHERE lower(sku)=lower('gilas339')),'review_seed_user_gilas339_007',5,'تابلو رو هدیه گرفتم و عاشقش شدم. قاب PVC طلایی گلدارش لوکس به نظر میاد.',0,'30 آذر 1401');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas339_008','محمود توکلی','09339008');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas339_008',(SELECT id FROM products WHERE lower(sku)=lower('gilas339')),'review_seed_user_gilas339_008',5,'تابلو زیباست ولی ای کاش زودتر به دستم می‌رسید. تأخیر کمی طولانی شد.',0,'23 بهمن 1402');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas339_009','حسین ابراهیمی','09339009');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas339_009',(SELECT id FROM products WHERE lower(sku)=lower('gilas339')),'review_seed_user_gilas339_009',5,'از وقتی نصبش کردم فضای خونه‌مون خیلی هنری‌تر شده.',0,'9 مهر 1401');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas339_010','نیما باقری','09339010');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas339_010',(SELECT id FROM products WHERE lower(sku)=lower('gilas339')),'review_seed_user_gilas339_010',5,'تابلو دقیقاً مطابق عکس بود و حتی قشنگ‌تر. دستتون درد نکنه.',0,'19 مهر 1393');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas339_011','آرمان حسینی','09339011');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas339_011',(SELECT id FROM products WHERE lower(sku)=lower('gilas339')),'review_seed_user_gilas339_011',5,'قاب مشکی مات با درخشش مس ترکیب مدرنی ساخته. عاشقش شدم.',0,'24 تیر 1400');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas339_012','مریم طباطبایی','09339012');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas339_012',(SELECT id FROM products WHERE lower(sku)=lower('gilas339')),'review_seed_user_gilas339_012',5,'جزئیات کار فوق‌العاده ظریفه. واقعاً کار استادانه‌ست.',0,'15 بهمن 1399');
