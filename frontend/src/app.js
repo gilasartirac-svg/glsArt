@@ -112,7 +112,7 @@ async function product(slug){
        b.classList.toggle('active',b.dataset.reaction===result.my_reaction);
      });
    }catch(err){alert(err.message||'ثبت واکنش انجام نشد.')}
- });
+  }));
  const showMedia=(index)=>{const i=Math.max(0,Math.min(mediaItems.length-1,index));const item=mediaItems[i];const media=document.querySelector('#product-media');if(media)media.innerHTML=mediaHtml(item);document.querySelectorAll('.product-thumb').forEach(x=>x.classList.toggle('active',Number(x.dataset.index)===i));return i};
  document.querySelectorAll('.product-thumb').forEach(b=>b.onclick=()=>showMedia(Number(b.dataset.index)));
  const media=document.querySelector('#product-media');
