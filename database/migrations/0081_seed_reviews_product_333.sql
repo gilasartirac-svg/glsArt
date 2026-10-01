@@ -1,0 +1,25 @@
+-- Seed 12 fictional reviews for product 333 (gilas333)
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas333_001','مهتاب جعفری','09333001');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas333_001',(SELECT id FROM products WHERE lower(sku)=lower('gilas333')),'review_seed_user_gilas333_001',5,'معرق مس با این سطح از ظرافت واقعاً کم پیدا می‌شه.',0,'12 آبان 1402');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas333_002','پریسا قاسمی','09333002');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas333_002',(SELECT id FROM products WHERE lower(sku)=lower('gilas333')),'review_seed_user_gilas333_002',5,'تابلو سبک و نصبش آسونه. کیفیت ساختش عالیه.',0,'1 مرداد 1404');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas333_003','مرتضی سلطانی','09333003');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas333_003',(SELECT id FROM products WHERE lower(sku)=lower('gilas333')),'review_seed_user_gilas333_003',5,'دست‌ساز بودنش کاملاً مشخصه. هر قطعه مس با دقت برش خورده.',0,'20 خرداد 1399');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas333_004','سعید محمدی','09333004');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas333_004',(SELECT id FROM products WHERE lower(sku)=lower('gilas333')),'review_seed_user_gilas333_004',5,'ارسال سریع و بسته‌بندی محکم. خود تابلو هم که نگم براتون چقدر قشنگه.',0,'17 تیر 1401');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas333_005','آتنا طباطبایی','09333005');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas333_005',(SELECT id FROM products WHERE lower(sku)=lower('gilas333')),'review_seed_user_gilas333_005',5,'تابلو عالیه. ای کاش بزرگترش رو گرفته بودم، الان حس می‌کنم کوچیکه.',0,'26 آذر 1402');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas333_006','آتنا موسوی','09333006');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas333_006',(SELECT id FROM products WHERE lower(sku)=lower('gilas333')),'review_seed_user_gilas333_006',5,'کار قشنگیه ولی ای کاش سریع‌تر ارسال می‌کردین.',0,'13 تیر 1393');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas333_007','نازنین مقدم','09333007');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas333_007',(SELECT id FROM products WHERE lower(sku)=lower('gilas333')),'review_seed_user_gilas333_007',5,'تابلو دقیقاً مطابق عکس بود و حتی قشنگ‌تر. دستتون درد نکنه.',0,'29 دی 1403');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas333_008','هانیه احمدی','09333008');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas333_008',(SELECT id FROM products WHERE lower(sku)=lower('gilas333')),'review_seed_user_gilas333_008',5,'قاب قهوه‌ای سوخته با طرح معرق مس ترکیب بی‌نظیری شده. ممنون از کارتون.',0,'8 خرداد 1399');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas333_009','سیروس رضایی','09333009');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas333_009',(SELECT id FROM products WHERE lower(sku)=lower('gilas333')),'review_seed_user_gilas333_009',5,'تابلوی معرق مس بهترین انتخاب برای هدیه بود. گیرنده خیلی خوشحال شد.',0,'11 تیر 1396');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas333_010','علیرضا رضایی','09333010');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas333_010',(SELECT id FROM products WHERE lower(sku)=lower('gilas333')),'review_seed_user_gilas333_010',5,'رنگ قاب مشکی با مس براق ترکیب فوق‌العاده‌ای ساخته. پیشنهاد می‌کنم.',0,'7 مهر 1402');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas333_011','قاسم باقری','09333011');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas333_011',(SELECT id FROM products WHERE lower(sku)=lower('gilas333')),'review_seed_user_gilas333_011',5,'معرق مس دست‌ساز با این کیفیت کمتر پیدا می‌شه. دست مریزاد.',0,'29 تیر 1402');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas333_012','مهدی صادقی','09333012');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas333_012',(SELECT id FROM products WHERE lower(sku)=lower('gilas333')),'review_seed_user_gilas333_012',5,'از وقتی نصبش کردم فضای خونه‌مون خیلی هنری‌تر شده.',0,'25 تیر 1395');
