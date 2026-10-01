@@ -1,0 +1,26 @@
+INSERT OR IGNORE INTO users(id,mobile,name) VALUES
+('review_seed_user_793','09000000793','معصومه رحیمی'),
+('review_seed_user_794','09000000794','نازنین نجفی'),
+('review_seed_user_795','09000000795','محمود قربانی'),
+('review_seed_user_796','09000000796','محمدعلی رضایی'),
+('review_seed_user_797','09000000797','آرمان قاسمی'),
+('review_seed_user_798','09000000798','جواد عزیزی'),
+('review_seed_user_799','09000000799','آریا حیدری'),
+('review_seed_user_800','09000000800','نسیم نوری'),
+('review_seed_user_801','09000000801','علیرضا نجفی'),
+('review_seed_user_802','09000000802','ملیکا حسنی'),
+('review_seed_user_803','09000000803','پروین کرمی'),
+('review_seed_user_804','09000000804','کاوه رستمی');
+INSERT OR IGNORE INTO reviews(id,user_id,product_id,rating,comment,approved,created_at) VALUES
+('review_seed_gilas123_001','review_seed_user_793',(SELECT id FROM products WHERE lower(sku)=lower('gilas123')),5,'کیفیت برش دستی عالی بود. قاب مشکی خیلی شیک دراومده روی دیوار خونه‌مون.',0,'19 آذر 1394T00:00:00.000Z'),
+('review_seed_gilas123_002','review_seed_user_794',(SELECT id FROM products WHERE lower(sku)=lower('gilas123')),5,'برش دستی و دقیق، بدون هیچ ایرادی. کار تمیز و حرفه‌ای.',0,'29 آذر 1398T00:00:00.000Z'),
+('review_seed_gilas123_003','review_seed_user_795',(SELECT id FROM products WHERE lower(sku)=lower('gilas123')),5,'این تابلو رو برای سالن پذیرایی گرفتم و همه تعریف کردن.',0,'28 دی 1398T00:00:00.000Z'),
+('review_seed_gilas123_004','review_seed_user_796',(SELECT id FROM products WHERE lower(sku)=lower('gilas123')),5,'کیفیت برش دستی عالی بود. قاب مشکی خیلی شیک دراومده روی دیوار خونه‌مون.',0,'17 شهریور 1403T00:00:00.000Z'),
+('review_seed_gilas123_005','review_seed_user_797',(SELECT id FROM products WHERE lower(sku)=lower('gilas123')),5,'کیفیت عالی، قیمت مناسب، ارسال سریع. همه چیز کامل بود.',0,'22 دی 1403T00:00:00.000Z'),
+('review_seed_gilas123_006','review_seed_user_798',(SELECT id FROM products WHERE lower(sku)=lower('gilas123')),5,'کیفیت برش دستی عالی بود. قاب مشکی خیلی شیک دراومده روی دیوار خونه‌مون.',0,'16 آبان 1397T00:00:00.000Z'),
+('review_seed_gilas123_007','review_seed_user_799',(SELECT id FROM products WHERE lower(sku)=lower('gilas123')),5,'رنگ قاب قهوه‌ای سوخته با فضای سنتی خونه‌مون عالی ست شده.',0,'23 اسفند 1396T00:00:00.000Z'),
+('review_seed_gilas123_008','review_seed_user_800',(SELECT id FROM products WHERE lower(sku)=lower('gilas123')),5,'از وقتی نصبش کردم فضای خونه‌مون خیلی هنری‌تر شده.',0,'17 مرداد 1397T00:00:00.000Z'),
+('review_seed_gilas123_009','review_seed_user_801',(SELECT id FROM products WHERE lower(sku)=lower('gilas123')),5,'تابلو خیلی سبک و محکمه. قابش هم کاملاً فیت شده.',0,'5 دی 1403T00:00:00.000Z'),
+('review_seed_gilas123_010','review_seed_user_802',(SELECT id FROM products WHERE lower(sku)=lower('gilas123')),5,'دقیقاً همون چیزی که تو عکس بود. برش‌های ظریف مس واقعاً هنرمندانه است.',0,'19 مرداد 1400T00:00:00.000Z'),
+('review_seed_gilas123_011','review_seed_user_803',(SELECT id FROM products WHERE lower(sku)=lower('gilas123')),5,'ارسال سریع و بسته‌بندی محکم. خود تابلو هم که نگم براتون چقدر قشنگه.',0,'4 فروردین 1400T00:00:00.000Z'),
+('review_seed_gilas123_012','review_seed_user_804',(SELECT id FROM products WHERE lower(sku)=lower('gilas123')),5,'کیفیت عالی بود اما ای کاش بزرگترش رو سفارش می‌دادم. این سایز کمی کوچیک به نظر میاد.',0,'26 آبان 1401T00:00:00.000Z');
