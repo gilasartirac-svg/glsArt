@@ -1,0 +1,25 @@
+-- Seed 12 demo reviews for product 341 (gilas341)
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas341_001','محمدعلی فرهادی','09341001');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas341_001',(SELECT id FROM products WHERE lower(sku)=lower('gilas341')),'review_seed_user_gilas341_001',5,'قاب PVC با کیفیت و رنگ ثابت. خیلی راضی هستم.',0,'8 بهمن 1394');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas341_002','علیرضا رضوی','09341002');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas341_002',(SELECT id FROM products WHERE lower(sku)=lower('gilas341')),'review_seed_user_gilas341_002',5,'معرق مس عالیه. ای کاش سایز بزرگتر موجود بود و سفارش می‌دادم.',0,'26 مرداد 1394');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas341_003','آتنا احمدی','09341003');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas341_003',(SELECT id FROM products WHERE lower(sku)=lower('gilas341')),'review_seed_user_gilas341_003',5,'تابلو دقیقاً مطابق عکس بود و حتی قشنگ‌تر. دستتون درد نکنه.',0,'28 اردیبهشت 1398');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas341_004','سوسن کریمی','09341004');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas341_004',(SELECT id FROM products WHERE lower(sku)=lower('gilas341')),'review_seed_user_gilas341_004',5,'برش‌ها تمیز و بدون پلیسه. کیفیت کار حرفه‌ای است.',0,'19 آبان 1400');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas341_005','ناصر نصیری','09341005');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas341_005',(SELECT id FROM products WHERE lower(sku)=lower('gilas341')),'review_seed_user_gilas341_005',5,'برش دستی مس باعث شده کار کاملاً منحصر به فرد باشه. راضی‌ام.',0,'12 شهریور 1405');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas341_006','محدثه فرهادی','09341006');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas341_006',(SELECT id FROM products WHERE lower(sku)=lower('gilas341')),'review_seed_user_gilas341_006',5,'تابلو خیلی قشنگه ولی ای کاش زودتر می‌فرستادین. منتظر موندن سخت بود.',0,'18 خرداد 1405');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas341_007','یاسمن غلامی','09341007');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas341_007',(SELECT id FROM products WHERE lower(sku)=lower('gilas341')),'review_seed_user_gilas341_007',5,'کیفیت PVC قاب عالیه و رنگ طلایی گلدارش محو نمی‌شه.',0,'12 تیر 1395');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas341_008','بهار باقری','09341008');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas341_008',(SELECT id FROM products WHERE lower(sku)=lower('gilas341')),'review_seed_user_gilas341_008',5,'قاب مشکی کلاسیک و شیکه. معرق مس روش می‌درخشه.',0,'8 فروردین 1403');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas341_009','کامران ابراهیمی','09341009');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas341_009',(SELECT id FROM products WHERE lower(sku)=lower('gilas341')),'review_seed_user_gilas341_009',5,'تابلوی معرق مس بهترین انتخاب برای هدیه بود. گیرنده خیلی خوشحال شد.',0,'4 دی 1404');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas341_010','شهرام احمدی','09341010');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas341_010',(SELECT id FROM products WHERE lower(sku)=lower('gilas341')),'review_seed_user_gilas341_010',5,'کیفیت ساخت خوبه. کی تخفیف ویژه می‌ذارین برای خرید بعدی؟',0,'3 آذر 1399');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas341_011','ابراهیم میرزایی','09341011');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas341_011',(SELECT id FROM products WHERE lower(sku)=lower('gilas341')),'review_seed_user_gilas341_011',5,'از خرید این اثر هنری دست‌ساز خیلی راضی‌ام. ممنون.',0,'12 مرداد 1395');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas341_012','سارا غفاری','09341012');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas341_012',(SELECT id FROM products WHERE lower(sku)=lower('gilas341')),'review_seed_user_gilas341_012',5,'کیفیت PVC قاب عالیه و رنگ طلایی گلدارش محو نمی‌شه.',0,'22 آذر 1395');
