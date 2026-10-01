@@ -154,7 +154,7 @@ async function cart(){
   const lines=items.map(x=>{
    const opts=x.selected_options?.length?'<div class="cart-options">'+x.selected_options.map(o=>escapeHtml(o.attributeName)+': '+escapeHtml(o.optionName)+(Number(o.priceDeltaIrt||0)?' (+'+fa(o.priceDeltaIrt)+' ریال)':'')).join(' · ')+'</div>':'';
    const href=productUrl(x.slug||x.product_slug||'');
-   const lineTotal=Number(x.unit_price_irt??x.price_irt||0)*Number(x.quantity||0);
+   const lineTotal=Number((x.unit_price_irt??x.price_irt)||0)*Number(x.quantity||0);
    return '<article class="cartline"><a class="cart-product-link" href="'+href+'" aria-label="مشاهده '+escapeHtml(x.name)+'"><span class="cart-product-thumb">'+(x.image?'<img src="'+escapeHtml(safeUrl(x.image))+'" alt="'+escapeHtml(x.name)+'">':'<span>گیلاس آرت</span>')+'</span><span class="grow"><b>'+escapeHtml(x.name)+'</b><span class="muted">'+fa(x.unit_price_irt??x.price_irt)+' ریال × '+fa(x.quantity)+'</span><strong class="cart-line-total">'+fa(lineTotal)+' ریال</strong>'+opts+'</span></a><div class="cart-qty" role="group" aria-label="تعداد '+escapeHtml(x.name)+'"><button class="cart-qty-btn" data-id="'+escapeHtml(x.product_id)+'" data-qty="'+Math.max(1,Number(x.quantity)-1)+'" type="button" aria-label="کاهش تعداد">−</button><span>'+fa(x.quantity)+'</span><button class="cart-qty-btn" data-id="'+escapeHtml(x.product_id)+'" data-qty="'+Math.min(99,Number(x.quantity)+1)+'" type="button" aria-label="افزایش تعداد">+</button></div><button class="btn ghost del" data-id="'+escapeHtml(x.product_id)+'" type="button">حذف</button></article>';
   }).join('');
   const empty=!items.length;
