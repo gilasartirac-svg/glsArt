@@ -1,0 +1,26 @@
+INSERT OR IGNORE INTO users(id,mobile,name) VALUES
+('review_seed_user_745','09000000745','ریحانه جعفرزاده'),
+('review_seed_user_746','09000000746','پارسا زارعی'),
+('review_seed_user_747','09000000747','پریسا آقایی'),
+('review_seed_user_748','09000000748','گلناز اسماعیلی'),
+('review_seed_user_749','09000000749','رستم پاکدل'),
+('review_seed_user_750','09000000750','یاسمن محمدی'),
+('review_seed_user_751','09000000751','سارا اسماعیلی'),
+('review_seed_user_752','09000000752','پریسا قربانی'),
+('review_seed_user_753','09000000753','محمدعلی نظری'),
+('review_seed_user_754','09000000754','بهنام علیزاده'),
+('review_seed_user_755','09000000755','بهرام کاظمی'),
+('review_seed_user_756','09000000756','مجید خسروی');
+INSERT OR IGNORE INTO reviews(id,user_id,product_id,rating,comment,approved,created_at) VALUES
+('review_seed_gilas119_001','review_seed_user_745',(SELECT id FROM products WHERE lower(sku)=lower('gilas119')),5,'رنگ طلایی گلدار قاب با درخشش مس هماهنگی بی‌نظیری داره.',0,'12 مرداد 1396T00:00:00.000Z'),
+('review_seed_gilas119_002','review_seed_user_746',(SELECT id FROM products WHERE lower(sku)=lower('gilas119')),5,'از نزدیک که دیدم کیفیتش چند برابر عکس‌هاست. قاب قهوه‌ای سوخته خیلی گرمه.',0,'8 خرداد 1400T00:00:00.000Z'),
+('review_seed_gilas119_003','review_seed_user_747',(SELECT id FROM products WHERE lower(sku)=lower('gilas119')),5,'دست‌ساز بودنش کاملاً مشخصه. هر قطعه مس با دقت برش خورده.',0,'17 فروردین 1396T00:00:00.000Z'),
+('review_seed_gilas119_004','review_seed_user_748',(SELECT id FROM products WHERE lower(sku)=lower('gilas119')),5,'تابلو خیلی قشنگه ولی ای کاش زودتر می‌فرستادین. منتظر موندن سخت بود.',0,'25 شهریور 1402T00:00:00.000Z'),
+('review_seed_gilas119_005','review_seed_user_749',(SELECT id FROM products WHERE lower(sku)=lower('gilas119')),5,'معرق مس قشنگیه. ای کاش مدل بزرگترش رو سفارش می‌دادم.',0,'8 خرداد 1393T00:00:00.000Z'),
+('review_seed_gilas119_006','review_seed_user_750',(SELECT id FROM products WHERE lower(sku)=lower('gilas119')),5,'جزئیات کار واقعاً دقیق و تمیزه. ممنون از هنرتون.',0,'26 خرداد 1399T00:00:00.000Z'),
+('review_seed_gilas119_007','review_seed_user_751',(SELECT id FROM products WHERE lower(sku)=lower('gilas119')),5,'این کار دست‌ساز ارزش هنری بالایی داره. خیلی خوشحالم از خرید.',0,'4 فروردین 1394T00:00:00.000Z'),
+('review_seed_gilas119_008','review_seed_user_752',(SELECT id FROM products WHERE lower(sku)=lower('gilas119')),5,'معرق مس قشنگیه. ای کاش مدل بزرگترش رو سفارش می‌دادم.',0,'23 آذر 1404T00:00:00.000Z'),
+('review_seed_gilas119_009','review_seed_user_753',(SELECT id FROM products WHERE lower(sku)=lower('gilas119')),5,'از نزدیک که دیدم کیفیتش چند برابر عکس‌هاست. قاب قهوه‌ای سوخته خیلی گرمه.',0,'1 اسفند 1404T00:00:00.000Z'),
+('review_seed_gilas119_010','review_seed_user_754',(SELECT id FROM products WHERE lower(sku)=lower('gilas119')),5,'معرق مس با این سطح از ظرافت واقعاً کم پیدا می‌شه.',0,'3 اسفند 1401T00:00:00.000Z'),
+('review_seed_gilas119_011','review_seed_user_755',(SELECT id FROM products WHERE lower(sku)=lower('gilas119')),5,'تابلوی معرق مس فوق‌العاده زیبایی بود. قاب طلایی گلدارش واقعاً چشم‌نوازه. دستتون درد نکنه.',0,'30 بهمن 1395T00:00:00.000Z'),
+('review_seed_gilas119_012','review_seed_user_756',(SELECT id FROM products WHERE lower(sku)=lower('gilas119')),5,'برش‌های دستی مس باعث شده هر تابلو منحصر به فرد باشه. عالیه.',0,'9 اسفند 1403T00:00:00.000Z');
