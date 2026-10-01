@@ -407,7 +407,7 @@ async function router(){const base=location.pathname.includes('/glsArt')?'/glsAr
  }catch(e){
   const bodyEl=document.querySelector('#terms-body');if(bodyEl)bodyEl.textContent='قوانین سایت در حال حاضر قابل دریافت نیست.';
  }
- return}if(p[0]==='support')return p[1]?supportDetail(decodeURIComponent(p[1])):support();if(p[0]==='payment'){layout(`<section class="wrap page"><div class="panel"><h1>${p[1]==='success'?'پرداخت با موفقیت تایید شد':'پرداخت ناموفق بود'}</h1><a class="btn primary" href="#/shop">بازگشت به فروشگاه</a></div></section>`);return}home()}catch(e){layout(`<section class="wrap page"><div class="panel"><h2>خطا</h2><p class="error">${escapeHtml(e.message)}</p></div></section>`)}}window.addEventListener('hashchange',()=>router());window.addEventListener('popstate',()=>router());router();loadMe().then(()=>{if(location.hash===''||location.hash==='#/'||location.pathname!=='/')router()});
+ return}if(p[0]==='support')return p[1]?supportDetail(decodeURIComponent(p[1])):support();if(p[0]==='payment'){layout(`<section class="wrap page"><div class="panel"><h1>${p[1]==='success'?'پرداخت با موفقیت تایید شد':'پرداخت ناموفق بود'}</h1><a class="btn primary" href="#/shop">بازگشت به فروشگاه</a></div></section>`);return}home()}catch(e){layout(`<section class="wrap page"><div class="panel"><h2>خطا</h2><p class="error">${escapeHtml(e.message)}</p></div></section>`)}}window.addEventListener('hashchange',()=>router());window.addEventListener('popstate',()=>router());loadMe().then(()=>router()).catch(()=>router());
 
 /* GilasArt interaction guard */
 (()=>{
