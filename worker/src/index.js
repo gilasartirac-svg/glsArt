@@ -353,13 +353,13 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
 }
 
 if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
-  const parts=u.pathname.split('/').filter(Boolean);const section=String(parts[2]||'').toLowerCase(),slug=decodeURIComponent(parts.slice(3).join('/'));if(!['news','articles'].includes(section)||!slug)return json({error:'invalid_content'},400);const x=await env.DB.prepare('SELECT id,section,title,slug,summary,body,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE section=? AND slug=? AND active=1').bind(section,slug).first();if(!x)return json({error:'not_found'},404);return json({item:x});
+  const parts=u.pathname.split('/').filter(Boolean);const section=String(parts[2]||'').toLowerCase(),slug=decodeURIComponent(parts.slice(3).join('/'));if(!['news','articles'].includes(section)||!slug)return json({error:'invalid_content'},400);const x=await env.DB.prepare('SELECT id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE section=? AND slug=? AND active=1').bind(section,slug).first();if(!x)return json({error:'not_found'},404);return json({item:x});
  }
  if(u.pathname.startsWith('/api/content')&&req.method==='GET'){
   const section=String(u.searchParams.get('section')||'').trim().toLowerCase();
   if(!['about','contact','news','articles'].includes(section))return json({error:'invalid_section'},400);
   const limit=Math.min(20,Math.max(1,Number(u.searchParams.get('limit')||8))),offset=Math.max(0,Number(u.searchParams.get('offset')||0)),q=String(u.searchParams.get('q')||'').trim();
-  let sql='SELECT id,section,title,slug,summary,body,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE section=? AND active=1';const args=[section];
+  let sql='SELECT id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE section=? AND active=1';const args=[section];
   if(q){sql+=' AND (title LIKE ? OR summary LIKE ? OR body LIKE ?)';const like='%'+q+'%';args.push(like,like,like)}
   sql+=' ORDER BY published_at DESC,created_at DESC LIMIT ? OFFSET ?';args.push(limit,offset);
   const r=await env.DB.prepare(sql).bind(...args).all();return json({items:r.results||[],limit,offset,hasMore:(r.results||[]).length===limit});
@@ -848,16 +848,20 @@ if(u.pathname==='/api/admin/cms'&&req.method==='POST'){
  const b=await body(req),section=String(b.section||'').toLowerCase();
  if(!['about','contact','news','articles'].includes(section)||!String(b.title||'').trim())return json({error:'invalid_content'},400);
  const id=uid(),slug=String(b.slug||b.title).trim().toLowerCase().replace(/[^a-z0-9\u0600-\u06ff\s_-]/g,'').replace(/\s+/g,'-').slice(0,160);
- await env.DB.prepare('INSERT INTO cms_entries(id,section,title,slug,summary,body,phone,mobile,address,map_url,active,published_at,sort_order) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)')
- .bind(id,section,String(b.title).trim().slice(0,180),slug,String(b.summary||'').slice(0,500),String(b.body||'').slice(0,12000),String(b.phone||'').slice(0,50),String(b.mobile||'').slice(0,50),String(b.address||'').slice(0,500),String(b.mapUrl||'').slice(0,500),b.active===false?0:1,b.publishedAt||now(),Math.trunc(Number(b.sortOrder)||0)).run();
+ const cover=String(b.coverImage||'').trim().slice(0,1000);
+ if(cover){try{const cu=new URL(cover);if(!['http:','https:'].includes(cu.protocol))return json({error:'invalid_cover_image'},400)}catch{return json({error:'invalid_cover_image'},400)}}
+ await env.DB.prepare('INSERT INTO cms_entries(id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+ .bind(id,section,String(b.title).trim().slice(0,180),slug,String(b.summary||'').slice(0,500),String(b.body||'').slice(0,12000),cover||null,String(b.phone||'').slice(0,50),String(b.mobile||'').slice(0,50),String(b.address||'').slice(0,500),String(b.mapUrl||'').slice(0,500),b.active===false?0:1,b.publishedAt||now(),Math.trunc(Number(b.sortOrder)||0)).run();
  await audit(env,me,'admin.cms.create','cms',id,{after:{section,title:b.title}},req);return json({ok:true,id});
 }
 if(u.pathname.startsWith('/api/admin/cms/')&&req.method==='PUT'){
  if(!(await requirePermission(me,env,'content.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
  const id=u.pathname.split('/').pop(),before=await env.DB.prepare('SELECT * FROM cms_entries WHERE id=?').bind(id).first();if(!before)return json({error:'not_found'},404);
  const b=await body(req);
- await env.DB.prepare('UPDATE cms_entries SET title=?,slug=?,summary=?,body=?,phone=?,mobile=?,address=?,map_url=?,active=?,published_at=?,sort_order=?,updated_at=CURRENT_TIMESTAMP WHERE id=?')
- .bind(String(b.title??before.title).slice(0,180),String(b.slug??before.slug).slice(0,160),String(b.summary??before.summary??'').slice(0,500),String(b.body??before.body??'').slice(0,12000),String(b.phone??before.phone??'').slice(0,50),String(b.mobile??before.mobile??'').slice(0,50),String(b.address??before.address??'').slice(0,500),String(b.mapUrl??before.map_url??'').slice(0,500),b.active===false?0:1,b.publishedAt??before.published_at,Math.trunc(Number(b.sortOrder??before.sort_order)||0),id).run();
+ const cover=b.coverImage===undefined?String(before.cover_image||''):String(b.coverImage||'').trim().slice(0,1000);
+ if(cover){try{const cu=new URL(cover);if(!['http:','https:'].includes(cu.protocol))return json({error:'invalid_cover_image'},400)}catch{return json({error:'invalid_cover_image'},400)}}
+ await env.DB.prepare('UPDATE cms_entries SET title=?,slug=?,summary=?,body=?,cover_image=?,phone=?,mobile=?,address=?,map_url=?,active=?,published_at=?,sort_order=?,updated_at=CURRENT_TIMESTAMP WHERE id=?')
+ .bind(String(b.title??before.title).slice(0,180),String(b.slug??before.slug).slice(0,160),String(b.summary??before.summary??'').slice(0,500),String(b.body??before.body??'').slice(0,12000),cover||null,String(b.phone??before.phone??'').slice(0,50),String(b.mobile??before.mobile??'').slice(0,50),String(b.address??before.address??'').slice(0,500),String(b.mapUrl??before.map_url??'').slice(0,500),b.active===false?0:1,b.publishedAt??before.published_at,Math.trunc(Number(b.sortOrder??before.sort_order)||0),id).run();
  const after=await env.DB.prepare('SELECT * FROM cms_entries WHERE id=?').bind(id).first();await audit(env,me,'admin.cms.update','cms',id,{before,after},req);return json({ok:true});
 }
 if(u.pathname.startsWith('/api/admin/cms/')&&req.method==='DELETE'){
