@@ -617,7 +617,22 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
 
  if(u.pathname==='/api/cart'&&req.method==='GET'){if(!me)return json({items:[],subtotal_irt:0,discount_irt:0,shipping_irt:0,total_irt:0});try{return json(await cartPricing(env,me,''))}catch(e){return json({error:'cart_pricing_failed'},500)}}
  if(u.pathname==='/api/cart/price'&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const b=await body(req),code=String(b.code||'').trim().toUpperCase();if(!code)return json({error:'coupon_required'},400);try{return json(await cartPricing(env,me,code))}catch(e){const c=promotionErrorCode(e);if(c)return json({error:c},400);return json({error:'cart_pricing_failed'},500)}}
- if(u.pathname==='/api/cart'&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const b=await body(req),pid=String(b.productId||''),qty=Math.max(1,Math.min(99,Number(b.quantity)||1));const p=await env.DB.prepare('SELECT id FROM products WHERE id=? AND active=1').bind(pid).first();if(!p)return json({error:'product_not_found'},404);let existingCart=await env.DB.prepare('SELECT id,options_json FROM cart_items WHERE cart_id IN (SELECT id FROM carts WHERE user_id=?) AND product_id=?').bind(me.id,pid).first();let resolved;try{const rawOptions=b.options===undefined?JSON.parse(existingCart?.options_json||'[]'):b.options;resolved=await resolveProductOptions(env,pid,rawOptions||[])}catch(e){return json({error:e.message||'invalid_product_options'},400)}let c=await env.DB.prepare('SELECT id FROM carts WHERE user_id=?').bind(me.id).first();if(!c){c={id:uid()};await env.DB.prepare('INSERT INTO carts(id,user_id) VALUES(?,?)').bind(c.id,me.id).run()}await env.DB.prepare('INSERT INTO cart_items(cart_id,product_id,quantity,options_json) VALUES(?,?,?,?) ON CONFLICT(cart_id,product_id) DO UPDATE SET quantity=excluded.quantity,options_json=excluded.options_json').bind(c.id,pid,qty,JSON.stringify(resolved.options)).run();return json({ok:true,unitPriceIrt:Number((await env.DB.prepare('SELECT price_irt FROM products WHERE id=?').bind(pid).first())?.price_irt||0)+resolved.adjustment_irt,options:resolved.options})}
+ if(u.pathname==='/api/cart'&&req.method==='POST'){
+  if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);
+  try{
+   const b=await body(req),pid=String(b.productId||'').trim(),qty=Math.max(1,Math.min(99,Number(b.quantity)||1));
+   if(!pid)return json({error:'product_required'},400);
+   const p=await env.DB.prepare('SELECT id,price_irt FROM products WHERE id=? AND active=1').bind(pid).first();
+   if(!p)return json({error:'product_not_found'},404);
+   let existingCart=await env.DB.prepare('SELECT ci.id,ci.options_json FROM cart_items ci JOIN carts c ON c.id=ci.cart_id WHERE c.user_id=? AND ci.product_id=?').bind(me.id,pid).first();
+   let resolved;
+   try{const rawOptions=b.options===undefined?(existingCart?.options_json||'[]'):b.options;resolved=await resolveProductOptions(env,pid,rawOptions||[])}catch(e){return json({error:e.message||'invalid_product_options'},400)}
+   let c=await env.DB.prepare('SELECT id FROM carts WHERE user_id=?').bind(me.id).first();
+   if(!c){c={id:uid()};await env.DB.prepare('INSERT INTO carts(id,user_id) VALUES(?,?)').bind(c.id,me.id).run()}
+   await env.DB.prepare('INSERT INTO cart_items(cart_id,product_id,quantity,options_json) VALUES(?,?,?,?) ON CONFLICT(cart_id,product_id) DO UPDATE SET quantity=excluded.quantity,options_json=excluded.options_json').bind(c.id,pid,qty,JSON.stringify(resolved.options)).run();
+   return json({ok:true,unitPriceIrt:Number(p.price_irt||0)+resolved.adjustment_irt,options:resolved.options});
+  }catch(e){console.error('cart add failed',e?.message||e);return json({error:'cart_add_failed'},500)}
+ }
  if(u.pathname==='/api/cart'&&req.method==='DELETE'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const pid=u.searchParams.get('productId');const c=await env.DB.prepare('SELECT id FROM carts WHERE user_id=?').bind(me.id).first();if(c&&pid)await env.DB.prepare('DELETE FROM cart_items WHERE cart_id=? AND product_id=?').bind(c.id,pid).run();return json({ok:true})}
  if(u.pathname==='/api/account/orders'&&req.method==='GET'){
   if(!me)return json({error:'unauthorized'},401);
