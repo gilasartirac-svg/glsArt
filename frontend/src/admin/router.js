@@ -13,6 +13,7 @@ const loaders={
  'invoice-settings':()=>import('./pages/InvoiceSettings.js?v=20260929-admin'),
  categories:()=>import('./pages/Categories.js?v=20260929-admin'),
  coupons:()=>import('./pages/Coupons.js?v=20260929-admin'),
+ reviews:()=>import('./pages/Reviews.js?v=20260929-admin'),
  discounts:()=>import('./pages/Discounts.js?v=20260929-admin'),
  sms:()=>import('./pages/SmsSettings.js?v=20260929-admin'),
  payment:()=>import('./pages/PaymentSettings.js?v=20260929-admin'),
