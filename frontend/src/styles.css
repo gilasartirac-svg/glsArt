@@ -566,6 +566,7 @@ input,textarea,select,button,[contenteditable="true"]{-webkit-user-select:none;u
 .cart-product-thumb{width:72px;height:72px;flex:0 0 72px;border-radius:13px;overflow:hidden;background:linear-gradient(135deg,#2a241b,#17171b);display:grid;place-items:center;color:#bcae94;font-size:9px;text-align:center}
 .cart-product-thumb img{width:100%;height:100%;object-fit:cover}
 .cart-options{font-size:11px;line-height:1.7;color:var(--ga-muted)}
+.cart-line-total{display:block;font-size:13px;font-weight:800;color:var(--ga-gold-2);direction:ltr;text-align:left;font-variant-numeric:tabular-nums}
 .cartline .del{flex:0 0 auto}
 .cart-coupon{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end;margin-top:18px;padding:16px;background:rgba(255,255,255,.025);border-radius:15px}
 .cart-coupon label{display:block;margin-bottom:7px;color:var(--ga-muted);font-size:12px}
