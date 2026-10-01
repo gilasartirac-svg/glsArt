@@ -1512,3 +1512,68 @@ main#main-content{min-height:60vh}
 .loyalty-rules{margin-top:24px;padding:22px}.loyalty-rules table{width:100%;border-collapse:collapse;margin:14px 0}.loyalty-rules th,.loyalty-rules td{padding:10px;border-bottom:1px solid var(--ui-line);text-align:right}.loyalty-rules th{color:var(--ui-gold-strong)}
 @media(max-width:800px){.points-badge{display:none}.rewards-grid{grid-template-columns:1fr}.rewards-account-card{align-items:flex-start;flex-direction:column}.rewards-account-card .btn{width:100%}}
 @media(max-width:560px){.rewards-promo-inner{padding:7px 12px;gap:6px;justify-content:space-between}.rewards-promo-inner span:nth-child(2){display:none}.rewards-page .page-masthead{grid-template-columns:1fr}.rewards-balance-hero{min-height:150px}.reward-tiers,.reward-coupons{grid-template-columns:1fr}.reward-tier .btn{width:100%}.referral-code{flex-direction:column;align-items:stretch}.referral-code code{text-align:center}.loyalty-rules{padding:15px}.loyalty-rules table{font-size:11px}}
+
+/* Loyalty experience polish — preserves existing GilasArt design system */
+.rewards-page{padding-bottom:70px}
+.rewards-masthead{align-items:stretch;gap:24px}
+.rewards-masthead .page-masthead-copy{display:flex;flex-direction:column;justify-content:center}
+.rewards-masthead h1{max-width:760px}
+.rewards-microcopy{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.rewards-microcopy span{display:inline-flex;align-items:center;min-height:30px;padding:0 11px;border:1px solid var(--ui-line);border-radius:999px;background:var(--ui-surface-2);color:var(--ui-muted);font-size:10px}
+.rewards-microcopy span::before{content:'✓';margin-left:6px;color:var(--ui-gold-strong);font-weight:900}
+.rewards-balance-hero{position:relative;overflow:hidden}
+.rewards-balance-hero::after{content:'✦';position:absolute;left:18px;top:10px;color:color-mix(in srgb,var(--ui-gold) 35%,transparent);font-size:36px;line-height:1;transform:rotate(12deg)}
+.rewards-balance-hero small{font-size:12px}
+.rewards-progress{height:7px;margin:14px 0 2px;border-radius:999px;overflow:hidden;background:color-mix(in srgb,var(--ui-line) 85%,transparent)}
+.rewards-progress span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--ui-gold),var(--ui-gold-strong));transition:width .45s ease}
+.rewards-progress-copy{font-size:10px;color:var(--ui-muted)}
+.rewards-progress-copy b{color:var(--ui-gold-strong)}
+.rewards-convert-panel .sectionhead p{margin:4px 0 0;font-size:11px}
+.reward-tier{position:relative;min-height:184px;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.reward-tier.is-ready{border-color:color-mix(in srgb,var(--ui-gold) 40%,var(--ui-line));box-shadow:0 12px 28px color-mix(in srgb,var(--ui-gold) 7%,transparent)}
+.reward-tier.is-ready:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--ui-gold) 65%,var(--ui-line))}
+.reward-tier-top{display:flex;align-items:center;gap:10px}
+.reward-tier-top>div{display:grid;gap:1px}
+.reward-tier-icon{width:34px;height:34px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--ui-gold) 35%,var(--ui-line));border-radius:50%;color:var(--ui-gold-strong);background:color-mix(in srgb,var(--ui-gold) 8%,var(--ui-surface))}
+.reward-tier p{margin:0;color:var(--ui-muted);font-size:10px;line-height:1.8;min-height:36px}
+.reward-tier .btn{margin-top:auto}
+.referral-panel{position:relative;overflow:hidden}
+.referral-panel::before{content:'↗';position:absolute;left:20px;top:18px;color:color-mix(in srgb,var(--ui-gold) 25%,transparent);font-size:54px;font-weight:300}
+.referral-label{display:block;margin:5px 0 6px;color:var(--ui-muted);font-size:10px}
+.referral-note{margin:8px 0 0;color:var(--ui-muted);font-size:9px}
+.rewards-earn-panel{margin-bottom:20px}
+.reward-earn-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.reward-earn-item{display:grid;gap:3px;min-height:104px;padding:14px;border:1px solid var(--ui-line);border-radius:15px;background:var(--ui-surface-2)}
+.reward-earn-item strong{font-size:13px}
+.reward-earn-item span{color:var(--ui-gold-strong);font-weight:900;font-size:12px}
+.reward-earn-item small{color:var(--ui-muted);font-size:9px}
+.section-count{align-self:center;color:var(--ui-muted);font-size:10px;white-space:nowrap}
+.reward-coupon{position:relative;overflow:hidden;min-height:112px}
+.reward-coupon:not(.is-expired){border-color:color-mix(in srgb,var(--ui-gold) 28%,var(--ui-line))}
+.reward-coupon-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.reward-coupon-head b{color:var(--ui-gold-strong)}
+.reward-coupon-meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:var(--ui-muted);font-size:9px}
+.reward-coupon.is-expired{opacity:.6}
+.reward-coupon.is-expired code,.reward-coupon.is-expired b{color:var(--ui-muted)}
+.empty-rewards{min-height:150px;display:grid;place-items:center;text-align:center;padding:25px;color:var(--ui-muted);border:1px dashed var(--ui-line);border-radius:15px}
+.empty-rewards span{font-size:24px;color:var(--ui-gold-strong)}
+.empty-rewards p{margin:0;font-weight:800;color:var(--ui-text)}
+.empty-rewards small{font-size:10px}
+.rewards-ledger td:first-child{font-weight:600}
+.rewards-ledger time{color:var(--ui-muted);font-size:10px}
+@media(max-width:800px){
+ .reward-earn-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .rewards-masthead{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+ .rewards-page{padding-bottom:45px}
+ .rewards-microcopy{gap:6px}
+ .rewards-microcopy span{font-size:9px}
+ .reward-earn-grid{grid-template-columns:1fr}
+ .reward-earn-item{min-height:auto}
+ .sectionhead{gap:8px}
+ .section-count{font-size:9px}
+ .reward-coupon{min-height:auto}
+ .reward-coupon-meta{display:grid}
+ .rewards-ledger th,.rewards-ledger td{padding:9px 6px;font-size:10px}
+}
