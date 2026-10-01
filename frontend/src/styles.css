@@ -1584,7 +1584,7 @@ main#main-content{min-height:60vh}
 @media(max-width:600px){.quantity-discount-card{padding:13px}.quantity-discount-tiers{gap:5px}.quantity-discount-tiers span{font-size:10px;padding:5px 7px}.quantity-discount-summary>div{align-items:flex-start}}
 
 /* Cart quantity indicator — refined for light/dark themes */
-.cart-link{position:relative;overflow:visible}
+.cart-link{position:relative;overflow:visible}.cart-link .cart-icon-wrap{display:inline-flex!important}
 .cart-icon-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;line-height:1;flex:0 0 24px}
 .cart-icon-wrap>svg{display:block;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .cart-count-badge{position:absolute;top:-8px;right:-9px;min-width:21px;height:21px;padding:0 5px;display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--ui-surface);border-radius:999px;background:#b85f3f;color:#fff;font-size:11px;font-weight:900;line-height:1;letter-spacing:-.1px;box-shadow:0 3px 10px rgba(120,55,35,.30);font-variant-numeric:tabular-nums;z-index:4;white-space:nowrap}
