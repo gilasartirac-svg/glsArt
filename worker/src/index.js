@@ -206,31 +206,21 @@ async function loadProductAttributes(env,productId){
       o.id option_id,
       o.name option_name,
       o.active option_active,
-      COALESCE(po.is_default,o.is_default) is_default,
-      COALESCE(po.price_delta_irt,o.price_delta_irt) price_delta_irt,
-      o.sort_order option_sort,
-      po.active override_active
+      o.is_default is_default,
+      o.price_delta_irt price_delta_irt,
+      o.sort_order option_sort
     FROM product_attribute_assignments pa
     JOIN product_attributes a ON a.id=pa.attribute_id
     JOIN product_attribute_options o ON o.attribute_id=a.id
-    LEFT JOIN product_attribute_option_overrides po
-      ON po.product_id=pa.product_id AND po.option_id=o.id
     WHERE pa.product_id=?
-      AND (
-        NOT EXISTS (
-          SELECT 1
-          FROM product_attribute_option_overrides px
-          JOIN product_attribute_options ox ON ox.id=px.option_id
-          WHERE px.product_id=pa.product_id AND ox.attribute_id=a.id
-        )
-        OR COALESCE(po.active,0)=1
-      )
+      AND a.active=1
+      AND o.active=1
     ORDER BY pa.sort_order,a.sort_order,o.sort_order
   `).bind(productId).all()).results||[];
   const map=new Map();
   for(const r of rows){
     if(!map.has(r.attribute_id))map.set(r.attribute_id,{id:r.attribute_id,name:r.attribute_name,active:Number(r.attribute_active)===1,required:true,options:[]});
-    if(Number(r.attribute_active)===1&&Number(r.option_active)===1&&Number(r.override_active??1)!==0)map.get(r.attribute_id).options.push({
+    map.get(r.attribute_id).options.push({
       id:r.option_id,name:r.option_name,is_default:Number(r.is_default)===1,price_delta_irt:Number(r.price_delta_irt||0)
     });
   }
