@@ -1,0 +1,26 @@
+INSERT OR IGNORE INTO users(id,mobile,name) VALUES
+('review_seed_user_757','09000000757','شیما حسینی'),
+('review_seed_user_758','09000000758','فرشته رضوی'),
+('review_seed_user_759','09000000759','سمیرا قاسمی'),
+('review_seed_user_760','09000000760','ستاره عباسی'),
+('review_seed_user_761','09000000761','پیمان رضایی'),
+('review_seed_user_762','09000000762','شهرام غلامی'),
+('review_seed_user_763','09000000763','گلناز عزیزی'),
+('review_seed_user_764','09000000764','کاوه زمانی'),
+('review_seed_user_765','09000000765','شایان اکبری'),
+('review_seed_user_766','09000000766','شهرام یوسفی'),
+('review_seed_user_767','09000000767','کاوه قاسمی'),
+('review_seed_user_768','09000000768','مریم سادات خسروی');
+INSERT OR IGNORE INTO reviews(id,user_id,product_id,rating,comment,approved,created_at) VALUES
+('review_seed_gilas120_001','review_seed_user_757',(SELECT id FROM products WHERE lower(sku)=lower('gilas120')),5,'برش دستی مس باعث شده کار کاملاً منحصر به فرد باشه. راضی‌ام.',0,'9 اسفند 1393T00:00:00.000Z'),
+('review_seed_gilas120_002','review_seed_user_758',(SELECT id FROM products WHERE lower(sku)=lower('gilas120')),5,'رنگ طلایی گلدار قاب با درخشش مس هماهنگی بی‌نظیری داره.',0,'1 مرداد 1394T00:00:00.000Z'),
+('review_seed_gilas120_003','review_seed_user_759',(SELECT id FROM products WHERE lower(sku)=lower('gilas120')),5,'کیفیت خوبه اما ارسال کمی دیر شد. ای کاش زودتر می‌فرستادین.',0,'25 شهریور 1405T00:00:00.000Z'),
+('review_seed_gilas120_004','review_seed_user_760',(SELECT id FROM products WHERE lower(sku)=lower('gilas120')),5,'قاب طلایی گلدارش خیلی لوکس و شیکه. تابلو رو کامل کرده.',0,'21 مرداد 1404T00:00:00.000Z'),
+('review_seed_gilas120_005','review_seed_user_761',(SELECT id FROM products WHERE lower(sku)=lower('gilas120')),5,'این تابلو دکوراسیون خونه‌مون رو کامل کرد. خیلی راضی هستم از خرید.',0,'27 خرداد 1396T00:00:00.000Z'),
+('review_seed_gilas120_006','review_seed_user_762',(SELECT id FROM products WHERE lower(sku)=lower('gilas120')),5,'معرق مس عالیه. ای کاش سایز بزرگتر موجود بود و سفارش می‌دادم.',0,'16 آذر 1401T00:00:00.000Z'),
+('review_seed_gilas120_007','review_seed_user_763',(SELECT id FROM products WHERE lower(sku)=lower('gilas120')),5,'کار دست‌ساز عالیه. کی پیشنهاد ویژه یا تخفیف می‌ذارین؟',0,'22 دی 1398T00:00:00.000Z'),
+('review_seed_gilas120_008','review_seed_user_764',(SELECT id FROM products WHERE lower(sku)=lower('gilas120')),5,'قیمتش کمی بالاست. برش دستی چقدر زمان می‌بره که این قیمت درمیاد؟',0,'10 آذر 1394T00:00:00.000Z'),
+('review_seed_gilas120_009','review_seed_user_765',(SELECT id FROM products WHERE lower(sku)=lower('gilas120')),5,'معرق مس عالیه. ای کاش سایز بزرگتر موجود بود و سفارش می‌دادم.',0,'20 اردیبهشت 1398T00:00:00.000Z'),
+('review_seed_gilas120_010','review_seed_user_766',(SELECT id FROM products WHERE lower(sku)=lower('gilas120')),5,'از وقتی این تابلو رو خریدم همه مهمون‌ها تعریف می‌کنن. معرق مس دست‌ساز عالیه.',0,'20 تیر 1403T00:00:00.000Z'),
+('review_seed_gilas120_011','review_seed_user_767',(SELECT id FROM products WHERE lower(sku)=lower('gilas120')),5,'کیفیت PVC قاب عالیه و رنگ طلایی گلدارش محو نمی‌شه.',0,'1 مرداد 1396T00:00:00.000Z'),
+('review_seed_gilas120_012','review_seed_user_768',(SELECT id FROM products WHERE lower(sku)=lower('gilas120')),5,'بسته‌بندی عالی بود و تابلو سالم به دستم رسید. ممنون.',0,'12 اردیبهشت 1396T00:00:00.000Z');
