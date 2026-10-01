@@ -13,7 +13,18 @@ export default function AdminApp(){
    window.addEventListener('hashchange',close);
   }
   window.dispatchEvent(new Event('admin-mounted'));
-  import('./router.js?v=20260929-admin').then(m=>m.default()).then(result=>{const page=document.getElementById('admin-page');if(!page)return;page.innerHTML=result.html;if(typeof result.mount==='function')return result.mount()}).catch(e=>{const page=document.getElementById('admin-page');if(page)page.innerHTML='<div class="admin-page panel" dir="rtl"><h2>خطا در بارگذاری کنترل پنل</h2><p class="error">'+String(e?.message||e)+'</p></div>'});
+  const renderAdminPage=async()=>{
+   const page=document.getElementById('admin-page');
+   if(!page)return;
+   page.innerHTML='<div class="admin-page panel" dir="rtl">در حال بارگذاری…</div>';
+   try{
+    const result=await import('./router.js?v=20260930-admin').then(m=>m.default());
+    page.innerHTML=result?.html||'<div class="admin-page panel" dir="rtl"><p class="error">صفحه مدیریت قابل بارگذاری نیست.</p></div>';
+    if(typeof result?.mount==='function')await result.mount();
+   }catch(e){page.innerHTML='<div class="admin-page panel" dir="rtl"><h2>خطا در بارگذاری کنترل پنل</h2><p class="error">'+String(e?.message||e)+'</p></div>'}
+  };
+  window.GilasArtAdminNavigate=renderAdminPage;
+  renderAdminPage();
  });
  return `
 <div class="admin-layout" dir="rtl">
