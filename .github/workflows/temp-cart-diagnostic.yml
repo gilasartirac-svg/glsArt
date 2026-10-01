@@ -16,10 +16,20 @@ jobs:
       - run: npm ci
       - name: Inspect production cart schema
         run: |
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT name,sql FROM sqlite_master WHERE type='table' AND name IN ('carts','cart_items','product_attributes','product_attribute_options','product_attribute_assignments') ORDER BY name;" --json
+          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT name,sql FROM sqlite_master WHERE type='table' AND name IN ('carts','cart_items','product_attributes','product_attribute_options','product_attribute_assignments') ORDER BY name;" --json | tee -a /tmp/cart-diagnostic.txt
       - name: Inspect migration state
         run: |
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT name FROM d1_migrations ORDER BY id DESC LIMIT 30;" --json
+          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT name FROM d1_migrations ORDER BY id DESC LIMIT 30;" --json | tee -a /tmp/cart-diagnostic.txt
       - name: Inspect cart related columns and indexes
         run: |
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT m.name table_name,p.name column_name,p.type,p.pk FROM sqlite_master m JOIN pragma_table_info(m.name) p WHERE m.type='table' AND m.name IN ('carts','cart_items') ORDER BY m.name,p.cid; SELECT name,tbl_name,sql FROM sqlite_master WHERE type='index' AND tbl_name IN ('carts','cart_items') ORDER BY tbl_name,name;" --json
+          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT m.name table_name,p.name column_name,p.type,p.pk FROM sqlite_master m JOIN pragma_table_info(m.name) p WHERE m.type='table' AND m.name IN ('carts','cart_items') ORDER BY m.name,p.cid; SELECT name,tbl_name,sql FROM sqlite_master WHERE type='index' AND tbl_name IN ('carts','cart_items') ORDER BY tbl_name,name;" --json | tee -a /tmp/cart-diagnostic.txt
+
+      - name: Upload diagnostic output
+        run: |
+          mkdir -p diagnostic
+          cp /tmp/cart-diagnostic.txt diagnostic/output.txt
+      - name: Store diagnostic artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cart-production-diagnostic
+          path: diagnostic/output.txt
