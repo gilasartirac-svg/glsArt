@@ -1,0 +1,51 @@
+name: Temporary Rewards Verification
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      TEST_USER_ID: rewards-test-user
+      TEST_CART_ID: rewards-test-cart
+      TEST_SESSION: rewards-test-session
+      TEST_CSRF: rewards-test-csrf
+      TEST_COUPON_ID: rewards-test-coupon
+      TEST_COUPON: GA-POINTS-TEST20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Syntax and unit checks
+        run: |
+          node --check frontend/src/app.js
+          node --check worker/src/index.js
+          npm test
+      - name: Wait for production migration
+        run: |
+          for i in $(seq 1 30); do
+            if npx wrangler d1 execute gilasartdatabase --remote --command="SELECT name FROM sqlite_master WHERE type='table' AND name='loyalty_points'" --json | grep -q 'loyalty_points'; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "loyalty_points migration not available"
+          exit 1
+      - name: Create isolated rewards test fixture
+        run: |
+          npx wrangler d1 execute gilasartdatabase --remote --command="INSERT OR IGNORE INTO users(id,mobile,name) VALUES ('rewards-test-user','09990000001','Rewards Test User'); INSERT OR IGNORE INTO loyalty_points(id,user_id,points,event_type,reference_type,reference_id,description) VALUES ('rewards-test-points','rewards-test-user',200,'test_fixture','test','rewards-test','test balance'); INSERT OR IGNORE INTO carts(id,user_id) VALUES ('rewards-test-cart','rewards-test-user'); INSERT OR REPLACE INTO cart_items(cart_id,product_id,quantity,options_json) SELECT 'rewards-test-cart',id,1,'[]' FROM products WHERE active=1 ORDER BY created_at DESC,id DESC LIMIT 1; INSERT OR REPLACE INTO coupons(id,code,kind,value,max_uses,active,expires_at,user_id,source,points_cost) VALUES ('rewards-test-coupon','GA-POINTS-TEST20','PERCENT',20,1,1,datetime('now','+1 day'),'rewards-test-user','POINTS',200); INSERT OR REPLACE INTO sessions(id,user_id,expires_at) VALUES ('rewards-test-session','rewards-test-user',datetime('now','+1 day'));"
+      - name: Verify coupon discounts the test cart
+        run: |
+          body=$(curl -fsS -X POST "https://gilasartworker.gilasart-ir-ac.workers.dev/api/cart/price" -H "content-type: application/json" -H "x-csrf-token: $TEST_CSRF" -H "cookie: __Host-gs_session=$TEST_SESSION; gs_csrf=$TEST_CSRF" --data '{"code":"GA-POINTS-TEST20"}')
+          echo "$body"
+          node -e "const d=JSON.parse(process.argv[1]); if(!d.total_irt||Number(d.discount_irt)<=0||Number(d.discount_irt)>Number(d.subtotal_irt)*0.20+1){process.exit(1)}" "$body"
+      - name: Cleanup rewards test fixture
+        if: always()
+        run: |
+          npx wrangler d1 execute gilasartdatabase --remote --command="DELETE FROM coupon_usages WHERE coupon_id='rewards-test-coupon'; DELETE FROM cart_items WHERE cart_id='rewards-test-cart'; DELETE FROM carts WHERE id='rewards-test-cart'; DELETE FROM sessions WHERE id='rewards-test-session'; DELETE FROM coupons WHERE id='rewards-test-coupon'; DELETE FROM loyalty_points WHERE user_id='rewards-test-user'; DELETE FROM users WHERE id='rewards-test-user';"
