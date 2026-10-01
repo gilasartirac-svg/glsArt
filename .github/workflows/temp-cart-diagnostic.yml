@@ -24,12 +24,28 @@ jobs:
         run: |
           npx wrangler d1 execute gilasartdatabase --remote --command="SELECT m.name table_name,p.name column_name,p.type,p.pk FROM sqlite_master m JOIN pragma_table_info(m.name) p WHERE m.type='table' AND m.name IN ('carts','cart_items') ORDER BY m.name,p.cid; SELECT name,tbl_name,sql FROM sqlite_master WHERE type='index' AND tbl_name IN ('carts','cart_items') ORDER BY tbl_name,name;" --json | tee -a /tmp/cart-diagnostic.txt
 
-      - name: Upload diagnostic output
+
+      - name: End-to-end cart add against production Worker
+        env:
+          API: https://gilasartworker.gilasart-ir-ac.workers.dev
         run: |
-          mkdir -p diagnostic
-          cp /tmp/cart-diagnostic.txt diagnostic/output.txt
-      - name: Store diagnostic artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: cart-production-diagnostic
-          path: diagnostic/output.txt
+          set -euo pipefail
+          USER_ID="cart_test_$(date +%s%N)"
+          SESSION_ID="cart_session_$(date +%s%N)"
+          CSRF="cart_csrf_$(date +%s%N)"
+          MOBILE="09$(date +%s%N | tail -c 10)"
+          PRODUCT_ID="$(npx wrangler d1 execute gilasartdatabase --remote --command="SELECT id FROM products WHERE active=1 ORDER BY id LIMIT 1;" --json | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const x=JSON.parse(s);process.stdout.write(x[0].results[0].id)})")"
+          echo "product=$PRODUCT_ID"
+          npx wrangler d1 execute gilasartdatabase --remote --command="INSERT INTO users(id,mobile,name) VALUES('$USER_ID','$MOBILE','Cart Test'); INSERT INTO sessions(id,user_id,expires_at) VALUES('$SESSION_ID','$USER_ID',datetime('now','+1 hour'));" --json
+          curl --fail-with-body -sS "$API/api/me" -H "Cookie: __Host-gs_session=$SESSION_ID; gs_csrf=$CSRF" -o /tmp/me.json
+          cat /tmp/me.json
+          STATUS="$(curl -sS -o /tmp/cart.json -w '%{http_code}' "$API/api/cart" -H "Cookie: __Host-gs_session=$SESSION_ID; gs_csrf=$CSRF")"
+          echo "GET cart status=$STATUS"; cat /tmp/cart.json
+          STATUS="$(curl -sS -o /tmp/add.json -w '%{http_code}' "$API/api/cart" -X POST -H "content-type: application/json" -H "X-CSRF-Token: $CSRF" -H "Cookie: __Host-gs_session=$SESSION_ID; gs_csrf=$CSRF" --data "{\"productId\":\"$PRODUCT_ID\",\"quantity\":1,\"options\":[]}")"
+          echo "POST cart status=$STATUS"; cat /tmp/add.json
+          test "$STATUS" = "200"
+          grep -q '"ok":true' /tmp/add.json
+          STATUS="$(curl -sS -o /tmp/cart_after.json -w '%{http_code}' "$API/api/cart" -H "Cookie: __Host-gs_session=$SESSION_ID; gs_csrf=$CSRF")"
+          echo "GET cart after status=$STATUS"; cat /tmp/cart_after.json
+          grep -q "$PRODUCT_ID" /tmp/cart_after.json
+          npx wrangler d1 execute gilasartdatabase --remote --command="DELETE FROM cart_items WHERE cart_id IN (SELECT id FROM carts WHERE user_id='$USER_ID'); DELETE FROM carts WHERE user_id='$USER_ID'; DELETE FROM sessions WHERE id='$SESSION_ID'; DELETE FROM users WHERE id='$USER_ID';" --json
