@@ -342,7 +342,7 @@ async function pointsBalance(env,userId){const r=await env.DB.prepare('SELECT CO
 async function rewardData(env,me){
  const balance=await pointsBalance(env,me.id),code=await ensureReferralCode(env,me.id);
  const ledger=(await env.DB.prepare('SELECT points,event_type,description,created_at FROM loyalty_points WHERE user_id=? ORDER BY created_at DESC LIMIT 50').bind(me.id).all()).results||[];
- const coupons=(await env.DB.prepare("SELECT id,code,kind,value,points_cost,expires_at,created_at FROM coupons WHERE user_id=? AND source='POINTS' ORDER BY created_at DESC LIMIT 20").bind(me.id).all()).results||[];
+ const coupons=(await env.DB.prepare("SELECT id,code,kind,value,points_cost,expires_at FROM coupons WHERE user_id=? AND source='POINTS' ORDER BY expires_at DESC,id DESC LIMIT 20").bind(me.id).all()).results||[];
  return {balance,referralCode:code,referralUrl:frontend(env)+'/?ref='+encodeURIComponent(code)+'#/account',tiers:REWARD_TIERS,ledger,coupons};
 }
 function promotionErrorCode(e){const c=String(e?.message||'');return ['coupon_not_found','coupon_expired_or_inactive','coupon_min_order','coupon_usage_limit','coupon_already_used','coupon_not_applicable'].includes(c)?c:null}
