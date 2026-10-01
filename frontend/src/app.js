@@ -333,15 +333,66 @@ async function contentDetail(section,slug){
 async function rewardsPage(){
  await loadMe();
  if(!state.user){location.hash='/account';return}
- let d=state.rewards;try{d=await api('/api/rewards');state.rewards=d;state.points=Number(d.balance||0)}catch(e){layout('<section class="wrap page"><div class="panel"><h1>باشگاه امتیاز</h1><p class="error">'+escapeHtml(e.message||'خطا')+'</p></div></section>');return}
- const tiers=(d.tiers||[]).map(t=>'<div class="reward-tier"><strong>'+fa(t.points)+' امتیاز</strong><span>'+fa(t.percent)+'٪ تخفیف</span><button class="btn primary reward-redeem" data-points="'+t.points+'" type="button" '+(Number(d.balance)<t.points?'disabled':'')+'>تبدیل به کوپن</button></div>').join('');
- const ledger=(d.ledger||[]).map(x=>'<tr><td>'+escapeHtml(x.description||x.event_type)+'</td><td class="'+(Number(x.points)<0?'points-negative':'points-positive')+'">'+(Number(x.points)>0?'+':'')+fa(x.points)+'</td><td>'+jalaliDate(x.created_at)+'</td></tr>').join('');
- const coupons=(d.coupons||[]).map(x=>'<div class="reward-coupon"><code dir="ltr">'+escapeHtml(x.code)+'</code><b>'+fa(x.value)+'٪</b><span>تا '+escapeHtml(jalaliDate(x.expires_at))+'</span><small>یک‌بار مصرف و فقط برای حساب شما</small></div>').join('')||'<p class="muted">هنوز کوپن امتیازی نساخته‌اید.</p>';
- layout('<section class="wrap page rewards-page"><div class="page-masthead"><div class="page-masthead-copy"><span class="eyebrow">GILAS ART REWARDS</span><h1>باشگاه امتیاز گیلاس آرت</h1><p>هر فعالیت ارزشمند شما امتیاز دارد. امتیازها را نگه دارید یا در زمان مناسب به کوپن تخفیف یک‌بارمصرف تبدیل کنید.</p></div><div class="rewards-balance-hero"><span>موجودی امتیاز</span><strong>'+fa(d.balance)+'</strong><small>حداکثر تخفیف کوپن امتیازی: ۲۰٪</small></div></div><div class="rewards-grid"><section class="panel"><div class="sectionhead"><div><span class="eyebrow">REDEEM</span><h2>تبدیل امتیاز به کوپن</h2></div></div><div class="reward-tiers">'+tiers+'</div></section><section class="panel referral-panel"><span class="eyebrow">INVITE FRIENDS</span><h2>دوستت را دعوت کن</h2><p class="muted">دوست شما با این لینک ثبت‌نام کند و شما <strong>۳۰ امتیاز</strong> هدیه می‌گیرید.</p><div class="referral-code"><code dir="ltr">'+escapeHtml(d.referralCode)+'</code><button class="btn ghost" id="copy-referral" type="button">کپی لینک دعوت</button></div><input class="referral-url" dir="ltr" readonly value="'+escapeHtml(d.referralUrl)+'"></section></div><section class="panel"><div class="sectionhead"><div><span class="eyebrow">MY COUPONS</span><h2>کوپن‌های من</h2></div></div><div class="reward-coupons">'+coupons+'</div></section><section class="panel"><div class="sectionhead"><div><span class="eyebrow">ACTIVITY</span><h2>تاریخچه امتیازها</h2></div></div><div class="table-wrap"><table class="rewards-ledger"><thead><tr><th>رویداد</th><th>امتیاز</th><th>تاریخ</th></tr></thead><tbody>'+ledger+'</tbody></table></div></section></section>');
- document.querySelector('#copy-referral')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(d.referralUrl);document.querySelector('#copy-referral').textContent='کپی شد ✓'}catch{const x=document.querySelector('.referral-url');x.select();document.execCommand('copy');document.querySelector('#copy-referral').textContent='کپی شد ✓'}});
- document.querySelectorAll('.reward-redeem').forEach(btn=>btn.addEventListener('click',async()=>{btn.disabled=true;try{await api('/api/rewards/redeem',{method:'POST',headers:{'x-csrf-token':csrf()},body:JSON.stringify({points:Number(btn.dataset.points)})});await rewardsPage()}catch(e){btn.disabled=false;alert(e.message||'تبدیل امتیاز انجام نشد')}}));
-}
+ let d=state.rewards;
+ try{d=await api('/api/rewards');state.rewards=d;state.points=Number(d.balance||0)}
+ catch(e){layout('<section class="wrap page"><div class="panel"><h1>باشگاه امتیاز</h1><p class="error">'+escapeHtml(e.message||'خطا')+'</p></div></section>');return}
 
+ const balance=Math.max(0,Number(d.balance||0));
+ const tiers=[...(d.tiers||[])].sort((a,b)=>Number(a.points)-Number(b.points));
+ const next=tiers.find(t=>Number(t.points)>balance)||null;
+ const previous=tiers.filter(t=>Number(t.points)<=balance).pop()||{points:0,percent:0};
+ const progressMax=next?Number(next.points):Number(previous.points||400);
+ const progressStart=Number(previous.points||0);
+ const progress=next?Math.min(100,Math.max(0,((balance-progressStart)/Math.max(1,progressMax-progressStart))*100)):100;
+ const remaining=next?Math.max(0,Number(next.points)-balance):0;
+
+ const tierIcon=p=>p===400?'✦':p===300?'◆':p===200?'◇':'•';
+ const tiersHtml=tiers.map(t=>{
+   const cost=Number(t.points),ready=balance>=cost;
+   return '<article class="reward-tier '+(ready?'is-ready':'')+'"><div class="reward-tier-top"><span class="reward-tier-icon" aria-hidden="true">'+tierIcon(cost)+'</span><div><strong>'+fa(cost)+' امتیاز</strong><span>'+fa(t.percent)+'٪ تخفیف</span></div></div><p>'+(ready?'این جایزه برای شما آماده است.':'برای باز کردن این جایزه '+fa(cost-balance)+' امتیاز دیگر لازم دارید.')+'</p><button class="btn '+(ready?'primary':'ghost')+' reward-redeem" data-points="'+cost+'" type="button" '+(ready?'':'disabled')+'>'+ (ready?'ساخت کوپن':'امتیاز کافی نیست') +'</button></article>';
+ }).join('');
+
+ const ledger=(d.ledger||[]).map(x=>{
+   const pts=Number(x.points||0), positive=pts>=0;
+   return '<tr><td><span class="ledger-event">'+escapeHtml(x.description||x.event_type)+'</span></td><td class="'+(positive?'points-positive':'points-negative')+'">'+(positive?'+':'')+fa(pts)+'</td><td><time datetime="'+escapeHtml(x.created_at||'')+'">'+jalaliDate(x.created_at)+'</time></td></tr>';
+ }).join('')||'<tr><td colspan="3" class="muted">هنوز فعالیتی برای ثبت امتیاز وجود ندارد.</td></tr>';
+
+ const coupons=(d.coupons||[]).map(x=>{
+   const expired=x.expires_at&&new Date(x.expires_at).getTime()<Date.now();
+   return '<article class="reward-coupon '+(expired?'is-expired':'')+'"><div class="reward-coupon-head"><code dir="ltr">'+escapeHtml(x.code)+'</code><b>'+fa(x.value)+'٪</b></div><div class="reward-coupon-meta"><span>'+(expired?'منقضی شده':'اعتبار تا '+escapeHtml(jalaliDate(x.expires_at)))+'</span><span>هزینه: '+fa(x.points_cost)+' امتیاز</span></div><small>'+(expired?'این کوپن دیگر قابل استفاده نیست.':'یک‌بار مصرف و فقط برای حساب شما')+'</small></article>';
+ }).join('')||'<div class="empty-rewards"><span>✦</span><p>هنوز کوپن امتیازی نساخته‌اید.</p><small>با جمع‌کردن امتیاز، یکی از سطوح تخفیف را فعال کنید.</small></div>';
+
+ const activity=[
+  ['ثبت‌نام','۱۰ امتیاز','شروع عضویت'],
+  ['نظر تأییدشده','۵ امتیاز','مشارکت در گالری'],
+  ['دعوت موفق','۳۰ امتیاز','پس از ثبت‌نام دوست شما'],
+  ['تکمیل اطلاعات ارسال','۵ امتیاز','یک‌بار برای هر حساب'],
+  ['افزودن به علاقه‌مندی','۳ امتیاز','برای هر اثر جدید'],
+  ['خرید موفق','تا ۳۰ امتیاز','۱ امتیاز به ازای هر ۱٬۰۰۰٬۰۰۰ ریال']
+ ].map(x=>'<div class="reward-earn-item"><strong>'+x[0]+'</strong><span>'+x[1]+'</span><small>'+x[2]+'</small></div>').join('');
+
+ layout('<section class="wrap page rewards-page">'+
+   '<div class="page-masthead rewards-masthead"><div class="page-masthead-copy"><span class="eyebrow">GILAS ART REWARDS</span><h1>باشگاه امتیاز گیلاس آرت</h1><p>هر خرید و هر مشارکت ارزشمند شما، یک قدم به یک تجربه خرید بهتر نزدیک‌ترتان می‌کند.</p><div class="rewards-microcopy"><span>یک‌بار مصرف</span><span>اختصاصی برای شما</span><span>حداکثر ۲۰٪ تخفیف</span></div></div>'+
+   '<div class="rewards-balance-hero"><span>موجودی فعلی شما</span><strong>'+fa(balance)+'</strong><small>امتیاز</small><div class="rewards-progress" aria-label="پیشرفت تا جایزه بعدی"><span style="width:'+progress+'%"></span></div><div class="rewards-progress-copy">'+(next?'تا کوپن '+fa(next.percent)+'٪ فقط <b>'+fa(remaining)+'</b> امتیاز مانده است.':'شما به بالاترین سطح فعلی باشگاه رسیده‌اید.')+'</div></div></div>'+
+   '<div class="rewards-grid"><section class="panel rewards-convert-panel"><div class="sectionhead"><div><span class="eyebrow">REDEEM</span><h2>امتیازهایتان را به تخفیف تبدیل کنید</h2><p class="muted">امتیاز مصرف‌شده از موجودی شما کم می‌شود و کوپن تا ۳۰ روز اعتبار دارد.</p></div></div><div class="reward-tiers">'+tiersHtml+'</div></section>'+
+   '<section class="panel referral-panel"><span class="eyebrow">INVITE FRIENDS</span><h2>دوستت را دعوت کن</h2><p class="muted">لینک دعوتت را برای دوستت بفرست. بعد از ثبت‌نام او، <strong>۳۰ امتیاز</strong> برای شما ثبت می‌شود.</p><div class="referral-code"><code dir="ltr">'+escapeHtml(d.referralCode)+'</code><button class="btn ghost" id="copy-referral" type="button">کپی لینک دعوت</button></div><label class="referral-label" for="referral-url">لینک دعوت شما</label><input id="referral-url" class="referral-url" dir="ltr" readonly value="'+escapeHtml(d.referralUrl)+'"><p class="referral-note">کد دعوت به‌صورت خودکار در لینک شما قرار گرفته است.</p></section></div>'+
+   '<section class="panel rewards-earn-panel"><div class="sectionhead"><div><span class="eyebrow">EARN POINTS</span><h2>چطور امتیاز بیشتری بگیریم؟</h2><p class="muted">امتیازها بر اساس فعالیت واقعی حساب شما ثبت می‌شوند.</p></div></div><div class="reward-earn-grid">'+activity+'</div></section>'+
+   '<section class="panel"><div class="sectionhead"><div><span class="eyebrow">MY COUPONS</span><h2>کوپن‌های من</h2></div><span class="section-count">'+fa((d.coupons||[]).length)+' کوپن</span></div><div class="reward-coupons">'+coupons+'</div></section>'+
+   '<section class="panel"><div class="sectionhead"><div><span class="eyebrow">ACTIVITY</span><h2>تاریخچه امتیازها</h2></div><span class="section-count">۵۰ رویداد اخیر</span></div><div class="table-wrap"><table class="rewards-ledger"><thead><tr><th>رویداد</th><th>امتیاز</th><th>تاریخ</th></tr></thead><tbody>'+ledger+'</tbody></table></div></section>'+
+   '</section>');
+
+ document.querySelector('#copy-referral')?.addEventListener('click',async()=>{
+   const btn=document.querySelector('#copy-referral');
+   try{await navigator.clipboard.writeText(d.referralUrl)}catch{const x=document.querySelector('#referral-url');x?.focus();x?.select();try{document.execCommand('copy')}catch{}}
+   if(btn){btn.textContent='لینک کپی شد ✓';setTimeout(()=>{if(document.body.contains(btn))btn.textContent='کپی لینک دعوت'},1800)}
+ });
+ document.querySelectorAll('.reward-redeem').forEach(btn=>btn.addEventListener('click',async()=>{
+   btn.disabled=true;
+   const original=btn.textContent;btn.textContent='در حال ساخت…';
+   try{await api('/api/rewards/redeem',{method:'POST',headers:{'x-csrf-token':csrf()},body:JSON.stringify({points:Number(btn.dataset.points)})});await rewardsPage()}
+   catch(e){btn.disabled=false;btn.textContent=original;alert(e.message||'تبدیل امتیاز انجام نشد')}
+ }));
+}
 async function checkout(){ location.hash='/cart'; }
 async function router(){const base=location.pathname.includes('/glsArt')?'/glsArt':'';const cleanPath=location.pathname.startsWith(base)?location.pathname.slice(base.length).replace(/^\/+|\/+$/g,''):location.pathname.replace(/^\/+|\/+$/g,'');const pathAdmin=cleanPath==='admin'||cleanPath.startsWith('admin/');const p=location.hash?location.hash.slice(2).split('/'):pathAdmin?['admin']:cleanPath?['product',decodeURIComponent(cleanPath)]:[''];try{if(!p[0])return home();if(p[0]==='admin'){await loadMe();if(!isAdminUser()){location.hash='/account';return}if(document.querySelector('.admin-layout')&&typeof window.GilasArtAdminNavigate==='function'){await window.GilasArtAdminNavigate();return}const base=location.pathname.includes('/glsArt/')?'/glsArt':'';const {default:AdminApp}=await import(base+'/admin/AdminApp.js?v=20261001-reviews');app.innerHTML=AdminApp();return}if(p[0]==='shop')return shop();if(p[0]==='product')return product(p[1]);if(p[0]==='cart')return cart();if(p[0]==='account')return account();if(p[0]==='rewards')return rewardsPage();if(p[0]==='checkout')return checkout();if(p[0]==='about'||p[0]==='contact')return cmsPage(p[0]);if((p[0]==='article'||p[0]==='articles')&&p[1])return contentDetail('articles',decodeURIComponent(p[1]));if(p[0]==='news'&&p[1])return contentDetail('news',decodeURIComponent(p[1]));if(p[0]==='news'||p[0]==='articles')return cmsPage(p[0]);if(p[0]==='terms'){
  layout('<section class="wrap page"><div class="panel"><h1 id="terms-title">قوانین سایت</h1><div id="terms-body" class="terms-content">در حال دریافت قوانین...</div></div></section>');
