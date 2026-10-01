@@ -1,0 +1,26 @@
+INSERT OR IGNORE INTO users(id,mobile,name) VALUES
+('review_seed_user_841','09000000841','سامان ابراهیمی'),
+('review_seed_user_842','09000000842','اردشیر رضایی'),
+('review_seed_user_843','09000000843','معصومه نیکوکار'),
+('review_seed_user_844','09000000844','اکبر پاکدل'),
+('review_seed_user_845','09000000845','مهدی عابدی'),
+('review_seed_user_846','09000000846','رویا علیزاده'),
+('review_seed_user_847','09000000847','شهرزاد رحمانی'),
+('review_seed_user_848','09000000848','علیرضا مرادی'),
+('review_seed_user_849','09000000849','نرگس رحمانی'),
+('review_seed_user_850','09000000850','یوسف قربانی'),
+('review_seed_user_851','09000000851','بهنام غفاری'),
+('review_seed_user_852','09000000852','سعید نوری');
+INSERT OR IGNORE INTO reviews(id,user_id,product_id,rating,comment,approved,created_at) VALUES
+('review_seed_gilas127_001','review_seed_user_841',(SELECT id FROM products WHERE lower(sku)=lower('gilas127')),5,'تابلو خیلی قشنگه ولی ای کاش زودتر می‌فرستادین. منتظر موندن سخت بود.',0,'3 اردیبهشت 1397T00:00:00.000Z'),
+('review_seed_gilas127_002','review_seed_user_842',(SELECT id FROM products WHERE lower(sku)=lower('gilas127')),5,'کیفیت عالی، قیمت مناسب، ارسال سریع. همه چیز کامل بود.',0,'12 اردیبهشت 1395T00:00:00.000Z'),
+('review_seed_gilas127_003','review_seed_user_843',(SELECT id FROM products WHERE lower(sku)=lower('gilas127')),5,'از وقتی نصبش کردم فضای خونه‌مون خیلی هنری‌تر شده.',0,'9 فروردین 1396T00:00:00.000Z'),
+('review_seed_gilas127_004','review_seed_user_844',(SELECT id FROM products WHERE lower(sku)=lower('gilas127')),5,'تابلو دقیقاً مطابق عکس بود و حتی قشنگ‌تر. دستتون درد نکنه.',0,'21 اردیبهشت 1400T00:00:00.000Z'),
+('review_seed_gilas127_005','review_seed_user_845',(SELECT id FROM products WHERE lower(sku)=lower('gilas127')),5,'این تابلو رو به عنوان کادو تولد خریدم و طرف مقابل عاشقش شد.',0,'21 شهریور 1397T00:00:00.000Z'),
+('review_seed_gilas127_006','review_seed_user_846',(SELECT id FROM products WHERE lower(sku)=lower('gilas127')),5,'تابلو خیلی سبک و محکمه. قابش هم کاملاً فیت شده.',0,'17 مرداد 1401T00:00:00.000Z'),
+('review_seed_gilas127_007','review_seed_user_847',(SELECT id FROM products WHERE lower(sku)=lower('gilas127')),5,'ترکیب مس براق با قاب مشکی فوق‌العاده مدرن و زیباست.',0,'12 فروردین 1403T00:00:00.000Z'),
+('review_seed_gilas127_008','review_seed_user_848',(SELECT id FROM products WHERE lower(sku)=lower('gilas127')),5,'معرق مس با این سطح از ظرافت واقعاً کم پیدا می‌شه.',0,'8 فروردین 1403T00:00:00.000Z'),
+('review_seed_gilas127_009','review_seed_user_849',(SELECT id FROM products WHERE lower(sku)=lower('gilas127')),5,'معرق مس با طرح‌های زیبا و قاب طلایی گلدارش دکوراسیون رو متحول کرد.',0,'21 اردیبهشت 1403T00:00:00.000Z'),
+('review_seed_gilas127_010','review_seed_user_850',(SELECT id FROM products WHERE lower(sku)=lower('gilas127')),5,'تابلو خیلی سبک و محکمه. قابش هم کاملاً فیت شده.',0,'5 شهریور 1405T00:00:00.000Z'),
+('review_seed_gilas127_011','review_seed_user_851',(SELECT id FROM products WHERE lower(sku)=lower('gilas127')),5,'معرق مس با این سطح از ظرافت واقعاً کم پیدا می‌شه.',0,'21 آبان 1404T00:00:00.000Z'),
+('review_seed_gilas127_012','review_seed_user_852',(SELECT id FROM products WHERE lower(sku)=lower('gilas127')),5,'ترکیب مس و قاب قهوه‌ای سوخته حس سنتی زیبایی می‌ده.',0,'14 شهریور 1397T00:00:00.000Z');
