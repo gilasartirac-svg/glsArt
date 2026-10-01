@@ -1,0 +1,26 @@
+INSERT OR IGNORE INTO users(id,mobile,name) VALUES
+('review_seed_user_769','09000000769','ملیکا زارعی'),
+('review_seed_user_770','09000000770','محمد رحمانی'),
+('review_seed_user_771','09000000771','مرتضی سلطانی'),
+('review_seed_user_772','09000000772','مریم امیری'),
+('review_seed_user_773','09000000773','خدیجه حسنی'),
+('review_seed_user_774','09000000774','آوا احمدی'),
+('review_seed_user_775','09000000775','قاسم قاسمی'),
+('review_seed_user_776','09000000776','یاسمن رحمانی'),
+('review_seed_user_777','09000000777','سوسن مرادی'),
+('review_seed_user_778','09000000778','سمیرا امینی'),
+('review_seed_user_779','09000000779','امیرحسین عزیزی'),
+('review_seed_user_780','09000000780','پردیس نجفی');
+INSERT OR IGNORE INTO reviews(id,user_id,product_id,rating,comment,approved,created_at) VALUES
+('review_seed_gilas121_001','review_seed_user_769',(SELECT id FROM products WHERE lower(sku)=lower('gilas121')),5,'معرق مس دست‌ساز با این کیفیت کمتر پیدا می‌شه. دست مریزاد.',0,'27 تیر 1402T00:00:00.000Z'),
+('review_seed_gilas121_002','review_seed_user_770',(SELECT id FROM products WHERE lower(sku)=lower('gilas121')),5,'قاب PVC با کیفیت و رنگ ثابت. خیلی راضی هستم.',0,'28 فروردین 1402T00:00:00.000Z'),
+('review_seed_gilas121_003','review_seed_user_771',(SELECT id FROM products WHERE lower(sku)=lower('gilas121')),5,'این تابلو دکوراسیون خونه‌مون رو کامل کرد. خیلی راضی هستم از خرید.',0,'23 دی 1400T00:00:00.000Z'),
+('review_seed_gilas121_004','review_seed_user_772',(SELECT id FROM products WHERE lower(sku)=lower('gilas121')),5,'برش دستی و دقیق، بدون هیچ ایرادی. کار تمیز و حرفه‌ای.',0,'6 شهریور 1394T00:00:00.000Z'),
+('review_seed_gilas121_005','review_seed_user_773',(SELECT id FROM products WHERE lower(sku)=lower('gilas121')),5,'از خرید این معرق مس پشیمون نشدم. ارزش هر ریالی که دادم رو داره.',0,'5 مرداد 1398T00:00:00.000Z'),
+('review_seed_gilas121_006','review_seed_user_774',(SELECT id FROM products WHERE lower(sku)=lower('gilas121')),5,'کیفیت عالی، قیمت مناسب، ارسال سریع. همه چیز کامل بود.',0,'6 اسفند 1393T00:00:00.000Z'),
+('review_seed_gilas121_007','review_seed_user_775',(SELECT id FROM products WHERE lower(sku)=lower('gilas121')),5,'کیفیت خوبه اما ارسال کمی دیر شد. ای کاش زودتر می‌فرستادین.',0,'1 اردیبهشت 1405T00:00:00.000Z'),
+('review_seed_gilas121_008','review_seed_user_776',(SELECT id FROM products WHERE lower(sku)=lower('gilas121')),5,'تابلو سبک و نصبش آسونه. کیفیت ساختش عالیه.',0,'28 اردیبهشت 1393T00:00:00.000Z'),
+('review_seed_gilas121_009','review_seed_user_777',(SELECT id FROM products WHERE lower(sku)=lower('gilas121')),5,'تابلوی معرق مس فوق‌العاده زیبایی بود. قاب طلایی گلدارش واقعاً چشم‌نوازه. دستتون درد نکنه.',0,'31 تیر 1393T00:00:00.000Z'),
+('review_seed_gilas121_010','review_seed_user_778',(SELECT id FROM products WHERE lower(sku)=lower('gilas121')),5,'رنگ طلایی گلدار قاب با درخشش مس هماهنگی بی‌نظیری داره.',0,'8 آبان 1399T00:00:00.000Z'),
+('review_seed_gilas121_011','review_seed_user_779',(SELECT id FROM products WHERE lower(sku)=lower('gilas121')),5,'رنگ قاب مشکی با مس براق ترکیب فوق‌العاده‌ای ساخته. پیشنهاد می‌کنم.',0,'26 مرداد 1400T00:00:00.000Z'),
+('review_seed_gilas121_012','review_seed_user_780',(SELECT id FROM products WHERE lower(sku)=lower('gilas121')),5,'رنگ قاب قهوه‌ای سوخته گرم و دلنشینه. با دکوراسیون چوبی عالی می‌شه.',0,'27 تیر 1396T00:00:00.000Z');
