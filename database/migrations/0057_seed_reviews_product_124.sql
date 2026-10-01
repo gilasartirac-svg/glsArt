@@ -1,0 +1,26 @@
+INSERT OR IGNORE INTO users(id,mobile,name) VALUES
+('review_seed_user_805','09000000805','شیما عابدی'),
+('review_seed_user_806','09000000806','مهین نظری'),
+('review_seed_user_807','09000000807','پارسا خلیلی'),
+('review_seed_user_808','09000000808','معصومه رستمی'),
+('review_seed_user_809','09000000809','بهروز اکبری'),
+('review_seed_user_810','09000000810','بهنام نیکوکار'),
+('review_seed_user_811','09000000811','اردشیر فرهادی'),
+('review_seed_user_812','09000000812','محمد رضایی'),
+('review_seed_user_813','09000000813','مهدی نظری'),
+('review_seed_user_814','09000000814','ملیکا نجفی'),
+('review_seed_user_815','09000000815','بهنام پاکدل'),
+('review_seed_user_816','09000000816','بهنام رضوی');
+INSERT OR IGNORE INTO reviews(id,user_id,product_id,rating,comment,approved,created_at) VALUES
+('review_seed_gilas124_001','review_seed_user_805',(SELECT id FROM products WHERE lower(sku)=lower('gilas124')),5,'برش دستی مس باعث شده کار کاملاً منحصر به فرد باشه. راضی‌ام.',0,'15 بهمن 1398T00:00:00.000Z'),
+('review_seed_gilas124_002','review_seed_user_806',(SELECT id FROM products WHERE lower(sku)=lower('gilas124')),5,'معرق مس با طرح‌های زیبا و قاب طلایی گلدارش دکوراسیون رو متحول کرد.',0,'22 خرداد 1395T00:00:00.000Z'),
+('review_seed_gilas124_003','review_seed_user_807',(SELECT id FROM products WHERE lower(sku)=lower('gilas124')),5,'رنگ قاب قهوه‌ای سوخته گرم و دلنشینه. با دکوراسیون چوبی عالی می‌شه.',0,'6 مهر 1396T00:00:00.000Z'),
+('review_seed_gilas124_004','review_seed_user_808',(SELECT id FROM products WHERE lower(sku)=lower('gilas124')),5,'قاب PVC با کیفیت و رنگ ثابت. خیلی راضی هستم.',0,'5 اسفند 1404T00:00:00.000Z'),
+('review_seed_gilas124_005','review_seed_user_809',(SELECT id FROM products WHERE lower(sku)=lower('gilas124')),5,'قیمتش کمی بالاست. برش دستی چقدر زمان می‌بره که این قیمت درمیاد؟',0,'5 شهریور 1397T00:00:00.000Z'),
+('review_seed_gilas124_006','review_seed_user_810',(SELECT id FROM products WHERE lower(sku)=lower('gilas124')),5,'کیفیت خوبه اما ارسال کمی دیر شد. ای کاش زودتر می‌فرستادین.',0,'25 آذر 1396T00:00:00.000Z'),
+('review_seed_gilas124_007','review_seed_user_811',(SELECT id FROM products WHERE lower(sku)=lower('gilas124')),5,'قاب مشکی کلاسیک و شیکه. معرق مس روش می‌درخشه.',0,'27 اردیبهشت 1400T00:00:00.000Z'),
+('review_seed_gilas124_008','review_seed_user_812',(SELECT id FROM products WHERE lower(sku)=lower('gilas124')),5,'معرق مس دست‌ساز با این کیفیت کمتر پیدا می‌شه. دست مریزاد.',0,'30 اردیبهشت 1395T00:00:00.000Z'),
+('review_seed_gilas124_009','review_seed_user_813',(SELECT id FROM products WHERE lower(sku)=lower('gilas124')),5,'برش‌ها تمیز و بدون پلیسه. کیفیت کار حرفه‌ای است.',0,'24 فروردین 1395T00:00:00.000Z'),
+('review_seed_gilas124_010','review_seed_user_814',(SELECT id FROM products WHERE lower(sku)=lower('gilas124')),5,'برش‌های دقیق و تمیز، قاب محکم و زیبا. واقعاً ارزش خرید داره.',0,'6 اردیبهشت 1396T00:00:00.000Z'),
+('review_seed_gilas124_011','review_seed_user_815',(SELECT id FROM products WHERE lower(sku)=lower('gilas124')),5,'این تابلو دکوراسیون خونه‌مون رو کامل کرد. خیلی راضی هستم از خرید.',0,'9 اردیبهشت 1403T00:00:00.000Z'),
+('review_seed_gilas124_012','review_seed_user_816',(SELECT id FROM products WHERE lower(sku)=lower('gilas124')),5,'ترکیب مس براق با قاب مشکی فوق‌العاده مدرن و زیباست.',0,'6 فروردین 1404T00:00:00.000Z');
