@@ -1,5 +1,7 @@
 export default function Sidebar(){
-  const current=location.hash.replace('#/admin/','')||'dashboard';
+  const hashCurrent=location.hash.startsWith('#/admin/')?location.hash.replace('#/admin/',''):'';
+  const pathCurrent=location.pathname.replace(/^.*\/admin\/?/,'').replace(/\/$/,'');
+  const current=hashCurrent||pathCurrent||'dashboard';
   const items=[
     ['dashboard','داشبورد','⌂'],['products','محصولات','▣'],['categories','دسته‌بندی‌ها','◈'],['orders','سفارشات','◫'],['site-rules','قوانین سایت','§'],
     ['customers','مشتریان','♙'],['inventory','موجودی','▤'],['payments','پرداخت‌ها','◇'],['discounts','تخفیف‌ها','%'],['coupons','کوپن‌ها','▱'],
