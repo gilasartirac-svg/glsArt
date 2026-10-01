@@ -1,0 +1,25 @@
+-- Seed 12 demo reviews for product 340 (gilas340)
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas340_001','فریدون سلیمانی','demo-340-001');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas340_001',(SELECT id FROM products WHERE lower(sku)=lower('gilas340')),'review_seed_user_gilas340_001',5,'این تابلو رو برای دفتر کارم گرفتم و همه همکاران تعریف کردن.',0,'28 شهریور 1402');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas340_002','نرگس طاهری','demo-340-002');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas340_002',(SELECT id FROM products WHERE lower(sku)=lower('gilas340')),'review_seed_user_gilas340_002',5,'کیفیت برش دستی عالی بود. قاب مشکی خیلی شیک دراومده روی دیوار خونه‌مون.',0,'28 مرداد 1398');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas340_003','فرشته زمانی','demo-340-003');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas340_003',(SELECT id FROM products WHERE lower(sku)=lower('gilas340')),'review_seed_user_gilas340_003',5,'تابلوی معرق مس فوق‌العاده زیبایی بود. قاب طلایی گلدارش واقعاً چشم‌نوازه. دستتون درد نکنه.',0,'2 مرداد 1403');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas340_004','فرهاد درویشی','demo-340-004');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas340_004',(SELECT id FROM products WHERE lower(sku)=lower('gilas340')),'review_seed_user_gilas340_004',5,'دقیقاً همون چیزی که تو عکس بود. برش‌های ظریف مس واقعاً هنرمندانه است.',0,'10 فروردین 1400');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas340_005','قاسم سلطانی','demo-340-005');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas340_005',(SELECT id FROM products WHERE lower(sku)=lower('gilas340')),'review_seed_user_gilas340_005',5,'رنگ قاب مشکی با مس براق ترکیب فوق‌العاده‌ای ساخته. پیشنهاد می‌کنم.',0,'5 تیر 1404');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas340_006','مهتاب نوری','demo-340-006');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas340_006',(SELECT id FROM products WHERE lower(sku)=lower('gilas340')),'review_seed_user_gilas340_006',5,'کیفیت مطلوب. منتظر تخفیف‌های فصلی‌تون هستم.',0,'18 آبان 1396');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas340_007','اکبر محمدی','demo-340-007');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas340_007',(SELECT id FROM products WHERE lower(sku)=lower('gilas340')),'review_seed_user_gilas340_007',5,'کیفیت ساخت و ظرافت برش واقعاً قابل تقدیره. پیشنهاد ویژه.',0,'8 دی 1399');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas340_008','آناهیتا بهرامی','demo-340-008');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas340_008',(SELECT id FROM products WHERE lower(sku)=lower('gilas340')),'review_seed_user_gilas340_008',5,'این تابلو رو برای دفتر کارم گرفتم و همه همکاران تعریف کردن.',0,'6 فروردین 1405');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas340_009','مهتاب ابراهیمی','demo-340-009');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas340_009',(SELECT id FROM products WHERE lower(sku)=lower('gilas340')),'review_seed_user_gilas340_009',5,'جزئیات کار فوق‌العاده ظریفه. واقعاً کار استادانه‌ست.',0,'21 مرداد 1398');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas340_010','جمشید ابراهیمی','demo-340-010');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas340_010',(SELECT id FROM products WHERE lower(sku)=lower('gilas340')),'review_seed_user_gilas340_010',5,'ارسال سریع و بسته‌بندی محکم. خود تابلو هم که نگم براتون چقدر قشنگه.',0,'22 بهمن 1396');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas340_011','مرتضی سلیمانی','demo-340-011');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas340_011',(SELECT id FROM products WHERE lower(sku)=lower('gilas340')),'review_seed_user_gilas340_011',5,'برش‌ها تمیز و بدون پلیسه. کیفیت کار حرفه‌ای است.',0,'3 اردیبهشت 1394');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas340_012','شهرام رحیمی','demo-340-012');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas340_012',(SELECT id FROM products WHERE lower(sku)=lower('gilas340')),'review_seed_user_gilas340_012',5,'کیفیت عالی، قیمت مناسب، ارسال سریع. همه چیز کامل بود.',0,'2 فروردین 1400');
