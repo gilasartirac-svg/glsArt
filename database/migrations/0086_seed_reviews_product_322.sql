@@ -1,0 +1,25 @@
+-- Product 322 review seed
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas322_001','گیتا علیزاده','093220001');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas322_001',(SELECT id FROM products WHERE lower(sku)=lower('gilas322')),'review_seed_user_gilas322_001',5,'جزئیات کار واقعاً دقیق و تمیزه. ممنون از هنرتون.',0,'16 دی 1397');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas322_002','آتنا حسنی','093220002');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas322_002',(SELECT id FROM products WHERE lower(sku)=lower('gilas322')),'review_seed_user_gilas322_002',5,'دست‌ساز بودنش کاملاً مشخصه. هر قطعه مس با دقت برش خورده.',0,'12 اردیبهشت 1396');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas322_003','یاسمن حسینی','093220003');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas322_003',(SELECT id FROM products WHERE lower(sku)=lower('gilas322')),'review_seed_user_gilas322_003',5,'بسته‌بندی عالی بود و تابلو سالم به دستم رسید. ممنون.',0,'2 مرداد 1394');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas322_004','مریم محمدی','093220004');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas322_004',(SELECT id FROM products WHERE lower(sku)=lower('gilas322')),'review_seed_user_gilas322_004',5,'قاب مشکی کلاسیک و شیکه. معرق مس روش می‌درخشه.',0,'19 فروردین 1400');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas322_005','فاطمه یوسفی','093220005');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas322_005',(SELECT id FROM products WHERE lower(sku)=lower('gilas322')),'review_seed_user_gilas322_005',5,'تابلوی معرق مس فوق‌العاده زیبایی بود. قاب طلایی گلدارش واقعاً چشم‌نوازه. دستتون درد نکنه.',0,'17 شهریور 1400');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas322_006','معصومه نصیری','093220006');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas322_006',(SELECT id FROM products WHERE lower(sku)=lower('gilas322')),'review_seed_user_gilas322_006',5,'تابلو خیلی قشنگه ولی ای کاش زودتر می‌فرستادین. منتظر موندن سخت بود.',0,'13 شهریور 1402');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas322_007','آوا نوری','093220007');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas322_007',(SELECT id FROM products WHERE lower(sku)=lower('gilas322')),'review_seed_user_gilas322_007',5,'جزئیات کار فوق‌العاده ظریفه. واقعاً کار استادانه‌ست.',0,'18 خرداد 1398');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas322_008','مهین حیدری','093220008');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas322_008',(SELECT id FROM products WHERE lower(sku)=lower('gilas322')),'review_seed_user_gilas322_008',5,'از نزدیک که نگاه می‌کنی متوجه ظرافت کار دست می‌شی. عالیه.',0,'13 اردیبهشت 1395');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas322_009','شایان احمدی','093220009');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas322_009',(SELECT id FROM products WHERE lower(sku)=lower('gilas322')),'review_seed_user_gilas322_009',5,'این تابلو رو برای دفتر کارم گرفتم و همه همکاران تعریف کردن.',0,'18 مرداد 1402');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas322_010','گلناز عابدی','093220010');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas322_010',(SELECT id FROM products WHERE lower(sku)=lower('gilas322')),'review_seed_user_gilas322_010',5,'رنگ قاب مشکی با مس براق ترکیب فوق‌العاده‌ای ساخته. پیشنهاد می‌کنم.',0,'14 بهمن 1402');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas322_011','کیان طباطبایی','093220011');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas322_011',(SELECT id FROM products WHERE lower(sku)=lower('gilas322')),'review_seed_user_gilas322_011',5,'تابلو سبک و نصبش آسونه. کیفیت ساختش عالیه.',0,'25 اسفند 1394');
+INSERT OR IGNORE INTO users (id,name,phone) VALUES ('review_seed_user_gilas322_012','حسین کرمی','093220012');
+INSERT OR IGNORE INTO reviews (id,product_id,user_id,rating,comment,approved,created_at) VALUES ('review_seed_gilas322_012',(SELECT id FROM products WHERE lower(sku)=lower('gilas322')),'review_seed_user_gilas322_012',5,'برش‌های دقیق و تمیز، قاب محکم و زیبا. واقعاً ارزش خرید داره.',0,'31 خرداد 1405');
