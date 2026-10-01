@@ -18,7 +18,7 @@ export default function AdminApp(){
    if(!page)return;
    page.innerHTML='<div class="admin-page panel" dir="rtl">در حال بارگذاری…</div>';
    try{
-    const result=await import('./router.js?v=20260930-admin').then(m=>m.default());
+    const result=await import('./router.js?v=20261001-reviews').then(m=>m.default());
     page.innerHTML=result?.html||'<div class="admin-page panel" dir="rtl"><p class="error">صفحه مدیریت قابل بارگذاری نیست.</p></div>';
     if(typeof result?.mount==='function')await result.mount();
    }catch(e){page.innerHTML='<div class="admin-page panel" dir="rtl"><h2>خطا در بارگذاری کنترل پنل</h2><p class="error">'+String(e?.message||e)+'</p></div>'}
