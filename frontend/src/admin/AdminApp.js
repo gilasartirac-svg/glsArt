@@ -13,6 +13,19 @@ export default function AdminApp(){
    d.addEventListener('click',e=>{const a=e.target.closest('a[data-admin-route]');if(!a)return;const target=a.getAttribute('href');if(target&&target!==location.hash){e.preventDefault();location.hash=target.slice(1);if(typeof window.GilasArtAdminNavigate==='function')window.setTimeout(window.GilasArtAdminNavigate,0)}});
    window.addEventListener('hashchange',close);
   }
+  if(!document.documentElement.dataset.adminRouteBound){
+   document.documentElement.dataset.adminRouteBound='1';
+   document.addEventListener('click',e=>{
+    const a=e.target?.closest?.('a[data-admin-route]');
+    if(!a)return;
+    const target=a.getAttribute('href');
+    if(!target||target===location.hash)return;
+    e.preventDefault();
+    e.stopPropagation();
+    location.hash=target.slice(1);
+    if(typeof window.GilasArtAdminNavigate==='function')window.setTimeout(window.GilasArtAdminNavigate,0);
+   },{capture:true});
+  }
   window.dispatchEvent(new Event('admin-mounted'));
   const renderAdminPage=async()=>{
    const page=document.getElementById('admin-page');
