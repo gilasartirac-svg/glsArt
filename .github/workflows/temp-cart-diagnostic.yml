@@ -49,3 +49,16 @@ jobs:
           echo "GET cart after status=$STATUS"; cat /tmp/cart_after.json
           grep -q "$PRODUCT_ID" /tmp/cart_after.json
           npx wrangler d1 execute gilasartdatabase --remote --command="DELETE FROM cart_items WHERE cart_id IN (SELECT id FROM carts WHERE user_id='$USER_ID'); DELETE FROM carts WHERE user_id='$USER_ID'; DELETE FROM sessions WHERE id='$SESSION_ID'; DELETE FROM users WHERE id='$USER_ID';" --json
+
+      - name: Upload end-to-end output
+        if: always()
+        run: |
+          mkdir -p diagnostic-e2e
+          cp /tmp/me.json /tmp/cart.json /tmp/add.json /tmp/cart_after.json diagnostic-e2e/ 2>/dev/null || true
+          printf 'diagnostic run complete\n' > diagnostic-e2e/status.txt
+      - name: Store end-to-end artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cart-production-e2e-output
+          path: diagnostic-e2e
