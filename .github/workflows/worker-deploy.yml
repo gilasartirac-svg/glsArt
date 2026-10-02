@@ -42,7 +42,7 @@ jobs:
         run: |
           set -euo pipefail
           for attempt in 1 2 3 4 5; do npx wrangler d1 execute gilasartdatabase --remote --command="PRAGMA table_info(orders)" --json > /tmp/orders-schema.json && break; sleep 5; done
-          if jq -e '.result[0].results[]? | select(.name=="is_sample")' /tmp/orders-schema.json >/dev/null; then
+          if jq -e '.[0].results[]? | select(.name=="is_sample")' /tmp/orders-schema.json >/dev/null; then
             npx wrangler d1 execute gilasartdatabase --remote --command="INSERT OR IGNORE INTO d1_migrations(name) VALUES ('0010_add_order_sample_flag.sql')" --json
           else
             echo "orders.is_sample is absent; migration 0010 will be applied normally."
@@ -52,7 +52,7 @@ jobs:
         run: |
           set -euo pipefail
           for attempt in 1 2 3 4 5; do npx wrangler d1 execute gilasartdatabase --remote --command="PRAGMA table_info(reviews)" --json > /tmp/reviews-schema.json && break; sleep 5; done
-          if jq -e '.result[0].results[]? | select(.name=="body")' /tmp/reviews-schema.json >/dev/null; then
+          if jq -e '.[0].results[]? | select(.name=="body")' /tmp/reviews-schema.json >/dev/null; then
             npx wrangler d1 execute gilasartdatabase --remote --command="INSERT OR IGNORE INTO d1_migrations(name) VALUES ('0001a_reviews_schema_compat.sql')" --json
           else
             echo "reviews.body is absent; compatibility migration must run normally."
