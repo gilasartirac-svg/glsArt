@@ -1,0 +1,85 @@
+name: Cloudflare Workers Usage Guard
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  usage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Query Cloudflare Workers usage
+        id: usage
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          START="$(date -u +'%Y-%m-%dT00:00:00Z')"
+          END="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          QUERY='query WorkersUsage($accountTag: string!, $start: Time!, $end: Time!, $scriptName: string!) {
+            viewer {
+              accounts(filter: { accountTag: $accountTag }) {
+                workersInvocationsAdaptive(
+                  limit: 10000
+                  filter: {
+                    scriptName: $scriptName
+                    datetime_geq: $start
+                    datetime_leq: $end
+                  }
+                ) {
+                  sum { requests errors }
+                }
+              }
+            }
+          }'
+          PAYLOAD="$(jq -n --arg q "$QUERY" --arg a "$CF_ACCOUNT_ID" --arg s "$START" --arg e "$END" '{query:$q,variables:{accountTag:$a,start:$s,end:$e,scriptName:"gilasartworker"}}')"
+          HTTP="$(curl -sS -o /tmp/cf.json -w '%{http_code}' \
+            https://api.cloudflare.com/client/v4/graphql \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data "$PAYLOAD")"
+          cat /tmp/cf.json
+          test "$HTTP" = "200"
+          ERRORS="$(jq -r '.errors // empty' /tmp/cf.json)"
+          test -z "$ERRORS"
+          REQUESTS="$(jq '[.data.viewer.accounts[0].workersInvocationsAdaptive[]?.sum.requests // 0] | add // 0' /tmp/cf.json)"
+          echo "requests=$REQUESTS"
+          echo "requests=$REQUESTS" >> "$GITHUB_OUTPUT"
+
+      - name: Update public service guard only when state changes
+        env:
+          REQUESTS: ${{ steps.usage.outputs.requests }}
+        run: |
+          set -euo pipefail
+          NOW="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          LIMIT=100000
+          # Pause before the hard limit to absorb analytics/reporting delay and traffic bursts.
+          PAUSE_THRESHOLD=95000
+          if [ "$REQUESTS" -ge "$PAUSE_THRESHOLD" ]; then
+            PAUSED=true
+            MESSAGE="سرویس فروشگاه موقتاً متوقف شده است. تعداد درخواست‌های ثبت‌شده امروز: $REQUESTS از $LIMIT."
+          else
+            PAUSED=false
+            MESSAGE="سرویس فروشگاه فعال است."
+          fi
+          node -e 'const fs=require("fs");const p="frontend/public/service-status.json";const old=JSON.parse(fs.readFileSync(p,"utf8"));const next={paused:process.env.PAUSED==="true",requests:Number(process.env.REQUESTS||0),limit:100000,checkedAt:process.env.NOW,message:process.env.MESSAGE};if(old.paused!==next.paused){fs.writeFileSync(p,JSON.stringify(next,null,2)+"\n");process.exit(10)}fs.writeFileSync("/tmp/status.json",JSON.stringify(next,null,2)+"\n");' || code=$?
+          if [ "${code:-0}" -eq 10 ]; then
+            cp /tmp/status.json frontend/public/service-status.json
+          fi
+          if git diff --quiet -- frontend/public/service-status.json; then
+            echo "No service-state transition; no commit."
+            exit 0
+          fi
+          git config user.name "GilasArt Cloudflare Guard"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/service-status.json
+          git commit -m "chore: update Cloudflare service guard state"
+          git push
