@@ -1,0 +1,71 @@
+name: Production Quality Gate
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate frontend JavaScript
+        run: node --check frontend/src/app.js
+
+      - name: Validate Worker module
+        run: |
+          cp worker/src/index.js /tmp/gilasart-worker.mjs
+          node --check /tmp/gilasart-worker.mjs
+
+      - name: Validate service status document
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const p='frontend/public/service-status.json';
+          const d=JSON.parse(fs.readFileSync(p,'utf8'));
+          if(typeof d.paused!=='boolean') throw new Error('service-status.paused must be boolean');
+          if(!Number.isFinite(Number(d.requests)) || !Number.isFinite(Number(d.limit))) throw new Error('service-status counters are invalid');
+          if(!d.checkedAt) throw new Error('service-status.checkedAt is required');
+          console.log('service-status ok', d);
+          NODE
+
+      - name: Smoke test production API
+        env:
+          API: https://gilasartworker.gilasart-ir-ac.workers.dev
+          ORIGIN: https://gilasartirac-svg.github.io
+        run: |
+          set -euo pipefail
+          check_json() {
+            local path="$1"
+            local expression="$2"
+            local body
+            local status
+            body=$(mktemp)
+            status=$(curl -sS --retry 2 --retry-all-errors -o "$body" -w '%{http_code}' "$API$path")
+            echo "$path -> HTTP $status"
+            test "$status" = "200"
+            node - "$body" "$expression" <<'NODE'
+            const fs=require('fs');
+            const [file,expr]=process.argv.slice(2);
+            const d=JSON.parse(fs.readFileSync(file,'utf8'));
+            if(!Function('d','return ('+expr+')')(d)) throw new Error('contract failed: '+expr);
+            NODE
+            rm -f "$body"
+          }
+          check_json /api/health "d.ok===true && d.db===true"
+          check_json '/api/products?limit=1' "Array.isArray(d.items)"
+          check_json /api/categories "Array.isArray(d.items)"
+          check_json /api/flash-sales "Array.isArray(d.items)"
+          check_json /api/settings "d.settings && typeof d.settings==='object'"
+
+          headers=$(curl -sS --retry 2 --retry-all-errors -D - -o /dev/null -H "Origin: $ORIGIN" "$API/api/health")
+          echo "$headers"
+          echo "$headers" | grep -F "access-control-allow-origin: $ORIGIN"
+          echo "$headers" | grep -F "access-control-allow-credentials: true"
