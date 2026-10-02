@@ -31,5 +31,13 @@ jobs:
           print('Cloudflare errors:', d.get('errors', []))
           print('Cloudflare messages:', d.get('messages', []))
           PY
+
+          echo 'Worker usage endpoint:'
+          ucode=$(curl -sS -o /tmp/usage.json -w '%{http_code}' \\
+            -H "Authorization: Bearer $CF_TOKEN" \\
+            -H 'Content-Type: application/json' \\
+            "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/workers/scripts/gilasartworker/usage")
+          echo "Cloudflare usage HTTP status: $ucode"
+          cat /tmp/usage.json
           echo 'Worker endpoint probe:'
           curl -sS -i --max-time 15 'https://gilasartworker.gilasart-ir-ac.workers.dev/api/health' | sed -n '1,25p'
