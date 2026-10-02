@@ -24,23 +24,15 @@ jobs:
           set -euo pipefail
           START="$(date -u +'%Y-%m-%dT00:00:00Z')"
           END="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-          QUERY='query WorkersUsage($accountTag: string!, $start: Time!, $end: Time!, $scriptName: string!) {
+          QUERY='query Usage($accountTag: string!, $startTime: Time!, $endTime: Time!, $startDate: Date!, $endDate: Date!, $scriptName: string!, $databaseId: string!) {
             viewer {
               accounts(filter: { accountTag: $accountTag }) {
-                workersInvocationsAdaptive(
-                  limit: 10000
-                  filter: {
-                    scriptName: $scriptName
-                    datetime_geq: $start
-                    datetime_leq: $end
-                  }
-                ) {
-                  sum { requests errors }
-                }
+                workersInvocationsAdaptive(limit: 10000, filter: { scriptName: $scriptName, datetime_geq: $startTime, datetime_leq: $endTime }) { sum { requests errors } }
+                d1AnalyticsAdaptiveGroups(limit: 10000, filter: { databaseId: $databaseId, date_geq: $startDate, date_leq: $endDate }) { sum { rowsRead rowsWritten } }
               }
             }
           }'
-          PAYLOAD="$(jq -n --arg q "$QUERY" --arg a "$CF_ACCOUNT_ID" --arg s "$START" --arg e "$END" '{query:$q,variables:{accountTag:$a,start:$s,end:$e,scriptName:"gilasartworker"}}')"
+          PAYLOAD="$(jq -n --arg q "$QUERY" --arg a "$CF_ACCOUNT_ID" --arg s "$START" --arg e "$END" '{query:$q,variables:{accountTag:$a,startTime:$s,endTime:$e,startDate:($s|split("T")[0]),endDate:($e|split("T")[0]),scriptName:"gilasartworker",databaseId:"3e6741e8-e50c-4c8d-b50a-33d9db2dfd4c"}}')"
           HTTP="$(curl -sS -o /tmp/cf.json -w '%{http_code}' \
             https://api.cloudflare.com/client/v4/graphql \
             -H "Authorization: Bearer $CF_API_TOKEN" \
@@ -51,21 +43,38 @@ jobs:
           ERRORS="$(jq -r '.errors // empty' /tmp/cf.json)"
           test -z "$ERRORS"
           REQUESTS="$(jq '[.data.viewer.accounts[0].workersInvocationsAdaptive[]?.sum.requests // 0] | add // 0' /tmp/cf.json)"
+          D1_READS="$(jq '[.data.viewer.accounts[0].d1AnalyticsAdaptiveGroups[]?.sum.rowsRead // 0] | add // 0' /tmp/cf.json)"
+          D1_WRITES="$(jq '[.data.viewer.accounts[0].d1AnalyticsAdaptiveGroups[]?.sum.rowsWritten // 0] | add // 0' /tmp/cf.json)"
           echo "requests=$REQUESTS"
+          echo "d1_reads=$D1_READS"
+          echo "d1_writes=$D1_WRITES"
           echo "requests=$REQUESTS" >> "$GITHUB_OUTPUT"
+          echo "d1_reads=$D1_READS" >> "$GITHUB_OUTPUT"
+          echo "d1_writes=$D1_WRITES" >> "$GITHUB_OUTPUT"
 
       - name: Update public service guard only when state changes
         env:
           REQUESTS: ${{ steps.usage.outputs.requests }}
+          D1_READS: ${{ steps.usage.outputs.d1_reads }}
+          D1_WRITES: ${{ steps.usage.outputs.d1_writes }}
         run: |
           set -euo pipefail
           NOW="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           LIMIT=100000
-          # Pause before the hard limit to absorb analytics/reporting delay and traffic bursts.
-          PAUSE_THRESHOLD=95000
-          if [ "$REQUESTS" -ge "$PAUSE_THRESHOLD" ]; then
+          WORKER_PAUSE_THRESHOLD=95000
+          D1_READ_LIMIT=5000000
+          D1_WRITE_LIMIT=100000
+          D1_READ_PAUSE_THRESHOLD=4750000
+          D1_WRITE_PAUSE_THRESHOLD=95000
+          if [ "$REQUESTS" -ge "$WORKER_PAUSE_THRESHOLD" ]; then
             PAUSED=true
-            MESSAGE="سرویس فروشگاه موقتاً متوقف شده است. تعداد درخواست‌های ثبت‌شده امروز: $REQUESTS از $LIMIT."
+            MESSAGE="سرویس فروشگاه موقتاً متوقف شده است. درخواست‌های Worker امروز: $REQUESTS از $LIMIT."
+          elif [ "$D1_READS" -ge "$D1_READ_PAUSE_THRESHOLD" ]; then
+            PAUSED=true
+            MESSAGE="سرویس فروشگاه موقتاً متوقف شده است. مصرف D1 امروز به آستانه امن خواندن رسیده است: $D1_READS از $D1_READ_LIMIT ردیف."
+          elif [ "$D1_WRITES" -ge "$D1_WRITE_PAUSE_THRESHOLD" ]; then
+            PAUSED=true
+            MESSAGE="سرویس فروشگاه موقتاً متوقف شده است. مصرف D1 امروز به آستانه امن نوشتن رسیده است: $D1_WRITES از $D1_WRITE_LIMIT ردیف."
           else
             PAUSED=false
             MESSAGE="سرویس فروشگاه فعال است."
