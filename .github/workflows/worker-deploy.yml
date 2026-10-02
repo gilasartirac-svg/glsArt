@@ -34,7 +34,7 @@ jobs:
 
       - name: Adopt existing D1 baseline migration
         run: |
-          npx wrangler d1 execute gilasartdatabase --remote --command="CREATE TABLE IF NOT EXISTS d1_migrations(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT UNIQUE,applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL); INSERT OR IGNORE INTO d1_migrations(name) SELECT '0001_initial.sql' WHERE (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('users','sessions','otp_challenges','roles','permissions','user_roles','categories','products','product_images','inventory','addresses','carts','cart_items','orders','order_items','payments','payment_attempts','favorites','reviews','coupons','coupon_usages','audit_logs'))=22 AND NOT EXISTS (SELECT 1 FROM d1_migrations WHERE name='0001_initial.sql');" --remote --json
+          npx wrangler d1 execute gilasartdatabase --remote --command="CREATE TABLE IF NOT EXISTS d1_migrations(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT UNIQUE,applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL); INSERT OR IGNORE INTO d1_migrations(name) SELECT '0001_initial.sql' WHERE (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('users','sessions','otp_challenges','roles','permissions','user_roles','categories','products','product_images','inventory','addresses','carts','cart_items','orders','order_items','payments','payment_attempts','favorites','reviews','coupons','coupon_usages','audit_logs'))>=22 AND NOT EXISTS (SELECT 1 FROM d1_migrations WHERE name='0001_initial.sql');" --json
 
       - name: Adopt existing order sample flag
         run: |
