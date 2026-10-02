@@ -81,8 +81,8 @@ jobs:
             PAUSED=false
             MESSAGE="سرویس فروشگاه فعال است."
           fi
-          export PAUSED REQUESTS NOW MESSAGE
-          node -e 'const fs=require("fs");const p="frontend/public/service-status.json";const old=JSON.parse(fs.readFileSync(p,"utf8"));const next={paused:process.env.PAUSED==="true",requests:Number(process.env.REQUESTS||0),limit:100000,checkedAt:process.env.NOW,message:process.env.MESSAGE};if(old.paused!==next.paused){fs.writeFileSync(p,JSON.stringify(next,null,2)+"\n");process.exit(10)}fs.writeFileSync("/tmp/status.json",JSON.stringify(next,null,2)+"\n");' || code=$?
+          export PAUSED REQUESTS D1_READS D1_WRITES NOW MESSAGE
+          node -e 'const fs=require("fs");const p="frontend/public/service-status.json";const old=JSON.parse(fs.readFileSync(p,"utf8"));const next={paused:process.env.PAUSED==="true",requests:Number(process.env.REQUESTS||0),d1RowsRead:Number(process.env.D1_READS||0),d1RowsWritten:Number(process.env.D1_WRITES||0),limit:100000,d1ReadLimit:5000000,d1WriteLimit:100000,checkedAt:process.env.NOW,message:process.env.MESSAGE};fs.writeFileSync("/tmp/status.json",JSON.stringify(next,null,2)+"\n");if(old.paused!==next.paused)process.exit(10)' || code=$?
           if [ "${code:-0}" -eq 10 ]; then
             cp /tmp/status.json frontend/public/service-status.json
           fi
