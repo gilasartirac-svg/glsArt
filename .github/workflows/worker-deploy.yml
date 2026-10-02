@@ -38,7 +38,13 @@ jobs:
 
       - name: Adopt existing order sample flag
         run: |
-          npx wrangler d1 execute gilasartdatabase --remote --command="INSERT OR IGNORE INTO d1_migrations(name) SELECT '0010_add_order_sample_flag.sql' WHERE EXISTS (SELECT 1 FROM sqlite_master WHERE type='table' AND name='orders' AND sql LIKE '%is_sample%') AND NOT EXISTS (SELECT 1 FROM d1_migrations WHERE name='0010_add_order_sample_flag.sql');" --json
+          set -euo pipefail
+          npx wrangler d1 execute gilasartdatabase --remote --command="PRAGMA table_info(orders)" --json > /tmp/orders-schema.json
+          if jq -e '.result[0].results[]? | select(.name=="is_sample")' /tmp/orders-schema.json >/dev/null; then
+            npx wrangler d1 execute gilasartdatabase --remote --command="INSERT OR IGNORE INTO d1_migrations(name) VALUES ('0010_add_order_sample_flag.sql')" --json
+          else
+            echo "orders.is_sample is absent; migration 0010 will be applied normally."
+          fi
 
       - name: Apply remote D1 migrations
         run: npx wrangler d1 migrations apply gilasartdatabase --remote
