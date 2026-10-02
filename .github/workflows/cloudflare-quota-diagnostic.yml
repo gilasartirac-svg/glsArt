@@ -33,10 +33,7 @@ jobs:
           PY
 
           echo 'Worker usage endpoint:'
-          ucode=$(curl -sS -o /tmp/usage.json -w '%{http_code}' \\
-            -H "Authorization: Bearer $CF_TOKEN" \\
-            -H 'Content-Type: application/json' \\
-            "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/workers/scripts/gilasartworker/usage")
+          ucode=$(curl -sS -o /tmp/usage.json -w '%{http_code}' -H "Authorization: Bearer $CF_TOKEN" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/workers/scripts/gilasartworker/usage")
           echo "Cloudflare usage HTTP status: $ucode"
           cat /tmp/usage.json
           echo 'Worker endpoint probe:'
