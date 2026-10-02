@@ -18,11 +18,17 @@ jobs:
           node-version: 22
       - run: npm ci
       - name: Capture D1 state
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
           mkdir -p docs
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT name FROM d1_migrations ORDER BY id" --json > /tmp/migrations.json
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT name,type,sql FROM sqlite_master WHERE type IN ('table','index') ORDER BY name" --json > /tmp/schema.json
+          query() {
+            curl -fsS -X POST "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/d1/database/3e6741e8-e50c-4c8d-b50a-33d9db2dfd4c/query" -H "Authorization: Bearer $CF_API_TOKEN" -H "Content-Type: application/json" --data "$1"
+          }
+          query '{"sql":"SELECT name FROM d1_migrations ORDER BY id"}' > /tmp/migrations.json
+          query '{"sql":"SELECT name,type,sql FROM sqlite_master WHERE type IN (\"table\",\"index\") ORDER BY name"}' > /tmp/schema.json
           node -e "const fs=require('fs');fs.writeFileSync('docs/.d1-diagnostic.json',JSON.stringify({migrations:JSON.parse(fs.readFileSync('/tmp/migrations.json')),schema:JSON.parse(fs.readFileSync('/tmp/schema.json'))},null,2)+'\\n')"
       - name: Commit diagnostic
         run: |
