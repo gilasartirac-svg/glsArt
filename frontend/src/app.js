@@ -18,9 +18,40 @@ window.GilasArtTheme={toggle(){applyTheme(document.documentElement.dataset.theme
 window.GilasArtMobileMenu={toggle(button){const menu=document.querySelector('#main-menu');if(!menu)return;const open=!menu.classList.contains('is-open');menu.classList.toggle('is-open',open);button?.setAttribute('aria-expanded',String(open));button?.setAttribute('aria-label',open?'بستن منوی اصلی':'باز کردن منوی اصلی')},close(){const menu=document.querySelector('#main-menu'),button=document.querySelector('.mobile-menu-toggle');menu?.classList.remove('is-open');button?.setAttribute('aria-expanded','false');button?.setAttribute('aria-label','باز کردن منوی اصلی')}};
 document.addEventListener('click',e=>{const link=e.target?.closest?.('#main-menu a');if(link)window.GilasArtMobileMenu?.close()},{capture:true});
 initTheme();
-let progressRequests=0,progressTimer=null;
-function progressStart(){let bar=document.querySelector('#global-progress');if(!bar){bar=document.createElement('div');bar.id='global-progress';bar.innerHTML='<span></span><b>0%</b>';document.body.prepend(bar)}progressRequests++;bar.hidden=false;bar.querySelector('span').style.width='8%';bar.querySelector('b').textContent='0%';let value=8;clearInterval(progressTimer);progressTimer=setInterval(()=>{value=Math.min(90,value+Math.max(.35,(90-value)/18));bar.querySelector('span').style.width=value+'%';bar.querySelector('b').textContent=Math.floor(value)+'%'},180)}
-function progressEnd(){progressRequests=Math.max(0,progressRequests-1);if(progressRequests)return;clearInterval(progressTimer);const bar=document.querySelector('#global-progress');if(!bar)return;bar.querySelector('span').style.width='100%';bar.querySelector('b').textContent='100%';setTimeout(()=>{if(progressRequests===0)bar.hidden=true},220)}
+let progressRequests=0,progressTimer=null,progressHideTimer=null,progressValue=0;
+function progressPaint(bar){const value=Math.max(0,Math.min(100,progressValue));bar.querySelector('span').style.width=value+'%';bar.querySelector('b').textContent=Math.floor(value)+'%'}
+function progressStart(){
+  let bar=document.querySelector('#global-progress');
+  if(!bar){bar=document.createElement('div');bar.id='global-progress';bar.innerHTML='<span></span><b>0%</b>';document.body.prepend(bar)}
+  clearTimeout(progressHideTimer);
+  progressRequests++;
+  bar.hidden=false;
+  if(progressRequests===1){progressValue=Math.max(progressValue,4);progressPaint(bar)}
+  if(!progressTimer){
+    progressTimer=setInterval(()=>{
+      if(progressRequests<=0)return;
+      if(progressValue<90)progressValue=Math.min(90,progressValue+Math.max(.18,(90-progressValue)*.035));
+      progressPaint(bar);
+    },120);
+  }
+}
+function progressEnd(){
+  progressRequests=Math.max(0,progressRequests-1);
+  if(progressRequests)return;
+  clearInterval(progressTimer);progressTimer=null;
+  const bar=document.querySelector('#global-progress');
+  if(!bar)return;
+  const startValue=progressValue,started=performance.now();
+  const finish=now=>{
+    if(progressRequests>0)return;
+    const t=Math.min(1,(now-started)/280);
+    progressValue=startValue+(100-startValue)*(1-Math.pow(1-t,3));
+    progressPaint(bar);
+    if(t<1)requestAnimationFrame(finish);
+    else{progressValue=100;progressPaint(bar);progressHideTimer=setTimeout(()=>{if(progressRequests===0)bar.hidden=true},220)}
+  };
+  requestAnimationFrame(finish);
+}
 window.GilasArtProgress={start:progressStart,end:progressEnd};
 async function api(path,opt={}){progressStart();const headers={...(opt.headers||{})};if(opt.body)headers['content-type']='application/json';try{const r=await fetch(API+path,{credentials:'include',cache:'no-store',headers,...opt});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'خطا');return d}finally{progressEnd()}}
 function csrf(){return csrfToken||''}
