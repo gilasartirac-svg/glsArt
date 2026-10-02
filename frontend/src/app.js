@@ -72,7 +72,20 @@ function showServicePause(reason='cloudflare',message){
 function detectServiceLimit(status,raw,data){const t=String(raw||'')+' '+JSON.stringify(data||{});if(/1027|error\\s*1027|worker exceeded free tier daily request limit|free tier daily request limit/i.test(t)||status===429)return'cloudflare-limit';if(/d1|daily row (read|write) limit|daily row.*limit|exceeded.*free tier daily|free tier.*daily row/i.test(t)&&status>=400)return'd1-limit';return''}
 async function readServiceStatus(){try{const root=location.pathname.includes('/glsArt')?'/glsArt/':'/';const u=new URL(root+'service-status.json',location.origin);u.searchParams.set('t',Date.now());const r=await fetch(u.href,{cache:'no-store'});if(!r.ok)return null;const d=await r.json();if(d&&d.checkedAt&&Date.now()-new Date(d.checkedAt).getTime()>20*60*1000)return null;return d}catch{return null}}
 async function bootServiceGate(){const status=await readServiceStatus();if(status?.paused){showServicePause('cloudflare-limit',status.message||('سرویس فروشگاه به سقف روزانه رسیده است. درخواست‌های ثبت‌شده: '+fa(status.requests||0)));return false}try{const d=await api('/api/health');if(d?.ok!==true||d?.db!==true){showServicePause('connection','سرویس اطلاعات فروشگاه در دسترس نیست و تا برقراری کامل Dynamic API، سایت نمایش داده نمی‌شود.');return false}return true}catch{return false}}
-async function api(path,opt={}){progressStart();const headers={...(opt.headers||{})};if(opt.body)headers['content-type']='application/json';try{const r=await fetch(API+path,{credentials:'include',cache:'no-store',headers,...opt});const raw=await r.text();let d={};try{d=raw?JSON.parse(raw):{}}catch{}if(!r.ok){const limit=detectServiceLimit(r.status,raw,d);if(limit)showServicePause(limit);throw new Error(d.error||d.message||(limit?'سرویس موقتاً در دسترس نیست':'خطا'))}if(servicePauseState.active&&servicePauseState.reason==='connection')hideServicePause();return d}catch(e){if(e instanceof TypeError)showServicePause('connection','ارتباط با سرویس فروشگاه برقرار نشد. در حال بررسی مجدد اتصال هستیم.');throw e}finally{progressEnd()}}
+async function api(path,opt={}){progressStart();const headers={...(opt.headers||{})};if(opt.body)headers['content-type']='application/json';try{const r=await fetch(API+path,{credentials:'include',cache:'no-store',headers,...opt});const raw=await r.text();let d={};try{d=raw?JSON.parse(raw):{}}catch{}if(!r.ok){const limit=detectServiceLimit(r.status,raw,d);if(limit)showServicePause(limit);throw new Error(d.error||d.message||(limit?'سرویس موقتاً در دسترس نیست':'خطا'))}
+const requiredShape=path=>{
+ if(path==='/api/health')return d&&d.ok===true&&d.db===true;
+ if(/^\/api\/products\?/.test(path)||path==='/api/products')return Array.isArray(d?.items);
+ if(path==='/api/categories'||path==='/api/flash-sales')return Array.isArray(d?.items);
+ if(path.startsWith('/api/products/')&&!path.includes('/reviews'))return d?.product&&Array.isArray(d.images)&&Array.isArray(d.attributes)&&Array.isArray(d.categories)&&Array.isArray(d.reviews);
+ if(path.startsWith('/api/content?'))return Array.isArray(d?.items);
+ if(path.startsWith('/api/content/'))return d?.item&&typeof d.item==='object';
+ if(path==='/api/settings')return d?.settings&&typeof d.settings==='object';
+ if(path==='/api/site-rules')return d?.item&&typeof d.item==='object';
+ return true;
+};
+if(!requiredShape(path)){showServicePause('connection','داده کامل از پایگاه داده دریافت نشد. برای جلوگیری از نمایش ناقص، این صفحه موقتاً متوقف شده است.');throw new Error('داده ناقص از سرویس اصلی دریافت شد')}
+if(servicePauseState.active&&servicePauseState.reason==='connection')hideServicePause();return d}catch(e){if(e instanceof TypeError)showServicePause('connection','ارتباط با سرویس فروشگاه برقرار نشد. در حال بررسی مجدد اتصال هستیم.');throw e}finally{progressEnd()}}
 
 function csrf(){return csrfToken||''}
 function setSeo({title,description,image,type='website',jsonLd}={}){if(title){document.title=title;let t=document.querySelector('meta[name="description"]');if(!t){t=document.createElement('meta');t.name='description';document.head.appendChild(t)}t.content=description||'';const og=document.querySelector('meta[property="og:title"]');if(og)og.content=title;const od=document.querySelector('meta[property="og:description"]');if(od)od.content=description||'';if(image){let oi=document.querySelector('meta[property="og:image"]');if(!oi){oi=document.createElement('meta');oi.setAttribute('property','og:image');document.head.appendChild(oi)}oi.content=image}}document.querySelectorAll('script[data-gilasart-jsonld]').forEach(x=>x.remove());if(jsonLd){const s=document.createElement('script');s.type='application/ld+json';s.dataset.gilasartJsonld='1';s.textContent=JSON.stringify(jsonLd).replace(/</g,'\\u003c');document.head.appendChild(s)}}
@@ -128,7 +141,7 @@ async function home(){const [products,settings,flashData,categoryData]=await Pro
    document.querySelector('#results').insertAdjacentHTML('beforeend',items.map(productCard).join(''));
    offset+=items.length;if(items.length<pageSize)done=true;
    document.querySelector('#load-status').textContent=done?'همه آثار نمایش داده شد.':'با اسکرول پایین، آثار بیشتری نمایش داده می‌شود.';startFlashTimers(document.querySelector('#results'));
-  }catch(e){document.querySelector('#load-status').textContent=e.message||'خطا در دریافت آثار.'}
+  }catch(e){document.querySelector('#load-status').textContent=e.message||'خطا در دریافت آثار.';throw e}
   finally{loading=false}
  };
  const hero=featuredImage?'<a class="shop-page-visual" href="'+productUrl(featuredProduct.slug)+'" aria-label="مشاهده اثر '+escapeHtml(featuredProduct.name)+'"><img src="'+escapeHtml(featuredImage)+'" alt="'+escapeHtml(featuredProduct.name)+'" fetchpriority="high" decoding="async"><span><small>اثر منتخب</small><strong>'+escapeHtml(featuredProduct.name)+'</strong></span></a>':'<div class="shop-page-visual shop-page-visual-empty"><span>GILAS ART</span><strong>گالری آثار</strong></div>';
@@ -218,7 +231,7 @@ async function product(slug){
      const cartData=await api('/api/cart');
      const line=(cartData.items||[]).find(x=>String(x.product_id)===String(p.id));
      renderProductCartControl(line?Number(line.quantity):0);
-   }catch{renderProductCartControl(0)}
+   }catch(e){renderProductCartControl(-1);console.warn('cart_quantity_unavailable',e)}
  };
  const quantityTiers=Array.isArray(d.quantityDiscountTiers)?d.quantityDiscountTiers.filter(x=>Number(x.min)>1&&Number(x.percent)>0):[]; const quantityDiscountCard=document.querySelector('#quantity-discount-card'); if(quantityDiscountCard&&quantityTiers.length){const next=quantityTiers[0];quantityDiscountCard.innerHTML='<div class="quantity-discount-head"><span class="quantity-discount-icon">٪</span><div><strong>با خرید چندتایی، بیشتر صرفه‌جویی کنید</strong><small>تخفیف تعدادی فقط برای همین محصول و بر اساس تعداد سفارش محاسبه می‌شود.</small></div></div><div class="quantity-discount-tiers">'+quantityTiers.map(x=>'<span><b>'+fa(x.min)+' عدد</b><em>'+fa(x.percent)+'٪</em></span>').join('')+'</div><div class="quantity-discount-note">از '+fa(next.min)+' عدد، '+fa(next.percent)+'٪ تخفیف خودکار در سبد خرید اعمال می‌شود.</div></div>'}
  document.querySelectorAll('.product-option select').forEach(x=>x.addEventListener('change',recalc));recalc();loadProductCartQuantity();
@@ -347,8 +360,7 @@ async function account(){
  await loadMe();
  if(state.user){
   const invoiceModule=await import('./invoice.js?v=20260929-invoice-2');
-  let ordersData={items:[],invoice:{}};
-  try{ordersData=await api('/api/account/orders')}catch(e){ordersData={items:[],invoice:{},error:e.message||'سفارش‌ها قابل دریافت نیستند'}}
+  const ordersData=await api('/api/account/orders');
   const orders=ordersData.items||[],invoiceSettings=ordersData.invoice||{};
   const statusLabels={PENDING:'در انتظار پرداخت',PAID:'پرداخت شد',PROCESSING:'در حال آماده‌سازی',SHIPPED:'ارسال شد',DELIVERED:'تحویل شد',CANCELLED:'لغو شد',FAILED:'ناموفق'};
   const steps=[['PENDING','ثبت سفارش'],['PAID','تأیید پرداخت'],['PROCESSING','آماده‌سازی اثر'],['SHIPPED','تحویل به پست / ارسال'],['DELIVERED','تحویل تابلو']];
