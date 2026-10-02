@@ -46,7 +46,7 @@ jobs:
         id: gate
         run: |
           set -euo pipefail
-          changed=$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA")
+          changed=$(git show --format= --name-only "$GITHUB_SHA")
           echo "$changed"
           blocked=$(printf '%s\n' "$changed" | grep -Ev '^(frontend/public/service-status\.json|\.github/workflows/cloudflare-usage-guard\.yml)$' || true)
           if [ -z "$blocked" ]; then
