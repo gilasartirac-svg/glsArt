@@ -46,9 +46,17 @@ jobs:
             echo "orders.is_sample is absent; migration 0010 will be applied normally."
           fi
 
-      - name: Inspect remote D1 migration state
-        run: npx wrangler d1 migrations list gilasartdatabase --remote
+      - name: Reconcile legacy review compatibility migration
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute gilasartdatabase --remote --command="PRAGMA table_info(reviews)" --json > /tmp/reviews-schema.json
+          if jq -e '.result[0].results[]? | select(.name=="body")' /tmp/reviews-schema.json >/dev/null; then
+            npx wrangler d1 execute gilasartdatabase --remote --command="INSERT OR IGNORE INTO d1_migrations(name) VALUES ('0001a_reviews_schema_compat.sql')" --json
+          else
+            echo "reviews.body is absent; compatibility migration must run normally."
+          fi
 
+      - name: Apply remote D1 migrations
       - name: Apply remote D1 migrations
         run: npx wrangler d1 migrations apply gilasartdatabase --remote
 
