@@ -23,8 +23,7 @@ jobs:
           mkdir -p docs
           npx wrangler d1 execute gilasartdatabase --remote --command="SELECT name FROM d1_migrations ORDER BY id" --json > /tmp/migrations.json
           npx wrangler d1 execute gilasartdatabase --remote --command="SELECT name,type,sql FROM sqlite_master WHERE type IN ('table','index') ORDER BY name" --json > /tmp/schema.json
-          npx wrangler d1 execute gilasartdatabase --remote --command="SELECT COUNT(*) AS products FROM products; SELECT COUNT(*) AS reviews FROM reviews; SELECT COUNT(*) AS categories FROM categories" --json > /tmp/counts.json
-          node -e "const fs=require('fs');fs.writeFileSync('docs/.d1-diagnostic.json',JSON.stringify({migrations:JSON.parse(fs.readFileSync('/tmp/migrations.json')),schema:JSON.parse(fs.readFileSync('/tmp/schema.json')),counts:JSON.parse(fs.readFileSync('/tmp/counts.json'))},null,2)+'\\n')"
+          node -e "const fs=require('fs');fs.writeFileSync('docs/.d1-diagnostic.json',JSON.stringify({migrations:JSON.parse(fs.readFileSync('/tmp/migrations.json')),schema:JSON.parse(fs.readFileSync('/tmp/schema.json'))},null,2)+'\\n')"
       - name: Commit diagnostic
         run: |
           git config user.name 'GilasArt Diagnostic'
