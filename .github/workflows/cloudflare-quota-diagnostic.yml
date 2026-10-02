@@ -1,0 +1,35 @@
+name: Cloudflare quota diagnostic
+on:
+  pull_request:
+    types: [opened, synchronize]
+permissions:
+  contents: read
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query Cloudflare Worker API
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${CF_TOKEN:-}" ] || [ -z "${CF_ACCOUNT_ID:-}" ]; then
+            echo "CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not available to this workflow."
+            exit 1
+          fi
+          code=$(curl -sS -o /tmp/cf.json -w '%{http_code}' \
+            -H "Authorization: Bearer $CF_TOKEN" \
+            -H 'Content-Type: application/json' \
+            "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/workers/scripts/gilasartworker/settings")
+          echo "Cloudflare API HTTP status: $code"
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/cf.json'))
+          print('Cloudflare API success:', d.get('success'))
+          print('Cloudflare errors:', d.get('errors', []))
+          print('Cloudflare messages:', d.get('messages', []))
+          PY
+          echo 'Worker endpoint probe:'
+          curl -sS -i --max-time 15 'https://gilasartworker.gilasart-ir-ac.workers.dev/api/health' | sed -n '1,25p'
