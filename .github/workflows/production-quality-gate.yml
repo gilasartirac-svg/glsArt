@@ -15,76 +15,46 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Validate frontend JavaScript
         run: node --check frontend/src/app.js
-
       - name: Validate Worker module
-        run: |
-          cp worker/src/index.js /tmp/gilasart-worker.mjs
-          node --check /tmp/gilasart-worker.mjs
-
+        run: cp worker/src/index.js /tmp/gilasart-worker.mjs && node --check /tmp/gilasart-worker.mjs
       - name: Validate service status document
-        run: |
-          node - <<'NODE'
-          const fs=require('fs');
-          const p='frontend/public/service-status.json';
-          const d=JSON.parse(fs.readFileSync(p,'utf8'));
-          if(typeof d.paused!=='boolean') throw new Error('service-status.paused must be boolean');
-          if(!Number.isFinite(Number(d.requests)) || !Number.isFinite(Number(d.limit))) throw new Error('service-status counters are invalid');
-          if(!d.checkedAt) throw new Error('service-status.checkedAt is required');
-          console.log('service-status ok', d);
-          NODE
-
+        run: node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('frontend/public/service-status.json','utf8'));if(typeof d.paused!=='boolean'||!Number.isFinite(Number(d.requests))||!Number.isFinite(Number(d.limit))||!d.checkedAt)process.exit(1)"
       - name: Wait for Worker deployment of this commit
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          status=missing; conclusion=failure
           for i in $(seq 1 30); do
             run=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/actions/workflows/worker-deploy.yml/runs?head_sha=${{ github.sha }}&per_page=1")
             status=$(echo "$run" | jq -r '.workflow_runs[0].status // "missing"')
             conclusion=$(echo "$run" | jq -r '.workflow_runs[0].conclusion // ""')
             echo "worker status=$status conclusion=$conclusion"
-            if [ "$status" = "completed" ]; then
-              test "$conclusion" = "success"
-              break
-            fi
+            if [ "$status" = completed ]; then break; fi
             sleep 10
           done
-          test "${status:-missing}" = "completed"
-          test "${conclusion:-failure}" = "success"
-
+          test "$status" = completed
+          test "$conclusion" = success
       - name: Smoke test production API
         env:
           API: https://gilasartworker.gilasart-ir-ac.workers.dev
           ORIGIN: https://gilasartirac-svg.github.io
         run: |
           set -euo pipefail
-          check_json() {
-            local path="$1"
-            local expression="$2"
-            local body status
+          for path in /api/health '/api/products?limit=1' /api/categories /api/flash-sales /api/settings; do
             body=$(mktemp)
-            status=$(curl -sS --retry 2 --retry-all-errors -o "$body" -w '%{http_code}' "$API$path")
-            echo "$path -> HTTP $status"
+            code=$(curl -sS --retry 2 --retry-all-errors -o "$body" -w '%{http_code}' "$API$path")
+            echo "$path -> HTTP $code"
             cat "$body"
-            echo
-            test "$status" = "200"
-            node - "$body" "$expression" <<'NODE'
-            const fs=require('fs');
-            const [file,expr]=process.argv.slice(2);
-            const d=JSON.parse(fs.readFileSync(file,'utf8'));
-            if(!Function('d','return ('+expr+')')(d)) throw new Error('contract failed: '+expr);
-NODE
+            test "$code" = 200
             rm -f "$body"
-          }
-          check_json /api/health "d.ok===true && d.db===true"
-          check_json '/api/products?limit=1' "Array.isArray(d.items)"
-          check_json /api/categories "Array.isArray(d.items)"
-          check_json /api/flash-sales "Array.isArray(d.items)"
-          check_json /api/settings "d.settings && typeof d.settings==='object'"
-          headers=$(curl -sS --retry 2 --retry-all-errors -D - -o /dev/null -H "Origin: $ORIGIN" "$API/api/health")
+          done
+          curl -fsS "$API/api/health" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{const d=JSON.parse(s);if(d.ok!==true||d.db!==true)process.exit(1)})"
+          curl -fsS "$API/api/products?limit=1" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{if(!Array.isArray(JSON.parse(s).items))process.exit(1)})"
+          curl -fsS "$API/api/categories" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{if(!Array.isArray(JSON.parse(s).items))process.exit(1)})"
+          headers=$(curl -sS -D - -o /dev/null -H "Origin: $ORIGIN" "$API/api/health")
           echo "$headers"
-          echo "$headers" | grep -F "access-control-allow-origin: $ORIGIN"
-          echo "$headers" | grep -F "access-control-allow-credentials: true"
+          echo "$headers" | grep -Fi "access-control-allow-origin: $ORIGIN"
+          echo "$headers" | grep -Fi "access-control-allow-credentials: true"
