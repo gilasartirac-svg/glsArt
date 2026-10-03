@@ -267,7 +267,22 @@ async function product(slug){
   });
 }
 async function ensureLogin(){if(state.user)return;await account();if(!state.user)throw new Error('ابتدا وارد حساب شوید')}
-async function loadMe(){try{const d=await api('/api/me');state.user=d.user||null;state.roles=d.roles||[];state.permissions=d.permissions||[];csrfToken=d.csrfToken||csrfToken;if(state.user){try{state.rewards=await api('/api/rewards');state.points=Number(state.rewards.balance||0)}catch{state.rewards=null;state.points=0}await syncCartBadge()}else{state.rewards=null;state.points=0;updateCartBadge(0)}return d}catch(e){return null}}
+let notificationTimer=null;
+function showNotificationHint(item){
+ const old=document.querySelector('#ga-notification-hint');old?.remove();
+ const el=document.createElement('div');el.id='ga-notification-hint';el.className='ga-notification-hint';el.setAttribute('role','status');
+ el.innerHTML='<div class="ga-notification-icon">✦</div><div><strong>'+escapeHtml(item.title||'خبر جدید از گیلاس آرت')+'</strong><p>'+escapeHtml(item.message||'')+'</p></div><button type="button" aria-label="بستن اعلان">×</button>';
+ document.body.appendChild(el);el.querySelector('button').onclick=()=>el.remove();setTimeout(()=>el.remove(),9000);
+}
+async function pollNotifications(){
+ if(!state.user)return;
+ try{const d=await api('/api/notifications');const items=Array.isArray(d.items)?d.items:[];if(items[0])showNotificationHint(items[0])}catch{}
+}
+function startNotificationPolling(){
+ clearInterval(notificationTimer);notificationTimer=null;
+ if(state.user){notificationTimer=setInterval(()=>{pollNotifications()},25000)}
+}
+async function loadMe(){try{const d=await api('/api/me');state.user=d.user||null;state.roles=d.roles||[];state.permissions=d.permissions||[];csrfToken=d.csrfToken||csrfToken;if(state.user){try{state.rewards=await api('/api/rewards');state.points=Number(state.rewards.balance||0)}catch{state.rewards=null;state.points=0}await syncCartBadge()}else{state.rewards=null;state.points=0;updateCartBadge(0)}startNotificationPolling();return d}catch(e){return null}}
 async function cart(){
  await loadMe();
  if(!state.user){
