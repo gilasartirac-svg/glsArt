@@ -379,27 +379,9 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  if(u.pathname==='/api/categories'&&req.method==='GET'){const r=await env.DB.prepare('SELECT id,slug,name,description FROM categories WHERE active=1 ORDER BY name').all();return json({items:r.results||[]})}
  if(u.pathname==='/api/products'&&req.method==='GET'){
   const q=(u.searchParams.get('q')||'').trim(),cat=u.searchParams.get('category'),sort=String(u.searchParams.get('sort')||'newest').toLowerCase();
-  const sortSql={
-   newest:'p.created_at DESC,p.id DESC',
-   price_asc:'p.price_irt ASC,p.id DESC',
-   price_desc:'p.price_irt DESC,p.id DESC',
-   rating:'rating_avg DESC,review_count DESC,p.created_at DESC,p.id DESC',
-   reviews:'review_count DESC,rating_avg DESC,p.created_at DESC,p.id DESC',
-   popular:'favorite_count DESC,view_count DESC,p.created_at DESC,p.id DESC',
-   best_selling:'sold_count DESC,review_count DESC,p.created_at DESC,p.id DESC',
-   views:'view_count DESC,favorite_count DESC,p.created_at DESC,p.id DESC'
-  }[sort]||'p.created_at DESC,p.id DESC';
+  const sortSql={newest:'p.created_at DESC,p.id DESC',price_asc:'p.price_irt ASC,p.id DESC',price_desc:'p.price_irt DESC,p.id DESC',rating:'p.rating_avg DESC,p.review_count DESC,p.created_at DESC,p.id DESC',reviews:'p.review_count DESC,p.rating_avg DESC,p.created_at DESC,p.id DESC',popular:'p.favorite_count DESC,p.view_count DESC,p.created_at DESC,p.id DESC',best_selling:'p.sold_count DESC,p.review_count DESC,p.created_at DESC,p.id DESC',views:'p.view_count DESC,p.favorite_count DESC,p.created_at DESC,p.id DESC'}[sort]||'p.created_at DESC,p.id DESC';
   const limit=Math.min(60,Math.max(1,Number(u.searchParams.get('limit')||12))),offset=Math.max(0,Math.min(10000,Number(u.searchParams.get('offset')||0)));
-  let sql=`SELECT p.id,p.slug,p.sku,p.name,p.description,p.price_irt,p.category_id,p.flash_sale_active,p.flash_sale_ends_at,p.flash_sale_price_irt,p.video_url,p.view_count,
-    COALESCE(rv.review_count,0) review_count,COALESCE(rv.rating_avg,0) rating_avg,
-    COALESCE(fv.favorite_count,0) favorite_count,COALESCE(sa.sold_count,0) sold_count,
-    pi.path image
-    FROM products p
-    LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1
-    LEFT JOIN (SELECT product_id,COUNT(*) review_count,AVG(rating) rating_avg FROM reviews WHERE approved=1 GROUP BY product_id) rv ON rv.product_id=p.id
-    LEFT JOIN (SELECT product_id,COUNT(*) favorite_count FROM favorites GROUP BY product_id) fv ON fv.product_id=p.id
-    LEFT JOIN (SELECT oi.product_id,SUM(oi.quantity) sold_count FROM order_items oi JOIN orders o ON o.id=oi.order_id AND o.status IN ('PAID','PROCESSING','SHIPPED','DELIVERED') GROUP BY oi.product_id) sa ON sa.product_id=p.id
-    WHERE p.active=1`;
+  let sql='SELECT p.id,p.slug,p.sku,p.name,p.description,p.price_irt,p.category_id,p.flash_sale_active,p.flash_sale_ends_at,p.flash_sale_price_irt,p.video_url,p.view_count,p.rating_avg,p.review_count,p.favorite_count,p.sold_count,pi.path image FROM products p LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.active=1';
   const args=[];
   if(q){sql+=' AND (p.name LIKE ? OR p.description LIKE ? OR p.sku LIKE ?)';args.push(`%${q}%`,`%${q}%`,`%${q}%`)}
   if(cat){sql+=' AND p.category_id=?';args.push(cat)}
