@@ -1615,18 +1615,26 @@ main#main-content{min-height:60vh}
 }
 
 
-/* Cloudflare / D1 service pause — graceful storefront failover */
-.service-pause{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;padding:18px;background:color-mix(in srgb,var(--ui-bg,#0b0b0d) 88%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-.service-pause-card{width:min(560px,100%);padding:clamp(24px,5vw,44px);text-align:center;border:1px solid color-mix(in srgb,var(--ui-gold,#c9a86a) 32%,var(--ui-line,#2a292d));border-radius:28px;background:linear-gradient(145deg,var(--ui-surface-2,#18181d),var(--ui-surface,#121216));box-shadow:0 30px 100px rgba(0,0,0,.42)}
-.service-pause-mark{width:62px;height:62px;margin:0 auto 16px;display:grid;place-items:center;border-radius:20px;color:var(--ui-gold-strong,#e2c891);font-size:27px;border:1px solid color-mix(in srgb,var(--ui-gold,#c9a86a) 30%,var(--ui-line,#2a292d));background:color-mix(in srgb,var(--ui-gold,#c9a86a) 9%,var(--ui-surface,#121216));box-shadow:0 0 45px color-mix(in srgb,var(--ui-gold,#c9a86a) 12%,transparent)}
-.service-pause-card h2{margin:8px 0 10px;font-size:clamp(24px,5vw,34px)}
-.service-pause-card p{margin:0 auto 18px;max-width:460px;color:var(--ui-muted,#aaa49b);line-height:2}
-.service-pause-countdown{margin:20px auto 12px;padding:12px 18px;width:min(300px,100%);border-radius:16px;border:1px solid color-mix(in srgb,var(--ui-gold,#c9a86a) 28%,var(--ui-line,#2a292d));background:color-mix(in srgb,var(--ui-gold,#c9a86a) 7%,var(--ui-surface,#121216));color:var(--ui-gold-strong,#e2c891);font:800 clamp(27px,7vw,40px)/1.2 Vazirmatn,Tahoma,Arial,sans-serif;letter-spacing:.06em;font-variant-numeric:tabular-nums}
-.service-pause-card small{display:block;color:var(--ui-muted,#aaa49b);line-height:1.9;margin-bottom:22px}.service-pause-card .btn{min-width:150px}
-:root[data-theme="light"] .service-pause{background:color-mix(in srgb,var(--ui-bg,#f5f2ec) 88%,transparent)}
-:root[data-theme="light"] .service-pause-card{box-shadow:0 30px 90px rgba(50,42,30,.18)}
-@media(max-width:520px){.service-pause-card{border-radius:22px;padding:24px 18px}.service-pause-mark{width:54px;height:54px;border-radius:17px}.service-pause-countdown{font-size:29px}}
-
+/* Cloudflare / D1 service pause — luxury maintenance screen */
+.service-pause{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;overflow:hidden;padding:22px;background:radial-gradient(900px 520px at 50% -12%,color-mix(in srgb,var(--ui-gold) 15%,transparent),transparent 68%),linear-gradient(135deg,var(--ui-bg),color-mix(in srgb,var(--ui-bg) 92%,#8b6b32));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.service-pause::before,.service-pause::after{content:"";position:absolute;border:1px solid color-mix(in srgb,var(--ui-gold) 16%,transparent);border-radius:50%;pointer-events:none}
+.service-pause::before{width:min(72vw,720px);height:min(72vw,720px);top:-38vw;right:-18vw;transform:rotate(18deg)}
+.service-pause::after{width:min(58vw,580px);height:min(58vw,580px);bottom:-34vw;left:-16vw}
+.service-pause-orbit{position:absolute;width:min(74vw,680px);height:min(74vw,680px);border:1px solid color-mix(in srgb,var(--ui-gold) 9%,transparent);border-radius:48% 52% 50% 50%;transform:rotate(28deg);pointer-events:none}
+.service-pause-card{position:relative;width:min(570px,100%);padding:clamp(28px,6vw,52px) clamp(20px,6vw,56px);text-align:center;border:1px solid color-mix(in srgb,var(--ui-gold) 34%,var(--ui-line));border-radius:32px;background:linear-gradient(150deg,color-mix(in srgb,var(--ui-surface) 96%,transparent),color-mix(in srgb,var(--ui-surface-2) 94%,transparent));box-shadow:0 36px 110px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.05);isolation:isolate}
+.service-pause-brand{display:grid;justify-items:center;gap:7px;margin-bottom:18px;color:var(--ui-gold-strong);font-size:12px;font-weight:900;letter-spacing:.16em}
+.service-pause-brand img{width:92px;height:92px;object-fit:contain;filter:drop-shadow(0 12px 28px color-mix(in srgb,var(--ui-gold) 20%,transparent))}
+.service-pause-rule{width:76px;height:1px;margin:0 auto 18px;background:linear-gradient(90deg,transparent,var(--ui-gold),transparent)}
+.service-pause-eyebrow{display:inline-block;color:var(--ui-muted);font-size:9px;font-weight:800;letter-spacing:.2em}
+.service-pause-card h2{margin:11px 0 12px;color:var(--ui-text);font-size:clamp(26px,5vw,38px);font-weight:900}
+.service-pause-card p{margin:0 auto 24px;max-width:440px;color:var(--ui-muted);font-size:13px;line-height:2.05}
+.service-pause-time-label{margin-bottom:8px;color:var(--ui-muted);font-size:10px;font-weight:800}
+.service-pause-countdown{margin:0 auto 11px;padding:14px 18px;width:min(330px,100%);border:1px solid color-mix(in srgb,var(--ui-gold) 34%,var(--ui-line));border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--ui-gold) 9%,var(--ui-surface)),var(--ui-surface));color:var(--ui-gold-strong);font:900 clamp(29px,7vw,43px)/1.15 Vazirmatn,Tahoma,Arial,sans-serif;letter-spacing:.08em;font-variant-numeric:tabular-nums;box-shadow:0 14px 38px color-mix(in srgb,var(--ui-gold) 8%,transparent)}
+.service-pause-card small{display:block;min-height:22px;color:var(--ui-muted);line-height:1.9;margin-bottom:22px;font-size:10px}
+.service-pause-card .btn{min-width:155px;min-height:46px;border-radius:14px}
+:root[data-theme="light"] .service-pause{background:radial-gradient(900px 520px at 50% -12%,rgba(190,145,60,.16),transparent 68%),linear-gradient(135deg,#f7f4ee,#eee8dc)}
+:root[data-theme="light"] .service-pause-card{background:linear-gradient(150deg,rgba(255,255,255,.97),rgba(248,244,236,.96));box-shadow:0 36px 100px rgba(64,50,28,.18),inset 0 1px 0 rgba(255,255,255,.9)}
+@media(max-width:520px){.service-pause{padding:14px}.service-pause-card{border-radius:24px;padding:25px 17px}.service-pause-brand img{width:76px;height:76px}.service-pause-card h2{font-size:27px}.service-pause-card p{font-size:12px;margin-bottom:20px}.service-pause-countdown{font-size:29px;padding:13px 10px}.service-pause-card .btn{width:100%}}
 
 /* Store sorting + hybrid pagination */
 .shop-page .gallery-workspace{align-items:start}
