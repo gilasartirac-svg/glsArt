@@ -64,7 +64,7 @@ function showServicePause(reason='cloudflare',message){
  const timed=reason==='cloudflare-limit'||reason==='d1-limit';
  el.querySelector('#service-pause-message').textContent=message||'فروشگاه گیلاس آرت در حال انجام به‌روزرسانی و آماده‌سازی برای ارائه خدمات بهتر است.';
  const countdown=el.querySelector('#service-pause-countdown'),note=el.querySelector('#service-pause-note');
- countdown.hidden=!timed;note.textContent=timed?'فروشگاه پس از پایان شمارش معکوس به‌صورت خودکار دوباره بررسی و فعال می‌شود.':'لطفاً چند لحظه بعد دوباره تلاش کنید.';
+ countdown.hidden=!timed;note.textContent=timed?'بازگشت فروشگاه: ⏱️':'لطفاً چند لحظه بعد دوباره تلاش کنید.';
  const paint=()=>{if(!timed)return;const left=nextUtcReset()-Date.now();countdown.textContent=formatCountdown(left);if(left<=0){clearInterval(servicePauseState.timer);servicePauseState.timer=null;servicePauseState.retryTimer=setTimeout(()=>{if(servicePauseState.active)location.reload()},1200)}};
  clearInterval(servicePauseState.timer);servicePauseState.timer=null;paint();if(timed)servicePauseState.timer=setInterval(paint,1000);
  el.querySelector('#service-pause-retry').onclick=()=>location.reload();
