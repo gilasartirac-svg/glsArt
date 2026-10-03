@@ -77,6 +77,7 @@ const requiredShape=path=>{
  if(path==='/api/health')return d&&d.ok===true&&d.db===true;
  if(/^\/api\/products\?/.test(path)||path==='/api/products')return Array.isArray(d?.items);
  if(path==='/api/categories'||path==='/api/flash-sales')return Array.isArray(d?.items);
+ if(path.startsWith('/api/products/')&&path.endsWith('/view'))return d?.ok===true;
  if(path.startsWith('/api/products/')&&!path.includes('/reviews'))return d?.product&&Array.isArray(d.images)&&Array.isArray(d.attributes)&&Array.isArray(d.categories)&&Array.isArray(d.reviews);
  if(path.startsWith('/api/content?'))return Array.isArray(d?.items);
  if(path.startsWith('/api/content/'))return d?.item&&typeof d.item==='object';
