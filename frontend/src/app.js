@@ -169,6 +169,7 @@ async function home(){const [products,settings,flashData,categoryData]=await Pro
 }
 async function product(slug){
  const d=await api('/api/products/'+encodeURIComponent(slug)),p=d.product||{},images=d.images||[],attributes=d.attributes||[],categories=d.categories||[];
+ try{const key='GilasArtViewed:'+String(p.id||slug);if(!sessionStorage.getItem(key)){sessionStorage.setItem(key,'1');api('/api/products/'+encodeURIComponent(slug)+'/view',{method:'POST'}).catch(()=>{})}}catch{}
  const image=safeUrl(p.image);
  setSeo({title:p.seo_title||p.name+' | گیلاس آرت',description:p.seo_description||p.description,image:image||undefined,jsonLd:{'@context':'https://schema.org','@type':'Product',name:p.name,description:p.description||'',sku:p.sku,image:images.map(x=>safeUrl(x.path)).filter(Boolean),offers:{'@type':'Offer',priceCurrency:'IRR',price:String(p.price_irt),availability:'https://schema.org/InStock',url:location.href}}});
  const mediaItems=images.map((x,i)=>({type:'image',src:safeUrl(x.path),alt:x.alt_text||p.name,index:i})).filter(x=>x.src);
