@@ -68,13 +68,13 @@ jobs:
           D1_WRITE_PAUSE_THRESHOLD=95000
           if [ "$REQUESTS" -ge "$WORKER_PAUSE_THRESHOLD" ]; then
             PAUSED=true
-            MESSAGE="سرویس فروشگاه موقتاً متوقف شده است. درخواست‌های Worker امروز: $REQUESTS از $LIMIT."
+            MESSAGE="فروشگاه گیلاس آرت در حال انجام به‌روزرسانی و آماده‌سازی برای ارائه خدمات بهتر است."
           elif [ "$D1_READS" -ge "$D1_READ_PAUSE_THRESHOLD" ]; then
             PAUSED=true
-            MESSAGE="سرویس فروشگاه موقتاً متوقف شده است. مصرف D1 امروز به آستانه امن خواندن رسیده است: $D1_READS از $D1_READ_LIMIT ردیف."
+            MESSAGE="فروشگاه گیلاس آرت در حال انجام به‌روزرسانی و آماده‌سازی برای ارائه خدمات بهتر است."
           elif [ "$D1_WRITES" -ge "$D1_WRITE_PAUSE_THRESHOLD" ]; then
             PAUSED=true
-            MESSAGE="سرویس فروشگاه موقتاً متوقف شده است. مصرف D1 امروز به آستانه امن نوشتن رسیده است: $D1_WRITES از $D1_WRITE_LIMIT ردیف."
+            MESSAGE="فروشگاه گیلاس آرت در حال انجام به‌روزرسانی و آماده‌سازی برای ارائه خدمات بهتر است."
           else
             PAUSED=false
             MESSAGE="سرویس فروشگاه فعال است."
