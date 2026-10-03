@@ -416,6 +416,22 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  if(u.pathname==='/api/auth/logout'&&req.method==='POST'){if(!requireCsrf(req))return json({error:'forbidden'},403);const sid=cookies(req)['__Host-gs_session'];if(sid)await env.DB.prepare("UPDATE sessions SET revoked_at=datetime('now') WHERE id=?").bind(sid).run();return json({ok:true},200,{'set-cookie':['__Host-gs_session=; Path=/; HttpOnly; Secure; SameSite=None; Partitioned; Max-Age=0','gs_csrf=; Path=/; Secure; SameSite=None; Partitioned; Max-Age=0']})}
  const me=await requireUser(req,env);
  if(u.pathname==='/api/rewards'&&req.method==='GET'){if(!me)return json({error:'unauthorized'},401);return json(await rewardData(env,me));}
+ if(u.pathname==='/api/referrals/apply'&&req.method==='POST'){
+  if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);
+  const b=await body(req),code=String(b.code||'').trim().toUpperCase().slice(0,20);
+  if(!/^GA[A-Z0-9]{8,18}$/.test(code))return json({error:'invalid_referral_code'},400);
+  const ref=await env.DB.prepare('SELECT user_id,code FROM referral_codes WHERE code=?').bind(code).first();
+  if(!ref?.user_id)return json({error:'invalid_referral_code'},400);
+  if(String(ref.user_id)===String(me.id))return json({error:'self_referral_not_allowed'},400);
+  const existing=await env.DB.prepare('SELECT id FROM referrals WHERE referred_user_id=?').bind(me.id).first();
+  if(existing?.id)return json({error:'referral_already_applied'},409);
+  const referralId=uid();
+  const created=await env.DB.prepare('INSERT OR IGNORE INTO referrals(id,referrer_user_id,referred_user_id,referral_code) VALUES(?,?,?,?)').bind(referralId,ref.user_id,me.id,code).run();
+  if(Number(created?.meta?.changes||0)!==1)return json({error:'referral_already_applied'},409);
+  const rewarded=await awardPoints(env,ref.user_id,30,'referral_signup','user',me.id,'ثبت کد دعوت توسط دوست');
+  if(rewarded)await env.DB.prepare('INSERT INTO user_notifications(id,user_id,type,title,message,reference_id) VALUES(?,?,?,?,?,?)').bind(uid(),ref.user_id,'referral_reward','🎁 خبر خوب از باشگاه امتیاز','دوستت همین الان کد دعوت شما را وارد کرد و ۳۰ امتیاز برایت شارژ شد.',me.id).run();
+  return json({ok:true,rewarded,points:rewarded?30:0});
+ }
  if(u.pathname==='/api/notifications'&&req.method==='GET'){if(!me)return json({error:'unauthorized'},401);const rows=(await env.DB.prepare("SELECT id,type,title,message,reference_id,created_at FROM user_notifications WHERE user_id=? AND read_at IS NULL ORDER BY created_at DESC LIMIT 10").bind(me.id).all()).results||[];if(rows.length)await env.DB.prepare("UPDATE user_notifications SET read_at=datetime('now') WHERE user_id=? AND read_at IS NULL AND id IN (SELECT id FROM user_notifications WHERE user_id=? AND read_at IS NULL ORDER BY created_at DESC LIMIT 10)").bind(me.id,me.id).run();return json({items:rows});}
  if(u.pathname==='/api/rewards/redeem'&&req.method==='POST'){
   if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);
