@@ -82,8 +82,7 @@ jobs:
         run: npx wrangler d1 migrations apply gilasartdatabase --remote
 
       - name: Sync admin bootstrap secret
-        if: steps.service.outputs.paused != 'true'
-        if: env.ADMIN_BOOTSTRAP_MOBILE != ''
+        if: steps.service.outputs.paused != 'true' && env.ADMIN_BOOTSTRAP_MOBILE != ''
         run: printf '%s' "$ADMIN_BOOTSTRAP_MOBILE" | npx wrangler secret put ADMIN_BOOTSTRAP_MOBILE --config wrangler.toml
 
       - name: Deploy Worker
