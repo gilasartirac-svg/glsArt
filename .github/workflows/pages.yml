@@ -19,7 +19,6 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,52 +46,11 @@ jobs:
         run: |
           set -euo pipefail
           changed=$(git show --format= --name-only "$GITHUB_SHA")
-          echo "$changed"
           paused=$(node -e "const d=require('./frontend/public/service-status.json');process.stdout.write(String(d.paused===true))")
-          blocked=$(printf '%s\n' "$changed" | grep -Ev '^(frontend/public/service-status\.json|\.github/workflows/cloudflare-usage-guard\.yml|\.github/workflows/production-quality-gate\.yml)
-
-      - name: Verify Worker deployment for this commit
-        if: steps.gate.outputs.emergency != 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          status=missing; conclusion=failure
-          for i in $(seq 1 30); do
-            run=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/actions/workflows/worker-deploy.yml/runs?head_sha=${{ github.sha }}&per_page=1")
-            status=$(echo "$run" | jq -r '.workflow_runs[0].status // "missing"')
-            conclusion=$(echo "$run" | jq -r '.workflow_runs[0].conclusion // ""')
-            echo "worker status=$status conclusion=$conclusion"
-            if [ "$status" = completed ]; then break; fi
-            sleep 10
-          done
-          test "$status" = completed
-          test "$conclusion" = success
-
-      - name: Verify live API before publishing Pages
-        if: steps.gate.outputs.emergency != 'true'
-        run: |
-          set -euo pipefail
-          curl -fsS --retry 3 --retry-all-errors https://gilasartworker.gilasart-ir-ac.workers.dev/api/health | tee /tmp/health.json
-          node -e "const d=require('/tmp/health.json');if(d.ok!==true||d.db!==true)process.exit(1)"
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
-      - name: Build frontend
-        run: npm run build
-
-      - name: Upload production artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: dist
-
-      - name: Deploy Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
- || true)
+          blocked=$(printf '%s\n' "$changed" | grep -Ev '^(frontend/public/service-status\.json|\.github/workflows/cloudflare-usage-guard\.yml|\.github/workflows/production-quality-gate\.yml)$' || true)
           if [ "$paused" = "true" ] || [ -z "$blocked" ]; then
             echo "emergency=true" >> "$GITHUB_OUTPUT"
-            echo "Emergency fail-closed Pages deployment."
+            echo "Fail-closed static deployment: service is paused or only guard files changed."
           else
             echo "emergency=false" >> "$GITHUB_OUTPUT"
           fi
@@ -121,6 +79,7 @@ jobs:
           set -euo pipefail
           curl -fsS --retry 3 --retry-all-errors https://gilasartworker.gilasart-ir-ac.workers.dev/api/health | tee /tmp/health.json
           node -e "const d=require('/tmp/health.json');if(d.ok!==true||d.db!==true)process.exit(1)"
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
