@@ -18,6 +18,14 @@ jobs:
       ADMIN_BOOTSTRAP_MOBILE: ${{ secrets.ADMIN_BOOTSTRAP_MOBILE }}
     steps:
       - uses: actions/checkout@v4
+      - name: Read service deployment state
+        id: service
+        run: |
+          set -euo pipefail
+          paused=$(node -e "const d=require('./frontend/public/service-status.json');process.stdout.write(String(d.paused===true))")
+          echo "paused=$paused"
+          echo "paused=$paused" >> "$GITHUB_OUTPUT"
+
 
       - uses: actions/setup-node@v4
         with:
@@ -33,12 +41,14 @@ jobs:
           test -n "$ADMIN_BOOTSTRAP_MOBILE" || echo "::warning::ADMIN_BOOTSTRAP_MOBILE is not configured; existing DB admin assignments remain unchanged"
 
       - name: Adopt existing D1 baseline migration
+        if: steps.service.outputs.paused != 'true'
         run: |
           set -euo pipefail
           sql="CREATE TABLE IF NOT EXISTS d1_migrations(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT UNIQUE,applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL); INSERT OR IGNORE INTO d1_migrations(name) SELECT '0001_initial.sql' WHERE (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('users','sessions','otp_challenges','roles','permissions','user_roles','categories','products','product_images','inventory','addresses','carts','cart_items','orders','order_items','payments','payment_attempts','favorites','reviews','coupons','coupon_usages','audit_logs'))>=22 AND NOT EXISTS (SELECT 1 FROM d1_migrations WHERE name='0001_initial.sql');"
           for attempt in 1 2 3 4 5; do npx wrangler d1 execute gilasartdatabase --remote --command="$sql" --json && break; echo "D1 busy/error, retry $attempt"; sleep 5; done
 
       - name: Adopt existing order sample flag
+        if: steps.service.outputs.paused != 'true'
         run: |
           set -euo pipefail
           for attempt in 1 2 3 4 5; do npx wrangler d1 execute gilasartdatabase --remote --command="PRAGMA table_info(orders)" --json > /tmp/orders-schema.json && break; sleep 5; done
@@ -49,6 +59,7 @@ jobs:
           fi
 
       - name: Reconcile legacy review compatibility migration
+        if: steps.service.outputs.paused != 'true'
         run: |
           set -euo pipefail
           for attempt in 1 2 3 4 5; do npx wrangler d1 execute gilasartdatabase --remote --command="PRAGMA table_info(reviews)" --json > /tmp/reviews-schema.json && break; sleep 5; done
@@ -59,6 +70,7 @@ jobs:
           fi
 
       - name: Reconcile existing core schema migrations
+        if: steps.service.outputs.paused != 'true'
         run: |
           set -euo pipefail
           for name in 0002_hardening.sql 0003_admin_enterprise.sql 0004_admin_audit_upgrade.sql 0005_permission_matrix.sql 0006_checkout_idempotency.sql 0007_catalog_seo_seed.sql 0008_admin_bootstrap_and_sample_data.sql 0009_stock_reservations.sql; do
@@ -66,11 +78,14 @@ jobs:
           done
 
       - name: Apply remote D1 migrations
+        if: steps.service.outputs.paused != 'true'
         run: npx wrangler d1 migrations apply gilasartdatabase --remote
 
       - name: Sync admin bootstrap secret
+        if: steps.service.outputs.paused != 'true'
         if: env.ADMIN_BOOTSTRAP_MOBILE != ''
         run: printf '%s' "$ADMIN_BOOTSTRAP_MOBILE" | npx wrangler secret put ADMIN_BOOTSTRAP_MOBILE --config wrangler.toml
 
       - name: Deploy Worker
+        if: steps.service.outputs.paused != 'true'
         run: npx wrangler deploy --config wrangler.toml
