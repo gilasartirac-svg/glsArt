@@ -1618,7 +1618,7 @@ main#main-content{min-height:60vh}
 /* Cloudflare / D1 service pause — Japanese sakura scene */
 .service-pause{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;overflow:hidden;padding:18px;background:#17110f;color:var(--ui-text);isolation:isolate}
 .service-pause::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(9,9,12,.22),rgba(9,7,8,.72) 76%,rgba(5,5,7,.90)),radial-gradient(circle at 50% 30%,transparent 0 28%,rgba(0,0,0,.28) 78%);pointer-events:none}
-.service-pause-scene{position:absolute;inset:-7%;z-index:0;overflow:hidden;pointer-events:none;background-image:url("https://download.pakutaso.com/shared/img/thumb/TKL_R6_8651_TP_V.jpg");background-size:cover;background-position:center 52%;filter:saturate(.88) contrast(1.02);animation:serviceSakuraZoom 28s ease-in-out infinite alternate}
+.service-pause-scene{position:absolute;inset:-7%;z-index:0;overflow:hidden;pointer-events:none;background-image:url("./assets/sakura-maintenance.svg");background-size:cover;background-position:center 52%;filter:saturate(.88) contrast(1.02);animation:serviceSakuraZoom 28s ease-in-out infinite alternate}
 .service-pause-scene::before{content:"";position:absolute;inset:-5%;background-image:linear-gradient(90deg,rgba(8,6,8,.32),transparent 34%,transparent 66%,rgba(8,6,8,.30));animation:serviceSakuraPan 22s ease-in-out infinite alternate}
 .service-pause-scene::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 36%,transparent 0 34%,rgba(4,4,6,.22) 70%,rgba(3,3,5,.58) 100%);mix-blend-mode:multiply}
 .service-pause-petals{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none}
