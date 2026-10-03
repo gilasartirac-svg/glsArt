@@ -20,8 +20,12 @@ jobs:
       - name: Validate Worker module
         run: cp worker/src/index.js /tmp/gilasart-worker.mjs && node --check /tmp/gilasart-worker.mjs
       - name: Validate service status document
-        run: node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('frontend/public/service-status.json','utf8'));if(typeof d.paused!=='boolean'||!Number.isFinite(Number(d.requests))||!Number.isFinite(Number(d.limit))||!d.checkedAt)process.exit(1)"
+        id: service
+        run: |
+          node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('frontend/public/service-status.json','utf8'));if(typeof d.paused!=='boolean'||!Number.isFinite(Number(d.requests))||!Number.isFinite(Number(d.limit))||!d.checkedAt)process.exit(1)"
+          echo "paused=$(node -e "const d=require('./frontend/public/service-status.json');process.stdout.write(String(d.paused===true))")" >> "$GITHUB_OUTPUT"
       - name: Wait for Worker deployment of this commit
+        if: steps.service.outputs.paused != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -38,6 +42,7 @@ jobs:
           test "$status" = completed
           test "$conclusion" = success
       - name: Smoke test production API
+        if: steps.service.outputs.paused != 'true'
         env:
           API: https://gilasartworker.gilasart-ir-ac.workers.dev
           ORIGIN: https://gilasartirac-svg.github.io
