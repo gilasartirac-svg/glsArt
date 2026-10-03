@@ -8,5 +8,20 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0b0b0d",
-  "theme_color": "#0b0b0d"
+  "theme_color": "#0b0b0d",
+  "id": "./",
+  "description": "فروشگاه آنلاین گیلاس آرت؛ گالری آثار هنری و تابلوهای دکوراتیو.",
+  "categories": [
+    "shopping",
+    "art",
+    "lifestyle"
+  ],
+  "icons": [
+    {
+      "src": "invoice/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
