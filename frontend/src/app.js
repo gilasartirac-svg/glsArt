@@ -82,6 +82,7 @@ const requiredShape=path=>{
  if(path.startsWith('/api/content/'))return d?.item&&typeof d.item==='object';
  if(path==='/api/settings')return d?.settings&&typeof d.settings==='object';
  if(path==='/api/site-rules')return d?.item&&typeof d.item==='object';
+ if(path==='/api/notifications')return Array.isArray(d?.items);
  return true;
 };
 if(!requiredShape(path)){showServicePause('connection','داده کامل از پایگاه داده دریافت نشد. برای جلوگیری از نمایش ناقص، این صفحه موقتاً متوقف شده است.');throw new Error('داده ناقص از سرویس اصلی دریافت شد')}
