@@ -1,11 +1,11 @@
 {
-  "paused": false,
-  "requests": 1,
-  "d1RowsRead": 0,
-  "d1RowsWritten": 0,
+  "paused": true,
+  "requests": 234,
+  "d1RowsRead": 11540170,
+  "d1RowsWritten": 138,
   "limit": 100000,
   "d1ReadLimit": 5000000,
   "d1WriteLimit": 100000,
-  "checkedAt": "2026-10-03T00:03:57Z",
-  "message": "سرویس فروشگاه فعال است."
+  "checkedAt": "2026-10-03T02:22:24Z",
+  "message": "سرویس فروشگاه موقتاً متوقف شده است. مصرف D1 امروز به آستانه امن خواندن رسیده است: 11540170 از 5000000 ردیف."
 }
