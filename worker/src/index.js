@@ -407,6 +407,13 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
   const r=await env.DB.prepare(sql).bind(...args).all();
   return json({items:r.results||[],limit,offset,sort});
  }
+ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/view')&&req.method==='POST'){
+  const slug=decodeURIComponent(u.pathname.split('/').slice(-2,-1)[0]||'');
+  const p=await env.DB.prepare('SELECT id FROM products WHERE slug=? AND active=1').bind(slug).first();
+  if(!p)return json({error:'not_found'},404);
+  await env.DB.prepare('UPDATE products SET view_count=COALESCE(view_count,0)+1 WHERE id=?').bind(p.id).run();
+  return json({ok:true});
+ }
  if(u.pathname.startsWith('/api/products/')&&req.method==='GET'){const slug=decodeURIComponent(u.pathname.split('/').pop());const p=await env.DB.prepare('SELECT p.*,c.name category_name,pi.path image FROM products p LEFT JOIN categories c ON c.id=p.category_id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.slug=? AND p.active=1').bind(slug).first();if(!p)return json({error:'not_found'},404);const images=(await env.DB.prepare('SELECT path,alt_text,sort_order,is_primary FROM product_images WHERE product_id=? ORDER BY sort_order,is_primary DESC').bind(p.id).all()).results||[];const attributes=await loadProductAttributes(env,p.id);const reviews=await env.DB.prepare(`SELECT r.id,r.rating,r.body,r.created_at,u.name,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='like'),0) like_count,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='dislike'),0) dislike_count FROM reviews r JOIN users u ON u.id=r.user_id WHERE r.product_id=? AND r.approved=1 ORDER BY r.created_at DESC`).bind(p.id).all();const categories=(await env.DB.prepare('SELECT c.id,c.slug,c.name FROM product_category_assignments pca JOIN categories c ON c.id=pca.category_id WHERE pca.product_id=? AND c.active=1 ORDER BY pca.sort_order,c.name').bind(p.id).all()).results||[];return json({product:p,images,attributes,reviews:reviews.results||[],categories,quantityDiscountTiers:quantityDiscountTiers()})}
  if(u.pathname==='/api/flash-sales'&&req.method==='GET'){const r=await env.DB.prepare("SELECT p.id,p.slug,p.sku,p.name,p.description,p.price_irt,p.flash_sale_price_irt,p.flash_sale_ends_at,pi.path image FROM products p LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.active=1 AND p.flash_sale_active=1 AND p.flash_sale_ends_at IS NOT NULL AND julianday(p.flash_sale_ends_at)>julianday('now') ORDER BY p.flash_sale_ends_at ASC,p.created_at DESC LIMIT 20").all();return json({items:r.results||[]})}
 
