@@ -1766,3 +1766,199 @@ main#main-content{min-height:60vh}
 
 /* Mobile/PWA release readiness */
 .mobile-update-hint{position:fixed;right:18px;left:18px;bottom:18px;z-index:120;display:flex;align-items:center;gap:14px;padding:15px 16px;border:1px solid var(--ga-line);border-radius:18px;background:color-mix(in srgb,var(--ga-surface) 94%,transparent);box-shadow:0 20px 60px rgba(0,0,0,.28);backdrop-filter:blur(18px);direction:rtl}.mobile-update-hint>div{flex:1;min-width:0;display:grid;gap:2px}.mobile-update-hint strong{font-size:14px;color:var(--ga-text)}.mobile-update-hint span{font-size:12px;color:var(--ga-muted)}.mobile-update-close{width:34px;height:34px;border:1px solid var(--ga-line);border-radius:50%;background:transparent;color:var(--ga-muted);font-size:20px;line-height:1}.native-update-hint{border-color:color-mix(in srgb,var(--ga-gold) 55%,var(--ga-line))}@media(max-width:600px){.mobile-update-hint{right:10px;left:10px;bottom:max(10px,env(safe-area-inset-bottom));padding:13px;gap:9px;align-items:flex-end}.mobile-update-hint .btn{padding:8px 11px;white-space:nowrap}.mobile-update-hint span{font-size:11px}}
+
+
+/* ============================================================
+   GilasArt — FINAL THEME CONSISTENCY PATCH
+   One semantic token system for light/dark; fixes legacy hard-coded
+   dark surfaces that were overriding the theme on later components.
+   ============================================================ */
+
+:root{
+  --theme-bg:#0b0b0d;
+  --theme-surface:#121216;
+  --theme-surface-2:#18181d;
+  --theme-surface-3:#202027;
+  --theme-text:#f7f3eb;
+  --theme-muted:#aaa49b;
+  --theme-line:rgba(255,255,255,.09);
+  --theme-soft:rgba(255,255,255,.035);
+  --theme-overlay:rgba(0,0,0,.72);
+  --theme-input:#0f0f13;
+}
+
+:root[data-theme="light"]{
+  --theme-bg:#f6f3ed;
+  --theme-surface:#fffdfa;
+  --theme-surface-2:#f1ede5;
+  --theme-surface-3:#e8e1d6;
+  --theme-text:#25221e;
+  --theme-muted:#6f6a61;
+  --theme-line:rgba(54,45,32,.13);
+  --theme-soft:rgba(54,45,32,.035);
+  --theme-overlay:rgba(32,27,21,.58);
+  --theme-input:#fffefa;
+}
+
+/* Native controls follow the active user-selected theme. */
+html[data-theme="dark"]{color-scheme:dark}
+html[data-theme="light"]{color-scheme:light}
+html,body{background-color:var(--theme-bg);color:var(--theme-text)}
+body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--ui-gold) 12%,transparent),transparent 65%),var(--theme-bg)}
+
+/* Shared surfaces */
+.card,.panel,.chart-box,
+.product-card,.product-item,
+.dashboard-panel,.dashboard-kpi,
+.category-card,.home-intro,
+.cms-rich,.cms-card,.cms-contact-aside,
+.filter-panel,.product-gallery,
+.product-info .panel,.cart-items-panel,.cart-section,.cart-trust,
+.customer-order-card,.invoice-settings,
+.flash-section,.support-hero,
+.admin-layout .card,.admin-layout .panel,.admin-layout .chart-box{
+  color:var(--theme-text);
+  border-color:var(--theme-line);
+}
+
+.form input,.form select,.form textarea,.search,
+.product-option select,.data-grid-search,
+.cart-coupon input,.cart-address-grid input,.cart-address-grid textarea,
+.admin-layout input,.admin-layout textarea,.admin-layout select,
+.attribute-option-row input,.inline-option-form input:not([type=checkbox]),
+.product-option select{
+  background:var(--theme-input)!important;
+  color:var(--theme-text)!important;
+  border-color:var(--theme-line)!important;
+}
+
+.form input::placeholder,.form textarea::placeholder,.search::placeholder,
+.cart-coupon input::placeholder,.cart-address-grid input::placeholder,
+.cart-address-grid textarea::placeholder{color:var(--theme-muted)}
+
+.notice,.pill,.cart-coupon,.cart-mobile-field,.data-grid-toolbar,
+.otp-loading,.dashboard-order,.dashboard-stock,.order-detail-grid>div,
+.order-item,.order-history-row,.customer-order-summary>div{
+  background:color-mix(in srgb,var(--theme-surface-2) 78%,transparent);
+  color:var(--theme-text);
+  border-color:var(--theme-line);
+}
+
+/* Header / navigation */
+.top,.admin-header{
+  background:color-mix(in srgb,var(--theme-bg) 90%,transparent);
+  border-color:var(--theme-line);
+}
+.theme-toggle,.iconbtn,.mobile-menu-toggle{
+  background:var(--theme-surface);
+  color:var(--theme-text);
+  border-color:var(--theme-line);
+}
+
+/* Mobile admin drawer had a hard-coded dark !important background. */
+.admin-layout .admin-sidebar#admin-mobile-drawer{
+  background:var(--theme-surface)!important;
+  color:var(--theme-text)!important;
+  border-color:var(--theme-line)!important;
+}
+.admin-layout .admin-sidebar#admin-mobile-drawer a,
+.admin-layout .admin-sidebar#admin-mobile-drawer span{color:var(--theme-text)}
+.admin-layout .admin-sidebar#admin-mobile-drawer .admin-nav-label{color:var(--theme-muted)}
+.admin-layout .admin-sidebar#admin-mobile-drawer .admin-nav-icon{color:var(--theme-muted)}
+.admin-layout .admin-sidebar#admin-mobile-drawer a:hover{
+  background:color-mix(in srgb,var(--ui-gold) 9%,var(--theme-surface));
+}
+.admin-mobile-backdrop{background:var(--theme-overlay)}
+
+/* Legacy dark-only overlays / widgets */
+.media-picker-modal{background:var(--theme-overlay)}
+.media-picker-panel{background:var(--theme-surface);color:var(--theme-text);border-color:color-mix(in srgb,var(--ui-gold) 35%,var(--theme-line))}
+.media-pick{background:var(--theme-surface-2);color:var(--theme-text);border-color:var(--theme-line)}
+.media-pick img{background:var(--theme-surface)}
+
+#global-progress{
+  background:color-mix(in srgb,var(--theme-bg) 94%,transparent);
+}
+#global-progress b{color:var(--ui-gold-strong)}
+
+.gilasart-captcha .math-captcha{
+  background:color-mix(in srgb,var(--theme-surface-2) 82%,transparent);
+  border-color:var(--theme-line);
+  color:var(--theme-text);
+}
+.gilasart-captcha .math-answer{
+  background:var(--theme-input)!important;
+  color:var(--theme-text)!important;
+  border-color:var(--theme-line)!important;
+}
+
+/* Welcome screen */
+.welcome-screen{
+  background:
+    radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--ui-gold) 12%,transparent),transparent 34%),
+    linear-gradient(145deg,var(--theme-bg),var(--theme-surface-2) 55%,var(--theme-bg));
+  color:var(--theme-text);
+}
+.welcome-card{
+  background:color-mix(in srgb,var(--theme-surface) 88%,transparent);
+  border-color:color-mix(in srgb,var(--ui-gold) 22%,var(--theme-line));
+}
+.welcome-card p{color:var(--theme-muted)}
+.welcome-progress{background:var(--theme-soft)}
+.welcome-card small{color:var(--theme-muted)}
+
+/* Hero/gallery captions intentionally remain readable in both themes. */
+.home-hero-art-caption,.shop-page-visual>span,.cms-page-visual>span{
+  color:#fff;
+}
+:root[data-theme="light"] .home-hero-art-caption,
+:root[data-theme="light"] .shop-page-visual>span,
+:root[data-theme="light"] .cms-page-visual>span{
+  background:rgba(35,30,24,.62);
+}
+
+/* Cart had several permanent dark gradients. */
+.cart-items-panel,.cart-section,.cart-trust{
+  background:linear-gradient(145deg,var(--theme-surface),var(--theme-surface-2));
+}
+.cart-checkout-bar{
+  background:linear-gradient(135deg,color-mix(in srgb,var(--ui-gold) 12%,transparent),var(--theme-surface));
+}
+.cart-product-thumb{background:var(--theme-surface-2)}
+.cart-trust-item{color:var(--theme-muted)}
+
+/* Light theme: keep the artistic hero dark where the artwork itself needs contrast,
+   but let the surrounding chrome/surfaces follow the light palette. */
+:root[data-theme="light"] .hero-card{
+  background:linear-gradient(145deg,#fffdfa,#eee8dc);
+  color:var(--theme-text);
+}
+:root[data-theme="light"] .shop-hero{
+  color:var(--theme-text);
+}
+:root[data-theme="light"] .product-card-overlay{
+  background:rgba(35,30,24,.68);
+  color:#fff;
+}
+
+/* Service pause: keep the sakura scene atmospheric while the card itself follows theme. */
+:root[data-theme="light"] .service-pause-card{
+  background:linear-gradient(145deg,rgba(255,253,250,.94),rgba(241,237,229,.94));
+  color:var(--theme-text);
+  border-color:rgba(100,76,35,.18);
+  box-shadow:0 30px 90px rgba(65,48,25,.18);
+}
+:root[data-theme="light"] .service-pause-card p,
+:root[data-theme="light"] .service-pause-note{color:var(--theme-muted)}
+:root[data-theme="light"] .service-pause-time-label{color:var(--theme-muted)}
+:root[data-theme="light"] .service-pause-countdown{
+  background:rgba(255,253,250,.82);
+  color:#6f511c;
+  border-color:rgba(155,116,45,.25);
+}
+:root[data-theme="light"] .service-pause-rule{background:linear-gradient(90deg,transparent,rgba(155,116,45,.45),transparent)}
+
+/* Accessibility: don't animate the entire page during a theme change. */
+@media(prefers-reduced-motion:reduce){
+  body{transition:none!important}
+}
