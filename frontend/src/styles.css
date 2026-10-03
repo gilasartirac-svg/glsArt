@@ -1616,13 +1616,21 @@ main#main-content{min-height:60vh}
 
 
 /* Cloudflare / D1 service pause — luxury maintenance screen */
-.service-pause{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;overflow:hidden;padding:22px;background:radial-gradient(900px 520px at 50% -12%,color-mix(in srgb,var(--ui-gold) 15%,transparent),transparent 68%),linear-gradient(135deg,var(--ui-bg),color-mix(in srgb,var(--ui-bg) 92%,#8b6b32));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-.service-pause::before,.service-pause::after{content:"";position:absolute;border:1px solid color-mix(in srgb,var(--ui-gold) 16%,transparent);border-radius:50%;pointer-events:none}
-.service-pause::before{width:min(72vw,720px);height:min(72vw,720px);top:-38vw;right:-18vw;transform:rotate(18deg)}
-.service-pause::after{width:min(58vw,580px);height:min(58vw,580px);bottom:-34vw;left:-16vw}
-.service-pause-orbit{position:absolute;width:min(74vw,680px);height:min(74vw,680px);border:1px solid color-mix(in srgb,var(--ui-gold) 9%,transparent);border-radius:48% 52% 50% 50%;transform:rotate(28deg);pointer-events:none}
-.service-pause-card{position:relative;width:min(570px,100%);padding:clamp(28px,6vw,52px) clamp(20px,6vw,56px);text-align:center;border:1px solid color-mix(in srgb,var(--ui-gold) 34%,var(--ui-line));border-radius:32px;background:linear-gradient(150deg,color-mix(in srgb,var(--ui-surface) 96%,transparent),color-mix(in srgb,var(--ui-surface-2) 94%,transparent));box-shadow:0 36px 110px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.05);isolation:isolate}
-.service-pause-brand{display:grid;justify-items:center;gap:7px;margin-bottom:18px;color:var(--ui-gold-strong);font-size:12px;font-weight:900;letter-spacing:.16em}
+.service-pause{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;overflow:hidden;padding:22px;background:#050711;color:var(--ui-text);isolation:isolate}
+.service-pause::before{content:"";position:absolute;inset:-35%;z-index:-3;background:radial-gradient(circle at 20% 25%,rgba(217,164,65,.16),transparent 18%),radial-gradient(circle at 78% 72%,rgba(91,107,185,.18),transparent 22%),radial-gradient(circle at 50% 45%,rgba(255,255,255,.035),transparent 34%);animation:serviceGalaxyDrift 22s ease-in-out infinite alternate}
+.service-pause::after{content:"";position:absolute;inset:0;z-index:-2;background-image:radial-gradient(circle,rgba(255,255,255,.9) 0 1px,transparent 1.5px),radial-gradient(circle,rgba(217,164,65,.7) 0 1px,transparent 1.6px);background-size:97px 113px,173px 151px;background-position:13px 29px,61px 83px;opacity:.34;animation:serviceStarsMove 28s linear infinite}
+.service-pause-galaxy{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.service-pause-galaxy::before{content:"";position:absolute;width:min(1100px,150vw);height:min(1100px,150vw);left:50%;top:50%;transform:translate(-50%,-50%) rotate(-18deg);border-radius:50%;background:conic-gradient(from 20deg,transparent 0 16%,rgba(217,164,65,.04) 24%,rgba(142,113,184,.16) 33%,transparent 45%,rgba(255,255,255,.055) 56%,transparent 70%,rgba(217,164,65,.08) 82%,transparent 92%);filter:blur(13px);animation:serviceGalaxySpin 55s linear infinite}
+.service-pause-galaxy::after{content:"";position:absolute;width:min(620px,90vw);height:min(620px,90vw);left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse at center,rgba(255,255,255,.055),rgba(217,164,65,.035) 22%,transparent 62%);box-shadow:0 0 90px rgba(217,164,65,.08);animation:serviceGalaxyPulse 7s ease-in-out infinite}
+.service-pause-galaxy i{position:absolute;display:block;width:3px;height:3px;border-radius:50%;background:#fff;box-shadow:0 0 10px rgba(255,255,255,.8);opacity:.65}
+.service-pause-galaxy i:nth-child(1){left:14%;top:24%;animation:serviceStarFloat 9s ease-in-out infinite}
+.service-pause-galaxy i:nth-child(2){left:83%;top:18%;width:2px;height:2px;animation:serviceStarFloat 12s ease-in-out -3s infinite}
+.service-pause-galaxy i:nth-child(3){left:75%;top:81%;animation:serviceStarFloat 10s ease-in-out -5s infinite}
+.service-pause-galaxy i:nth-child(4){left:19%;top:76%;width:2px;height:2px;animation:serviceStarFloat 11s ease-in-out -7s infinite}
+.service-pause-galaxy i:nth-child(5){left:57%;top:12%;width:2px;height:2px;animation:serviceStarFloat 8s ease-in-out -2s infinite}
+.service-pause-orbit{position:absolute;width:min(74vw,680px);height:min(74vw,680px);border:1px solid rgba(217,164,65,.10);border-radius:48% 52% 50% 50%;transform:rotate(28deg);pointer-events:none;animation:serviceOrbitFloat 18s ease-in-out infinite}
+.service-pause-card{position:relative;width:min(570px,100%);padding:clamp(28px,6vw,52px) clamp(20px,6vw,56px);text-align:center;border:1px solid color-mix(in srgb,var(--ui-gold) 34%,var(--ui-line));border-radius:32px;background:linear-gradient(150deg,color-mix(in srgb,var(--ui-surface) 96%,transparent),color-mix(in srgb,var(--ui-surface-2) 94%,transparent));box-shadow:0 36px 110px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);isolation:isolate}
+.service-pause-brand{display:grid;justify-items:center;gap:7px;margin-bottom:18px;color:var(--ui-gold-strong);font-size:12px;font-weight:900;letter-spacing:.08em}
 .service-pause-brand img{width:92px;height:92px;object-fit:contain;filter:drop-shadow(0 12px 28px color-mix(in srgb,var(--ui-gold) 20%,transparent))}
 .service-pause-rule{width:76px;height:1px;margin:0 auto 18px;background:linear-gradient(90deg,transparent,var(--ui-gold),transparent)}
 .service-pause-eyebrow{display:inline-block;color:var(--ui-muted);font-size:9px;font-weight:800;letter-spacing:.2em}
@@ -1632,10 +1640,19 @@ main#main-content{min-height:60vh}
 .service-pause-countdown{margin:0 auto 11px;padding:14px 18px;width:min(330px,100%);border:1px solid color-mix(in srgb,var(--ui-gold) 34%,var(--ui-line));border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--ui-gold) 9%,var(--ui-surface)),var(--ui-surface));color:var(--ui-gold-strong);font:900 clamp(29px,7vw,43px)/1.15 Vazirmatn,Tahoma,Arial,sans-serif;letter-spacing:.08em;font-variant-numeric:tabular-nums;box-shadow:0 14px 38px color-mix(in srgb,var(--ui-gold) 8%,transparent)}
 .service-pause-card small{display:block;min-height:22px;color:var(--ui-muted);line-height:1.9;margin-bottom:22px;font-size:10px}
 .service-pause-card .btn{min-width:155px;min-height:46px;border-radius:14px}
-:root[data-theme="light"] .service-pause{background:radial-gradient(900px 520px at 50% -12%,rgba(190,145,60,.16),transparent 68%),linear-gradient(135deg,#f7f4ee,#eee8dc)}
-:root[data-theme="light"] .service-pause-card{background:linear-gradient(150deg,rgba(255,255,255,.97),rgba(248,244,236,.96));box-shadow:0 36px 100px rgba(64,50,28,.18),inset 0 1px 0 rgba(255,255,255,.9)}
+@keyframes serviceGalaxyDrift{0%{transform:translate3d(-2%,0,0) scale(1)}100%{transform:translate3d(2%,-2%,0) scale(1.08)}}
+@keyframes serviceStarsMove{from{background-position:13px 29px,61px 83px}to{background-position:180px 210px,-120px -160px}}
+@keyframes serviceGalaxySpin{to{transform:translate(-50%,-50%) rotate(342deg)}}
+@keyframes serviceGalaxyPulse{0%,100%{opacity:.65;transform:translate(-50%,-50%) scale(.96)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}}
+@keyframes serviceStarFloat{0%,100%{transform:translate3d(0,0,0);opacity:.35}50%{transform:translate3d(10px,-16px,0);opacity:1}}
+@keyframes serviceOrbitFloat{0%,100%{transform:rotate(28deg) scale(.98)}50%{transform:rotate(34deg) scale(1.02)}}
+@media(prefers-reduced-motion:reduce){.service-pause::before,.service-pause::after,.service-pause-galaxy::before,.service-pause-galaxy::after,.service-pause-galaxy i,.service-pause-orbit{animation:none}}
+:root[data-theme="light"] .service-pause{background:#f2eee6}
+:root[data-theme="light"] .service-pause::before{opacity:.65}
+:root[data-theme="light"] .service-pause::after{opacity:.18}
+:root[data-theme="light"] .service-pause-card{background:linear-gradient(150deg,rgba(255,255,255,.96),rgba(248,244,236,.94));box-shadow:0 36px 100px rgba(64,50,28,.20),inset 0 1px 0 rgba(255,255,255,.9)}
 @media(max-width:520px){.service-pause{padding:14px}.service-pause-card{border-radius:24px;padding:25px 17px}.service-pause-brand img{width:76px;height:76px}.service-pause-card h2{font-size:27px}.service-pause-card p{font-size:12px;margin-bottom:20px}.service-pause-countdown{font-size:29px;padding:13px 10px}.service-pause-card .btn{width:100%}}
-
+ 
 /* Store sorting + hybrid pagination */
 .shop-page .gallery-workspace{align-items:start}
 .sort-field{display:grid;gap:7px;margin:14px 0}
