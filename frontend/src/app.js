@@ -52,7 +52,43 @@ function progressEnd(){
   };
   requestAnimationFrame(finish);
 }
-window.GilasArtProgress={start:progressStart,end:progressEnd};
+window.GilasArtProgress={start:progressStart,end:progressEnd};window.GilasArtMobile={
+ platform:()=>{try{if(window.Capacitor?.getPlatform)return window.Capacitor.getPlatform();}catch{}const u=navigator.userAgent||'';return /iPad|iPhone|iPod/.test(u)?'ios':/Android/i.test(u)?'android':'web'},
+ async checkRelease(){
+  try{
+   const root=location.pathname.includes('/glsArt')?'/glsArt/':'/';
+   const r=await fetch(root+'mobile-release.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;
+   const d=await r.json();if(!d||typeof d!=='object'||!d.web)return null;
+   const current=String(window.GILASART_APP_VERSION||'');const latest=String(d.web.version||'');
+   if(current&&latest&&current!==latest)this.showWebUpdate(latest);
+   const p=this.platform(),native=d[p];
+   if(native?.available&&native.url)this.showNativeUpdate(p,native);
+   return d;
+  }catch{return null}
+ },
+ showWebUpdate(version){
+  if(document.querySelector('#mobile-update-hint'))return;
+  const el=document.createElement('aside');el.id='mobile-update-hint';el.className='mobile-update-hint';el.setAttribute('role','status');el.innerHTML='<div><strong>نسخه جدید گیلاس آرت آماده است</strong><span>برای دریافت آخرین بهبودها، نسخه جدید را بارگذاری کنید.</span></div><button type="button" class="btn primary" data-action="reload">به‌روزرسانی</button><button type="button" class="mobile-update-close" aria-label="بستن">×</button>';
+  document.body.appendChild(el);el.querySelector('[data-action="reload"]').onclick=()=>location.reload();el.querySelector('.mobile-update-close').onclick=()=>el.remove();
+ },
+ showNativeUpdate(platform,release){
+  if(document.querySelector('#native-update-hint'))return;
+  const label=platform==='android'?'اندروید':'iOS';const el=document.createElement('aside');el.id='native-update-hint';el.className='mobile-update-hint native-update-hint';el.setAttribute('role','alert');el.innerHTML='<div><strong>نسخه جدید اپلیکیشن گیلاس آرت آماده است</strong><span>نسخه '+escapeHtml(release.latestVersion||'جدید')+' برای '+label+' منتشر شده است.</span></div><a class="btn primary" href="'+escapeHtml(safeUrl(release.url))+'" target="_blank" rel="noopener noreferrer">به‌روزرسانی</a><button type="button" class="mobile-update-close" aria-label="بستن">×</button>';document.body.appendChild(el);el.querySelector('.mobile-update-close').onclick=()=>el.remove();
+ }
+};
+async function registerGilasArtServiceWorker(){
+ if(!('serviceWorker' in navigator))return;
+ try{
+  const root=location.pathname.includes('/glsArt')?'/glsArt/':'/';
+  const reg=await navigator.serviceWorker.register(root+'sw.js',{scope:root});
+  reg.addEventListener('updatefound',()=>{const w=reg.installing;if(!w)return;w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller){w.postMessage({type:'SKIP_WAITING'})}})});
+  let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;location.reload()});
+ }catch(e){console.warn('service_worker_registration_failed',e)}
+}
+registerGilasArtServiceWorker();
+setTimeout(()=>window.GilasArtMobile?.checkRelease(),1800);
+setInterval(()=>{if(navigator.onLine)window.GilasArtMobile?.checkRelease()},15*60*1000);
+
 let servicePauseState={active:false,reason:'',timer:null,retryTimer:null};
 function nextUtcReset(){const now=new Date();const next=new Date(now);next.setUTCHours(24,0,0,0);return next.getTime()}
 function servicePauseMarkup(){return '<div id="service-pause" class="service-pause" role="alertdialog" aria-modal="true" aria-labelledby="service-pause-title"><div class="service-pause-card"><div class="service-pause-mark" aria-hidden="true">✦</div><span class="eyebrow">GILAS ART • SYSTEM STATUS</span><h2 id="service-pause-title">در حال به‌روزرسانی</h2><p id="service-pause-message">فروشگاه گیلاس آرت در حال انجام به‌روزرسانی و آماده‌سازی برای ارائه خدمات بهتر است.</p><div id="service-pause-countdown" class="service-pause-countdown" dir="ltr">--:--:--</div><small id="service-pause-note">بازگشت فروشگاه: ⏱️</small><button id="service-pause-retry" class="btn primary" type="button">تلاش مجدد</button></div></div>'}
