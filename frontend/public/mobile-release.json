@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "web": {
+    "version": "2026.10.03.1",
+    "minimumVersion": "2026.10.03.1"
+  },
+  "android": {
+    "available": true,
+    "latestVersion": "1.0.0",
+    "minimumVersion": "1.0.0",
+    "url": "https://www.Nightcast.ir/downloadrelease/NightCast.apk"
+  },
+  "ios": {
+    "available": false,
+    "latestVersion": "0.0.0",
+    "minimumVersion": "0.0.0",
+    "url": ""
+  },
+  "checkedAt": "2026-10-03T00:00:00Z"
+}
