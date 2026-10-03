@@ -1729,3 +1729,7 @@ main#main-content{min-height:60vh}
  .referral-apply-row .btn{width:100%}
  .ga-notification-hint{top:calc(72px + env(safe-area-inset-top));right:10px;width:calc(100vw - 20px)}
 }
+
+
+/* Mobile/PWA release readiness */
+.mobile-update-hint{position:fixed;right:18px;left:18px;bottom:18px;z-index:120;display:flex;align-items:center;gap:14px;padding:15px 16px;border:1px solid var(--ga-line);border-radius:18px;background:color-mix(in srgb,var(--ga-surface) 94%,transparent);box-shadow:0 20px 60px rgba(0,0,0,.28);backdrop-filter:blur(18px);direction:rtl}.mobile-update-hint>div{flex:1;min-width:0;display:grid;gap:2px}.mobile-update-hint strong{font-size:14px;color:var(--ga-text)}.mobile-update-hint span{font-size:12px;color:var(--ga-muted)}.mobile-update-close{width:34px;height:34px;border:1px solid var(--ga-line);border-radius:50%;background:transparent;color:var(--ga-muted);font-size:20px;line-height:1}.native-update-hint{border-color:color-mix(in srgb,var(--ga-gold) 55%,var(--ga-line))}@media(max-width:600px){.mobile-update-hint{right:10px;left:10px;bottom:max(10px,env(safe-area-inset-bottom));padding:13px;gap:9px;align-items:flex-end}.mobile-update-hint .btn{padding:8px 11px;white-space:nowrap}.mobile-update-hint span{font-size:11px}}
