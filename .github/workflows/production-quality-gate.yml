@@ -19,6 +19,13 @@ jobs:
         run: node --check frontend/src/app.js
       - name: Validate Worker module
         run: cp worker/src/index.js /tmp/gilasart-worker.mjs && node --check /tmp/gilasart-worker.mjs
+      - name: Validate mobile release and PWA assets
+        run: |
+          set -euo pipefail
+          node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('frontend/public/mobile-release.json','utf8'));if(d.schemaVersion!==1||!d.web?.version||!d.web?.minimumVersion)process.exit(1);for(const p of ['android','ios']){if(typeof d[p]?.available!=='boolean'||!d[p]?.latestVersion||!d[p]?.minimumVersion)process.exit(1);if(d[p].available&&(!d[p].url||!/^https:\\/\\//.test(d[p].url)))process.exit(1)}"
+          node --check frontend/public/sw.js
+          test -f frontend/public/site.webmanifest
+          node -e "const d=require('./frontend/public/site.webmanifest');if(d.display!=='standalone'||!Array.isArray(d.icons)||!d.icons.length)process.exit(1)"
       - name: Validate service status document
         id: service
         run: |
