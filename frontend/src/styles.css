@@ -2893,3 +2893,13 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 }
 @media(max-width:420px){.admin-product-tabs button{padding-inline:12px!important;font-size:12px}.admin-product-modal-head h3{font-size:19px}.admin-product-modal-close{width:38px!important;height:38px!important;min-width:38px!important}}
 @media(hover:none) and (pointer:coarse){.admin-product-modal button{touch-action:manipulation}}
+
+
+/* ADMIN — DataGrid containers remain usable on narrow screens */
+.admin-layout .panel:has(> .admin-table),
+.admin-layout .panel:has(> .table-wrap),
+.admin-layout .panel:has(> .table-scroll){overflow-x:auto}
+.admin-layout .panel>.admin-table,.admin-layout .panel>.table-wrap,.admin-layout .panel>.table-scroll{min-width:0}
+.admin-layout .table-wrap,.admin-layout .table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.admin-layout .admin-table th:last-child,.admin-layout .admin-table td:last-child{background:color-mix(in srgb,var(--admin-surface) 94%,transparent)}
+@media(max-width:700px){.admin-layout .admin-table{min-width:620px}.admin-layout .orders-table{min-width:760px}.admin-layout .products-admin-table{min-width:0}}
