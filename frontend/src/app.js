@@ -162,7 +162,7 @@ async function api(path,opt={}){
   };
   if(!requiredShape(path))throw new Error('داده ناقص از سرویس اصلی دریافت شد');
   return d;
-  }
+ }catch(e){throw e}
 }
 function csrf(){return csrfToken||''}
 function setSeo({title,description,image,type='website',jsonLd}={}){if(title){document.title=title;let t=document.querySelector('meta[name="description"]');if(!t){t=document.createElement('meta');t.name='description';document.head.appendChild(t)}t.content=description||'';const og=document.querySelector('meta[property="og:title"]');if(og)og.content=title;const od=document.querySelector('meta[property="og:description"]');if(od)od.content=description||'';if(image){let oi=document.querySelector('meta[property="og:image"]');if(!oi){oi=document.createElement('meta');oi.setAttribute('property','og:image');document.head.appendChild(oi)}oi.content=image}}document.querySelectorAll('script[data-gilasart-jsonld]').forEach(x=>x.remove());if(jsonLd){const s=document.createElement('script');s.type='application/ld+json';s.dataset.gilasartJsonld='1';s.textContent=JSON.stringify(jsonLd).replace(/</g,'\\u003c');document.head.appendChild(s)}}
