@@ -175,10 +175,6 @@ async function snapshotApi(path){
   return {items:items.slice(offset,offset+limit).map(snapshotCore),limit,offset,sort};
  }
  const parts=u.pathname.split('/').filter(Boolean);
- if(false&&parts[1]==='products'&&parts.length===3){
-  const slug=decodeURIComponent(parts[2]),p=(d.products||[]).find(x=>x.slug===slug);if(!p)return null;
-  return {product:{...p,category_name:p.categories?.[0]?.name||'',image:snapshotCore(p).image},images:p.images||[],attributes:p.attributes||[],reviews:p.reviews||[],categories:p.categories||[],quantityDiscountTiers:[{min:1,percent:0},{min:2,percent:2},{min:3,percent:4},{min:4,percent:6},{min:5,percent:8},{min:6,percent:10},{min:8,percent:12},{min:10,percent:15},{min:15,percent:17},{min:20,percent:20}]};
- }
  if(u.pathname.startsWith('/api/content/')){
   const parts2=u.pathname.split('/').filter(Boolean),section=parts2[2],slug=decodeURIComponent(parts2.slice(3).join('/'));const item=(d[section]||[]).find(x=>x.slug===slug);return item?{item}:null;
  }
