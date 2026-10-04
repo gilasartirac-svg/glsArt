@@ -2903,3 +2903,30 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 .admin-layout .table-wrap,.admin-layout .table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
 .admin-layout .admin-table th:last-child,.admin-layout .admin-table td:last-child{background:color-mix(in srgb,var(--admin-surface) 94%,transparent)}
 @media(max-width:700px){.admin-layout .admin-table{min-width:620px}.admin-layout .orders-table{min-width:760px}.admin-layout .products-admin-table{min-width:0}}
+
+/* ADMIN — per-product option configuration */
+.admin-product-modal-open,.admin-attribute-modal-open{overflow:hidden}
+.admin-layout .attribute-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.admin-layout .attribute-choice-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border:1px solid var(--admin-line);border-radius:14px;background:var(--admin-surface-2);transition:.18s ease}
+.admin-layout .attribute-choice-card.is-selected{border-color:color-mix(in srgb,var(--admin-gold) 45%,var(--admin-line));background:color-mix(in srgb,var(--admin-gold) 7%,var(--admin-surface-2))}
+.admin-layout .attribute-choice-main{display:flex!important;align-items:center;gap:10px!important;margin:0!important;cursor:pointer;min-width:0}
+.admin-layout .attribute-choice-main input{width:18px;height:18px;flex:0 0 auto}
+.admin-layout .attribute-choice-main span{display:grid;gap:2px;min-width:0}
+.admin-layout .attribute-choice-main small{color:var(--admin-muted);font-size:11px}
+.admin-layout .attribute-configure{min-height:36px!important;padding:6px 11px!important;white-space:nowrap}
+.admin-layout .attribute-configure:disabled{opacity:.42;cursor:not-allowed;transform:none!important}
+.admin-attribute-modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:18px}
+.admin-attribute-modal[hidden]{display:none}
+.admin-attribute-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.68);backdrop-filter:blur(5px)}
+.admin-attribute-modal-dialog{position:relative;width:min(760px,100%);max-height:min(86vh,820px);overflow:auto;background:var(--admin-surface);border:1px solid var(--admin-line);border-radius:22px;box-shadow:0 30px 100px rgba(0,0,0,.45);padding:22px;direction:rtl}
+.admin-attribute-modal-dialog>header{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;padding-bottom:16px;border-bottom:1px solid var(--admin-line)}
+.admin-attribute-modal-dialog h3{margin:4px 0;font-size:20px;color:var(--admin-text)}
+.admin-attribute-modal-dialog>header p{margin:3px 0 0;font-size:12px}
+.admin-attribute-modal-dialog>footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;padding-top:15px;border-top:1px solid var(--admin-line)}
+.admin-attribute-modal-dialog>footer>div{display:flex;gap:8px}
+.attribute-option-editor{display:grid;gap:10px;padding:18px 0}
+.attribute-option-editor-row{display:grid;grid-template-columns:minmax(180px,1fr) auto auto minmax(170px,.8fr);align-items:center;gap:12px;padding:14px;border:1px solid var(--admin-line);border-radius:14px;background:var(--admin-surface-2)}
+.attribute-option-editor-row>div{display:grid;gap:2px;min-width:0}.attribute-option-editor-row small{font-size:11px;color:var(--admin-muted)}
+.attribute-option-editor-row label{display:flex!important;align-items:center;gap:6px!important;margin:0!important;white-space:nowrap}
+.attribute-option-editor-row input[type=checkbox]{width:18px;height:18px}.product-option-price{display:grid!important;gap:5px!important;font-size:11px!important}.product-option-delta{min-height:40px!important}
+@media(max-width:700px){.admin-layout .attribute-choice-grid{grid-template-columns:1fr}.admin-attribute-modal{padding:9px}.admin-attribute-modal-dialog{max-height:92vh;padding:16px;border-radius:18px}.attribute-option-editor-row{grid-template-columns:1fr 1fr}.attribute-option-editor-row>div{grid-column:1/-1}.product-option-price{grid-column:1/-1}.admin-attribute-modal-dialog>footer{align-items:stretch;flex-direction:column}.admin-attribute-modal-dialog>footer>div{width:100%}.admin-attribute-modal-dialog>footer .btn{flex:1}}
