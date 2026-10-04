@@ -4,10 +4,6 @@ on:
   push:
     branches: [main]
 
-concurrency:
-  group: worker-production
-  cancel-in-progress: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
