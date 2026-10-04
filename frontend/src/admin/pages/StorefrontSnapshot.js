@@ -1,28 +1,13 @@
 import {api} from '../services/api.js';
 
 export default function StorefrontSnapshot(){
- setTimeout(async()=>{
-  const btn=document.querySelector('#snapshot-run');
-  const msg=document.querySelector('#snapshot-message');
-  if(!btn)return;
-  btn.addEventListener('click',async()=>{
-    btn.disabled=true;
-    try{
-      const r=await api('/api/admin/storefront-snapshot/trigger',{method:'POST'});
-      if(msg)msg.textContent=r?.status==='queued'?'Trigger آفلاین‌سازی با موفقیت در صف GitHub Actions قرار گرفت.':'Trigger ارسال شد.';
-    }catch(e){
-      if(e?.message==='snapshot_trigger_not_configured')window.open('https://github.com/gilasartirac-svg/glsArt/actions/workflows/storefront-snapshot.yml','_blank','noopener,noreferrer');
-      if(msg)msg.textContent=e?.message==='snapshot_trigger_not_configured'?'اتصال مستقیم هنوز تنظیم نشده؛ صفحه GitHub باز شد تا Run workflow را اجرا کنید.':'اجرای Trigger ناموفق بود؛ دوباره تلاش کنید.';
-    }finally{btn.disabled=false}
-  });
- },0);
  return `
  <div class="admin-page" dir="rtl">
   <div class="admin-title"><div><div class="eyebrow">GILAS ART • DATA</div><h2>آفلاین‌سازی اطلاعات فروشگاه</h2><span class="muted">نسخه عمومی فروشگاه روزانه از D1 استخراج و به JSON داخل GitHub Pages منتقل می‌شود.</span></div></div>
   <div class="panel">
    <div class="admin-snapshot-hero">
     <div><strong>Snapshot فروشگاه</strong><p>محصولات، تصاویر، دسته‌بندی‌ها، ویژگی‌ها و قیمت گزینه‌ها، نظرات تأییدشده، مقالات، اخبار، FAQ و تنظیمات عمومی قابل انتشار در Snapshot قرار می‌گیرند.</p></div>
-    <button id="snapshot-run" class="btn primary" type="button">باز کردن Trigger اجرای آفلاین‌سازی</button>
+    <button id="snapshot-run" class="btn primary" type="button">اجرای آفلاین‌سازی فروشگاه</button>
    </div>
    <div id="snapshot-message" class="notice" role="status" aria-live="polite">اجرای خودکار هر شب ساعت ۰۰:۰۰ به وقت تهران برنامه‌ریزی شده است.</div>
   </div>
@@ -32,4 +17,21 @@ export default function StorefrontSnapshot(){
   </div>
   <div class="notice">این Snapshot منبع حقیقت خرید نیست؛ فقط برای نمایش عمومی فروشگاه و کاهش درخواست‌های Cloudflare استفاده می‌شود.</div>
  </div>`;
+}
+
+export async function mount(){
+ const btn=document.querySelector('#snapshot-run');
+ const msg=document.querySelector('#snapshot-message');
+ if(!btn)return;
+ btn.addEventListener('click',async()=>{
+  btn.disabled=true;
+  if(msg)msg.textContent='در حال ارسال درخواست آفلاین‌سازی…';
+  try{
+   const r=await api('/api/admin/storefront-snapshot/trigger',{method:'POST'});
+   if(msg)msg.textContent=r?.status==='queued'?'آفلاین‌سازی با موفقیت در صف GitHub Actions قرار گرفت.':'درخواست آفلاین‌سازی ارسال شد.';
+  }catch(e){
+   if(msg)msg.textContent='اجرای آفلاین‌سازی ناموفق بود؛ وضعیت اتصال و دسترسی مدیریت را بررسی کنید.';
+   console.error('storefront_snapshot_trigger_failed',e);
+  }finally{btn.disabled=false}
+ });
 }
