@@ -395,14 +395,17 @@ async function product(slug){
   });
 }
 async function ensureLogin(){if(state.user)return;await account();if(!state.user)throw new Error('ابتدا وارد حساب شوید')}
-let notificationTimer=null;
+let notificationTimer=null,notificationShowingId='';
 function showNotificationHint(item){
- const old=document.querySelector('#ga-notification-hint');old?.remove();
+ const id=String(item?.id||'');if(!id||notificationShowingId===id)return;
+ const existing=document.querySelector('#ga-notification-hint');existing?.remove();notificationShowingId=id;
  const referral=String(item?.type||'')==='referral_reward';
  const el=document.createElement('div');el.id='ga-notification-hint';el.className=referral?'ga-notification-hint ga-galaxy-reward':'ga-notification-hint';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');
  const points=(String(item?.message||'').match(/(\d+)\s*امتیاز/)||[])[1]||'';
  el.innerHTML=referral?'<div class="ga-stars" aria-hidden="true"></div><div class="ga-galaxy-orb">✦</div><div class="ga-reward-content"><span class="eyebrow">GILAS ART REWARDS</span><h2>'+escapeHtml(item.title||'یک خبر شیرین برای شما')+'</h2><p>'+escapeHtml(item.message||'')+'</p>'+(points?'<strong class="ga-reward-points">+'+fa(points)+' امتیاز</strong>':'')+'<button type="button" class="btn primary ga-reward-close">ادامه</button></div>':'<div class="ga-notification-icon">✦</div><div><strong>'+escapeHtml(item.title||'خبر جدید از گیلاس آرت')+'</strong><p>'+escapeHtml(item.message||'')+'</p></div><button type="button" aria-label="بستن اعلان">×</button>';
- document.body.appendChild(el);const close=()=>el.remove();el.querySelector('.ga-reward-close')?.addEventListener('click',close);el.querySelector('[aria-label="بستن اعلان"]')?.addEventListener('click',close);if(!referral)setTimeout(close,9000);
+ document.body.appendChild(el);
+ const close=async()=>{if(!document.body.contains(el))return;el.remove();notificationShowingId='';try{await api('/api/notifications/read',{method:'POST',headers:{'x-csrf-token':csrf()},body:JSON.stringify({id})})}catch{}};
+ el.querySelector('.ga-reward-close')?.addEventListener('click',close);el.querySelector('[aria-label="بستن اعلان"]')?.addEventListener('click',close);if(!referral)setTimeout(close,9000);
 }async function pollNotifications(){
  if(!state.user)return;
  try{const d=await api('/api/notifications');const items=Array.isArray(d.items)?d.items:[];if(items[0])showNotificationHint(items[0])}catch{}
