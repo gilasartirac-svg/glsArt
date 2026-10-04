@@ -131,7 +131,7 @@ function snapshotSort(items,sort){
  });
 }
 async function snapshotApi(path){
- if(!/^\/api\/(home|products|categories|flash-sales|settings|content|site-rules|faq)(?:[/?]|$)/.test(path))return null;
+ if(!/^\/api\/(home|products|categories|flash-sales|content|site-rules|faq)(?:[/?]|$)/.test(path))return null;
  const d=await loadStorefrontSnapshot();if(!d)return null;
  const u=new URL(path,'https://snapshot.local');
  if(u.pathname==='/api/home'){
