@@ -241,7 +241,7 @@ async function buildStorefrontSnapshot(env){
     env.DB.prepare(`SELECT r.id,r.product_id,r.rating,r.body,r.created_at,u.name,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='like'),0) like_count,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='dislike'),0) dislike_count FROM reviews r JOIN users u ON u.id=r.user_id JOIN products p ON p.id=r.product_id AND p.active=1 WHERE r.approved=1 ORDER BY r.product_id,r.created_at DESC`).all(),
     env.DB.prepare(`SELECT id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE active=1 AND section IN ('about','contact','news','articles') ORDER BY section,published_at DESC,created_at DESC`).all(),
     env.DB.prepare(`SELECT id,question,answer,sort_order,created_at,updated_at FROM faq_entries WHERE active=1 ORDER BY sort_order ASC,created_at ASC`).all(),
-    env.DB.prepare(`SELECT key,value,updated_at FROM site_settings WHERE key IN ('site_name','site_description','seo_title','seo_description','seo_keywords','og_image','site_rules_title','site_rules_body','loyalty_rules_title','loyalty_rules_body') ORDER BY key`).all()
+    env.DB.prepare(`SELECT key,value,updated_at FROM site_settings WHERE key IN ('site_name','site_description','seo_title','seo_description','seo_keywords','og_image','footer_social_links','footer_enamad_code','site_rules_title','site_rules_body','loyalty_rules_title','loyalty_rules_body') ORDER BY key`).all()
   ]);
   const products=(productsR.results||[]).map(x=>({...x,price_irt:Number(x.price_irt||0),view_count:Number(x.view_count||0),review_count:Number(x.review_count||0),rating_avg:Number(x.rating_avg||0),favorite_count:Number(x.favorite_count||0),sold_count:Number(x.sold_count||0)}));
   const imagesBy=new Map(),categoriesByProduct=new Map(),attrsBy=new Map(),reviewsBy=new Map();
@@ -1104,7 +1104,36 @@ if(u.pathname==='/api/admin/invoice-settings'&&req.method==='PUT'){
  return json({ok:true,item:await invoiceSettings(env)});
 }
 if(u.pathname==='/api/admin/settings'&&req.method==='GET'){if(!(await requirePermission(me,env,'settings.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare("SELECT key,value,updated_at FROM site_settings ORDER BY key").all();return json({items:r.results||[]})}
-if(u.pathname==='/api/admin/settings'&&req.method==='PUT'){if(!(await requirePermission(me,env,'settings.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const b=await body(req),allowed=['site_name','site_description','seo_title','seo_description','seo_keywords','og_image','invoice_store_name','invoice_national_id','invoice_economic_code','invoice_registration_number','invoice_phone','invoice_mobile','invoice_postal_code','invoice_address','invoice_logo_path','invoice_signature_path'];for(const key of allowed)if(Object.prototype.hasOwnProperty.call(b,key))await env.DB.prepare("INSERT INTO site_settings(key,value,updated_at) VALUES(?,?,CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP").bind(key,String(b[key]??'').slice(0,2000)).run();const updated=allowed.filter(k=>Object.prototype.hasOwnProperty.call(b,k));await audit(env,me,'admin.settings.update','settings','site_settings',{updated},req);return json({ok:true,invoiceSettings:await invoiceSettings(env)})}
+if(u.pathname==='/api/admin/settings'&&req.method==='PUT'){
+ if(!(await requirePermission(me,env,'settings.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+ const b=await body(req);
+ const allowed=['site_name','site_description','seo_title','seo_description','seo_keywords','og_image','footer_social_links','footer_enamad_code','invoice_store_name','invoice_national_id','invoice_economic_code','invoice_registration_number','invoice_phone','invoice_mobile','invoice_postal_code','invoice_address','invoice_logo_path','invoice_signature_path'];
+ for(const key of allowed){
+  if(!Object.prototype.hasOwnProperty.call(b,key))continue;
+  let value=String(b[key]??'').slice(0,2000);
+  if(key==='footer_social_links'){
+   try{
+    const links=JSON.parse(value);
+    if(!Array.isArray(links)||links.length>12)throw new Error();
+    const allowedPlatforms=new Set(['telegram','instagram','aparat','whatsapp','youtube','linkedin','other']);
+    const clean=links.map((x,i)=>{
+     const platform=String(x?.id||'other').trim().toLowerCase();
+     const label=String(x?.label||'').trim().slice(0,80);
+     const url=String(x?.url||'').trim();
+     if(!allowedPlatforms.has(platform)||!label||!url)throw new Error();
+     const u=new URL(url);
+     if(u.protocol!=='https:')throw new Error();
+     return {id:platform,label,url:u.href,active:x?.active!==false,sort:Number.isFinite(Number(x?.sort))?Math.max(0,Math.min(99,Number(x.sort))):i};
+    });
+    value=JSON.stringify(clean.slice(0,12));
+   }catch{return json({error:'invalid_footer_social_links'},400)}
+  }
+  await env.DB.prepare("INSERT INTO site_settings(key,value,updated_at) VALUES(?,?,CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP").bind(key,value).run();
+ }
+ const updated=allowed.filter(k=>Object.prototype.hasOwnProperty.call(b,k));
+ await audit(env,me,'admin.settings.update','settings','site_settings',{updated},req);
+ return json({ok:true,invoiceSettings:await invoiceSettings(env)});
+}
 
 if(u.pathname==='/api/admin/integrations'&&req.method==='GET'){
  if(!(await requirePermission(me,env,'settings.read')))return json({error:'forbidden'},403);
