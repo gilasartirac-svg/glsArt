@@ -511,7 +511,7 @@ function orderTimeline(order){
  return '<div class="order-track '+(terminal?'is-terminal':'')+'">'+nodes+(terminal?'<div class="order-track-terminal"><b>'+escapeHtml(orderStatusPublic(status))+'</b><small>این سفارش در وضعیت نهایی قرار گرفته است.</small></div>':'')+'</div>';
 }
 async function referralFromLocation(){try{const q=new URLSearchParams(location.search||'').get('ref');if(q)return decodeURIComponent(q).trim().toUpperCase();const h=new URLSearchParams(String(location.hash||'').split('?')[1]||'').get('ref');return h?decodeURIComponent(h).trim().toUpperCase():''}catch{return ''}}
-function account(){
+async function account(){
  await loadMe();
  if(state.user){
   const invoiceModule=await import('./invoice.js?v=20260929-invoice-2');
