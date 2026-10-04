@@ -968,23 +968,22 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
 
  if(u.pathname.startsWith('/api/admin/products/')&&u.pathname.endsWith('/attribute-options')&&req.method==='PUT'){
   if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
-  const parts=u.pathname.split('/'),id=parts[4];
-  const product=await env.DB.prepare('SELECT id FROM products WHERE id=?').bind(id).first();
+  const parts=u.pathname.split('/'),id=parts[4],product=await env.DB.prepare('SELECT id FROM products WHERE id=?').bind(id).first();
   if(!product)return json({error:'not_found'},404);
   const b=await body(req),rows=Array.isArray(b.attributeOptions)?b.attributeOptions.slice(0,200):[];
   const optionIds=[...new Set(rows.map(x=>String(x?.optionId||'')).filter(Boolean))];
-  if(optionIds.length){
-    const valid=await env.DB.prepare(`SELECT o.id FROM product_attribute_options o JOIN product_attribute_assignments pa ON pa.product_id=? AND pa.attribute_id=o.attribute_id WHERE o.id IN (${optionIds.map(()=>'?').join(',')})`).bind(id,...optionIds).all();
-    const validIds=new Set((valid.results||[]).map(x=>x.id));
-    if(validIds.size!==optionIds.length)return json({error:'invalid_product_attribute_option'},400);
-  }
-  const stmts=[env.DB.prepare('DELETE FROM product_attribute_option_overrides WHERE product_id=?').bind(id)];
-  for(const x of rows){
-    const optionId=String(x?.optionId||'');if(!optionId)continue;
-    stmts.push(env.DB.prepare('INSERT INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) VALUES(?,?,?,?,?)').bind(id,optionId,x.active===false?0:1,x.isDefault===true?1:0,Math.max(0,Math.trunc(Number(x.priceDeltaIrt)||0))));
-  }
+  if(!optionIds.length)return json({ok:true,count:0});
+  const valid=await env.DB.prepare(`SELECT o.id,o.attribute_id FROM product_attribute_options o JOIN product_attribute_assignments pa ON pa.product_id=? AND pa.attribute_id=o.attribute_id WHERE o.id IN (${optionIds.map(()=>'?').join(',')})`).bind(id,...optionIds).all();
+  const validRows=valid.results||[],validIds=new Set(validRows.map(x=>x.id));
+  if(validIds.size!==optionIds.length)return json({error:'invalid_product_attribute_option'},400);
+  const stmts=[];
+  const attrIds=[...new Set(validRows.map(x=>x.attribute_id))];
+  for(const aid of attrIds)stmts.push(env.DB.prepare('UPDATE product_attribute_option_overrides SET is_default=0 WHERE product_id=? AND option_id IN (SELECT id FROM product_attribute_options WHERE attribute_id=?)').bind(id,aid));
+  stmts.push(env.DB.prepare(`DELETE FROM product_attribute_option_overrides WHERE product_id=? AND option_id IN (${optionIds.map(()=>'?').join(',')})`).bind(id,...optionIds));
+  const attrByOption=new Map(validRows.map(x=>[x.id,x.attribute_id]));
+  for(const x of rows){const optionId=String(x?.optionId||'');if(!optionId)continue;stmts.push(env.DB.prepare('INSERT INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) VALUES(?,?,?,?,?)').bind(id,optionId,x.active===false?0:1,x.isDefault===true?1:0,Math.max(0,Math.trunc(Number(x.priceDeltaIrt)||0))));}
   await env.DB.batch(stmts);
-  await audit(env,me,'admin.product.attribute_options.update','product',id,{after:{count:rows.length}},req);
+  await audit(env,me,'admin.product.attribute_options.update','product',id,{after:{count:rows.length,attributeIds:attrIds}},req);
   return json({ok:true,count:rows.length});
  }
 
