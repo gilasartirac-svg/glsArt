@@ -3212,3 +3212,9 @@ button,.btn,.iconbtn,.theme-toggle,.mobile-menu-toggle{min-height:44px;touch-act
  .ticket-form{gap:15px}
  .ticket-field textarea{min-height:200px}
 }
+
+/* Admin support reply controls */
+.admin-ticket-reply-form{gap:14px}
+.ticket-sms-toggle{width:fit-content!important;min-height:44px;padding:9px 12px;border-radius:12px;background:color-mix(in srgb,var(--ui-gold) 7%,var(--ui-surface));border:1px solid color-mix(in srgb,var(--ui-gold) 20%,var(--ui-line));cursor:pointer}
+.ticket-sms-toggle span{font-weight:700}
+.admin-ticket-reply-form textarea{min-height:170px;resize:vertical;line-height:2}
