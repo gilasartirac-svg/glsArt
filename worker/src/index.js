@@ -533,6 +533,25 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
  if(u.pathname.startsWith('/api/admin/tickets/')&&req.method==='GET'){if(!(await requirePermission(me,env,'support.read')))return json({error:'forbidden'},403);const id=u.pathname.split('/').pop(),t=await env.DB.prepare('SELECT t.*,u.mobile FROM support_tickets t JOIN users u ON u.id=t.user_id WHERE t.id=?').bind(id).first();if(!t)return json({error:'not_found'},404);const m=await env.DB.prepare('SELECT id,author_type,body,created_at FROM ticket_messages WHERE ticket_id=? ORDER BY created_at ASC').bind(id).all();return json({ticket:t,messages:m.results||[]})}
  if(u.pathname.startsWith('/api/admin/tickets/')&&req.method==='POST'){if(!(await requirePermission(me,env,'support.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const id=u.pathname.split('/').pop(),t=await env.DB.prepare('SELECT * FROM support_tickets WHERE id=?').bind(id).first();if(!t)return json({error:'not_found'},404);const b=await body(req),message=String(b.message||'').trim().slice(0,10000),status=['open','closed'].includes(String(b.status))?String(b.status):t.status,stage=String(b.stage||'پاسخ داده شد').slice(0,80);const stm=[env.DB.prepare("UPDATE support_tickets SET status=?,stage=?,updated_at=CURRENT_TIMESTAMP,closed_at=CASE WHEN ?='closed' THEN CURRENT_TIMESTAMP ELSE NULL END WHERE id=?").bind(status,stage,status,id)];if(message)stm.push(env.DB.prepare("INSERT INTO ticket_messages(id,ticket_id,user_id,author_type,body) VALUES(?,?,?, 'admin',?)").bind(uid(),id,me.id,message));await env.DB.batch(stm);return json({ok:true})}
 
+ if(u.pathname==='/api/admin/storefront-snapshot/trigger'&&req.method==='POST'){
+  if(!me)return json({error:'unauthorized'},401);
+  if(!(await requirePermission(me,env,'settings.read'))||!requireCsrf(req))return json({error:'forbidden'},403);
+  const token=String(env.GITHUB_ACTIONS_TOKEN||'').trim();
+  if(!token)return json({error:'snapshot_trigger_not_configured',message:'GITHUB_ACTIONS_TOKEN is not configured'},503);
+  const response=await fetch('https://api.github.com/repos/gilasartirac-svg/glsArt/actions/workflows/storefront-snapshot.yml/dispatches',{
+    method:'POST',
+    headers:{'accept':'application/vnd.github+json','authorization':'Bearer '+token,'x-github-api-version':'2022-11-28','user-agent':'GilasArt-Storefront-Snapshot'},
+    body:JSON.stringify({ref:'main'})
+  });
+  if(!response.ok){
+    const detail=await response.text().catch(()=> '');
+    console.error('storefront snapshot trigger failed',response.status,detail.slice(0,500));
+    return json({error:'snapshot_trigger_failed'},502);
+  }
+  await audit(env,me,'admin.storefront_snapshot.trigger','system','storefront_snapshot',{after:{workflow:'storefront-snapshot.yml',ref:'main'}},req);
+  return json({ok:true,status:'queued'});
+ }
+
  if(u.pathname.startsWith('/api/admin')){
   if(!me)return json({error:'unauthorized'},401);
   if(adminBootstrapConfigured(env)){try{await ensureAdminBootstrap(env)}catch(e){console.error('admin bootstrap failed',e?.message||e)}}
