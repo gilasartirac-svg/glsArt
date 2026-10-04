@@ -44,9 +44,24 @@ export default function Products(){
 
  function render(items){
   const el=document.querySelector('#products-grid');if(!el)return;
-  el.innerHTML=items.map(p=>`<tr><td><b>${esc(p.name)}</b><div class="muted">${esc(p.slug)}</div></td><td>${esc(p.sku)}</td><td>${money(p.price_irt)} ریال</td><td>${p.stock??0}</td><td><span class="pill">${p.active?'فعال':'غیرفعال'}</span></td><td><button class="btn ghost edit" data-id="${esc(p.id)}">ویرایش</button> <button class="btn danger del" data-id="${esc(p.id)}">حذف</button></td></tr>`).join('')||'<tr><td colspan="6">محصولی وجود ندارد.</td></tr>';
+  el.innerHTML=items.map(p=>{const src=String(p.image||'').trim(),file=imageFile(src);return `<tr>
+  <td class="product-admin-identity">
+   <div class="product-admin-thumb">${src?`<img src="${esc(src)}" alt="${esc(p.name||'محصول')}" loading="lazy" decoding="async">`:'<span aria-hidden="true">—</span>'}</div>
+   <div class="product-admin-meta"><b>${esc(p.name)}</b><div class="muted product-admin-slug">${esc(p.slug)}</div><div class="product-admin-image-file" dir="ltr"><code>${esc(file||'بدون تصویر')}</code>${file?`<button type="button" class="icon-copy copy-image-name" data-filename="${esc(file)}" aria-label="کپی نام فایل تصویر" title="کپی نام فایل تصویر"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>`:""}</div></div>
+  </td>
+  <td>${esc(p.sku)}</td><td>${money(p.price_irt)} ریال</td><td>${p.stock??0}</td><td><span class="pill">${p.active?'فعال':'غیرفعال'}</span></td>
+  <td><button class="btn ghost edit" data-id="${esc(p.id)}">ویرایش</button> <button class="btn danger del" data-id="${esc(p.id)}">حذف</button></td>
+ </tr>`}).join('')||'<tr><td colspan="6">محصولی وجود ندارد.</td></tr>';
   try{setupDataGrid('products-grid')}catch(err){console.warn('Products data-grid enhancement failed; catalog rendering preserved.',err)}
-  el.querySelectorAll('.edit').forEach(b=>b.onclick=()=>edit(items.find(x=>x.id===b.dataset.id)));
+  el.querySelectorAll('.copy-image-name').forEach(b=>b.onclick=async()=>{
+  const value=b.dataset.filename||'';
+  try{
+   if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(value);
+   else{const ta=document.createElement('textarea');ta.value=value;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove()}
+   const old=b.title;b.title='کپی شد';b.classList.add('is-copied');setTimeout(()=>{b.title=old;b.classList.remove('is-copied')},1200);
+  }catch{alert('کپی نام فایل انجام نشد.')}
+});
+el.querySelectorAll('.edit').forEach(b=>b.onclick=()=>edit(items.find(x=>x.id===b.dataset.id)));
   el.querySelectorAll('.del').forEach(b=>b.onclick=async()=>{if(!confirm('حذف شود؟'))return;try{await api('/api/admin/products/'+encodeURIComponent(b.dataset.id),{method:'DELETE'});await refresh();}catch(e){alert(e.message)}});
  }
  async function refresh(){const d=await admin.products();if(!Array.isArray(d.items))throw new Error('پاسخ API محصولات ساختار معتبر ندارد.');render(d.items)}
@@ -116,7 +131,7 @@ export default function Products(){
  <div class="panel"><div class="sectionhead"><div><h3>ویژگی‌های قابل انتخاب</h3><p class="muted">ویژگی عمومی بسازید و گزینه‌های آن را با وضعیت، پیش‌فرض و افزایش قیمت مدیریت کنید.</p></div></div>
  <form id="attribute-form" class="inline-option-form"><input name="name" required placeholder="مثلاً رنگ قاب"><button class="btn primary">ایجاد ویژگی</button></form>
  <div id="attributes-manager" class="attributes-manager"></div></div>
- <div class="panel"><h3>کاتالوگ</h3><div class="table-scroll"><table class="admin-table"><thead><tr><th>محصول</th><th>SKU</th><th>قیمت</th><th>موجودی</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="products-grid"><tr><td colspan="6">در حال دریافت...</td></tr></tbody></table></div></div>
+ <div class="panel"><h3>کاتالوگ</h3><div class="table-scroll"><table class="admin-table products-admin-table"><thead><tr><th>محصول / تصویر</th><th>SKU</th><th>قیمت</th><th>موجودی</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="products-grid"><tr><td colspan="6">در حال دریافت...</td></tr></tbody></table></div></div>
  </div>`;
 }
 
