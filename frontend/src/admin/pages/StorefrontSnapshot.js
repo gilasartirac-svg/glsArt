@@ -6,9 +6,15 @@ export default function StorefrontSnapshot(){
   const msg=document.querySelector('#snapshot-message');
   if(!btn)return;
   btn.addEventListener('click',()=>{
-   const url='https://github.com/gilasartirac-svg/glsArt/actions/workflows/storefront-snapshot.yml';
-   window.open(url,'_blank','noopener,noreferrer');
-   if(msg)msg.textContent='صفحه Trigger گیت‌هاب باز شد؛ همان‌جا «Run workflow» را بزنید تا همین Workflow اجرا شود.';
+   btn.disabled=true;
+   try{
+    const r=await api('/api/admin/storefront-snapshot/trigger',{method:'POST'});
+    if(msg)msg.textContent=r?.status==='queued'?'Trigger آفلاین‌سازی با موفقیت در صف GitHub Actions قرار گرفت.':'Trigger ارسال شد.';
+   }catch(e){
+    if(e?.message==='snapshot_trigger_not_configured')window.open('https://github.com/gilasartirac-svg/glsArt/actions/workflows/storefront-snapshot.yml','_blank','noopener,noreferrer');
+    if(msg)msg.textContent=e?.message==='snapshot_trigger_not_configured'?'اتصال مستقیم هنوز تنظیم نشده؛ صفحه GitHub باز شد تا Run workflow را اجرا کنید.':'اجرای Trigger ناموفق بود؛ دوباره تلاش کنید.';
+   }finally{btn.disabled=false}
+  });
   });
  },0);
  return `
