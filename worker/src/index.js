@@ -112,6 +112,11 @@ function otpSmsMessage(env,code,template){
  const base=String(template||'گیلاس آرت\\nکد ورود : {code}').replaceAll('\\r\\n','\\n').replaceAll('\\n','\n').replaceAll('{code}',code).replaceAll('{0}',code).split(/\\r?\\n/).filter(x=>!/^\\s*@[^\\s]+\\s+#\\d{6}\\s*$/.test(x)).join('\\n').trim();
  return `${base}\\n\\n@${host} #${code}`;
 }
+function normalizeIranMobile(value){
+ let m=String(value||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/\\D/g,'');
+ if(m.startsWith('0098'))m='0'+m.slice(4);else if(m.startsWith('98')&&m.length===12)m='0'+m.slice(2);else if(m.startsWith('9')&&m.length===10)m='0'+m;
+ return m;
+}
 function ticketSmsUrl(env,id){return frontend(env)+'/#/support/'+encodeURIComponent(String(id||''))}
 function fillSmsTemplate(template,data){
  return String(template||'').replaceAll('\\r\\n','\\n').replaceAll('\\n','\n')
@@ -123,9 +128,9 @@ function fillSmsTemplate(template,data){
 async function sendKavenegarSms(env,mobile,message){
  const key=String(env.KAVENEGAR_API_KEY||'').trim();
  const sender=String(await siteSetting(env,'kavenegar_sender',env.KAVENEGAR_SENDER||'')).trim().slice(0,50);
- if(!key||!sender||!/^09\\d{9}$/.test(String(mobile||'')))return {sent:false,reason:'not_configured'};
+ const receptor=normalizeIranMobile(mobile);if(!key||!sender)return {sent:false,reason:'not_configured'};if(!/^09\\d{9}$/.test(receptor))return {sent:false,reason:'invalid_mobile'};
  try{
-  const p=new URLSearchParams({receptor:String(mobile),message:String(message||'').slice(0,700),sender});
+  const p=new URLSearchParams({receptor,message:String(message||'').slice(0,700),sender});
   const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),8000);let sr;
   try{sr=await fetch('https://api.kavenegar.com/v1/'+key+'/sms/send.json',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:p,signal:controller.signal})}finally{clearTimeout(timer)}
   let sj=null;try{sj=await sr.json()}catch{}
@@ -585,13 +590,13 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
   if(message)stm.push(env.DB.prepare("INSERT INTO ticket_messages(id,ticket_id,user_id,author_type,body) VALUES(?,?,?, 'admin',?)").bind(uid(),id,me.id,message));
   await env.DB.batch(stm);
   let sms={sent:false,reason:'not_requested'};
-  if(message&&sendSms){
+  if(sendSms){
    try{
     const template=await siteSetting(env,'support_ticket_reply_sms_template','گیلاس آرت\\nپاسخی برای تیکت شما ثبت شده است.\\nمشاهده پاسخ: {ticket_url}');
     sms=await sendKavenegarSms(env,String(t.mobile||''),fillSmsTemplate(template,{ticketId:id,subject:t.subject,ticketUrl:ticketSmsUrl(env,id)}));
    }catch(e){console.error('ticket_reply_sms_error',e?.message||e)}
   }
-  return json({ok:true,smsSent:sms.sent});
+  return json({ok:true,smsSent:sms.sent,smsReason:sms.reason||null});
  }
  if(u.pathname==='/api/admin/storefront-snapshot/trigger'&&req.method==='POST'){
   if(!me)return json({error:'unauthorized'},401);
