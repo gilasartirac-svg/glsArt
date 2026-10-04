@@ -55,11 +55,11 @@ p{margin:0 auto 28px;max-width:650px;color:var(--muted);font-size:clamp(14px,2vw
   <div class="footer"><b>GilasArt</b>هر اثر، داستانی برای کشف کردن دارد.</div>
 </main>
 <script>
-(()=>{const c=document.getElementById('stars'),x=c.getContext('2d'),D=devicePixelRatio||1;
+(()=>{const path=location.pathname,root=location.hostname.endsWith('github.io')?'/glsArt/':'/';const clean=path.startsWith(root)?path.slice(root.length):'';if(clean&&!clean.includes('.')&&!location.hash){location.replace(root+'#/product/'+clean.split('/').map(encodeURIComponent).join('/'));return}const c=document.getElementById('stars'),x=c.getContext('2d'),D=devicePixelRatio||1;
 function resize(){c.width=innerWidth*D;c.height=innerHeight*D;x.setTransform(D,0,0,D,0,0)}resize();addEventListener('resize',resize);
 const stars=Array.from({length:Math.min(260,Math.floor(innerWidth*innerHeight/6500))},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.5+.25,a:Math.random(),s:Math.random()*.018+.004}));
 function draw(){x.clearRect(0,0,innerWidth,innerHeight);for(const s of stars){s.a+=s.s;if(s.a>1||s.a<.1)s.s=-s.s;x.globalAlpha=.15+s.a*.65;x.fillStyle='#fff';x.beginPath();x.arc(s.x,s.y,s.r,0,Math.PI*2);x.fill()}requestAnimationFrame(draw)}draw();
-const h=document.getElementById('home');h.href=location.hostname.endsWith('github.io')?'/glsArt/':'/';
+const h=document.getElementById('home');h.href=root;
 })();
 </script>
 </body>
