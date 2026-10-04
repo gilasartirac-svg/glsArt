@@ -89,22 +89,121 @@ registerGilasArtServiceWorker();
 setTimeout(()=>window.GilasArtMobile?.checkRelease(),1800);
 setInterval(()=>{if(navigator.onLine)window.GilasArtMobile?.checkRelease()},15*60*1000);
 
-async function api(path,opt={}){progressStart();const headers={...(opt.headers||{})};if(opt.body)headers['content-type']='application/json';try{const r=await fetch(API+path,{credentials:'include',cache:'no-store',headers,...opt});const raw=await r.text();let d={};try{d=raw?JSON.parse(raw):{}}catch{}if(!r.ok){throw new Error(d.error||d.message||'خطا در ارتباط با سرویس')}
-const requiredShape=path=>{
- if(path==='/api/health')return d&&d.ok===true&&d.db===true;
- if(/^\/api\/products\?/.test(path)||path==='/api/products')return Array.isArray(d?.items);
- if(path==='/api/categories'||path==='/api/flash-sales')return Array.isArray(d?.items);
- if(path.startsWith('/api/products/')&&path.endsWith('/view'))return d?.ok===true;
- if(path.startsWith('/api/products/')&&!path.includes('/reviews'))return d?.product&&Array.isArray(d.images)&&Array.isArray(d.attributes)&&Array.isArray(d.categories)&&Array.isArray(d.reviews);
- if(path.startsWith('/api/content?'))return Array.isArray(d?.items);
- if(path.startsWith('/api/content/'))return d?.item&&typeof d.item==='object';
- if(path==='/api/settings')return d?.settings&&typeof d.settings==='object';
- if(path==='/api/site-rules')return d?.item&&typeof d.item==='object';
- if(path==='/api/notifications')return Array.isArray(d?.items);
- return true;
-};
-if(!requiredShape(path))throw new Error('داده ناقص از سرویس اصلی دریافت شد');return d}catch(e){throw e}finally{progressEnd()}}
+let storefrontSnapshotPromise=null;
+const storefrontSnapshotUrl=()=>((location.pathname.includes('/glsArt')?'/glsArt':'')+'/data/storefront-manifest.json');
 
+async function loadStorefrontSnapshot(){
+ if(storefrontSnapshotPromise)return storefrontSnapshotPromise;
+ storefrontSnapshotPromise=(async()=>{
+  try{
+   const mr=await fetch(storefrontSnapshotUrl(),{cache:'no-store',credentials:'same-origin'});
+   if(!mr.ok)return null;
+   const manifest=await mr.json();
+   if(Number(manifest?.schemaVersion)!==1||!manifest?.generatedAt)return null;
+   const base=(location.pathname.includes('/glsArt')?'/glsArt':'')+'/data/storefront.json';
+   const sr=await fetch(base+'?v='+encodeURIComponent(manifest.generatedAt),{cache:'no-store',credentials:'same-origin'});
+   if(!sr.ok)return null;
+   const d=await sr.json();
+   if(Number(d?.meta?.schemaVersion)!==1||!Array.isArray(d.products)||!Array.isArray(d.categories)||!d.settings)return null;
+   return d;
+  }catch{return null}
+ })();
+ const d=await storefrontSnapshotPromise;
+ if(!d)storefrontSnapshotPromise=null;
+ return d;
+}
+function snapshotCore(p){
+ const image=(p?.images||[]).find(x=>Number(x.is_primary)===1)?.path||(p?.images||[0])?.path||'';
+ return {id:p.id,slug:p.slug,sku:p.sku,name:p.name,description:p.description,price_irt:Number(p.price_irt||0),category_id:p.category_id,flash_sale_active:p.flash_sale_active,flash_sale_ends_at:p.flash_sale_ends_at,flash_sale_price_irt:p.flash_sale_price_irt,video_url:p.video_url,view_count:Number(p.view_count||0),rating_avg:Number(p.rating_avg||0),review_count:Number(p.review_count||0),favorite_count:Number(p.favorite_count||0),sold_count:Number(p.sold_count||0),seo_title:p.seo_title,seo_description:p.seo_description,image};
+}
+function snapshotSort(items,sort){
+ const a=[...items],s=String(sort||'newest');
+ const textDesc=(x,y)=>String(y).localeCompare(String(x));
+ return a.sort((x,y)=>{
+  if(s==='price_asc')return Number(x.price_irt)-Number(y.price_irt)||textDesc(x.id,y.id);
+  if(s==='price_desc')return Number(y.price_irt)-Number(x.price_irt)||textDesc(x.id,y.id);
+  if(s==='rating')return Number(y.rating_avg)-Number(x.rating_avg)||Number(y.review_count)-Number(x.review_count)||textDesc(x.created_at,y.created_at)||textDesc(x.id,y.id);
+  if(s==='reviews')return Number(y.review_count)-Number(x.review_count)||Number(y.rating_avg)-Number(x.rating_avg)||textDesc(x.created_at,y.created_at)||textDesc(x.id,y.id);
+  if(s==='popular')return Number(y.favorite_count)-Number(x.favorite_count)||Number(y.view_count)-Number(x.view_count)||textDesc(x.created_at,y.created_at)||textDesc(x.id,y.id);
+  if(s==='best_selling')return Number(y.sold_count)-Number(x.sold_count)||Number(y.review_count)-Number(x.review_count)||textDesc(x.created_at,y.created_at)||textDesc(x.id,y.id);
+  if(s==='views')return Number(y.view_count)-Number(x.view_count)||Number(y.favorite_count)-Number(x.favorite_count)||textDesc(x.created_at,y.created_at)||textDesc(x.id,y.id);
+  return textDesc(x.created_at,y.created_at)||textDesc(x.id,y.id);
+ });
+}
+async function snapshotApi(path){
+ if(!/^\/api\/(home|products|categories|flash-sales|settings|content|site-rules|faq)(?:[/?]|$)/.test(path))return null;
+ const d=await loadStorefrontSnapshot();if(!d)return null;
+ const u=new URL(path,'https://snapshot.local');
+ if(u.pathname==='/api/home'){
+  const items=snapshotSort(d.products,'newest').slice(0,8).map(snapshotCore);
+  const flash=(d.products||[]).filter(p=>Number(p.flash_sale_active)===1&&p.flash_sale_ends_at&&new Date(p.flash_sale_ends_at).getTime()>Date.now()).sort((a,b)=>String(a.flash_sale_ends_at).localeCompare(String(b.flash_sale_ends_at))).slice(0,20).map(snapshotCore);
+  return {products:{items},categories:{items:d.categories},settings:{settings:d.settings},flash:{items:flash}};
+ }
+ if(u.pathname==='/api/categories')return {items:d.categories};
+ if(u.pathname==='/api/settings')return {settings:d.settings};
+ if(u.pathname==='/api/site-rules')return {item:{title:d.settings.site_rules_title||'قوانین سایت',body:d.settings.site_rules_body||'ثبت سفارش و پرداخت به معنی پذیرش قوانین و شرایط فروش گیلاس آرت است.',updated_at:d.meta.generatedAt}};
+ if(u.pathname==='/api/faq')return {items:d.faq||[]};
+ if(u.pathname==='/api/flash-sales'){
+  const items=(d.products||[]).filter(p=>Number(p.flash_sale_active)===1&&p.flash_sale_ends_at&&new Date(p.flash_sale_ends_at).getTime()>Date.now()).sort((a,b)=>String(a.flash_sale_ends_at).localeCompare(String(b.flash_sale_ends_at))).slice(0,20).map(snapshotCore);
+  return {items};
+ }
+ if(u.pathname==='/api/products'){
+  let items=[...(d.products||[])];
+  const q=(u.searchParams.get('q')||'').trim().toLowerCase(),cat=u.searchParams.get('category')||'',sort=u.searchParams.get('sort')||'newest';
+  if(q)items=items.filter(p=>[p.name,p.description,p.sku].some(v=>String(v||'').toLowerCase().includes(q)));
+  if(cat)items=items.filter(p=>Array.isArray(p.category_ids)&&p.category_ids.includes(cat));
+  items=snapshotSort(items,sort);
+  const limit=Math.min(60,Math.max(1,Number(u.searchParams.get('limit')||12))),offset=Math.max(0,Math.min(10000,Number(u.searchParams.get('offset')||0)));
+  return {items:items.slice(offset,offset+limit).map(snapshotCore),limit,offset,sort};
+ }
+ const parts=u.pathname.split('/').filter(Boolean);
+ if(parts[1]==='products'&&parts.length===3){
+  const slug=decodeURIComponent(parts[2]),p=(d.products||[]).find(x=>x.slug===slug);if(!p)return null;
+  return {product:{...p,category_name:p.categories?.[0]?.name||'',image:snapshotCore(p).image},images:p.images||[],attributes:p.attributes||[],reviews:p.reviews||[],categories:p.categories||[],quantityDiscountTiers:[{min:1,percent:0},{min:2,percent:2},{min:3,percent:4},{min:4,percent:6},{min:5,percent:8},{min:6,percent:10},{min:8,percent:12},{min:10,percent:15},{min:15,percent:17},{min:20,percent:20}]};
+ }
+ if(u.pathname.startsWith('/api/content/')){
+  const parts2=u.pathname.split('/').filter(Boolean),section=parts2[2],slug=decodeURIComponent(parts2.slice(3).join('/'));const item=(d[section]||[]).find(x=>x.slug===slug);return item?{item}:null;
+ }
+ if(u.pathname==='/api/content'){
+  const section=(u.searchParams.get('section')||'').trim().toLowerCase();if(!['about','contact','news','articles'].includes(section))return null;
+  let items=[...(d[section]||[])];const q=(u.searchParams.get('q')||'').trim().toLowerCase();if(q)items=items.filter(x=>[x.title,x.summary,x.body].some(v=>String(v||'').toLowerCase().includes(q)));
+  const limit=Math.min(20,Math.max(1,Number(u.searchParams.get('limit')||8))),offset=Math.max(0,Number(u.searchParams.get('offset')||0));
+  items.sort((a,b)=>String(b.published_at||b.created_at||'').localeCompare(String(a.published_at||a.created_at||'')));
+  return {items:items.slice(offset,offset+limit),limit,offset,hasMore:items.length>offset+limit};
+ }
+ return null;
+}
+
+async function api(path,opt={}){
+ progressStart();
+ const headers={...(opt.headers||{})};
+ if(opt.body)headers['content-type']='application/json';
+ try{
+  if((opt.method||'GET').toUpperCase()==='GET'){
+   const local=await snapshotApi(path);
+   if(local)return local;
+  }
+  const r=await fetch(API+path,{credentials:'include',cache:'no-store',headers,...opt});
+  const raw=await r.text();
+  let d={};try{d=raw?JSON.parse(raw):{}}catch{}
+  if(!r.ok)throw new Error(d.error||d.message||'خطا در ارتباط با سرویس');
+  const requiredShape=path=>{
+   if(path==='/api/health')return d&&d.ok===true&&d.db===true;
+   if(/^\/api\/products\?/.test(path)||path==='/api/products')return Array.isArray(d?.items);
+   if(path==='/api/categories'||path==='/api/flash-sales')return Array.isArray(d?.items);
+   if(path.startsWith('/api/products/')&&path.endsWith('/view'))return d?.ok===true;
+   if(path.startsWith('/api/products/')&&!path.includes('/reviews'))return d?.product&&Array.isArray(d.images)&&Array.isArray(d.attributes)&&Array.isArray(d.categories)&&Array.isArray(d.reviews);
+   if(path.startsWith('/api/content?'))return Array.isArray(d?.items);
+   if(path.startsWith('/api/content/'))return d?.item&&typeof d.item==='object';
+   if(path==='/api/settings')return d?.settings&&typeof d.settings==='object';
+   if(path==='/api/site-rules')return d?.item&&typeof d.item==='object';
+   if(path==='/api/notifications')return Array.isArray(d?.items);
+   return true;
+  };
+  if(!requiredShape(path))throw new Error('داده ناقص از سرویس اصلی دریافت شد');
+  return d;
+ }finally{progressEnd()}
+}
 function csrf(){return csrfToken||''}
 function setSeo({title,description,image,type='website',jsonLd}={}){if(title){document.title=title;let t=document.querySelector('meta[name="description"]');if(!t){t=document.createElement('meta');t.name='description';document.head.appendChild(t)}t.content=description||'';const og=document.querySelector('meta[property="og:title"]');if(og)og.content=title;const od=document.querySelector('meta[property="og:description"]');if(od)od.content=description||'';if(image){let oi=document.querySelector('meta[property="og:image"]');if(!oi){oi=document.createElement('meta');oi.setAttribute('property','og:image');document.head.appendChild(oi)}oi.content=image}}document.querySelectorAll('script[data-gilasart-jsonld]').forEach(x=>x.remove());if(jsonLd){const s=document.createElement('script');s.type='application/ld+json';s.dataset.gilasartJsonld='1';s.textContent=JSON.stringify(jsonLd).replace(/</g,'\\u003c');document.head.appendChild(s)}}
 function isAdminUser(){return state.roles?.includes("admin")||state.roles?.includes("super_admin")||state.roles?.includes("administrator")||state.roles?.includes("admin-role")}
