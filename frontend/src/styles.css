@@ -2938,3 +2938,133 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 .ga-galaxy-reward{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:22px;background:rgba(8,4,18,.78);backdrop-filter:blur(14px);overflow:hidden}.ga-galaxy-reward .ga-stars{position:absolute;inset:0;background-image:radial-gradient(circle at 10% 20%,rgba(255,255,255,.85) 0 1px,transparent 1.5px),radial-gradient(circle at 70% 12%,rgba(255,255,255,.7) 0 1px,transparent 1.5px),radial-gradient(circle at 42% 78%,rgba(255,255,255,.8) 0 1px,transparent 1.5px),radial-gradient(circle at 86% 68%,rgba(255,255,255,.65) 0 1px,transparent 1.5px);background-size:180px 160px,230px 190px,210px 170px,260px 220px;opacity:.75}.ga-galaxy-reward .ga-reward-content{position:relative;width:min(100%,500px);padding:38px 28px 30px;text-align:center;border-radius:30px;border:1px solid rgba(218,164,255,.38);background:radial-gradient(circle at 50% 0,rgba(159,85,255,.34),transparent 50%),linear-gradient(145deg,#171027,#090614);box-shadow:0 30px 100px rgba(81,24,154,.45),inset 0 1px rgba(255,255,255,.08);color:#fff}.ga-galaxy-reward .ga-galaxy-orb{position:relative;margin:-66px auto 12px;width:76px;height:76px;display:grid;place-items:center;border-radius:50%;font-size:38px;color:#f6dcff;background:radial-gradient(circle,#b96aff,#4a1c80 65%,#1a0a2b);box-shadow:0 0 60px rgba(180,95,255,.8)}.ga-galaxy-reward h2{margin:8px 0 10px}.ga-galaxy-reward p{line-height:2;color:#ddd0e9}.ga-reward-points{display:block;margin:18px auto 22px;font-size:32px;color:#ffd76a;text-shadow:0 0 22px rgba(255,215,106,.35)}.ga-galaxy-reward .btn{min-width:170px;justify-content:center}.ga-notification-hint{position:fixed;z-index:9999;left:18px;bottom:18px;max-width:min(440px,calc(100vw - 36px));display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:1px solid var(--ui-line);border-radius:18px;background:var(--ui-surface);box-shadow:0 20px 60px rgba(0,0,0,.25)}
 @media(max-width:560px){.auth-page{padding:12px 10px}.login-panel{border-radius:24px;padding:24px 18px}.otp-boxes{gap:6px}.otp-digit{height:52px;font-size:21px}.otp-topline{align-items:flex-start}.ga-galaxy-reward{padding:14px}.ga-galaxy-reward .ga-reward-content{padding:34px 20px 24px;border-radius:26px}.ga-reward-points{font-size:28px}}
 @media(prefers-reduced-motion:reduce){.auth-spinner{animation:none}.otp-digit,.auth-mobile-field input{transition:none}}
+
+
+/* =========================================================
+   GilasArt UI/UX Responsive Hardening — final surface layer
+   Scope: public/rewards forms, panels, buttons and mobile/desktop
+   ========================================================= */
+:root{
+  --ui-control-h:46px;
+  --ui-control-radius:13px;
+  --ui-panel-pad:clamp(16px,2.2vw,24px);
+}
+html{overflow-x:hidden}
+body{overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+button,input,select,textarea{max-width:100%;}
+button,.btn,.iconbtn,.theme-toggle,.mobile-menu-toggle{min-height:44px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.btn,.iconbtn{padding-inline:14px}
+.btn:disabled,.iconbtn:disabled{opacity:.52;cursor:not-allowed;transform:none!important}
+.panel,.card,.chart-box{min-width:0}
+.panel{padding:var(--ui-panel-pad)}
+.form{min-width:0}
+.form input,.form select,.form textarea,.search,
+.referral-url,
+.data-grid-search{
+  min-height:var(--ui-control-h);
+  border-radius:var(--ui-control-radius);
+  padding-block:10px;
+}
+.form input,.form select,.form textarea{appearance:none;-webkit-appearance:none;}
+.form input::placeholder,.form textarea::placeholder,.search::placeholder{color:var(--ui-muted);opacity:.78}
+
+/* Rewards: clear visual hierarchy, no crowded control rows */
+.rewards-page .panel{overflow:hidden}
+.rewards-page .sectionhead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.rewards-page .sectionhead>div{min-width:0}
+.rewards-page .sectionhead h2{font-size:clamp(18px,2.2vw,24px);line-height:1.45}
+.rewards-page .sectionhead p{color:var(--ui-muted);line-height:1.8}
+.rewards-grid{grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr);gap:20px}
+.rewards-grid>.panel{height:100%}
+.reward-tiers{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.reward-tier{min-width:0;padding:16px}
+.referral-url-row{grid-template-columns:minmax(0,1fr) auto auto;gap:9px}
+.referral-url-row>*{min-width:0}
+.referral-url{font-size:12px;direction:ltr;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.referral-copy-btn,.referral-sms-btn{min-height:46px}
+.referral-copy-btn{min-width:154px}
+.referral-sms-btn{min-width:218px}
+.referral-code code{overflow-wrap:anywhere;word-break:break-word}
+.referral-privacy-note{line-height:1.8}
+.reward-earn-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.reward-earn-item{min-width:0}
+.reward-coupons{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.rewards-ledger-wrap,.rewards-ledger{min-width:0}
+.rewards-ledger-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.rewards-ledger{min-width:560px}
+
+/* Light theme: inputs/buttons/panels retain enough contrast */
+:root[data-theme="light"] .referral-url,
+:root[data-theme="light"] .form input,
+:root[data-theme="light"] .form select,
+:root[data-theme="light"] .form textarea,
+:root[data-theme="light"] .search{box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+:root[data-theme="light"] .btn.primary{color:#21180a}
+
+/* Tablet */
+@media(max-width:980px){
+  .wrap{width:min(100% - 28px,var(--max))}
+  .rewards-grid{grid-template-columns:1fr}
+  .rewards-balance-hero{min-height:180px}
+  .reward-earn-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* Large phones / small tablets */
+@media(max-width:760px){
+  .nav{padding-inline:2px}
+  .rewards-grid{gap:14px}
+  .rewards-grid>.panel{padding:16px}
+  .reward-tiers{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .reward-tier{min-height:0}
+  .reward-earn-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .reward-coupons{grid-template-columns:1fr}
+  .referral-url-row{grid-template-columns:1fr 1fr}
+  .referral-url-row .referral-url{grid-column:1/-1}
+  .referral-copy-btn,.referral-sms-btn{width:100%;min-width:0}
+}
+
+/* Phones: controls never overflow and remain thumb-friendly */
+@media(max-width:560px){
+  .wrap{width:min(100% - 20px,var(--max))}
+  .panel{border-radius:16px}
+  .rewards-page{padding-bottom:42px}
+  .rewards-masthead{gap:14px}
+  .rewards-microcopy{margin-top:12px}
+  .rewards-balance-hero{min-height:145px;padding:20px 14px;border-radius:18px}
+  .rewards-balance-hero strong{font-size:clamp(38px,13vw,56px)}
+  .reward-tiers{grid-template-columns:1fr}
+  .reward-tier{padding:14px}
+  .reward-tier .btn{width:100%}
+  .reward-earn-grid{grid-template-columns:1fr}
+  .reward-earn-item{padding:13px}
+  .referral-url-row{gap:7px}
+  .referral-copy-btn,.referral-sms-btn{min-height:44px;font-size:12px}
+  .referral-copy-btn svg,.referral-sms-btn svg{width:17px;height:17px}
+  .referral-privacy-note{font-size:10px}
+  .sectionhead{margin-bottom:12px}
+}
+
+/* Very narrow Android/iOS devices */
+@media(max-width:360px){
+  .wrap{width:calc(100% - 16px)}
+  .brand{font-size:17px}
+  .nav{gap:5px}
+  .iconbtn,.theme-toggle,.mobile-menu-toggle{width:38px;min-width:38px;height:38px}
+  .rewards-grid>.panel{padding:13px}
+  .rewards-balance-hero strong{font-size:36px}
+  .referral-url-row{grid-template-columns:1fr}
+  .referral-url-row .referral-url,.referral-copy-btn,.referral-sms-btn{grid-column:auto}
+  .referral-copy-btn,.referral-sms-btn{width:100%}
+}
+
+/* Coarse pointer: remove hover-only movement and preserve stable tap targets */
+@media(hover:none) and (pointer:coarse){
+  button:hover,.btn:hover,.card:hover,.product-card:hover,.product-item:hover{transform:none}
+  button,.btn,.iconbtn{touch-action:manipulation}
+}
+
+/* Safe areas for modern iOS/Android browser chrome */
+@supports(padding:max(0px)){
+  .top{padding-top:env(safe-area-inset-top)}
+  .footer{padding-bottom:max(28px,env(safe-area-inset-bottom))}
+}
