@@ -885,7 +885,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const id=u.pathname.split('/')[4];await env.DB.prepare('DELETE FROM product_attribute_options WHERE id=?').bind(id).run();return json({ok:true});
  }
 
- if(u.pathname==='/api/admin/products'&&req.method==='GET'){if(!(await requirePermission(me,env,'products.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT p.*,i.quantity stock,pi.path image FROM products p LEFT JOIN inventory i ON i.product_id=p.id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 ORDER BY p.created_at DESC').all();const items=r.results||[];const a=await env.DB.prepare('SELECT product_id,attribute_id FROM product_attribute_assignments ORDER BY sort_order').all();const by=new Map();for(const x of (a.results||[])){if(!by.has(x.product_id))by.set(x.product_id,[]);by.get(x.product_id).push(x.attribute_id)}for(const x of items)x.attribute_ids=by.get(x.id)||[];return json({items})}
+ if(u.pathname==='/api/admin/products'&&req.method==='GET'){if(!(await requirePermission(me,env,'products.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT p.*,i.quantity stock,pi.path image FROM products p LEFT JOIN inventory i ON i.product_id=p.id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 ORDER BY p.created_at DESC').all();const items=r.results||[];const a=await env.DB.prepare('SELECT product_id,attribute_id,required,sort_order FROM product_attribute_assignments ORDER BY sort_order').all();const by=new Map();for(const x of (a.results||[])){if(!by.has(x.product_id))by.set(x.product_id,[]);by.get(x.product_id).push(x.attribute_id)}const ov=await env.DB.prepare('SELECT pov.product_id,pov.option_id,pov.active,pov.is_default,pov.price_delta_irt FROM product_attribute_option_overrides pov JOIN product_attribute_assignments pa ON pa.product_id=pov.product_id JOIN product_attribute_options o ON o.id=pov.option_id AND o.attribute_id=pa.attribute_id').all();const ob=new Map();for(const x of (ov.results||[])){if(!ob.has(x.product_id))ob.set(x.product_id,[]);ob.get(x.product_id).push({optionId:x.option_id,active:Number(x.active)===1,isDefault:Number(x.is_default)===1,priceDeltaIrt:Number(x.price_delta_irt||0)})}for(const x of items){x.attribute_ids=by.get(x.id)||[];x.attribute_options=ob.get(x.id)||[]}return json({items})}
  if(u.pathname==='/api/admin/products'&&req.method==='POST'){if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const b=await body(req);if(b.imagePath&&!allowedImagePath(b.imagePath))return json({error:'invalid_image_path'},400);const videoUrl=validVideoUrl(b.videoUrl);if(b.videoUrl&&!videoUrl)return json({error:'invalid_video_url'},400);let flash;try{flash=flashSaleValues(b)}catch(e){return json({error:e.message},400)}const id=uid();await env.DB.batch([env.DB.prepare('INSERT INTO products(id,category_id,slug,sku,name,description,price_irt,active,seo_title,seo_description,video_url,flash_sale_active,flash_sale_ends_at,flash_sale_price_irt) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(id,b.categoryId||null,b.slug,b.sku,b.name,b.description||'',Number(b.priceIrt)||0,b.active===false?0:1,b.seoTitle||b.name,b.seoDescription||'',videoUrl,flash.active,flash.end,flash.price),env.DB.prepare('INSERT INTO inventory(product_id,quantity) VALUES(?,?)').bind(id,Math.max(0,Number(b.stock)||0)),...(b.imagePath?[env.DB.prepare('INSERT INTO product_images(id,product_id,path,alt_text,is_primary) VALUES(?,?,?,?,1)').bind(uid(),id,String(b.imagePath),String(b.imageAlt||b.name))]:[])]);await saveProductAttributeAssignments(env,id,b.attributeIds||[]);
   await audit(env,me,'admin.product.create','product',id,{
  before:null,
@@ -965,6 +965,28 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   return json({ok:true});
  }
 
+
+ if(u.pathname.startsWith('/api/admin/products/')&&u.pathname.endsWith('/attribute-options')&&req.method==='PUT'){
+  if(!(await requirePermission(me,env,'products.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+  const parts=u.pathname.split('/'),id=parts[4];
+  const product=await env.DB.prepare('SELECT id FROM products WHERE id=?').bind(id).first();
+  if(!product)return json({error:'not_found'},404);
+  const b=await body(req),rows=Array.isArray(b.attributeOptions)?b.attributeOptions.slice(0,200):[];
+  const optionIds=[...new Set(rows.map(x=>String(x?.optionId||'')).filter(Boolean))];
+  if(optionIds.length){
+    const valid=await env.DB.prepare(`SELECT o.id FROM product_attribute_options o JOIN product_attribute_assignments pa ON pa.product_id=? AND pa.attribute_id=o.attribute_id WHERE o.id IN (${optionIds.map(()=>'?').join(',')})`).bind(id,...optionIds).all();
+    const validIds=new Set((valid.results||[]).map(x=>x.id));
+    if(validIds.size!==optionIds.length)return json({error:'invalid_product_attribute_option'},400);
+  }
+  const stmts=[env.DB.prepare('DELETE FROM product_attribute_option_overrides WHERE product_id=?').bind(id)];
+  for(const x of rows){
+    const optionId=String(x?.optionId||'');if(!optionId)continue;
+    stmts.push(env.DB.prepare('INSERT INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt) VALUES(?,?,?,?,?)').bind(id,optionId,x.active===false?0:1,x.isDefault===true?1:0,Math.max(0,Math.trunc(Number(x.priceDeltaIrt)||0))));
+  }
+  await env.DB.batch(stmts);
+  await audit(env,me,'admin.product.attribute_options.update','product',id,{after:{count:rows.length}},req);
+  return json({ok:true,count:rows.length});
+ }
 
  if(u.pathname.startsWith('/api/admin/products/') &&
     req.method==='DELETE'){
