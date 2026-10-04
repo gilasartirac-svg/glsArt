@@ -109,14 +109,12 @@ function flashSaleValues(b,before={}){
 }
 function otpSmsMessage(env,code,template){
  const host=new URL(frontend(env)).hostname;
- const base=String(template||'گیلاس آرت\\nکد ورود : {code}').replaceAll('\\r\\n','\\n').replaceAll('\\n','
-').replaceAll('{code}',code).replaceAll('{0}',code).split(/\\r?\\n/).filter(x=>!/^\\s*@[^\\s]+\\s+#\\d{6}\\s*$/.test(x)).join('\\n').trim();
+ const base=String(template||'گیلاس آرت\\nکد ورود : {code}').replaceAll('\\r\\n','\\n').replaceAll('\\n','\n').replaceAll('{code}',code).replaceAll('{0}',code).split(/\\r?\\n/).filter(x=>!/^\\s*@[^\\s]+\\s+#\\d{6}\\s*$/.test(x)).join('\\n').trim();
  return `${base}\\n\\n@${host} #${code}`;
 }
 function ticketSmsUrl(env,id){return frontend(env)+'/#/support/'+encodeURIComponent(String(id||''))}
 function fillSmsTemplate(template,data){
- return String(template||'').replaceAll('\\r\\n','\\n').replaceAll('\\n','
-')
+ return String(template||'').replaceAll('\\r\\n','\\n').replaceAll('\\n','\n')
   .replaceAll('{ticket_id}',String(data.ticketId||''))
   .replaceAll('{ticket_url}',String(data.ticketUrl||''))
   .replaceAll('{subject}',String(data.subject||''))
