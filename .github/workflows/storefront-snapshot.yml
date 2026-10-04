@@ -29,6 +29,7 @@ jobs:
           mkdir -p frontend/public/data
           curl -fsSL --retry 4 --retry-all-errors --connect-timeout 15 --max-time 120 "$SNAPSHOT_URL" -o frontend/public/data/storefront.json
           test -s frontend/public/data/storefront.json
+          node -e "const fs=require('fs');const d=require('./frontend/public/data/storefront.json');fs.writeFileSync('./frontend/public/data/storefront-manifest.json',JSON.stringify({schemaVersion:d.meta.schemaVersion,generatedAt:d.meta.generatedAt,productCount:d.meta.productCount,categoryCount:d.meta.categoryCount,reviewCount:d.meta.reviewCount,articleCount:d.meta.articleCount,newsCount:d.meta.newsCount},null,2)+'\\n')"
 
       - name: Validate snapshot schema and safety
         run: |
@@ -59,7 +60,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add frontend/public/data/storefront.json
+          git add frontend/public/data/storefront.json frontend/public/data/storefront-manifest.json
           if git diff --cached --quiet; then
             echo "Snapshot unchanged; nothing to commit."
             exit 0
