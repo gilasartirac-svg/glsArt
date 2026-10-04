@@ -18,58 +18,7 @@ window.GilasArtTheme={toggle(){applyTheme(document.documentElement.dataset.theme
 window.GilasArtMobileMenu={toggle(button){const menu=document.querySelector('#main-menu');if(!menu)return;const open=!menu.classList.contains('is-open');menu.classList.toggle('is-open',open);button?.setAttribute('aria-expanded',String(open));button?.setAttribute('aria-label',open?'بستن منوی اصلی':'باز کردن منوی اصلی')},close(){const menu=document.querySelector('#main-menu'),button=document.querySelector('.mobile-menu-toggle');menu?.classList.remove('is-open');button?.setAttribute('aria-expanded','false');button?.setAttribute('aria-label','باز کردن منوی اصلی')}};
 document.addEventListener('click',e=>{const link=e.target?.closest?.('#main-menu a');if(link)window.GilasArtMobileMenu?.close()},{capture:true});
 initTheme();
-let artLoader=null,artLoaderHideTimer=null,artLoaderVisible=false;
-function ensureArtLoader(){
- if(artLoader&&document.body.contains(artLoader))return artLoader;
- artLoader=document.createElement('div');artLoader.id='gilasart-art-loader';artLoader.className='art-loader';artLoader.setAttribute('role','status');artLoader.setAttribute('aria-live','polite');
- const root=location.pathname.includes('/glsArt')?'/glsArt/':'/';
- artLoader.innerHTML='<div class="art-loader-inner"><div class="art-loader-logo"><img src="'+root+'invoice/logo.svg" alt="گیلاس آرت" decoding="async"></div><div class="art-loader-frame" aria-hidden="true"><span class="art-loader-canvas"></span><i></i><b></b></div><strong class="art-loader-title">گیلاس آرت</strong><span class="art-loader-caption">در حال آماده‌سازی گالری هنری</span><div class="art-loader-percent">0٪</div><div class="art-loader-track"><span></span></div></div>';
- document.body.appendChild(artLoader);return artLoader;
-}
-function artLoaderPaint(value){
- const el=ensureArtLoader(),v=Math.max(0,Math.min(100,Number(value)||0));const pct=el.querySelector('.art-loader-percent'),bar=el.querySelector('.art-loader-track span');if(pct)pct.textContent=fa(Math.round(v))+'٪';if(bar)bar.style.width=v+'%';
-}
-function showArtLoader(immediate=false){
- const el=ensureArtLoader();clearTimeout(artLoaderHideTimer);artLoaderVisible=true;el.classList.add('is-visible');if(immediate)artLoaderPaint(Math.max(progressValue,4));
-}
-function hideArtLoader(){
- if(!artLoader||!artLoaderVisible)return;artLoaderPaint(100);clearTimeout(artLoaderHideTimer);artLoaderHideTimer=setTimeout(()=>{if(!artLoader)return;artLoader.classList.remove('is-visible');artLoaderVisible=false},260);
-}
-let progressRequests=0,progressTimer=null,progressHideTimer=null,progressValue=0;
-function progressPaint(bar){const value=Math.max(0,Math.min(100,progressValue));const span=bar?.querySelector('span');if(span)span.style.width=value+'%';if(artLoaderVisible)artLoaderPaint(value)}
-function progressStart(){
-  let bar=document.querySelector('#global-progress');
-  if(!bar){bar=document.createElement('div');bar.id='global-progress';bar.innerHTML='<span></span>';document.body.prepend(bar)}
-  clearTimeout(progressHideTimer);
-  progressRequests++;
-  bar.hidden=false;
-  if(progressRequests===1){progressValue=Math.max(progressValue,3);progressPaint(bar)}
-  if(!progressTimer){
-    progressTimer=setInterval(()=>{
-      if(progressRequests<=0)return;
-      if(progressValue<88)progressValue=Math.min(88,progressValue+Math.max(.12,(88-progressValue)*.025));
-      progressPaint(bar);
-    },140);
-  }
-}
-function progressEnd(){
-  progressRequests=Math.max(0,progressRequests-1);
-  if(progressRequests)return;
-  clearInterval(progressTimer);progressTimer=null;
-  const bar=document.querySelector('#global-progress');
-  if(!bar)return;
-  const startValue=progressValue,started=performance.now();
-  const finish=now=>{
-    if(progressRequests>0)return;
-    const t=Math.min(1,(now-started)/280);
-    progressValue=startValue+(100-startValue)*(1-Math.pow(1-t,3));
-    progressPaint(bar);
-    if(t<1)requestAnimationFrame(finish);
-    else{progressValue=100;progressPaint(bar);progressHideTimer=setTimeout(()=>{if(progressRequests===0)bar.hidden=true},220)}
-  };
-  requestAnimationFrame(finish);
-}
-window.GilasArtProgress={start:progressStart,end:progressEnd};window.GilasArtMobile={
+window.GilasArtMobile={
  platform:()=>{try{if(window.Capacitor?.getPlatform)return window.Capacitor.getPlatform();}catch{}const u=navigator.userAgent||'';return /iPad|iPhone|iPod/.test(u)?'ios':/Android/i.test(u)?'android':'web'},
  async checkRelease(){
   try{
@@ -103,7 +52,6 @@ async function registerGilasArtServiceWorker(){
  }catch(e){console.warn('service_worker_registration_failed',e)}
 }
 registerGilasArtServiceWorker();
-showArtLoader(true);
 setTimeout(()=>window.GilasArtMobile?.checkRelease(),1800);
 setInterval(()=>{if(navigator.onLine)window.GilasArtMobile?.checkRelease()},15*60*1000);
 
@@ -189,7 +137,6 @@ async function snapshotApi(path){
 }
 
 async function api(path,opt={}){
- progressStart();
  const headers={...(opt.headers||{})};
  if(opt.body)headers['content-type']='application/json';
  try{
@@ -216,7 +163,7 @@ async function api(path,opt={}){
   };
   if(!requiredShape(path))throw new Error('داده ناقص از سرویس اصلی دریافت شد');
   return d;
- }finally{progressEnd()}
+  }
 }
 function csrf(){return csrfToken||''}
 function setSeo({title,description,image,type='website',jsonLd}={}){if(title){document.title=title;let t=document.querySelector('meta[name="description"]');if(!t){t=document.createElement('meta');t.name='description';document.head.appendChild(t)}t.content=description||'';const og=document.querySelector('meta[property="og:title"]');if(og)og.content=title;const od=document.querySelector('meta[property="og:description"]');if(od)od.content=description||'';if(image){let oi=document.querySelector('meta[property="og:image"]');if(!oi){oi=document.createElement('meta');oi.setAttribute('property','og:image');document.head.appendChild(oi)}oi.content=image}}document.querySelectorAll('script[data-gilasart-jsonld]').forEach(x=>x.remove());if(jsonLd){const s=document.createElement('script');s.type='application/ld+json';s.dataset.gilasartJsonld='1';s.textContent=JSON.stringify(jsonLd).replace(/</g,'\\u003c');document.head.appendChild(s)}}
