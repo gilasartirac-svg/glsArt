@@ -578,7 +578,34 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
   ]);
   return json({ok:true});
  }
- if(u.pathname==='/api/admin/tickets'&&req.method==='GET'){if(!(await requirePermission(me,env,'support.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT t.*,u.mobile FROM support_tickets t JOIN users u ON u.id=t.user_id ORDER BY t.updated_at DESC LIMIT 500').all();return json({items:r.results||[]})}
+ if(u.pathname==='/api/admin/faq'&&req.method==='GET'){
+ if(!(await requirePermission(me,env,'support.read')))return json({error:'forbidden'},403);
+ const r=await env.DB.prepare('SELECT id,question,answer,sort_order,active,created_at,updated_at FROM faq_entries ORDER BY sort_order ASC,created_at ASC').all();
+ return json({items:r.results||[]});
+}
+if(u.pathname==='/api/admin/faq'&&req.method==='POST'){
+ if(!(await requirePermission(me,env,'support.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+ const b=await body(req),id=uid(),question=String(b.question||'').trim().slice(0,500),answer=String(b.answer||'').trim().slice(0,5000),sortOrder=Math.trunc(Number(b.sortOrder)||0),active=b.active===false?0:1;
+ if(!question||!answer)return json({error:'invalid_faq'},400);
+ await env.DB.prepare('INSERT INTO faq_entries(id,question,answer,sort_order,active) VALUES(?,?,?,?,?)').bind(id,question,answer,sortOrder,active).run();
+ await audit(env,me,'admin.faq.create','faq',id,{after:{question,answer,sortOrder,active}},req);
+ return json({ok:true,id});
+}
+if(u.pathname.startsWith('/api/admin/faq/')&&req.method==='PUT'){
+ if(!(await requirePermission(me,env,'support.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+ const id=u.pathname.split('/').pop(),before=await env.DB.prepare('SELECT * FROM faq_entries WHERE id=?').bind(id).first();if(!before)return json({error:'not_found'},404);
+ const b=await body(req),question=String(b.question??before.question).trim().slice(0,500),answer=String(b.answer??before.answer).trim().slice(0,5000),sortOrder=Math.trunc(Number(b.sortOrder??before.sort_order)||0),active=b.active===undefined?Number(before.active):b.active?1:0;
+ if(!question||!answer)return json({error:'invalid_faq'},400);
+ await env.DB.prepare('UPDATE faq_entries SET question=?,answer=?,sort_order=?,active=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(question,answer,sortOrder,active,id).run();
+ const after=await env.DB.prepare('SELECT * FROM faq_entries WHERE id=?').bind(id).first();await audit(env,me,'admin.faq.update','faq',id,{before,after},req);return json({ok:true});
+}
+if(u.pathname.startsWith('/api/admin/faq/')&&req.method==='DELETE'){
+ if(!(await requirePermission(me,env,'support.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+ const id=u.pathname.split('/').pop(),before=await env.DB.prepare('SELECT * FROM faq_entries WHERE id=?').bind(id).first();if(!before)return json({error:'not_found'},404);
+ await env.DB.prepare('DELETE FROM faq_entries WHERE id=?').bind(id).run();await audit(env,me,'admin.faq.delete','faq',id,{before,after:null},req);return json({ok:true});
+}
+
+if(u.pathname==='/api/admin/tickets'&&req.method==='GET'){if(!(await requirePermission(me,env,'support.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT t.*,u.mobile FROM support_tickets t JOIN users u ON u.id=t.user_id ORDER BY t.updated_at DESC LIMIT 500').all();return json({items:r.results||[]})}
  if(u.pathname.startsWith('/api/admin/tickets/')&&req.method==='GET'){if(!(await requirePermission(me,env,'support.read')))return json({error:'forbidden'},403);const id=u.pathname.split('/').pop(),t=await env.DB.prepare('SELECT t.*,u.mobile FROM support_tickets t JOIN users u ON u.id=t.user_id WHERE t.id=?').bind(id).first();if(!t)return json({error:'not_found'},404);const m=await env.DB.prepare('SELECT id,author_type,body,created_at FROM ticket_messages WHERE ticket_id=? ORDER BY created_at ASC').bind(id).all();return json({ticket:t,messages:m.results||[]})}
  if(u.pathname.startsWith('/api/admin/tickets/')&&req.method==='POST'){
   if(!(await requirePermission(me,env,'support.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
