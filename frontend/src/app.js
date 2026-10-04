@@ -97,8 +97,7 @@ function hideServicePause(){servicePauseState.active=false;clearInterval(service
 function showServicePause(reason='cloudflare',message){
  servicePauseState.active=true;servicePauseState.reason=reason;
  let el=document.querySelector('#service-pause');if(!el){document.body.insertAdjacentHTML('beforeend',servicePauseMarkup());el=document.querySelector('#service-pause')}
- const timed=reason==='cloudflare-limit'||reason==='d1-limit';
- el.querySelector('#service-pause-message').textContent=message||'فروشگاه گیلاس آرت در حال انجام به‌روزرسانی و آماده‌سازی برای ارائه خدمات بهتر است.';
+ const timed=reason==='cloudflare-limit'||reason==='d1-limit'; el.querySelector('#service-pause-message').textContent=message||'فروشگاه گیلاس آرت در حال انجام به‌روزرسانی و آماده‌سازی برای ارائه خدمات بهتر است.';
  const countdown=el.querySelector('#service-pause-countdown'),note=el.querySelector('#service-pause-note');
  countdown.hidden=!timed;note.textContent=timed?'بازگشت فروشگاه: ⏱️':'لطفاً چند لحظه بعد دوباره تلاش کنید.';
  const paint=()=>{if(!timed)return;const left=nextUtcReset()-Date.now();countdown.textContent=formatCountdown(left);if(left<=0){clearInterval(servicePauseState.timer);servicePauseState.timer=null;servicePauseState.retryTimer=setTimeout(()=>{if(servicePauseState.active)location.reload()},1200)}};
@@ -107,8 +106,8 @@ function showServicePause(reason='cloudflare',message){
 }
 function detectServiceLimit(status,raw,data){const t=String(raw||'')+' '+JSON.stringify(data||{});if(status===429||status===1015||/1027|error\\s*1027|worker exceeded free tier daily request limit|free tier daily request limit|too many requests|rate.?limited|you are being rate limited|error\\s*1015/i.test(t))return'cloudflare-limit';if(/7500|d1.?limit|service_limit.?[": ]+d1-limit|daily row (read|write) limit|daily row.*limit|exceeded.*free tier daily|free tier.*daily row/i.test(t)&&status>=400)return'd1-limit';return''}
 async function readServiceStatus(){try{const root=location.pathname.includes('/glsArt')?'/glsArt/':'/';const u=new URL(root+'service-status.json',location.origin);u.searchParams.set('t',Date.now());const r=await fetch(u.href,{cache:'no-store'});if(!r.ok)return null;const d=await r.json();if(d&&d.checkedAt){const age=Date.now()-new Date(d.checkedAt).getTime();const maxAge=d.paused?24*60*60*1000:20*60*1000;if(age>maxAge)return null}return d}catch{return null}}
-async function bootServiceGate(){try{const d=await api('/api/health');if(d?.ok===true&&d?.db===true){if(servicePauseState.active)hideServicePause();return true}if(servicePauseState.active)hideServicePause();return true}catch(e){if(servicePauseState.active&&servicePauseState.reason==='cloudflare-limit')return false;if(servicePauseState.active)hideServicePause();return true}}
-async function api(path,opt={}){progressStart();const headers={...(opt.headers||{})};if(opt.body)headers['content-type']='application/json';try{const r=await fetch(API+path,{credentials:'include',cache:'no-store',headers,...opt});const raw=await r.text();let d={};try{d=raw?JSON.parse(raw):{}}catch{}if(!r.ok){const limit=detectServiceLimit(r.status,raw,d);if(limit)showServicePause(limit);throw new Error(d.error||d.message||(limit?'سرویس موقتاً در دسترس نیست':'خطا'))}
+
+async function api(path,opt={}){progressStart();const headers={...(opt.headers||{})};if(opt.body)headers['content-type']='application/json';try{const r=await fetch(API+path,{credentials:'include',cache:'no-store',headers,...opt});const raw=await r.text();let d={};try{d=raw?JSON.parse(raw):{}}catch{}if(!r.ok){const limit=detectServiceLimit(r.status,raw,d);throw new Error(d.error||d.message||(limit?'سرویس موقتاً در دسترس نیست':'خطا'))}
 const requiredShape=path=>{
  if(path==='/api/health')return d&&d.ok===true&&d.db===true;
  if(/^\/api\/products\?/.test(path)||path==='/api/products')return Array.isArray(d?.items);
@@ -197,8 +196,7 @@ async function home(){const results=await Promise.allSettled([api('/api/products
  layout('<section class="wrap page shop-page"><header class="page-masthead"><div class="page-masthead-copy"><span class="eyebrow">GILAS ART • COPPER INLAY</span><h1>گالری آثار</h1><p>مجموعه‌ای منظم برای تماشای آثار، جستجو و انتخاب دقیق.</p></div>'+hero+'</header><section class="gallery-workspace" aria-label="جستجو، فیلتر و مرتب‌سازی آثار"><aside class="filter-panel"><div class="filter-panel-head"><div><span class="eyebrow">FILTER & SORT</span><h2>فیلتر و مرتب‌سازی</h2></div><button class="filter-reset" id="filter-reset" type="button">پاک کردن</button></div><label class="search-field"><span>جستجو</span><input id="q" class="search" type="search" placeholder="نام یا کد محصول" autocomplete="off" enterkeyhint="search"></label><label class="sort-field" for="sort-products"><span>مرتب‌سازی آثار</span><select id="sort-products" aria-label="مرتب‌سازی آثار">'+sortMarkup+'</select></label><fieldset class="filter-group"><legend>دسته‌بندی</legend><label class="check-option"><input class="cat-check" type="checkbox" data-id="" '+(!category?'checked':'')+'><span class="check-box" aria-hidden="true"></span><span>همه آثار</span></label>'+categoryMarkup+'</fieldset><div class="filter-help">جستجو، دسته‌بندی و مرتب‌سازی همگی همزمان روی گالری اعمال می‌شوند.</div></aside><div class="gallery-results"><div class="results-head"><div><span class="eyebrow">GALLERY COLLECTION</span><h2>آثار موجود</h2></div><span class="results-count" id="results-count" aria-live="polite"></span></div><div id="results" class="grid product-stream" aria-live="polite"></div><div id="sentinel" class="infinite-sentinel" aria-hidden="true"></div><div class="load-more-wrap"><button id="load-more" class="btn ghost load-more-button" type="button">نمایش صفحه بعدی</button><div id="load-status" class="load-status" role="status" aria-live="polite">در حال آماده سازی گالری ...</div></div><div id="empty" class="panel empty-state" hidden>نتیجه‌ای پیدا نشد.</div></div></section></section>');
  sentinel=document.querySelector('#sentinel');
  observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting))loadMore(false)}, {rootMargin:'650px 0px'});observer.observe(sentinel);
- const rerun=()=>{clearTimeout(window.__gaSearchTimer);window.__gaSearchTimer=setTimeout(()=>loadMore(true).catch(()=>{}),220)};
- document.querySelector('#q').addEventListener('input',()=>{query=document.querySelector('#q').value.trim();rerun()});
+ const rerun=()=>{clearTimeout(window.__gaSearchTimer);window.__gaSearchTimer=setTimeout(()=>loadMore(true).catch(()=>{}),220)}; document.querySelector('#q').addEventListener('input',()=>{query=document.querySelector('#q').value.trim();rerun()});
  document.querySelector('#q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();query=document.querySelector('#q').value.trim();clearTimeout(window.__gaSearchTimer);loadMore(true).catch(()=>{})}});
  document.querySelector('#sort-products').addEventListener('change',e=>{sort=e.target.value;rerun()});
  document.querySelectorAll('.cat-check').forEach(x=>x.addEventListener('change',()=>{if(x.checked){category=x.dataset.id||'';document.querySelectorAll('.cat-check').forEach(y=>{if(y!==x)y.checked=false});rerun()}else if(!document.querySelector('.cat-check:checked')){category='';rerun()}}));
@@ -297,8 +295,7 @@ async function product(slug){
   document.querySelector('#review-form')?.addEventListener('submit',async e=>{
     e.preventDefault();
     const f=new FormData(e.target),m=document.querySelector('#review-msg');
-    try{
-      await ensureLogin();
+    try{      await ensureLogin();
       await api('/api/products/'+encodeURIComponent(slug)+'/reviews',{method:'POST',body:JSON.stringify({rating:Number(f.get('rating')),body:f.get('body')}),headers:{'x-csrf-token':csrf()}});
       m.innerHTML='<span class="ok">نظر شما ثبت شد و پس از بررسی منتشر می‌شود.</span>';
       e.target.reset();
@@ -397,8 +394,7 @@ async function cart(){
 const orderStatusPublic=s=>ORDER_STATUS_LABELS_PUBLIC[String(s||'').toUpperCase()]||String(s||'نامشخص');
 function invoiceHtmlData(d){
  const o=d.order||{},items=d.items||[],p=d.payment||{},cfg=d.invoice||{};
- const paid=['PAID','PROCESSING','SHIPPED','DELIVERED'].includes(String(o.status||'').toUpperCase())||String(p.status||'').toUpperCase()==='PAID';
- const title=paid?'فاکتور فروش':'پیش فاکتور فروش';
+ const paid=['PAID','PROCESSING','SHIPPED','DELIVERED'].includes(String(o.status||'').toUpperCase())||String(p.status||'').toUpperCase()==='PAID'; const title=paid?'فاکتور فروش':'پیش فاکتور فروش';
  const esc=escapeHtml;
  const rows=items.map(x=>'<tr><td>'+esc(x.name)+'</td><td>'+esc(x.sku||'-')+'</td><td>'+esc(x.quantity)+'</td><td>'+fa(x.unit_price_irt)+'</td><td>'+fa(x.line_total_irt)+'</td></tr>').join('');
  const logo=cfg.invoice_logo_path||'/glsArt/invoice/logo.svg',sig=cfg.invoice_signature_path||'';
@@ -497,8 +493,7 @@ async function contentDetail(section,slug){
   const d=await api('/api/content/'+encodeURIComponent(section)+'/'+encodeURIComponent(slug)),x=d.item||{},src=safeUrl(x.cover_image),visual=src?'<div class="cms-page-visual"><img src="'+escapeHtml(src)+'" alt="'+escapeHtml(x.title||'تصویر محتوا')+'" loading="eager" decoding="async"><span><small>GILAS ART</small><strong>'+escapeHtml(x.title||'')+'</strong></span></div>':'<div class="cms-page-visual cms-page-visual-empty" aria-hidden="true"><span>GILAS ART</span><strong>روایت و هنر</strong></div>',bodyText=v=>escapeHtml(String(v||'')).replace(/\r?\n/g,'<br>');
   layout('<section class="wrap page cms-page">'+visual+'<article class="panel cms-detail"><div class="cms-detail-head"><div><span class="eyebrow">'+(section==='news'?'NEWS':'ARTICLE')+'</span><h1>'+escapeHtml(x.title||title)+'</h1>'+(x.published_at?'<time class="cms-date" datetime="'+escapeHtml(x.published_at)+'">'+escapeHtml(jalaliDate(x.published_at))+'</time>':'')+'</div><a class="btn ghost" href="#/'+section+'">← بازگشت</a></div>'+(x.summary?'<p class="cms-detail-lead">'+escapeHtml(x.summary)+'</p>':'')+'<div class="cms-body">'+bodyText(x.body||'')+'</div><div class="cms-detail-footer"><a class="btn ghost" href="#/'+section+'">مطالب بیشتر</a><a class="btn primary" href="#/shop">مشاهده آثار</a></div></article></section>');
   setSeo({title:(x.title||title)+' | گیلاس آرت',description:x.summary||'',image:src||undefined});
- }catch(e){layout('<section class="wrap page cms-page"><div class="panel cms-empty"><h1>محتوا یافت نشد</h1><p class="error">'+escapeHtml(e.message||'این محتوا قابل دریافت نیست.')+'</p><a class="btn ghost" href="#/'+section+'">بازگشت</a></div></section>')}
-}
+ }catch(e){layout('<section class="wrap page cms-page"><div class="panel cms-empty"><h1>محتوا یافت نشد</h1><p class="error">'+escapeHtml(e.message||'این محتوا قابل دریافت نیست.')+'</p><a class="btn ghost" href="#/'+section+'">بازگشت</a></div></section>')}}
 
 async function rewardsPage(){
  await loadMe();
@@ -584,7 +579,7 @@ async function router(){const base=location.pathname.includes('/glsArt')?'/glsAr
  }catch(e){
   const bodyEl=document.querySelector('#terms-body');if(bodyEl)bodyEl.textContent='قوانین سایت در حال حاضر قابل دریافت نیست.';
  }
- return}if(p[0]==='support')return p[1]?supportDetail(decodeURIComponent(p[1])):support();if(p[0]==='payment'){layout(`<section class="wrap page"><div class="panel"><h1>${p[1]==='success'?'پرداخت با موفقیت تایید شد':'پرداخت ناموفق بود'}</h1><a class="btn primary" href="#/shop">بازگشت به فروشگاه</a></div></section>`);return}home()}catch(e){console.error('router_error',e);showServicePause(servicePauseState.reason||'connection','اطلاعات موردنیاز فروشگاه از سرویس اصلی دریافت نشد. برای جلوگیری از نمایش ناقص، سایت موقتاً متوقف شده است.')} }window.addEventListener('hashchange',()=>{if(!servicePauseState.active)router()});window.addEventListener('popstate',()=>{if(!servicePauseState.active)router()});(async()=>{const ready=await bootServiceGate();if(!ready)return;try{await loadMe()}catch{}if(!servicePauseState.active)await router()})();
+ return}if(p[0]==='support')return p[1]?supportDetail(decodeURIComponent(p[1])):support();if(p[0]==='payment'){layout(`<section class="wrap page"><div class="panel"><h1>${p[1]==='success'?'پرداخت با موفقیت تایید شد':'پرداخت ناموفق بود'}</h1><a class="btn primary" href="#/shop">بازگشت به فروشگاه</a></div></section>`);return}home()}catch(e){console.error('router_error',e);if(!p[0]){hideServicePause();console.warn('home_render_error',e)}else showServicePause(servicePauseState.reason||'connection','اطلاعات موردنیاز این بخش از سرویس اصلی دریافت نشد.')} }window.addEventListener('hashchange',()=>router());window.addEventListener('popstate',()=>router());(async()=>{try{await loadMe()}catch{}await router()})();
 
 /* GilasArt interaction guard */
 (()=>{
@@ -597,8 +592,7 @@ async function router(){const base=location.pathname.includes('/glsArt')?'/glsAr
    const link=e.target?.closest?.('a[href]');
    if(link && (link.target==='_blank'||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey)){e.preventDefault();e.stopPropagation();}
  },{capture:true});
- document.addEventListener('keydown',e=>{
-   const k=String(e.key||'').toLowerCase();
+ document.addEventListener('keydown',e=>{   const k=String(e.key||'').toLowerCase();
    if((e.ctrlKey||e.metaKey)&&['c','x','u','s','p'].includes(k)){e.preventDefault();e.stopPropagation();}
    if(e.key==='ContextMenu'||(e.shiftKey&&e.key==='F10')){e.preventDefault();e.stopPropagation();}
  },{capture:true});
