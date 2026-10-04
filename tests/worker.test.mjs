@@ -28,7 +28,7 @@ test('CMS content schema, permissions and samples are present',()=>{
  assert.ok(cmsSchema.includes('cms_news_01'));assert.ok(cmsSchema.includes('cms_article_01'));assert.ok(cmsSchema.includes('cms_contact_01'));
  assert.ok(worker.includes("u.pathname.startsWith('/api/content')"));assert.ok(worker.includes("searchParams.get('section')"));assert.match(worker,/\/api\/admin\/cms/);
 });
-test('OTP request hides UI before network request and login returns roles',()=>{
+test('account OTP and reward UX has production split-input and notification styling',async()=>{ const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8'); const css=await readFile(new URL('../frontend/src/styles.css',import.meta.url),'utf8'); assert.match(app,/otp-digit/);assert.match(app,/one-time-code/);assert.match(app,/webOtpController\\?\\.abort/); for(const selector of ['.auth-page','.auth-otp-panel','.otp-digit','.ga-galaxy-reward','.ga-reward-content'])assert.match(css,new RegExp(selector.replace(/[.]/g,'\\\\.')));});test('OTP request hides UI before network request and login returns roles',()=>{
  const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
  assert.match(app,/const hideMobile=\(\)=>\{mobileLabel\.hidden=true;mobileLabel\.setAttribute\('aria-hidden','true'\);mobileEl\.disabled=true;send\.hidden=true;send\.disabled=true\}/);
  assert.match(worker,/ok:true,user:u0,roles:await roles\(u0,env\),permissions:await permissions\(u0,env\),csrfToken:csrf/);

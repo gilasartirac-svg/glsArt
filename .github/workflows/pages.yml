@@ -63,22 +63,6 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      # Custom workflows do not use a repository CNAME file for the Pages
-      # custom-domain setting. Keep the repository CNAME for compatibility,
-      # and explicitly configure the Pages custom domain through the API.
-      - name: Configure GitHub Pages custom domain
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          curl --fail-with-body -sS -L \
-            -X PUT \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "X-GitHub-Api-Version: 2026-03-10" \
-            https://api.github.com/repos/${{ github.repository }}/pages \
-            -d '{"cname":"gilasart.ir","build_type":"workflow","source":{"branch":"main","path":"/"}}'
-
       - name: Build frontend
         run: npm run build
 
