@@ -376,6 +376,16 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
  }
  if(u.pathname==='/api/admin/visitors'&&req.method==='GET')return visitorAdminList(req,env);
  if(u.pathname==='/api/health'){let db=false,dbError='';if(env.DB){try{await env.DB.prepare('SELECT 1 AS ok').first();await env.DB.prepare('SELECT id FROM products LIMIT 1').first();await env.DB.prepare('SELECT id FROM categories LIMIT 1').first();await env.DB.prepare('SELECT key FROM site_settings LIMIT 1').first();db=true}catch(e){dbError=String(e?.message||'d1_unavailable').slice(0,240)}}const ok=db;return json({ok,service:'gilasartworker',db,paymentEnv:env.PAYMENT_ENV||'sandbox',smsConfigured:!!env.KAVENEGAR_API_KEY,smsSenderConfigured:!!String(env.KAVENEGAR_SENDER||''),...(dbError?{dbError}: {})},ok?200:503)}
+ if(u.pathname==='/api/home'&&req.method==='GET'){
+  const [products,categories,settings,flash]=await Promise.all([
+    env.DB.prepare("SELECT p.id,p.slug,p.sku,p.name,p.description,p.price_irt,p.category_id,p.flash_sale_active,p.flash_sale_ends_at,p.flash_sale_price_irt,p.video_url,p.view_count,p.rating_avg,p.review_count,p.favorite_count,p.sold_count,pi.path image FROM products p LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.active=1 ORDER BY p.created_at DESC,p.id DESC LIMIT 8").all(),
+    env.DB.prepare("SELECT id,slug,name,description FROM categories WHERE active=1 ORDER BY name").all(),
+    env.DB.prepare("SELECT key,value FROM site_settings").all(),
+    env.DB.prepare("SELECT p.id,p.slug,p.sku,p.name,p.description,p.price_irt,p.flash_sale_price_irt,p.flash_sale_ends_at,pi.path image FROM products p LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.active=1 AND p.flash_sale_active=1 AND p.flash_sale_ends_at IS NOT NULL AND julianday(p.flash_sale_ends_at)>julianday('now') ORDER BY p.flash_sale_ends_at ASC,p.created_at DESC LIMIT 20").all()
+  ]);
+  const out={};for(const x of (settings.results||[]))out[x.key]=x.value;
+  return json({products:{items:products.results||[]},categories:{items:categories.results||[]},settings:{settings:out},flash:{items:flash.results||[]}});
+ }
  if(u.pathname==='/api/categories'&&req.method==='GET'){const r=await env.DB.prepare('SELECT id,slug,name,description FROM categories WHERE active=1 ORDER BY name').all();return json({items:r.results||[]})}
  if(u.pathname==='/api/products'&&req.method==='GET'){
   const q=(u.searchParams.get('q')||'').trim(),cat=u.searchParams.get('category'),sort=String(u.searchParams.get('sort')||'newest').toLowerCase();
