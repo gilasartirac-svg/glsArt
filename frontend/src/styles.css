@@ -1615,52 +1615,6 @@ main#main-content{min-height:60vh}
 }
 
 
-/* Cloudflare / D1 service pause — Japanese sakura scene */
-.service-pause{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;overflow:hidden;padding:18px;background:#100d12;color:var(--ui-text);isolation:isolate}
-.service-pause::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(8,7,12,.08) 0%,rgba(9,7,12,.30) 42%,rgba(6,5,9,.82) 100%),radial-gradient(circle at 50% 38%,transparent 0 23%,rgba(5,4,8,.16) 58%,rgba(3,3,6,.56) 100%);pointer-events:none}
-.service-pause::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(105deg,transparent 0 34%,rgba(255,220,231,.045) 44%,transparent 53%);animation:serviceLightSweep 13s ease-in-out infinite}
-.service-pause-scene{position:absolute;inset:-9%;z-index:0;overflow:hidden;pointer-events:none;background-image:url("./assets/sakura-maintenance.svg");background-size:cover;background-position:center 52%;filter:saturate(.96) contrast(1.04) brightness(.92);animation:serviceSakuraZoom 32s ease-in-out infinite alternate}
-.service-pause-scene::before{content:"";position:absolute;inset:-5%;background:radial-gradient(ellipse at 50% 25%,rgba(255,224,235,.12),transparent 46%),linear-gradient(90deg,rgba(18,7,16,.34),transparent 38%,transparent 64%,rgba(10,7,13,.34));animation:serviceSakuraPan 24s ease-in-out infinite alternate}
-.service-pause-scene::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 0 30%,rgba(4,3,7,.18) 62%,rgba(2,2,5,.64) 100%);mix-blend-mode:multiply}
-.service-pause-petals{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none}
-.service-pause-petals i{position:absolute;top:-8%;left:var(--x);width:var(--s);height:calc(var(--s)*.72);border-radius:80% 18% 80% 18%;background:linear-gradient(135deg,rgba(255,245,248,.98),rgba(236,159,181,.78));box-shadow:0 2px 12px rgba(88,35,52,.22);opacity:0;animation:servicePetalFall var(--d) linear var(--delay) infinite}
-.service-pause-petals i:nth-child(1){--x:7%;--s:12px;--d:10s;--delay:-2s}.service-pause-petals i:nth-child(2){--x:16%;--s:8px;--d:13s;--delay:-8s}.service-pause-petals i:nth-child(3){--x:25%;--s:13px;--d:16s;--delay:-5s}.service-pause-petals i:nth-child(4){--x:34%;--s:9px;--d:11s;--delay:-9s}.service-pause-petals i:nth-child(5){--x:43%;--s:11px;--d:15s;--delay:-12s}.service-pause-petals i:nth-child(6){--x:52%;--s:8px;--d:12s;--delay:-4s}.service-pause-petals i:nth-child(7){--x:61%;--s:14px;--d:17s;--delay:-13s}.service-pause-petals i:nth-child(8){--x:70%;--s:10px;--d:14s;--delay:-7s}.service-pause-petals i:nth-child(9){--x:79%;--s:8px;--d:11s;--delay:-3s}.service-pause-petals i:nth-child(10){--x:88%;--s:13px;--d:16s;--delay:-10s}.service-pause-petals i:nth-child(11){--x:94%;--s:9px;--d:13s;--delay:-6s}.service-pause-petals i:nth-child(12){--x:12%;--s:7px;--d:18s;--delay:-15s}.service-pause-petals i:nth-child(13){--x:31%;--s:10px;--d:14s;--delay:-11s}.service-pause-petals i:nth-child(14){--x:57%;--s:12px;--d:19s;--delay:-16s}.service-pause-petals i:nth-child(15){--x:74%;--s:7px;--d:12s;--delay:-5s}.service-pause-petals i:nth-child(16){--x:83%;--s:11px;--d:17s;--delay:-14s}
-.service-pause-orbit{position:absolute;z-index:2;width:min(82vw,820px);height:min(36vw,320px);border:1px solid rgba(255,226,193,.13);border-radius:50%;left:50%;top:51%;transform:translate(-50%,-50%) rotate(22deg);pointer-events:none;opacity:.42;animation:serviceOrbitFloat 22s ease-in-out infinite}
-.service-pause-orbit::before{content:"";position:absolute;inset:14%;border:1px solid rgba(255,202,218,.07);border-radius:50%}
-.service-pause-orbit::after{content:"";position:absolute;width:7px;height:7px;left:13%;top:13%;border-radius:50%;background:#ffe4b7;box-shadow:0 0 24px rgba(255,211,153,.9);animation:serviceOrbitDot 20s linear infinite}
-.service-pause-card{position:relative;z-index:3;width:min(570px,100%);padding:clamp(28px,5vw,46px) clamp(21px,5.5vw,54px);text-align:center;border:1px solid rgba(246,205,145,.34);border-radius:32px;background:linear-gradient(145deg,rgba(17,15,22,.79),rgba(10,10,15,.66));box-shadow:0 42px 130px rgba(0,0,0,.62),0 0 80px rgba(217,164,65,.06),inset 0 1px 0 rgba(255,255,255,.12);backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%);isolation:isolate;overflow:hidden}
-.service-pause-card::before{content:"";position:absolute;inset:8px;border:1px solid rgba(255,225,188,.10);border-radius:25px;pointer-events:none}
-.service-pause-card::after{content:"✦";position:absolute;top:18px;right:23px;color:rgba(255,225,188,.56);font-size:12px;filter:drop-shadow(0 0 10px rgba(255,211,153,.42));animation:serviceSpark 4s ease-in-out infinite}
-.service-pause-card .service-pause-glow{position:absolute;left:50%;top:-90px;width:280px;height:180px;transform:translateX(-50%);background:radial-gradient(circle,rgba(217,164,65,.13),transparent 68%);pointer-events:none}
-.service-pause-brand{position:relative;display:grid;justify-items:center;gap:5px;margin-bottom:13px;color:var(--ui-gold-strong);font-size:10px;font-weight:900;letter-spacing:.14em}
-.service-pause-brand img{width:100px;height:100px;object-fit:contain;filter:drop-shadow(0 0 1px rgba(255,255,255,.32)) drop-shadow(0 17px 38px rgba(217,164,65,.25));animation:serviceLogoFloat 5s ease-in-out infinite}
-.service-pause-brand span{opacity:.88}
-.service-pause-rule{width:120px;height:1px;margin:0 auto 16px;background:linear-gradient(90deg,transparent,var(--ui-gold),rgba(255,255,255,.9),var(--ui-gold),transparent);opacity:.72;position:relative}
-.service-pause-rule::after{content:"";position:absolute;left:50%;top:50%;width:5px;height:5px;border-radius:50%;background:var(--ui-gold);box-shadow:0 0 13px rgba(217,164,65,.65);transform:translate(-50%,-50%)}
-.service-pause-card h2{position:relative;margin:8px 0 9px;color:#fffaf4;font-size:clamp(28px,5vw,40px);font-weight:900;letter-spacing:-.035em;text-shadow:0 5px 28px rgba(0,0,0,.32)}
-.service-pause-card p{position:relative;margin:0 auto 20px;max-width:430px;color:rgba(246,241,235,.76);font-size:12px;line-height:2.05}
-.service-pause-time-label{display:inline-flex;align-items:center;gap:8px;margin-bottom:8px;padding:6px 11px;border:1px solid rgba(255,224,187,.13);border-radius:999px;background:rgba(255,255,255,.035);color:rgba(255,238,216,.74);font-size:9px;font-weight:900}
-.service-pause-time-label::before{content:"";width:6px;height:6px;border-radius:50%;background:#e6b75f;box-shadow:0 0 13px rgba(230,183,95,.8);animation:serviceStatusPulse 2s ease-in-out infinite}
-.service-pause-countdown{position:relative;margin:0 auto 10px;padding:15px 18px;width:min(350px,100%);border:1px solid rgba(242,201,139,.36);border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(217,164,65,.055));color:#f5ce83;font:900 clamp(30px,7vw,46px)/1.1 Vazirmatn,Tahoma,Arial,sans-serif;letter-spacing:.09em;font-variant-numeric:tabular-nums;text-shadow:0 0 25px rgba(217,164,65,.18);box-shadow:0 18px 48px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.08)}
-.service-pause-card small{display:block;min-height:22px;color:rgba(245,239,231,.60);line-height:1.9;margin-bottom:19px;font-size:9px}
-.service-pause-card .btn{min-width:165px;min-height:47px;border-radius:15px;box-shadow:0 12px 30px rgba(217,164,65,.16);transition:transform .2s ease,box-shadow .2s ease}
-.service-pause-card .btn:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(217,164,65,.22)}
-@keyframes serviceSakuraZoom{0%{transform:scale(1.04) translate3d(0,0,0)}100%{transform:scale(1.13) translate3d(-1.5%,-1.2%,0)}}
-@keyframes serviceSakuraPan{0%{transform:translate3d(1.5%,0,0) scale(1.02)}100%{transform:translate3d(-1.5%,-1%,0) scale(1.07)}}
-@keyframes serviceLightSweep{0%,100%{opacity:0;transform:translateX(-8%)}45%{opacity:1}70%{opacity:0;transform:translateX(8%)}}
-@keyframes servicePetalFall{0%{opacity:0;transform:translate3d(-8vw,-8vh,0) rotate(0deg)}8%{opacity:.86}45%{transform:translate3d(4vw,48vh,0) rotate(190deg)}78%{opacity:.72}100%{opacity:0;transform:translate3d(-10vw,112vh,0) rotate(390deg)}}
-@keyframes serviceOrbitFloat{0%,100%{transform:translate(-50%,-50%) rotate(22deg) scale(.98)}50%{transform:translate(-50%,-50%) rotate(28deg) scale(1.03)}}
-@keyframes serviceOrbitDot{from{transform:rotate(0deg) translateX(0)}50%{transform:rotate(180deg) translateX(30px)}to{transform:rotate(360deg) translateX(0)}}
-@keyframes serviceLogoFloat{0%,100%{transform:translateY(0);opacity:.96}50%{transform:translateY(-4px);opacity:1}}
-@keyframes serviceSpark{0%,100%{opacity:.35;transform:scale(.9) rotate(0)}50%{opacity:1;transform:scale(1.15) rotate(18deg)}}
-@keyframes serviceStatusPulse{0%,100%{opacity:.55;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
-@media(prefers-reduced-motion:reduce){.service-pause::after,.service-pause-scene,.service-pause-scene::before,.service-pause-petals i,.service-pause-orbit,.service-pause-orbit::after,.service-pause-brand img,.service-pause-card::after,.service-pause-time-label::before{animation:none}}
-:root[data-theme="light"] .service-pause{background:#b9a69a}
-:root[data-theme="light"] .service-pause::before{background:linear-gradient(180deg,rgba(248,244,238,.08),rgba(37,22,24,.56) 76%,rgba(15,10,12,.72)),radial-gradient(circle at 50% 30%,transparent 0 28%,rgba(0,0,0,.16) 78%)}
-:root[data-theme="light"] .service-pause-scene{filter:saturate(.88) brightness(1.04) contrast(.99)}
-:root[data-theme="light"] .service-pause-card{background:linear-gradient(145deg,rgba(255,250,244,.84),rgba(248,241,231,.76));box-shadow:0 40px 110px rgba(64,50,28,.24),inset 0 1px 0 rgba(255,255,255,.92)}
-:root[data-theme="light"] .service-pause-card::before{border-color:rgba(132,96,35,.13)}
-@media(max-width:520px){.service-pause{padding:12px}.service-pause-card{border-radius:25px;padding:24px 16px}.service-pause-card::before{inset:6px;border-radius:19px}.service-pause-brand img{width:80px;height:80px}.service-pause-card h2{font-size:27px}.service-pause-card p{font-size:12px;line-height:1.95;margin-bottom:17px}.service-pause-countdown{font-size:29px;padding:13px 8px;border-radius:17px}.service-pause-card .btn{width:100%}.service-pause-orbit{width:140vw;height:58vw}.service-pause-petals i{transform-origin:center center}}
 /* Store sorting + hybrid pagination */
 .shop-page .gallery-workspace{align-items:start}
 .sort-field{display:grid;gap:7px;margin:14px 0}
