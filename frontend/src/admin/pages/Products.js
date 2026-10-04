@@ -6,6 +6,7 @@ const localDateTime=v=>{if(!v)return '';const d=new Date(v);if(Number.isNaN(d.ge
 const isoDateTime=v=>{if(!v)return null;const d=new Date(v);return Number.isNaN(d.getTime())?null:d.toISOString()};
 const money=n=>new Intl.NumberFormat('fa-IR').format(Number(n||0));
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const imageFile=v=>{try{const s=String(v||'').split(/[?#]/)[0].replace(/\\+$/,'');return decodeURIComponent(s.split('/').pop()||'')}catch{return String(v||'').split('/').pop()||''}};
 
 export default function Products(){
  let attributes=[];
