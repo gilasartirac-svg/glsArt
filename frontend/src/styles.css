@@ -3125,3 +3125,13 @@ button,.btn,.iconbtn,.theme-toggle,.mobile-menu-toggle{min-height:44px;touch-act
     grid-column:1;
   }
 }
+
+/* Referral code copy + first-login referral field */
+.rewards-page .referral-code{display:flex;align-items:center;justify-content:center;gap:8px}
+.rewards-page .referral-code-copy{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;min-width:40px;border:1px solid var(--border-color);border-radius:10px;background:transparent;color:inherit;cursor:pointer}
+.rewards-page .referral-code-copy svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.auth-referral-field{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.auth-referral-field>span{font-size:.9rem;font-weight:700}
+.auth-referral-field>span small{font-weight:500;opacity:.7}
+.auth-referral-field input{width:100%;min-height:46px;height:46px;box-sizing:border-box}
+@media(max-width:560px){.auth-referral-field input{min-height:44px;height:44px}.rewards-page .referral-code-copy{width:38px;height:38px;min-width:38px}}
