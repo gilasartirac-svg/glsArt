@@ -200,7 +200,7 @@ async function api(path,opt={}){
   const r=await fetch(API+path,{credentials:'include',cache:'no-store',headers,...opt});
   const raw=await r.text();
   let d={};try{d=raw?JSON.parse(raw):{}}catch{}
-  if(!r.ok)throw new Error(d.error||d.message||'خطا در ارتباط با سرویس');
+  if(!r.ok){const e=new Error(d.error||d.message||(r.status===404?'صفحه پیدا نشد':'خطا در ارتباط با سرویس'));e.status=r.status;throw e}
   const requiredShape=path=>{
    if(path==='/api/health')return d&&d.ok===true&&d.db===true;
    if(/^\/api\/products\?/.test(path)||path==='/api/products')return Array.isArray(d?.items);
@@ -221,6 +221,11 @@ async function api(path,opt={}){
 function csrf(){return csrfToken||''}
 function setSeo({title,description,image,type='website',jsonLd}={}){if(title){document.title=title;let t=document.querySelector('meta[name="description"]');if(!t){t=document.createElement('meta');t.name='description';document.head.appendChild(t)}t.content=description||'';const og=document.querySelector('meta[property="og:title"]');if(og)og.content=title;const od=document.querySelector('meta[property="og:description"]');if(od)od.content=description||'';if(image){let oi=document.querySelector('meta[property="og:image"]');if(!oi){oi=document.createElement('meta');oi.setAttribute('property','og:image');document.head.appendChild(oi)}oi.content=image}}document.querySelectorAll('script[data-gilasart-jsonld]').forEach(x=>x.remove());if(jsonLd){const s=document.createElement('script');s.type='application/ld+json';s.dataset.gilasartJsonld='1';s.textContent=JSON.stringify(jsonLd).replace(/</g,'\\u003c');document.head.appendChild(s)}}
 function isAdminUser(){return state.roles?.includes("admin")||state.roles?.includes("super_admin")||state.roles?.includes("administrator")||state.roles?.includes("admin-role")}
+function renderNotFound(){
+ setSeo({title:'صفحه پیدا نشد | گیلاس آرت',description:'این مسیر در گالری گیلاس آرت پیدا نشد.'});
+ const root=location.pathname.includes('/glsArt')?'/glsArt':'';
+ layout('<main class="gilas-404" dir="rtl"><div class="g404-stars" aria-hidden="true"></div><div class="g404-orbit g404-orbit-a"></div><div class="g404-orbit g404-orbit-b"></div><div class="g404-arabesque" aria-hidden="true"><span></span><span></span><span></span><span></span></div><section class="g404-card" aria-labelledby="g404-title"><div class="g404-emblem"><span class="g404-emblem-ring"></span><img src="'+root+'/invoice/logo.svg" alt="گیلاس آرت" decoding="async"></div><div class="eyebrow">GILAS ART · ART GALLERY</div><div class="g404-number" aria-hidden="true">۴۰۴</div><h1 id="g404-title">این مسیر در گالری پیدا نشد</h1><p>به نظر می‌رسد وارد راهرویی شده‌اید که دیگر در نقشه گالری گیلاس آرت وجود ندارد.<br>اما مسیر بازگشت به دنیای هنر هنوز روشن است.</p><div class="g404-actions"><a class="btn primary g404-shop" href="#/shop">ورود به فروشگاه</a><a class="btn ghost" href="#/">بازگشت به گالری</a></div><div class="g404-divider"><span></span><b>هنر، انتخابی برای ماندن.</b><span></span></div></section><div class="g404-motif" aria-hidden="true">✦　❖　✦</div></main>');
+}
 function accountLink(){return state.user?'<a class="iconbtn profile-link" href="#/account" title="پروفایل کاربر">'+icon('user')+'<span>پروفایل</span></a>':'<a class="iconbtn" href="#/account">'+icon('user')+'<span>ورود</span></a>'}
 function footerSocialLinks(){
  try{const x=JSON.parse(String(state.settings?.footer_social_links||'[]'));return Array.isArray(x)?x.filter(v=>v&&v.active!==false&&/^https:\/\//i.test(String(v.url||''))).sort((a,b)=>Number(a.sort||0)-Number(b.sort||0)).slice(0,12):[]}catch{return []}
@@ -705,7 +710,7 @@ async function router(){const base=location.pathname.includes('/glsArt')?'/glsAr
  }catch(e){
   const bodyEl=document.querySelector('#terms-body');if(bodyEl)bodyEl.textContent='قوانین سایت در حال حاضر قابل دریافت نیست.';
  }
- return}if(p[0]==='support')return p[1]?supportDetail(decodeURIComponent(p[1])):support();if(p[0]==='payment'){layout(`<section class="wrap page"><div class="panel"><h1>${p[1]==='success'?'پرداخت با موفقیت تایید شد':'پرداخت ناموفق بود'}</h1><a class="btn primary" href="#/shop">بازگشت به فروشگاه</a></div></section>`);return}home()}catch(e){console.error('router_error',e);if(!p[0])console.warn('home_render_error',e)} }window.addEventListener('hashchange',()=>router());window.addEventListener('popstate',()=>router());(async()=>{try{await Promise.all([loadMe(),(async()=>{try{const sd=await api('/api/settings');state.settings=sd.settings||state.settings}catch{}})()])}catch{}try{await router()}finally{hideArtLoader()}})();
+ return}if(p[0]==='support')return p[1]?supportDetail(decodeURIComponent(p[1])):support();if(p[0]==='payment'){layout(`<section class="wrap page"><div class="panel"><h1>${p[1]==='success'?'پرداخت با موفقیت تایید شد':'پرداخت ناموفق بود'}</h1><a class="btn primary" href="#/shop">بازگشت به فروشگاه</a></div></section>`);return}return renderNotFound()}catch(e){console.error('router_error',e);if(e?.status===404||e?.message==='صفحه پیدا نشد')return renderNotFound();if(!p[0])console.warn('home_render_error',e)} }window.addEventListener('hashchange',()=>router());window.addEventListener('popstate',()=>router());(async()=>{try{await Promise.all([loadMe(),(async()=>{try{const sd=await api('/api/settings');state.settings=sd.settings||state.settings}catch{}})()])}catch{}try{await router()}finally{hideArtLoader()}})();
 
 /* GilasArt interaction guard */
 (()=>{
