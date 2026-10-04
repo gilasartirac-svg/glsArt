@@ -3218,3 +3218,17 @@ button,.btn,.iconbtn,.theme-toggle,.mobile-menu-toggle{min-height:44px;touch-act
 .ticket-sms-toggle{width:fit-content!important;min-height:44px;padding:9px 12px;border-radius:12px;background:color-mix(in srgb,var(--ui-gold) 7%,var(--ui-surface));border:1px solid color-mix(in srgb,var(--ui-gold) 20%,var(--ui-line));cursor:pointer}
 .ticket-sms-toggle span{font-weight:700}
 .admin-ticket-reply-form textarea{min-height:170px;resize:vertical;line-height:2}
+
+
+/* Support FAQ manager */
+.support-faq-first{position:relative;margin-top:18px}
+.admin-modal-backdrop{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.68);backdrop-filter:blur(8px)}
+.admin-modal{width:min(1100px,100%);max-height:min(88vh,900px);overflow:auto;background:var(--ui-surface,#151519);color:var(--ui-text,#f6f2ea);border:1px solid var(--ui-line,#2b2a2d);border-radius:22px;box-shadow:0 24px 80px rgba(0,0,0,.4)}
+.admin-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:22px;border-bottom:1px solid var(--ui-line)}
+.admin-modal-head h3{margin:4px 0}.admin-modal-head p{margin:0}
+.faq-manager-body{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:18px;padding:18px}
+.faq-manager-list{display:grid;gap:10px;align-content:start}.faq-manager-item{border:1px solid var(--ui-line);border-radius:16px;padding:14px;background:var(--ui-surface-2)}
+.faq-manager-item-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.faq-manager-item p{white-space:pre-wrap;color:var(--ui-muted);margin:8px 0}
+.faq-manager-item-actions{display:flex;gap:8px;margin-top:12px}.faq-manager-form{align-self:start;position:sticky;top:0;padding:16px;border:1px solid var(--ui-line);border-radius:16px;background:var(--ui-surface-2)}
+.faq-manager-form textarea{min-height:180px}.faq-form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+@media(max-width:760px){.faq-manager-body{grid-template-columns:1fr}.faq-manager-form{position:static}.admin-modal-backdrop{padding:8px}.admin-modal{max-height:94vh}.admin-modal-head{padding:16px}.faq-manager-body{padding:10px}.admin-title{align-items:flex-start;gap:10px}.admin-title .btn{white-space:nowrap}}
