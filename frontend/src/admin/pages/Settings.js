@@ -103,6 +103,7 @@ export async function mount(){
  function renderSocialLinks(items){const box=document.querySelector('#social-links-list');if(!box)return;box.innerHTML='';(items.length?items:[]).forEach(addSocialRow);if(!items.length)box.innerHTML='<div class="social-links-empty">هنوز شبکه اجتماعی ثبت نشده است. برای شروع «افزودن شبکه اجتماعی» را بزنید.</div>'}
  function addSocialRow(item){
   const box=document.querySelector('#social-links-list');if(!box)return;
+  box.querySelector('.social-links-empty')?.remove();
   const row=document.createElement('div');row.className='social-link-row';
   row.innerHTML=`<div class="social-link-icon"><img src="${esc(iconPath(item.id))}" alt="" aria-hidden="true"></div>
    <label class="social-platform-field">شبکه<select data-field="id">${PLATFORMS.map(([id,label])=>`<option value="${id}" ${id===item.id?'selected':''}>${label}</option>`).join('')}</select></label>
