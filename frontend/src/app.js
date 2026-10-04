@@ -656,7 +656,12 @@ async function router(){const base=location.pathname.includes('/glsArt')?'/glsAr
  }catch(e){
   const bodyEl=document.querySelector('#terms-body');if(bodyEl)bodyEl.textContent='قوانین سایت در حال حاضر قابل دریافت نیست.';
  }
- return}if(p[0]==='support')return p[1]?supportDetail(decodeURIComponent(p[1])):support();if(p[0]==='payment'){layout(`<section class="wrap page"><div class="panel"><h1>${p[1]==='success'?'پرداخت با موفقیت تایید شد':'پرداخت ناموفق بود'}</h1><a class="btn primary" href="#/shop">بازگشت به فروشگاه</a></div></section>`);return}return renderNotFound()}catch(e){console.error('router_error',e);if(e?.status===404||e?.message==='صفحه پیدا نشد')return renderNotFound();if(!p[0])console.warn('home_render_error',e)} }window.addEventListener('hashchange',()=>router());window.addEventListener('popstate',()=>router());(async()=>{try{await Promise.all([loadMe(),(async()=>{try{const sd=await api('/api/settings');state.settings=sd.settings||state.settings}catch{}})()])}catch{}try{await router()}catch(e){console.error('initial_router_error',e)}})();
+ return}if(p[0]==='support')return p[1]?supportDetail(decodeURIComponent(p[1])):support();if(p[0]==='payment'){layout(`<section class="wrap page"><div class="panel"><h1>${p[1]==='success'?'پرداخت با موفقیت تایید شد':'پرداخت ناموفق بود'}</h1><a class="btn primary" href="#/shop">بازگشت به فروشگاه</a></div></section>`);return}return renderNotFound()}catch(e){console.error('router_error',e);if(e?.status===404||e?.message==='صفحه پیدا نشد')return renderNotFound();if(!p[0])console.warn('home_render_error',e)} }window.addEventListener('hashchange',()=>{void router()});window.addEventListener('popstate',()=>{void router()});
+// Critical navigation must never wait for authentication/settings/network requests.
+// Render the requested route immediately; hydrate session/settings in the background.
+void router().catch(e=>console.error('initial_router_error',e));
+void loadMe().catch(()=>{});
+void (async()=>{try{const sd=await api('/api/settings');state.settings=sd.settings||state.settings}catch{}})();
 
 /* GilasArt interaction guard */
 (()=>{
