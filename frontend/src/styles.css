@@ -2759,3 +2759,33 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
     -webkit-tap-highlight-color:transparent;
   }
 }
+
+/* ADMIN — product catalog identity and footer social management */
+.admin-layout .products-admin-table{min-width:980px}
+.admin-layout .products-admin-table th:first-child{min-width:360px}
+.admin-layout .product-admin-identity{display:flex;align-items:center;gap:12px;min-width:0}
+.admin-layout .product-admin-thumb{width:58px;height:58px;min-width:58px;border-radius:12px;overflow:hidden;display:grid;place-items:center;background:var(--admin-surface-3);border:1px solid var(--admin-line);color:var(--admin-muted)}
+.admin-layout .product-admin-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.admin-layout .product-admin-meta{min-width:0;display:grid;gap:2px}
+.admin-layout .product-admin-meta>b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-layout .product-admin-slug{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-layout .product-admin-image-file{display:flex;align-items:center;gap:6px;max-width:100%;font-size:11px;color:var(--admin-muted)}
+.admin-layout .product-admin-image-file code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:ltr;text-align:left}
+.admin-layout .icon-copy{width:30px;height:30px;min-width:30px;padding:6px;border-radius:8px;border:1px solid var(--admin-line);background:var(--admin-surface-2);color:var(--admin-muted);display:inline-grid;place-items:center;cursor:pointer;transition:.18s ease}
+.admin-layout .icon-copy svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.admin-layout .icon-copy:hover,.admin-layout .icon-copy:focus-visible,.admin-layout .icon-copy.is-copied{color:var(--admin-gold-strong);border-color:var(--admin-gold);background:var(--admin-surface-3)}
+@media(max-width:700px){
+ .admin-layout .products-admin-table{min-width:0}
+ .admin-layout .products-admin-table thead{display:none}
+ .admin-layout .products-admin-table,.admin-layout .products-admin-table tbody,.admin-layout .products-admin-table tr,.admin-layout .products-admin-table td{display:block;width:100%}
+ .admin-layout .products-admin-table tr{padding:12px;border-bottom:1px solid var(--admin-line)}
+ .admin-layout .products-admin-table td{border:0!important;padding:6px 0}
+ .admin-layout .products-admin-table td:not(:first-child)::before{display:inline-block;min-width:74px;color:var(--admin-muted);font-size:11px}
+ .admin-layout .products-admin-table td:nth-child(2)::before{content:'SKU';}
+ .admin-layout .products-admin-table td:nth-child(3)::before{content:'قیمت';}
+ .admin-layout .products-admin-table td:nth-child(4)::before{content:'موجودی';}
+ .admin-layout .products-admin-table td:nth-child(5)::before{content:'وضعیت';}
+ .admin-layout .products-admin-table td:nth-child(6)::before{content:'عملیات';}
+ .admin-layout .product-admin-identity{align-items:flex-start}
+ .admin-layout .product-admin-thumb{width:64px;height:64px;min-width:64px}
+}
