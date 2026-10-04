@@ -203,28 +203,75 @@ async function loadProductAttributes(env,productId){
       a.name attribute_name,
       a.active attribute_active,
       a.sort_order attribute_sort,
+      pa.required required,
+      pa.sort_order assignment_sort,
       o.id option_id,
       o.name option_name,
-      o.active option_active,
-      o.is_default is_default,
-      o.price_delta_irt price_delta_irt,
+      CASE WHEN pov.product_id IS NOT NULL THEN pov.active ELSE o.active END option_active,
+      CASE WHEN pov.product_id IS NOT NULL THEN pov.is_default ELSE o.is_default END is_default,
+      CASE WHEN pov.product_id IS NOT NULL THEN pov.price_delta_irt ELSE o.price_delta_irt END price_delta_irt,
       o.sort_order option_sort
     FROM product_attribute_assignments pa
     JOIN product_attributes a ON a.id=pa.attribute_id
     JOIN product_attribute_options o ON o.attribute_id=a.id
+    LEFT JOIN product_attribute_option_overrides pov
+      ON pov.product_id=pa.product_id AND pov.option_id=o.id
     WHERE pa.product_id=?
       AND a.active=1
-      AND o.active=1
+      AND CASE WHEN pov.product_id IS NOT NULL THEN pov.active ELSE o.active END=1
     ORDER BY pa.sort_order,a.sort_order,o.sort_order
   `).bind(productId).all()).results||[];
   const map=new Map();
   for(const r of rows){
-    if(!map.has(r.attribute_id))map.set(r.attribute_id,{id:r.attribute_id,name:r.attribute_name,active:Number(r.attribute_active)===1,required:true,options:[]});
+    if(!map.has(r.attribute_id))map.set(r.attribute_id,{id:r.attribute_id,name:r.attribute_name,active:Number(r.attribute_active)===1,required:Number(r.required)!==0,options:[]});
     map.get(r.attribute_id).options.push({
       id:r.option_id,name:r.option_name,is_default:Number(r.is_default)===1,price_delta_irt:Number(r.price_delta_irt||0)
     });
   }
   return [...map.values()].filter(a=>a.active&&a.options.length);
+}
+
+async function buildStorefrontSnapshot(env){
+  const [productsR,imagesR,categoriesR,assignmentsR,attributesR,reviewsR,contentR,faqR,settingsR]=await Promise.all([
+    env.DB.prepare(`SELECT id,category_id,slug,sku,name,description,price_irt,active,seo_title,seo_description,created_at,updated_at,flash_sale_active,flash_sale_ends_at,flash_sale_price_irt,video_url,view_count,review_count,rating_avg,favorite_count,sold_count FROM products WHERE active=1 ORDER BY created_at DESC,id DESC`).all(),
+    env.DB.prepare(`SELECT id,product_id,path,alt_text,sort_order,is_primary FROM product_images WHERE product_id IN (SELECT id FROM products WHERE active=1) ORDER BY product_id,sort_order,is_primary DESC`).all(),
+    env.DB.prepare(`SELECT id,slug,name,description,parent_id,sort_order,image,seo_title,seo_description FROM categories WHERE active=1 ORDER BY sort_order,name`).all(),
+    env.DB.prepare(`SELECT pca.product_id,pca.category_id,pca.sort_order FROM product_category_assignments pca JOIN products p ON p.id=pca.product_id AND p.active=1 JOIN categories c ON c.id=pca.category_id AND c.active=1 ORDER BY pca.product_id,pca.sort_order,c.name`).all(),
+    env.DB.prepare(`SELECT pa.product_id,a.id attribute_id,a.name attribute_name,pa.required,pa.sort_order attribute_sort,o.id option_id,o.name option_name,o.sort_order option_sort,CASE WHEN pov.product_id IS NOT NULL THEN pov.active ELSE o.active END option_active,CASE WHEN pov.product_id IS NOT NULL THEN pov.is_default ELSE o.is_default END is_default,CASE WHEN pov.product_id IS NOT NULL THEN pov.price_delta_irt ELSE o.price_delta_irt END price_delta_irt FROM product_attribute_assignments pa JOIN products p ON p.id=pa.product_id AND p.active=1 JOIN product_attributes a ON a.id=pa.attribute_id AND a.active=1 JOIN product_attribute_options o ON o.attribute_id=a.id LEFT JOIN product_attribute_option_overrides pov ON pov.product_id=pa.product_id AND pov.option_id=o.id WHERE CASE WHEN pov.product_id IS NOT NULL THEN pov.active ELSE o.active END=1 ORDER BY pa.product_id,pa.sort_order,a.sort_order,o.sort_order`).all(),
+    env.DB.prepare(`SELECT r.id,r.product_id,r.rating,r.body,r.created_at,u.name,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='like'),0) like_count,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='dislike'),0) dislike_count FROM reviews r JOIN users u ON u.id=r.user_id JOIN products p ON p.id=r.product_id AND p.active=1 WHERE r.approved=1 ORDER BY r.product_id,r.created_at DESC`).all(),
+    env.DB.prepare(`SELECT id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE active=1 AND section IN ('about','contact','news','articles') ORDER BY section,published_at DESC,created_at DESC`).all(),
+    env.DB.prepare(`SELECT id,question,answer,sort_order,created_at,updated_at FROM faq_entries WHERE active=1 ORDER BY sort_order ASC,created_at ASC`).all(),
+    env.DB.prepare(`SELECT key,value,updated_at FROM site_settings WHERE key IN ('site_name','site_description','seo_title','seo_description','seo_keywords','og_image','site_rules_title','site_rules_body','loyalty_rules_title','loyalty_rules_body') ORDER BY key`).all()
+  ]);
+  const products=(productsR.results||[]).map(x=>({...x,price_irt:Number(x.price_irt||0),view_count:Number(x.view_count||0),review_count:Number(x.review_count||0),rating_avg:Number(x.rating_avg||0),favorite_count:Number(x.favorite_count||0),sold_count:Number(x.sold_count||0)}));
+  const imagesBy=new Map(),categoriesByProduct=new Map(),attrsBy=new Map(),reviewsBy=new Map();
+  for(const x of imagesR.results||[]){if(!imagesBy.has(x.product_id))imagesBy.set(x.product_id,[]);imagesBy.get(x.product_id).push(x)}
+  const catMap=new Map((categoriesR.results||[]).map(x=>[x.id,x]));
+  for(const p of products){
+    const ids=[];if(p.category_id&&catMap.has(p.category_id))ids.push(p.category_id);
+    for(const a of assignmentsR.results||[]){if(a.product_id===p.id&&!ids.includes(a.category_id))ids.push(a.category_id)}
+    categoriesByProduct.set(p.id,ids);
+  }
+  for(const x of attributesR.results||[]){
+    if(!attrsBy.has(x.product_id))attrsBy.set(x.product_id,new Map());
+    const m=attrsBy.get(x.product_id);
+    if(!m.has(x.attribute_id))m.set(x.attribute_id,{id:x.attribute_id,name:x.attribute_name,required:Number(x.required)!==0,options:[]});
+    m.get(x.attribute_id).options.push({id:x.option_id,name:x.option_name,is_default:Number(x.is_default)===1,price_delta_irt:Number(x.price_delta_irt||0)});
+  }
+  for(const x of reviewsR.results||[]){if(!reviewsBy.has(x.product_id))reviewsBy.set(x.product_id,[]);reviewsBy.get(x.product_id).push(x)}
+  const productDocs=products.map(p=>({...p,images:imagesBy.get(p.id)||[],category_ids:categoriesByProduct.get(p.id)||[],categories:(categoriesByProduct.get(p.id)||[]).map(id=>catMap.get(id)).filter(Boolean).map(x=>({id:x.id,slug:x.slug,name:x.name})),attributes:[...(attrsBy.get(p.id)?.values()||[])].filter(a=>a.options.length),reviews:reviewsBy.get(p.id)||[]}));
+  const settings=Object.fromEntries((settingsR.results||[]).map(x=>[x.key,x.value]));
+  const bySort={
+    newest:[...productDocs].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at))||String(b.id).localeCompare(String(a.id))),
+    price_asc:[...productDocs].sort((a,b)=>Number(a.price_irt)-Number(b.price_irt)||String(b.id).localeCompare(String(a.id))),
+    price_desc:[...productDocs].sort((a,b)=>Number(b.price_irt)-Number(a.price_irt)||String(b.id).localeCompare(String(a.id))),
+    rating:[...productDocs].sort((a,b)=>Number(b.rating_avg)-Number(a.rating_avg)||Number(b.review_count)-Number(a.review_count)||String(b.created_at).localeCompare(String(a.created_at))||String(b.id).localeCompare(String(a.id))),
+    reviews:[...productDocs].sort((a,b)=>Number(b.review_count)-Number(a.review_count)||Number(b.rating_avg)-Number(a.rating_avg)||String(b.created_at).localeCompare(String(a.created_at))||String(b.id).localeCompare(String(a.id))),
+    popular:[...productDocs].sort((a,b)=>Number(b.favorite_count)-Number(a.favorite_count)||Number(b.view_count)-Number(a.view_count)||String(b.created_at).localeCompare(String(a.created_at))||String(b.id).localeCompare(String(a.id))),
+    best_selling:[...productDocs].sort((a,b)=>Number(b.sold_count)-Number(a.sold_count)||Number(b.review_count)-Number(a.review_count)||String(b.created_at).localeCompare(String(a.created_at))||String(b.id).localeCompare(String(a.id))),
+    views:[...productDocs].sort((a,b)=>Number(b.view_count)-Number(a.view_count)||Number(b.favorite_count)-Number(a.favorite_count)||String(b.created_at).localeCompare(String(a.created_at))||String(b.id).localeCompare(String(a.id)))
+  };
+  return {meta:{schemaVersion:1,generatedAt:now(),productCount:productDocs.length,categoryCount:(categoriesR.results||[]).length,reviewCount:(reviewsR.results||[]).length,articleCount:(contentR.results||[]).filter(x=>x.section==='articles').length,newsCount:(contentR.results||[]).filter(x=>x.section==='news').length},categories:categoriesR.results||[],products:productDocs,reviews:reviewsR.results||[],articles:(contentR.results||[]).filter(x=>x.section==='articles'),news:(contentR.results||[]).filter(x=>x.section==='news'),about:(contentR.results||[]).filter(x=>x.section==='about'),contact:(contentR.results||[]).filter(x=>x.section==='contact'),faq:faqR.results||[],settings,indexes:Object.fromEntries(Object.entries(bySort).map(([k,v])=>[k,v.map(x=>x.id)]))};
 }
 async function resolveProductOptions(env,productId,raw){
   let requested=[];
@@ -375,6 +422,10 @@ async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS'
   await recordVisitor(req,env,key);return json({ok:true});
  }
  if(u.pathname==='/api/admin/visitors'&&req.method==='GET')return visitorAdminList(req,env);
+ if(u.pathname==='/api/storefront-snapshot'&&req.method==='GET'){
+  const snapshot=await buildStorefrontSnapshot(env);
+  return json(snapshot,200,{'cache-control':'no-store'});
+}
  if(u.pathname==='/api/health'){let db=false,dbError='';if(env.DB){try{await env.DB.prepare('SELECT 1 AS ok').first();await env.DB.prepare('SELECT id FROM products LIMIT 1').first();await env.DB.prepare('SELECT id FROM categories LIMIT 1').first();await env.DB.prepare('SELECT key FROM site_settings LIMIT 1').first();db=true}catch(e){dbError=String(e?.message||'d1_unavailable').slice(0,240)}}const ok=db;return json({ok,service:'gilasartworker',db,paymentEnv:env.PAYMENT_ENV||'sandbox',smsConfigured:!!env.KAVENEGAR_API_KEY,smsSenderConfigured:!!String(env.KAVENEGAR_SENDER||''),...(dbError?{dbError}: {})},ok?200:503)}
  if(u.pathname==='/api/home'&&req.method==='GET'){
   const [products,categories,settings,flash]=await Promise.all([
