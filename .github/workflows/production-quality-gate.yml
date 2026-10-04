@@ -55,7 +55,7 @@ jobs:
           ORIGIN: https://gilasartirac-svg.github.io
         run: |
           set -euo pipefail
-          for path in /api/health '/api/products?limit=1' /api/categories /api/flash-sales /api/settings; do
+          for path in /api/health /api/home '/api/products?limit=1' /api/categories /api/flash-sales /api/settings; do
             body=$(mktemp)
             code=$(curl -sS --retry 2 --retry-all-errors -o "$body" -w '%{http_code}' "$API$path")
             echo "$path -> HTTP $code"
@@ -66,6 +66,7 @@ jobs:
           curl -fsS "$API/api/health" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{const d=JSON.parse(s);if(d.ok!==true||d.db!==true)process.exit(1)})"
           curl -fsS "$API/api/products?limit=1" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{if(!Array.isArray(JSON.parse(s).items))process.exit(1)})"
           curl -fsS "$API/api/categories" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{if(!Array.isArray(JSON.parse(s).items))process.exit(1)})"
+          curl -fsS "$API/api/home" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{const d=JSON.parse(s);if(!Array.isArray(d?.products?.items)||!Array.isArray(d?.categories?.items)||!Array.isArray(d?.flash?.items)||!d?.settings?.settings)process.exit(1);if(d.products.items.length<1||d.categories.items.length<1)process.exit(1);if(!d.products.items.some(x=>String(x.name||'').trim()&&String(x.image||'').trim()))process.exit(1)})"
           headers=$(curl -sS -D - -o /dev/null -H "Origin: $ORIGIN" "$API/api/health")
           echo "$headers"
           echo "$headers" | grep -Fi "access-control-allow-origin: $ORIGIN"
