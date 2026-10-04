@@ -109,8 +109,32 @@ function flashSaleValues(b,before={}){
 }
 function otpSmsMessage(env,code,template){
  const host=new URL(frontend(env)).hostname;
- const base=String(template||'گیلاس آرت\\nکد ورود : {code}').replaceAll('\\r\\n','\\n').replaceAll('\\n','\n').replaceAll('{code}',code).replaceAll('{0}',code).split(/\\r?\\n/).filter(x=>!/^\\s*@[^\\s]+\\s+#\\d{6}\\s*$/.test(x)).join('\\n').trim();
+ const base=String(template||'گیلاس آرت\\nکد ورود : {code}').replaceAll('\\r\\n','\\n').replaceAll('\\n','
+').replaceAll('{code}',code).replaceAll('{0}',code).split(/\\r?\\n/).filter(x=>!/^\\s*@[^\\s]+\\s+#\\d{6}\\s*$/.test(x)).join('\\n').trim();
  return `${base}\\n\\n@${host} #${code}`;
+}
+function ticketSmsUrl(env,id){return frontend(env)+'/#/support/'+encodeURIComponent(String(id||''))}
+function fillSmsTemplate(template,data){
+ return String(template||'').replaceAll('\\r\\n','\\n').replaceAll('\\n','
+')
+  .replaceAll('{ticket_id}',String(data.ticketId||''))
+  .replaceAll('{ticket_url}',String(data.ticketUrl||''))
+  .replaceAll('{subject}',String(data.subject||''))
+  .replaceAll('{code}',String(data.code||'')).trim().slice(0,500);
+}
+async function sendKavenegarSms(env,mobile,message){
+ const key=String(env.KAVENEGAR_API_KEY||'').trim();
+ const sender=String(await siteSetting(env,'kavenegar_sender',env.KAVENEGAR_SENDER||'')).trim().slice(0,50);
+ if(!key||!sender||!/^09\\d{9}$/.test(String(mobile||'')))return {sent:false,reason:'not_configured'};
+ try{
+  const p=new URLSearchParams({receptor:String(mobile),message:String(message||'').slice(0,700),sender});
+  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),8000);let sr;
+  try{sr=await fetch('https://api.kavenegar.com/v1/'+key+'/sms/send.json',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:p,signal:controller.signal})}finally{clearTimeout(timer)}
+  let sj=null;try{sj=await sr.json()}catch{}
+  const providerStatus=Number(sj?.return?.status);
+  if(!sr.ok||providerStatus!==200){console.error('kavenegar_ticket_sms_rejected',{httpStatus:sr.status,providerStatus});return {sent:false,reason:'provider_rejected',providerStatus}}
+  return {sent:true,providerStatus};
+ }catch(e){console.error('kavenegar_ticket_sms_failed',e?.message||e);return {sent:false,reason:e?.name==='AbortError'?'timeout':'network_error'}}
 }
 async function ensureAdminBootstrap(env){
   const bootstrapMobile=String(env.ADMIN_BOOTSTRAP_MOBILE||'').replace(/\D/g,'');
@@ -522,18 +546,55 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
   const r=await env.DB.prepare('SELECT id,subject,category,priority,status,stage,created_at,updated_at,closed_at FROM support_tickets WHERE user_id=? ORDER BY updated_at DESC LIMIT ? OFFSET ?').bind(me.id,limit,offset).all();return json({items:r.results||[],hasMore:(r.results||[]).length===limit});
  }
  if(u.pathname==='/api/support/tickets'&&req.method==='POST'){
-  if(!me)return json({error:'unauthorized'},401);if(!requireCsrf(req))return json({error:'forbidden'},403);const b=await body(req);const subject=String(b.subject||'').trim().slice(0,180),bodyText=String(b.message||'').trim().slice(0,10000),category=String(b.category||'عمومی').trim().slice(0,60),priority=['low','normal','high'].includes(String(b.priority))?String(b.priority):'normal';if(!subject||!bodyText)return json({error:'invalid_ticket'},400);const id=uid();await env.DB.batch([env.DB.prepare('INSERT INTO support_tickets(id,user_id,subject,category,priority,status,stage) VALUES(?,?,?,?,?,\'open\',\'ثبت شده\')').bind(id,me.id,subject,category,priority),env.DB.prepare('INSERT INTO ticket_messages(id,ticket_id,user_id,author_type,body) VALUES(?,?,?,\'customer\',?)').bind(uid(),id,me.id,bodyText)]);return json({ok:true,id});
+  if(!me)return json({error:'unauthorized'},401);if(!requireCsrf(req))return json({error:'forbidden'},403);
+  const b=await body(req),subject=String(b.subject||'').trim().slice(0,180),bodyText=String(b.message||'').trim().slice(0,10000),category=String(b.category||'عمومی').trim().slice(0,60),priority=['low','normal','high'].includes(String(b.priority))?String(b.priority):'normal';
+  if(!subject||!bodyText)return json({error:'invalid_ticket'},400);
+  const id=uid();
+  await env.DB.batch([
+   env.DB.prepare('INSERT INTO support_tickets(id,user_id,subject,category,priority,status,stage) VALUES(?,?,?,?,?,\'open\',\'ثبت شده\')').bind(id,me.id,subject,category,priority),
+   env.DB.prepare('INSERT INTO ticket_messages(id,ticket_id,user_id,author_type,body) VALUES(?,?,?,\'customer\',?)').bind(uid(),id,me.id,bodyText)
+  ]);
+  let sms={sent:false,reason:'disabled'};
+  try{
+   const template=await siteSetting(env,'support_ticket_created_sms_template','گیلاس آرت\\nتیکت شما با موفقیت ثبت شد.\\nشماره تیکت: {ticket_id}\\nمشاهده و پیگیری: {ticket_url}');
+   sms=await sendKavenegarSms(env,String(me.mobile||''),fillSmsTemplate(template,{ticketId:id,subject,ticketUrl:ticketSmsUrl(env,id)}));
+  }catch(e){console.error('ticket_created_sms_error',e?.message||e)}
+  return json({ok:true,id,smsSent:sms.sent});
  }
  if(u.pathname.startsWith('/api/support/tickets/')&&req.method==='GET'){
   if(!me)return json({error:'unauthorized'},401);const id=u.pathname.split('/').pop(),t=await env.DB.prepare('SELECT id,subject,category,priority,status,stage,created_at,updated_at,closed_at FROM support_tickets WHERE id=? AND user_id=?').bind(id,me.id).first();if(!t)return json({error:'not_found'},404);const m=await env.DB.prepare('SELECT id,author_type,body,created_at FROM ticket_messages WHERE ticket_id=? ORDER BY created_at ASC').bind(id).all();return json({ticket:t,messages:m.results||[]});
  }
  if(u.pathname.startsWith('/api/support/tickets/')&&req.method==='POST'){
-  if(!me)return json({error:'unauthorized'},401);if(!requireCsrf(req))return json({error:'forbidden'},403);const pre=await body(req);const id=u.pathname.split('/').pop(),t=await env.DB.prepare('SELECT id,status FROM support_tickets WHERE id=? AND user_id=?').bind(id,me.id).first();if(!t)return json({error:'not_found'},404);if(t.status==='closed')return json({error:'ticket_closed'},409);const b=await body(req),bodyText=String(b.message||'').trim().slice(0,10000);if(!bodyText)return json({error:'invalid_message'},400);await env.DB.batch([env.DB.prepare('INSERT INTO ticket_messages(id,ticket_id,user_id,author_type,body) VALUES(?,?,?,\'customer\',?)').bind(uid(),id,me.id,bodyText),env.DB.prepare("UPDATE support_tickets SET stage='در انتظار بررسی',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(id)]);return json({ok:true});
+  if(!me)return json({error:'unauthorized'},401);if(!requireCsrf(req))return json({error:'forbidden'},403);
+  const b=await body(req),id=u.pathname.split('/').pop(),t=await env.DB.prepare('SELECT id,status FROM support_tickets WHERE id=? AND user_id=?').bind(id,me.id).first();
+  if(!t)return json({error:'not_found'},404);if(t.status==='closed')return json({error:'ticket_closed'},409);
+  const bodyText=String(b.message||'').trim().slice(0,10000);if(!bodyText)return json({error:'invalid_message'},400);
+  await env.DB.batch([
+   env.DB.prepare('INSERT INTO ticket_messages(id,ticket_id,user_id,author_type,body) VALUES(?,?,?,\'customer\',?)').bind(uid(),id,me.id,bodyText),
+   env.DB.prepare("UPDATE support_tickets SET stage='در انتظار بررسی',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(id)
+  ]);
+  return json({ok:true});
  }
  if(u.pathname==='/api/admin/tickets'&&req.method==='GET'){if(!(await requirePermission(me,env,'support.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT t.*,u.mobile FROM support_tickets t JOIN users u ON u.id=t.user_id ORDER BY t.updated_at DESC LIMIT 500').all();return json({items:r.results||[]})}
  if(u.pathname.startsWith('/api/admin/tickets/')&&req.method==='GET'){if(!(await requirePermission(me,env,'support.read')))return json({error:'forbidden'},403);const id=u.pathname.split('/').pop(),t=await env.DB.prepare('SELECT t.*,u.mobile FROM support_tickets t JOIN users u ON u.id=t.user_id WHERE t.id=?').bind(id).first();if(!t)return json({error:'not_found'},404);const m=await env.DB.prepare('SELECT id,author_type,body,created_at FROM ticket_messages WHERE ticket_id=? ORDER BY created_at ASC').bind(id).all();return json({ticket:t,messages:m.results||[]})}
- if(u.pathname.startsWith('/api/admin/tickets/')&&req.method==='POST'){if(!(await requirePermission(me,env,'support.write'))||!requireCsrf(req))return json({error:'forbidden'},403);const id=u.pathname.split('/').pop(),t=await env.DB.prepare('SELECT * FROM support_tickets WHERE id=?').bind(id).first();if(!t)return json({error:'not_found'},404);const b=await body(req),message=String(b.message||'').trim().slice(0,10000),status=['open','closed'].includes(String(b.status))?String(b.status):t.status,stage=String(b.stage||'پاسخ داده شد').slice(0,80);const stm=[env.DB.prepare("UPDATE support_tickets SET status=?,stage=?,updated_at=CURRENT_TIMESTAMP,closed_at=CASE WHEN ?='closed' THEN CURRENT_TIMESTAMP ELSE NULL END WHERE id=?").bind(status,stage,status,id)];if(message)stm.push(env.DB.prepare("INSERT INTO ticket_messages(id,ticket_id,user_id,author_type,body) VALUES(?,?,?, 'admin',?)").bind(uid(),id,me.id,message));await env.DB.batch(stm);return json({ok:true})}
-
+ if(u.pathname.startsWith('/api/admin/tickets/')&&req.method==='POST'){
+  if(!(await requirePermission(me,env,'support.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+  const id=u.pathname.split('/').pop(),t=await env.DB.prepare('SELECT t.*,u.mobile FROM support_tickets t JOIN users u ON u.id=t.user_id WHERE t.id=?').bind(id).first();
+  if(!t)return json({error:'not_found'},404);
+  const b=await body(req),message=String(b.message||'').trim().slice(0,10000),sendSms=b.sendSms===true||b.sendSms==='true'||b.sendSms===1;
+  const status=['open','closed'].includes(String(b.status))?String(b.status):t.status,stage=String(b.stage||'پاسخ داده شد').slice(0,80);
+  const stm=[env.DB.prepare("UPDATE support_tickets SET status=?,stage=?,updated_at=CURRENT_TIMESTAMP,closed_at=CASE WHEN ?='closed' THEN CURRENT_TIMESTAMP ELSE NULL END WHERE id=?").bind(status,stage,status,id)];
+  if(message)stm.push(env.DB.prepare("INSERT INTO ticket_messages(id,ticket_id,user_id,author_type,body) VALUES(?,?,?, 'admin',?)").bind(uid(),id,me.id,message));
+  await env.DB.batch(stm);
+  let sms={sent:false,reason:'not_requested'};
+  if(message&&sendSms){
+   try{
+    const template=await siteSetting(env,'support_ticket_reply_sms_template','گیلاس آرت\\nپاسخی برای تیکت شما ثبت شده است.\\nمشاهده پاسخ: {ticket_url}');
+    sms=await sendKavenegarSms(env,String(t.mobile||''),fillSmsTemplate(template,{ticketId:id,subject:t.subject,ticketUrl:ticketSmsUrl(env,id)}));
+   }catch(e){console.error('ticket_reply_sms_error',e?.message||e)}
+  }
+  return json({ok:true,smsSent:sms.sent});
+ }
  if(u.pathname==='/api/admin/storefront-snapshot/trigger'&&req.method==='POST'){
   if(!me)return json({error:'unauthorized'},401);
   if(!(await requirePermission(me,env,'settings.read'))||!requireCsrf(req))return json({error:'forbidden'},403);
@@ -1163,17 +1224,19 @@ if(u.pathname==='/api/admin/settings'&&req.method==='PUT'){
 
 if(u.pathname==='/api/admin/integrations'&&req.method==='GET'){
  if(!(await requirePermission(me,env,'settings.read')))return json({error:'forbidden'},403);
- const keys=['kavenegar_sender','kavenegar_message_template','zarinpal_environment','zarinpal_callback_url'];
- const r=await env.DB.prepare("SELECT key,value,updated_at FROM site_settings WHERE key IN ('kavenegar_sender','kavenegar_message_template','zarinpal_environment','zarinpal_callback_url')").all();
+ const keys=['kavenegar_sender','kavenegar_message_template','support_ticket_created_sms_template','support_ticket_reply_sms_template','zarinpal_environment','zarinpal_callback_url'];
+ const r=await env.DB.prepare("SELECT key,value,updated_at FROM site_settings WHERE key IN ('kavenegar_sender','kavenegar_message_template','support_ticket_created_sms_template','support_ticket_reply_sms_template','zarinpal_environment','zarinpal_callback_url')").all();
  const map={};for(const x of(r.results||[]))map[x.key]=x.value;
- return json({kavenegar:{sender:map.kavenegar_sender||env.KAVENEGAR_SENDER||'9982007299',messageTemplate:map.kavenegar_message_template||'گیلاس آرت\\nکد ورود : {code}',apiKeyConfigured:!!env.KAVENEGAR_API_KEY},zarinpal:{environment:map.zarinpal_environment||env.PAYMENT_ENV||'production',callbackUrl:map.zarinpal_callback_url||env.PAYMENT_CALLBACK_URL||new URL(req.url).origin+'/api/payment/callback',merchantConfigured:!!env.ZARINPAL_MERCHANT_ID}});
+ return json({kavenegar:{sender:map.kavenegar_sender||env.KAVENEGAR_SENDER||'9982007299',messageTemplate:map.kavenegar_message_template||'گیلاس آرت\\nکد ورود : {code}',apiKeyConfigured:!!env.KAVENEGAR_API_KEY},supportSms:{ticketCreatedTemplate:map.support_ticket_created_sms_template||'گیلاس آرت\\nتیکت شما با موفقیت ثبت شد.\\nشماره تیکت: {ticket_id}\\nمشاهده و پیگیری: {ticket_url}',ticketReplyTemplate:map.support_ticket_reply_sms_template||'گیلاس آرت\\nپاسخی برای تیکت شما ثبت شده است.\\nمشاهده پاسخ: {ticket_url}'},zarinpal:{environment:map.zarinpal_environment||env.PAYMENT_ENV||'production',callbackUrl:map.zarinpal_callback_url||env.PAYMENT_CALLBACK_URL||new URL(req.url).origin+'/api/payment/callback',merchantConfigured:!!env.ZARINPAL_MERCHANT_ID}});
 }
 if(u.pathname==='/api/admin/integrations'&&req.method==='PUT'){
  if(!(await requirePermission(me,env,'settings.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
  const b=await body(req),updates={};
- const sender=String(b.kavenegarSender||'').trim().slice(0,50),template=String(b.kavenegarMessageTemplate||'').trim().slice(0,500),zenv=String(b.zarinpalEnvironment||'').toLowerCase(),callback=String(b.zarinpalCallbackUrl||'').trim();
+ const sender=String(b.kavenegarSender||'').trim().slice(0,50),template=String(b.kavenegarMessageTemplate||'').trim().slice(0,500),ticketCreatedTemplate=String(b.supportTicketCreatedSmsTemplate||'').trim().slice(0,500),ticketReplyTemplate=String(b.supportTicketReplySmsTemplate||'').trim().slice(0,500),zenv=String(b.zarinpalEnvironment||'').toLowerCase(),callback=String(b.zarinpalCallbackUrl||'').trim();
  if(sender)updates.kavenegar_sender=sender;
  if(template&&template.includes('{code}'))updates.kavenegar_message_template=template;
+ if(ticketCreatedTemplate&&ticketCreatedTemplate.includes('{ticket_url}'))updates.support_ticket_created_sms_template=ticketCreatedTemplate;
+ if(ticketReplyTemplate&&ticketReplyTemplate.includes('{ticket_url}'))updates.support_ticket_reply_sms_template=ticketReplyTemplate;
  if(zenv==='production'||zenv==='sandbox')updates.zarinpal_environment=zenv;else if(b.zarinpalEnvironment!==undefined)return json({error:'invalid_payment_environment'},400);
  if(callback){try{const x=new URL(callback);if(x.protocol!=='https:'||x.origin!==new URL(req.url).origin||x.pathname!=='/api/payment/callback')return json({error:'invalid_payment_callback'},400)}catch{return json({error:'invalid_payment_callback'},400)}updates.zarinpal_callback_url=callback}
  for(const [key,value] of Object.entries(updates))await env.DB.prepare("INSERT INTO site_settings(key,value,updated_at) VALUES(?,?,CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP").bind(key,value).run();
