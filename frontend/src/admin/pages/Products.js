@@ -95,40 +95,65 @@ el.querySelectorAll('.edit').forEach(b=>b.onclick=()=>edit(items.find(x=>x.id===
   attributeForm?.addEventListener('submit',async e=>{e.preventDefault();const x=new FormData(attributeForm);try{await api('/api/admin/product-attributes',{method:'POST',body:JSON.stringify({name:x.get('name'),active:true})});attributeForm.reset();await load()}catch(err){alert(err.message)}});
   const form=document.querySelector('#product-form');
   document.querySelector('#product-reset')?.addEventListener('click',resetForm);
+  document.querySelector('#product-add')?.addEventListener('click',()=>{resetForm();openProductModal()});
+  document.querySelectorAll('[data-product-modal-close]').forEach(x=>x.addEventListener('click',closeProductModal));
+  document.querySelector('#product-modal')?.addEventListener('click',e=>{if(e.target.matches('[data-product-modal-close]'))closeProductModal()});
+  document.addEventListener('keydown',productModalKeydown);
+  document.querySelectorAll('[data-product-tab]').forEach(tab=>tab.addEventListener('click',()=>activateProductTab(tab.dataset.productTab)));
   form?.addEventListener('submit',async e=>{
    e.preventDefault();const f=new FormData(form);const id=form.dataset.editId;
    const payload={name:f.get('name'),sku:f.get('sku'),slug:f.get('slug'),categoryId:f.get('categoryId')||null,priceIrt:Number(f.get('priceIrt')),stock:Number(f.get('stock')),description:f.get('description'),seoTitle:f.get('seoTitle'),seoDescription:f.get('seoDescription'),imagePath:f.get('imagePath'),imageAlt:f.get('imageAlt'),videoUrl:String(f.get('videoUrl')||'').trim()||null,attributeIds:selectedAttributeIds(),flashSaleActive:f.get('flashSaleActive')==='on',flashSaleEndsAt:isoDateTime(f.get('flashSaleEndsAt')),flashSalePriceIrt:f.get('flashSalePriceIrt')?Number(f.get('flashSalePriceIrt')):null};
-   try{await api(id?'/api/admin/products/'+encodeURIComponent(id):'/api/admin/products',{method:id?'PUT':'POST',body:JSON.stringify(payload)});resetForm();await refresh();alert(id?'ویرایش ذخیره شد':'محصول ثبت شد')}catch(err){alert(err.message)}
+   try{const status=document.querySelector('#product-save-status');if(status)status.textContent='در حال ذخیره…';await api(id?'/api/admin/products/'+encodeURIComponent(id):'/api/admin/products',{method:id?'PUT':'POST',body:JSON.stringify(payload)});closeProductModal();resetForm();await refresh()}catch(err){const status=document.querySelector('#product-save-status');if(status)status.textContent=err.message;else alert(err.message)}
   });
  }
- function resetForm(){const f=document.querySelector('#product-form');f.reset();delete f.dataset.editId;document.querySelector('#p-form-title').textContent='افزودن محصول';renderAttributeChoices([])}
+ function resetForm(){const f=document.querySelector('#product-form');if(!f)return;f.reset();delete f.dataset.editId;document.querySelector('#p-form-title').textContent='افزودن محصول';document.querySelector('#product-modal-subtitle').textContent='اطلاعات محصول را مرحله‌به‌مرحله تکمیل کنید.';document.querySelector('#product-save-status').textContent='';renderAttributeChoices([]);activateProductTab('base')}
+ function openProductModal(){const m=document.querySelector('#product-modal');if(!m)return;m.hidden=false;m.setAttribute('aria-hidden','false');document.body.classList.add('admin-product-modal-open');setTimeout(()=>document.querySelector('#p-name')?.focus(),80)}
+ function closeProductModal(){const m=document.querySelector('#product-modal');if(!m)return;m.hidden=true;m.setAttribute('aria-hidden','true');document.body.classList.remove('admin-product-modal-open')}
+ function productModalKeydown(e){const m=document.querySelector('#product-modal');if(!m||m.hidden)return;if(e.key==='Escape')closeProductModal()}
+ function activateProductTab(name){document.querySelectorAll('[data-product-tab]').forEach(t=>{const active=t.dataset.productTab===name;t.classList.toggle('is-active',active);t.setAttribute('aria-selected',String(active))});document.querySelectorAll('[data-product-panel]').forEach(p=>{const active=p.dataset.productPanel===name;p.classList.toggle('is-active',active);p.hidden=!active})}
  function edit(p){
   const f=document.querySelector('#product-form');f.dataset.editId=p.id;
   for(const [id,v] of [['p-name',p.name],['p-sku',p.sku],['p-slug',p.slug],['p-category',p.category_id||''],['p-price',p.price_irt],['p-stock',p.stock||0],['p-description',p.description||''],['p-seo-title',p.seo_title||''],['p-seo-description',p.seo_description||''],['p-image',p.image||''],['p-image-alt',p.image_alt||p.name||''],['p-video',p.video_url||''],['p-flash-end',localDateTime(p.flash_sale_ends_at)],['p-flash-price',p.flash_sale_price_irt??'']]){const e=document.querySelector('#'+id);if(e)e.value=v}
   const active=document.querySelector('#p-flash-active');if(active)active.checked=!!p.flash_sale_active;
   renderAttributeChoices(p.attribute_ids||[]);
   document.querySelector('#p-form-title').textContent='ویرایش محصول';
-  window.scrollTo({top:0,behavior:'smooth'});
+  document.querySelector('#product-modal-subtitle').textContent='ویرایش اطلاعات محصول انتخاب‌شده؛ تغییرات فقط پس از ذخیره اعمال می‌شود.';
+  document.querySelector('#product-save-status').textContent='';
+  activateProductTab('base');
+  openProductModal();
  }
  return `<div class="admin-page" dir="rtl">
- <div class="admin-title"><div><h2>محصولات</h2><span class="muted">کامل: اطلاعات، دسته، قیمت، موجودی، تصویر، ویدئو، ویژگی و SEO</span></div></div>
+ <div class="admin-title"><div><h2>محصولات</h2><span class="muted">مدیریت حرفه‌ای اطلاعات، رسانه، فروش و SEO محصولات</span></div><button type="button" class="btn primary" id="product-add">افزودن محصول</button></div>
  <div id="products-error" class="error"></div>
- <div class="panel"><h3 id="p-form-title">افزودن محصول</h3>
- <form id="product-form" class="form"><div class="form-grid">
-  <label>نام<input id="p-name" name="name" required></label><label>SKU<input id="p-sku" name="sku" required></label><label>Slug<input id="p-slug" name="slug" required></label><label>دسته<select id="p-category" name="categoryId"></select></label>
-  <label>قیمت (ریال)<input id="p-price" name="priceIrt" type="number" min="0" required></label><label>موجودی<input id="p-stock" name="stock" type="number" min="0" required></label>
- </div>
- <label>توضیحات<textarea id="p-description" name="description" required></textarea></label>
- <div class="form-grid">
-  <label>SEO Title<input id="p-seo-title" name="seoTitle" maxlength="70"></label><label>SEO Description<textarea id="p-seo-description" name="seoDescription" maxlength="180"></textarea></label>
-  <label>تصویر محصول<div class="image-field"><input id="p-image" name="imagePath" placeholder="انتخاب از Repository تصویر" readonly><button type="button" class="btn ghost" id="choose-product-image">انتخاب تصویر</button></div></label>
-  <label>Alt تصویر<input id="p-image-alt" name="imageAlt"></label>
-  <label class="full-field">ویدئوی محصول<input id="p-video" name="videoUrl" type="url" inputmode="url" placeholder="https://example.com/product-video.mp4"><small class="muted">فقط URL کامل HTTPS ذخیره می‌شود؛ فایل ویدئو در D1 ذخیره نمی‌شود.</small></label>
-  <div class="flash-sale-editor"><label class="check-row"><input id="p-flash-active" name="flashSaleActive" type="checkbox"> فعال‌سازی پیشنهاد شگفت‌انگیز</label><label>پایان پیشنهاد<input id="p-flash-end" name="flashSaleEndsAt" type="datetime-local"></label><label>قیمت ویژه (ریال، اختیاری)<input id="p-flash-price" name="flashSalePriceIrt" type="number" min="0"></label><small class="muted">برای فعال‌سازی، تاریخ پایان باید در آینده باشد.</small></div>
- </div>
- <div class="product-attributes-editor"><div class="sectionhead"><div><h4>ویژگی‌های این محصول</h4><p class="muted">چند ویژگی را همزمان انتخاب کنید؛ قیمت نهایی هنگام افزودن به سبد در Backend اعتبارسنجی می‌شود.</p></div></div><div id="product-attributes" class="attribute-choice-grid"></div></div>
- <button class="btn primary">ذخیره</button><button type="button" class="btn ghost" id="product-reset">لغو و پاک کردن فرم</button>
- </form></div>
+ <div id="product-modal" class="admin-product-modal" hidden aria-hidden="true">
+ <div class="admin-product-modal-backdrop" data-product-modal-close></div>
+ <section class="admin-product-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="p-form-title">
+  <header class="admin-product-modal-head"><div><span class="admin-kicker">PRODUCT EDITOR</span><h3 id="p-form-title">افزودن محصول</h3><p id="product-modal-subtitle" class="muted">اطلاعات محصول را مرحله‌به‌مرحله تکمیل کنید.</p></div><button type="button" class="admin-product-modal-close" data-product-modal-close aria-label="بستن پنجره">×</button></header>
+  <nav class="admin-product-tabs" role="tablist" aria-label="بخش‌های ویرایش محصول">
+   <button type="button" class="is-active" role="tab" aria-selected="true" data-product-tab="base">اطلاعات پایه</button>
+   <button type="button" role="tab" aria-selected="false" data-product-tab="media">رسانه و SEO</button>
+   <button type="button" role="tab" aria-selected="false" data-product-tab="sales">قیمت و فروش</button>
+  </nav>
+  <form id="product-form" class="form admin-product-form">
+   <section class="admin-product-tab-panel is-active" data-product-panel="base">
+    <div class="product-editor-intro"><strong>هویت و اطلاعات اصلی</strong><span>نام، کد، آدرس، دسته‌بندی و توضیحات محصول.</span></div>
+    <div class="form-grid"><label>نام<input id="p-name" name="name" required></label><label>SKU<input id="p-sku" name="sku" required dir="ltr"></label><label>Slug<input id="p-slug" name="slug" required dir="ltr"></label><label>دسته<select id="p-category" name="categoryId"></select></label></div>
+    <label>توضیحات<textarea id="p-description" name="description" required></textarea></label>
+   </section>
+   <section class="admin-product-tab-panel" data-product-panel="media" hidden>
+    <div class="product-editor-intro"><strong>رسانه و بهینه‌سازی</strong><span>تصویر، متن جایگزین، ویدئو و اطلاعات موتورهای جستجو.</span></div>
+    <div class="form-grid"><label>SEO Title<input id="p-seo-title" name="seoTitle" maxlength="70"></label><label>SEO Description<textarea id="p-seo-description" name="seoDescription" maxlength="180"></textarea></label><label>تصویر محصول<div class="image-field"><input id="p-image" name="imagePath" placeholder="انتخاب از Repository تصویر" readonly><button type="button" class="btn ghost" id="choose-product-image">انتخاب تصویر</button></div></label><label>Alt تصویر<input id="p-image-alt" name="imageAlt"></label><label class="full-field">ویدئوی محصول<input id="p-video" name="videoUrl" type="url" inputmode="url" placeholder="https://example.com/product-video.mp4"><small class="muted">فقط URL کامل HTTPS ذخیره می‌شود؛ فایل ویدئو در D1 ذخیره نمی‌شود.</small></label></div>
+   </section>
+   <section class="admin-product-tab-panel" data-product-panel="sales" hidden>
+    <div class="product-editor-intro"><strong>قیمت، موجودی و فروش</strong><span>اطلاعات مالی و پیشنهاد شگفت‌انگیز را کنترل کنید.</span></div>
+    <div class="form-grid"><label>قیمت (ریال)<input id="p-price" name="priceIrt" type="number" min="0" required></label><label>موجودی<input id="p-stock" name="stock" type="number" min="0" required></label></div>
+    <div class="flash-sale-editor"><label class="check-row"><input id="p-flash-active" name="flashSaleActive" type="checkbox"> فعال‌سازی پیشنهاد شگفت‌انگیز</label><label>پایان پیشنهاد<input id="p-flash-end" name="flashSaleEndsAt" type="datetime-local"></label><label>قیمت ویژه (ریال، اختیاری)<input id="p-flash-price" name="flashSalePriceIrt" type="number" min="0"></label><small class="muted">برای فعال‌سازی، تاریخ پایان باید در آینده باشد.</small></div>
+    <div class="product-attributes-editor"><div class="sectionhead"><div><h4>ویژگی‌های این محصول</h4><p class="muted">چند ویژگی را همزمان انتخاب کنید؛ قیمت نهایی هنگام افزودن به سبد در Backend اعتبارسنجی می‌شود.</p></div></div><div id="product-attributes" class="attribute-choice-grid"></div></div>
+   </section>
+   <footer class="admin-product-modal-foot"><span id="product-save-status" class="muted" aria-live="polite"></span><div><button type="button" class="btn ghost" data-product-modal-close>انصراف</button><button class="btn primary" id="product-save">ذخیره محصول</button></div></footer>
+  </form>
+ </section>
+</div>
  <div class="panel"><div class="sectionhead"><div><h3>ویژگی‌های قابل انتخاب</h3><p class="muted">ویژگی عمومی بسازید و گزینه‌های آن را با وضعیت، پیش‌فرض و افزایش قیمت مدیریت کنید.</p></div></div>
  <form id="attribute-form" class="inline-option-form"><input name="name" required placeholder="مثلاً رنگ قاب"><button class="btn primary">ایجاد ویژگی</button></form>
  <div id="attributes-manager" class="attributes-manager"></div></div>
