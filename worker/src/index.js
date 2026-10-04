@@ -109,7 +109,7 @@ function flashSaleValues(b,before={}){
 }
 function otpSmsMessage(env,code,template){
  const host=new URL(frontend(env)).hostname;
- const base=String(template||'گیلاس آرت\\nکد ورود : {code}').replaceAll('\\r\\n','\\n').replaceAll('\\n','\\n').replaceAll('{code}',code).replaceAll('{0}',code).split(/\\r?\\n/).filter(x=>!/^\\s*@[^\\s]+\\s+#\\d{6}\\s*$/.test(x)).join('\\n').trim();
+ const base=String(template||'گیلاس آرت\\nکد ورود : {code}').replaceAll('\\r\\n','\\n').replaceAll('\\n','\n').replaceAll('{code}',code).replaceAll('{0}',code).split(/\\r?\\n/).filter(x=>!/^\\s*@[^\\s]+\\s+#\\d{6}\\s*$/.test(x)).join('\\n').trim();
  return `${base}\\n\\n@${host} #${code}`;
 }
 async function ensureAdminBootstrap(env){
