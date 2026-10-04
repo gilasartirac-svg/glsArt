@@ -18,8 +18,25 @@ window.GilasArtTheme={toggle(){applyTheme(document.documentElement.dataset.theme
 window.GilasArtMobileMenu={toggle(button){const menu=document.querySelector('#main-menu');if(!menu)return;const open=!menu.classList.contains('is-open');menu.classList.toggle('is-open',open);button?.setAttribute('aria-expanded',String(open));button?.setAttribute('aria-label',open?'بستن منوی اصلی':'باز کردن منوی اصلی')},close(){const menu=document.querySelector('#main-menu'),button=document.querySelector('.mobile-menu-toggle');menu?.classList.remove('is-open');button?.setAttribute('aria-expanded','false');button?.setAttribute('aria-label','باز کردن منوی اصلی')}};
 document.addEventListener('click',e=>{const link=e.target?.closest?.('#main-menu a');if(link)window.GilasArtMobileMenu?.close()},{capture:true});
 initTheme();
+let artLoader=null,artLoaderHideTimer=null,artLoaderVisible=false;
+function ensureArtLoader(){
+ if(artLoader&&document.body.contains(artLoader))return artLoader;
+ artLoader=document.createElement('div');artLoader.id='gilasart-art-loader';artLoader.className='art-loader';artLoader.setAttribute('role','status');artLoader.setAttribute('aria-live','polite');
+ const root=location.pathname.includes('/glsArt')?'/glsArt/':'/';
+ artLoader.innerHTML='<div class="art-loader-inner"><div class="art-loader-logo"><img src="'+root+'invoice/logo.svg" alt="گیلاس آرت" decoding="async"></div><div class="art-loader-frame" aria-hidden="true"><span class="art-loader-canvas"></span><i></i><b></b></div><strong class="art-loader-title">گیلاس آرت</strong><span class="art-loader-caption">در حال آماده‌سازی گالری هنری</span><div class="art-loader-percent">0٪</div><div class="art-loader-track"><span></span></div></div>';
+ document.body.appendChild(artLoader);return artLoader;
+}
+function artLoaderPaint(value){
+ const el=ensureArtLoader(),v=Math.max(0,Math.min(100,Number(value)||0));const pct=el.querySelector('.art-loader-percent'),bar=el.querySelector('.art-loader-track span');if(pct)pct.textContent=fa(Math.round(v))+'٪';if(bar)bar.style.width=v+'%';
+}
+function showArtLoader(immediate=false){
+ const el=ensureArtLoader();clearTimeout(artLoaderHideTimer);artLoaderVisible=true;el.classList.add('is-visible');if(immediate)artLoaderPaint(Math.max(progressValue,4));
+}
+function hideArtLoader(){
+ if(!artLoader||!artLoaderVisible)return;artLoaderPaint(100);clearTimeout(artLoaderHideTimer);artLoaderHideTimer=setTimeout(()=>{if(!artLoader)return;artLoader.classList.remove('is-visible');artLoaderVisible=false},260);
+}
 let progressRequests=0,progressTimer=null,progressHideTimer=null,progressValue=0;
-function progressPaint(bar){const value=Math.max(0,Math.min(100,progressValue));const span=bar?.querySelector('span');if(span)span.style.width=value+'%'}
+function progressPaint(bar){const value=Math.max(0,Math.min(100,progressValue));const span=bar?.querySelector('span');if(span)span.style.width=value+'%';if(artLoaderVisible)artLoaderPaint(value)}
 function progressStart(){
   let bar=document.querySelector('#global-progress');
   if(!bar){bar=document.createElement('div');bar.id='global-progress';bar.innerHTML='<span></span>';document.body.prepend(bar)}
@@ -86,6 +103,7 @@ async function registerGilasArtServiceWorker(){
  }catch(e){console.warn('service_worker_registration_failed',e)}
 }
 registerGilasArtServiceWorker();
+showArtLoader(true);
 setTimeout(()=>window.GilasArtMobile?.checkRelease(),1800);
 setInterval(()=>{if(navigator.onLine)window.GilasArtMobile?.checkRelease()},15*60*1000);
 
@@ -157,7 +175,7 @@ async function snapshotApi(path){
   return {items:items.slice(offset,offset+limit).map(snapshotCore),limit,offset,sort};
  }
  const parts=u.pathname.split('/').filter(Boolean);
- if(parts[1]==='products'&&parts.length===3){
+ if(false&&parts[1]==='products'&&parts.length===3){
   const slug=decodeURIComponent(parts[2]),p=(d.products||[]).find(x=>x.slug===slug);if(!p)return null;
   return {product:{...p,category_name:p.categories?.[0]?.name||'',image:snapshotCore(p).image},images:p.images||[],attributes:p.attributes||[],reviews:p.reviews||[],categories:p.categories||[],quantityDiscountTiers:[{min:1,percent:0},{min:2,percent:2},{min:3,percent:4},{min:4,percent:6},{min:5,percent:8},{min:6,percent:10},{min:8,percent:12},{min:10,percent:15},{min:15,percent:17},{min:20,percent:20}]};
  }
@@ -219,7 +237,7 @@ function renderFooter(){
  return '<footer class="footer"><div class="wrap footer-grid footer-grid-refined"><section class="footer-brand"><strong>گیلاس آرت</strong><p>هنر، انتخابی برای ماندن.</p><span class="footer-caption">گالری و فروشگاه آنلاین آثار هنری گیلاس آرت</span></section><nav aria-label="پیوندهای خدمات" class="footer-links"><strong>دسترسی سریع</strong><a href="#/terms">قوانین سایت</a><a href="#/rewards">باشگاه امتیاز</a><a href="#/support">تیکت پشتیبانی</a><a href="#/contact">تماس با ما</a></nav><section class="footer-socials"><strong>شبکه‌های اجتماعی</strong><div class="footer-social-list">'+(socialMarkup||'<span class="muted">به‌زودی</span>')+'</div></section><section class="footer-trust"><strong>نماد اعتماد و پرداخت</strong><div class="trust-badges">'+enamad+'<span>درگاه امن</span></div></section></div><div class="wrap footer-bottom"><span>© گیلاس آرت</span><span>تمامی حقوق محفوظ است.</span></div></footer>';
 }
 function updateCartBadge(count){const n=Math.max(0,Number(count)||0);state.cartCount=n;document.querySelectorAll('.cart-count-badge').forEach(el=>{el.textContent=n>99?'۹۹+':fa(n);el.hidden=n<=0;el.setAttribute('aria-label',n+' تابلو در سبد خرید')})}
-async function syncCartBadge(){if(!state.user){updateCartBadge(0);return}try{const d=await api('/api/cart');const count=(d.items||[]).reduce((sum,x)=>sum+Math.max(0,Number(x.quantity)||0),0);updateCartBadge(count)}catch{updateCartBadge(0)}}
+async function syncCartBadge(){if(!state.user){updateCartBadge(0);return}try{const d=await api('/api/cart');state.cart=d;const count=(d.items||[]).reduce((sum,x)=>sum+Math.max(0,Number(x.quantity)||0),0);updateCartBadge(count)}catch{updateCartBadge(0)}}
 function layout(content){
  app.innerHTML=`<header class="top"><div class="wrap nav"><a class="brand" href="#/" aria-label="گیلاس آرت، صفحه اصلی">گیلاس آرت<small>GILAS ART</small></a><nav class="links" id="main-menu" aria-label="منوی اصلی"><a href="#/shop">فروشگاه</a><a href="#/about">درباره ما</a><a href="#/contact">تماس با ما</a><a href="#/news">اخبار</a><a href="#/articles">مقالات</a><a href="#/rewards" class="rewards-nav-link">باشگاه امتیاز</a>${isAdminUser()?'<a class="admin-link" href="#/admin">کنترل پنل</a>':''}</nav><div class="spacer"></div><button class="theme-toggle" type="button" aria-label="تغییر حالت نمایش" title="روز / شب" onclick="window.GilasArtTheme&&window.GilasArtTheme.toggle()">◐ <span>روز/شب</span></button><a class="iconbtn cart-link" href="#/cart" aria-label="سبد خرید"><div class="cart-icon-wrap">${icon('cart')}<b class="cart-count-badge" aria-label="${state.cartCount} تابلو در سبد خرید"${state.cartCount>0?'':' hidden'}>${state.cartCount>99?'۹۹+':fa(state.cartCount)}</b></div><span>سبد خرید</span></a>${state.user?'<a class="points-badge" href="#/rewards" title="امتیازهای من">★ '+fa(state.points)+' امتیاز</a>':''}${accountLink()}<button class="mobile-menu-toggle" type="button" aria-label="باز کردن منوی اصلی" aria-expanded="false" aria-controls="main-menu" onclick="window.GilasArtMobileMenu&&window.GilasArtMobileMenu.toggle(this)"><span></span><span></span><span></span></button></div></header><div class="rewards-promo"><div class="wrap rewards-promo-inner">${state.user?'<span>امتیاز شما: <b>'+fa(state.points)+'</b></span><span>از امتیازهایتان کوپن تا ۲۰٪ تخفیف بسازید.</span><a href="#/rewards">تبدیل امتیاز به کوپن ←</a>':'<span>عضویت در گیلاس آرت = <b>۱۰ امتیاز هدیه</b></span><a href="#/account">عضو شوید و امتیاز بگیرید ←</a>'}</div></div><main id="main-content" tabindex="-1">${content}</main>${renderFooter()}`;
 }
@@ -302,9 +320,9 @@ async function product(slug){
  const mediaItems=images.map((x,i)=>({type:'image',src:safeUrl(x.path),alt:x.alt_text||p.name,index:i})).filter(x=>x.src);
  if(p.video_url)mediaItems.push({type:'video',src:safeUrl(p.video_url),alt:'ویدئوی محصول',index:mediaItems.length});
  const first=mediaItems[0]||null;
- const mediaHtml=item=>item?.type==='video'?'<video class="product-video-player" controls playsinline preload="metadata" src="'+escapeHtml(item.src)+'"><p>مرورگر شما از پخش ویدئو پشتیبانی نمی‌کند.</p></video>':item?.src?'<img src="'+escapeHtml(item.src)+'" alt="'+escapeHtml(item.alt||p.name)+'">':'<div class="product-media-empty">اثر هنری</div>';
+ const mediaHtml=item=>item?.type==='video'?'<video class="product-video-player" controls playsinline preload="metadata" src="'+escapeHtml(item.src)+'"><p>مرورگر شما از پخش ویدئو پشتیبانی نمی‌کند.</p></video>':item?.src?'<img src="'+escapeHtml(item.src)+'" alt="'+escapeHtml(item.alt||p.name)+'" loading="eager" fetchpriority="high" decoding="async">':'<div class="product-media-empty">اثر هنری</div>';
  const optionHtml=attributes.map(a=>'<label class="product-option"><span>'+escapeHtml(a.name)+'</span><select data-attribute-id="'+escapeHtml(a.id)+'">'+a.options.map(o=>'<option value="'+escapeHtml(o.id)+'" data-delta="'+Number(o.price_delta_irt||0)+'" '+(o.is_default?'selected':'')+'>'+escapeHtml(o.name)+(Number(o.price_delta_irt||0)?' (+'+fa(o.price_delta_irt)+' ریال)':'')+'</option>').join('')+'</select></label>').join('');
- layout('<section class="wrap page product"><div class="product-gallery"><div id="product-media" class="product-media">'+mediaHtml(first)+'</div><div class="product-thumbs">'+mediaItems.map((x,i)=>x.type==='video'?'<button class="product-thumb video-thumb '+(i===0?'active':'')+'" data-index="'+i+'" aria-label="نمایش ویدئوی محصول"><span>▶</span><small>ویدئو</small></button>':'<button class="product-thumb '+(i===0?'active':'')+'" data-index="'+i+'" aria-label="نمایش تصویر '+(i+1)+'"><img src="'+escapeHtml(x.src)+'" alt=""></button>').join('')+'</div></div><div class="product-info"><div class="product-category-pills">'+(categories.length?categories:[{name:p.category_name||'اثر هنری'}]).map(x=>'<span class="pill">'+escapeHtml(x.name)+'</span>').join('')+'</div><h1>'+escapeHtml(p.name)+'</h1><p class="muted">'+escapeHtml(p.description||'')+'</p>'+(optionHtml?'<div class="panel product-options-panel"><h3>انتخاب ویژگی‌ها</h3><div class="product-options">'+optionHtml+'</div></div>':'')+'<div class="price product-live-price" id="product-live-price" style="font-size:24px;margin:24px 0">'+fa(p.price_irt)+' ریال</div><div class="muted" id="product-price-breakdown"></div><div class="toolbar"><div class="product-cart-control" id="product-cart-control" aria-live="polite"><button class="btn primary product-add-btn" id="add" type="button">افزودن به سبد</button></div><button class="btn ghost" id="fav">ذخیره</button></div><div class="quantity-discount-card" id="quantity-discount-card"></div><div class="panel"><h3>نظر خریداران</h3>'+((d.reviews||[]).map(r=>'<article class="review-card" data-review-id="'+escapeHtml(r.id)+'"><div class="review-head"><div><b>'+escapeHtml(r.name||'خریدار')+'</b><div class="review-stars" aria-label="امتیاز '+Number(r.rating||0)+' از 5">'+('★'.repeat(Math.max(0,Math.min(5,Number(r.rating)||0))))+'</div></div><time class="muted">'+escapeHtml(jalaliDate(r.created_at)||'')+'</time></div><p class="review-body">'+escapeHtml(r.body||'')+'</p><div class="review-reactions"><button type="button" class="review-reaction" data-reaction="like" aria-label="پسندیدن نظر">👍 <span>'+fa(r.like_count||0)+'</span></button><button type="button" class="review-reaction" data-reaction="dislike" aria-label="نپسندیدن نظر">👎 <span>'+fa(r.dislike_count||0)+'</span></button></div></article>').join('')||'<span class="muted">هنوز نظری ثبت نشده است.</span>')+'<div class="panel"><h3>ثبت نظر</h3><form id="review-form" class="form"><label>امتیاز<select name="rating"><option value="5">★★★★★</option><option value="4">★★★★</option><option value="3">★★★</option><option value="2">★★</option><option value="1">★</option></select></label><label>نظر شما<textarea name="body" maxlength="1000" required placeholder="نظر خود درباره این اثر را بنویسید"></textarea></label><button class="btn primary" type="submit">ثبت نظر</button><div id="review-msg" aria-live="polite"></div></form></div></div></div></section>');
+ layout('<section class="wrap page product"><div class="product-gallery"><div id="product-media" class="product-media">'+mediaHtml(first)+'</div><div class="product-thumbs">'+mediaItems.map((x,i)=>x.type==='video'?'<button class="product-thumb video-thumb '+(i===0?'active':'')+'" data-index="'+i+'" aria-label="نمایش ویدئوی محصول"><span>▶</span><small>ویدئو</small></button>':'<button class="product-thumb '+(i===0?'active':'')+'" data-index="'+i+'" aria-label="نمایش تصویر '+(i+1)+'"><img src="'+escapeHtml(x.src)+'" alt="" loading="lazy" decoding="async"></button>').join('')+'</div></div><div class="product-info"><div class="product-category-pills">'+(categories.length?categories:[{name:p.category_name||'اثر هنری'}]).map(x=>'<span class="pill">'+escapeHtml(x.name)+'</span>').join('')+'</div><h1>'+escapeHtml(p.name)+'</h1><p class="muted">'+escapeHtml(p.description||'')+'</p>'+(optionHtml?'<div class="panel product-options-panel"><h3>انتخاب ویژگی‌ها</h3><div class="product-options">'+optionHtml+'</div></div>':'')+'<div class="price product-live-price" id="product-live-price" style="font-size:24px;margin:24px 0">'+fa(p.price_irt)+' ریال</div><div class="muted" id="product-price-breakdown"></div><div class="toolbar"><div class="product-cart-control" id="product-cart-control" aria-live="polite"><button class="btn primary product-add-btn" id="add" type="button">افزودن به سبد</button></div><button class="btn ghost" id="fav">ذخیره</button></div><div class="quantity-discount-card" id="quantity-discount-card"></div><div class="panel"><h3>نظر خریداران</h3>'+((d.reviews||[]).map(r=>'<article class="review-card" data-review-id="'+escapeHtml(r.id)+'"><div class="review-head"><div><b>'+escapeHtml(r.name||'خریدار')+'</b><div class="review-stars" aria-label="امتیاز '+Number(r.rating||0)+' از 5">'+('★'.repeat(Math.max(0,Math.min(5,Number(r.rating)||0))))+'</div></div><time class="muted">'+escapeHtml(jalaliDate(r.created_at)||'')+'</time></div><p class="review-body">'+escapeHtml(r.body||'')+'</p><div class="review-reactions"><button type="button" class="review-reaction" data-reaction="like" aria-label="پسندیدن نظر">👍 <span>'+fa(r.like_count||0)+'</span></button><button type="button" class="review-reaction" data-reaction="dislike" aria-label="نپسندیدن نظر">👎 <span>'+fa(r.dislike_count||0)+'</span></button></div></article>').join('')||'<span class="muted">هنوز نظری ثبت نشده است.</span>')+'<div class="panel"><h3>ثبت نظر</h3><form id="review-form" class="form"><label>امتیاز<select name="rating"><option value="5">★★★★★</option><option value="4">★★★★</option><option value="3">★★★</option><option value="2">★★</option><option value="1">★</option></select></label><label>نظر شما<textarea name="body" maxlength="1000" required placeholder="نظر خود درباره این اثر را بنویسید"></textarea></label><button class="btn primary" type="submit">ثبت نظر</button><div id="review-msg" aria-live="polite"></div></form></div></div></div></section>');
  document.querySelectorAll('.review-reaction').forEach(btn=>btn.addEventListener('click',async()=>{
    const card=btn.closest('.review-card'),reviewId=card?.dataset.reviewId,reaction=btn.dataset.reaction;
    if(!reviewId||!reaction)return;
@@ -342,7 +360,7 @@ async function product(slug){
    if(!productCartControl)return;
    if(productCartQuantity<=0){
      productCartControl.innerHTML='<button class="btn primary product-add-btn" id="add" type="button">افزودن به سبد</button>';
-     document.querySelector('#add').onclick=async()=>{try{const btn=document.querySelector('#add');if(btn?.disabled)return;btn?.setAttribute('disabled','disabled');const meData=await loadMe();if(!meData?.user)await ensureLogin();const token=csrf();if(!token)throw new Error('جلسه خرید منقضی شده است؛ لطفاً دوباره وارد حساب شوید.');await api('/api/cart',{method:'POST',body:JSON.stringify({productId:p.id,quantity:1,options:selections()}),headers:{'x-csrf-token':token}});await syncCartBadge();renderProductCartControl(1);alert('به سبد خرید اضافه شد')}catch(e){const msg=String(e?.message||'');alert(msg==='cart_add_failed'?'افزودن به سبد خرید در حال حاضر انجام نشد؛ لطفاً دوباره تلاش کنید.':msg||'افزودن به سبد خرید انجام نشد.')}finally{document.querySelector('#add')?.removeAttribute('disabled')}};
+     document.querySelector('#add').onclick=async()=>{try{const btn=document.querySelector('#add');if(btn?.disabled)return;btn?.setAttribute('disabled','disabled');if(!state.user)await ensureLogin();const token=csrf();if(!token)throw new Error('جلسه خرید منقضی شده است؛ لطفاً دوباره وارد حساب شوید.');await api('/api/cart',{method:'POST',body:JSON.stringify({productId:p.id,quantity:1,options:selections()}),headers:{'x-csrf-token':token}});updateCartBadge(Math.max(0,state.cartCount-Number(productCartQuantity||0)+1));productCartQuantity=1;renderProductCartControl(1);alert('به سبد خرید اضافه شد')}catch(e){const msg=String(e?.message||'');alert(msg==='cart_add_failed'?'افزودن به سبد خرید در حال حاضر انجام نشد؛ لطفاً دوباره تلاش کنید.':msg||'افزودن به سبد خرید انجام نشد.')}finally{document.querySelector('#add')?.removeAttribute('disabled')}};
      return;
    }
    productCartControl.innerHTML='<div class="product-qty-control" role="group" aria-label="تعداد این تابلو در سبد خرید"><button class="product-qty-btn product-qty-minus" id="product-qty-minus" type="button" aria-label="کاهش تعداد">−</button><div class="product-qty-summary"><span>افزودن به سبد</span><strong>'+fa(productCartQuantity)+'</strong><small>تعداد انتخاب‌شده</small></div><button class="product-qty-btn product-qty-plus" id="product-qty-plus" type="button" aria-label="افزایش تعداد">+</button></div>';
@@ -355,7 +373,8 @@ async function product(slug){
        }else{
          await api('/api/cart',{method:'POST',body:JSON.stringify({productId:p.id,quantity:target}),headers:{'x-csrf-token':csrf()}});
        }
-       await syncCartBadge();
+       updateCartBadge(Math.max(0,state.cartCount+(target-Number(productCartQuantity||0))));
+       productCartQuantity=target;
        renderProductCartControl(target);
      }catch(e){
        buttons.forEach(b=>b.disabled=false);
@@ -368,7 +387,7 @@ async function product(slug){
  const loadProductCartQuantity=async()=>{
    if(!state.user){renderProductCartControl(0);return}
    try{
-     const cartData=await api('/api/cart');
+     const cartData=state.cart||await api('/api/cart');
      const line=(cartData.items||[]).find(x=>String(x.product_id)===String(p.id));
      renderProductCartControl(line?Number(line.quantity):0);
    }catch(e){renderProductCartControl(-1);console.warn('cart_quantity_unavailable',e)}
@@ -414,7 +433,7 @@ function startNotificationPolling(){
  clearInterval(notificationTimer);notificationTimer=null;
  if(state.user){pollNotifications();notificationTimer=setInterval(()=>{pollNotifications()},10000)}
 }
-async function loadMe(){try{const d=await api('/api/me');state.user=d.user||null;state.roles=d.roles||[];state.permissions=d.permissions||[];csrfToken=d.csrfToken||csrfToken;if(state.user){try{state.rewards=await api('/api/rewards');state.points=Number(state.rewards.balance||0)}catch{state.rewards=null;state.points=0}await syncCartBadge()}else{state.rewards=null;state.points=0;updateCartBadge(0)}startNotificationPolling();return d}catch(e){return null}}
+async function loadMe(){try{const d=await api('/api/me');state.user=d.user||null;state.roles=d.roles||[];state.permissions=d.permissions||[];csrfToken=d.csrfToken||csrfToken;if(state.user){const [rewardsResult]=await Promise.allSettled([api('/api/rewards'),syncCartBadge()]);if(rewardsResult.status==='fulfilled'){state.rewards=rewardsResult.value;state.points=Number(state.rewards.balance||0)}else{state.rewards=null;state.points=0}}else{state.rewards=null;state.points=0;updateCartBadge(0)}startNotificationPolling();return d}catch(e){return null}}
 async function cart(){
  await loadMe();
  if(!state.user){
@@ -690,7 +709,7 @@ async function router(){const base=location.pathname.includes('/glsArt')?'/glsAr
  }catch(e){
   const bodyEl=document.querySelector('#terms-body');if(bodyEl)bodyEl.textContent='قوانین سایت در حال حاضر قابل دریافت نیست.';
  }
- return}if(p[0]==='support')return p[1]?supportDetail(decodeURIComponent(p[1])):support();if(p[0]==='payment'){layout(`<section class="wrap page"><div class="panel"><h1>${p[1]==='success'?'پرداخت با موفقیت تایید شد':'پرداخت ناموفق بود'}</h1><a class="btn primary" href="#/shop">بازگشت به فروشگاه</a></div></section>`);return}home()}catch(e){console.error('router_error',e);if(!p[0])console.warn('home_render_error',e)} }window.addEventListener('hashchange',()=>router());window.addEventListener('popstate',()=>router());(async()=>{try{await loadMe()}catch{}try{const sd=await api('/api/settings');state.settings=sd.settings||state.settings}catch{}await router()})();
+ return}if(p[0]==='support')return p[1]?supportDetail(decodeURIComponent(p[1])):support();if(p[0]==='payment'){layout(`<section class="wrap page"><div class="panel"><h1>${p[1]==='success'?'پرداخت با موفقیت تایید شد':'پرداخت ناموفق بود'}</h1><a class="btn primary" href="#/shop">بازگشت به فروشگاه</a></div></section>`);return}home()}catch(e){console.error('router_error',e);if(!p[0])console.warn('home_render_error',e)} }window.addEventListener('hashchange',()=>router());window.addEventListener('popstate',()=>router());(async()=>{try{await Promise.all([loadMe(),(async()=>{try{const sd=await api('/api/settings');state.settings=sd.settings||state.settings}catch{}})()])}catch{}try{await router()}finally{hideArtLoader()}})();
 
 /* GilasArt interaction guard */
 (()=>{
