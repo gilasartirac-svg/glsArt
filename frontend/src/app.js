@@ -648,7 +648,6 @@ async function rewardsPage(){
    '<section class="panel reward-activity-panel"><div class="sectionhead"><div><span class="eyebrow">ACTIVITY</span><h2>تاریخچه امتیازها</h2></div><span class="section-count">۵۰ رویداد اخیر</span></div><div class="table-wrap"><table class="rewards-ledger"><thead><tr><th>رویداد</th><th>امتیاز</th><th>تاریخ</th></tr></thead><tbody>'+ledger+'</tbody></table></div></section>'+
    '</section>');
 
- const referralInput=document.querySelector('#referral-apply-code');if(referralInput&&referralQuery)referralInput.value=referralQuery.toUpperCase().slice(0,20);
 
  document.querySelector('#copy-referral')?.addEventListener('click',async()=>{
    const btn=document.querySelector('#copy-referral'),source=document.querySelector('#referral-url'),value=String(source?.value||'').trim(),label=btn?.querySelector('span');
