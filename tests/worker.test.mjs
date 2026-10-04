@@ -78,6 +78,14 @@ test('flash sales API and secure product fields exist',()=>{
 test('WebOTP SMS is origin-bound and session cookies support cross-site GitHub Pages authentication',()=>{
  assert.match(worker,/otpSmsMessage/);assert.match(worker,/@\$\{host\} #\$\{code\}/);assert.match(worker,/Partitioned/);assert.match(worker,/otp-credentials=\(self\)/);
 });
+test('support ticket SMS workflow is template-driven and reply opt-in is server enforced',()=>{
+ assert.match(worker,/support_ticket_created_sms_template/);
+ assert.match(worker,/support_ticket_reply_sms_template/);
+ assert.match(worker,/ticketSmsUrl/);
+ assert.match(worker,/sendSms/);
+ assert.match(worker,/sendKavenegarSms/);
+ assert.match(worker,/ticket_created_sms_error/);
+});
 test('support CRM and infinite CMS pagination are exposed',()=>{
  assert.match(worker,/\/api\/support\/tickets/);assert.match(worker,/\/api\/admin\/tickets/);assert.match(worker,/\/api\/faq/);assert.match(worker,/searchParams\.get\('limit'\)/);assert.match(worker,/searchParams\.get\('offset'\)/);
  const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
