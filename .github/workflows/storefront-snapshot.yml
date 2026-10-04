@@ -1,0 +1,68 @@
+name: Storefront Snapshot
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+      timezone: "Asia/Tehran"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: storefront-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch current public storefront snapshot
+        env:
+          SNAPSHOT_URL: https://gilasartworker.gilasart-ir-ac.workers.dev/api/storefront-snapshot
+        run: |
+          set -euo pipefail
+          mkdir -p frontend/public/data
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 15 --max-time 120 "$SNAPSHOT_URL" -o frontend/public/data/storefront.json
+          test -s frontend/public/data/storefront.json
+
+      - name: Validate snapshot schema and safety
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const d=JSON.parse(fs.readFileSync('frontend/public/data/storefront.json','utf8'));
+          if(d?.meta?.schemaVersion!==1) throw new Error('invalid schemaVersion');
+          for(const key of ['categories','products','reviews','articles','news','about','contact','faq']) if(!Array.isArray(d[key])) throw new Error('missing array: '+key);
+          if(!d.settings || typeof d.settings!=='object' || Array.isArray(d.settings)) throw new Error('invalid settings');
+          if(!d.indexes || typeof d.indexes!=='object') throw new Error('missing indexes');
+          if(d.products.length<1) throw new Error('empty product catalog');
+          if(d.products.some(p=>!p.id||!p.slug||!p.sku||!p.name||!Array.isArray(p.images)||!Array.isArray(p.attributes)||!Array.isArray(p.category_ids))) throw new Error('invalid product document');
+          if(d.products.some(p=>p.images.length===0)) throw new Error('product without image');
+          const forbidden=/admin_bootstrap|kavenegar|invoice_|national_id|postal_code|economic_code/i;
+          const raw=JSON.stringify(d);
+          if(forbidden.test(raw)) throw new Error('sensitive field leaked into snapshot');
+          if(Number(d.meta.productCount)!==d.products.length) throw new Error('product count mismatch');
+          if(Number(d.meta.categoryCount)!==d.categories.length) throw new Error('category count mismatch');
+          console.log(JSON.stringify({products:d.products.length,categories:d.categories.length,reviews:d.reviews.length,articles:d.articles.length,news:d.news.length,bytes:Buffer.byteLength(raw)}));
+          NODE
+
+      - name: Show snapshot diff
+        run: git diff --stat -- frontend/public/data/storefront.json
+
+      - name: Commit validated snapshot
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/data/storefront.json
+          if git diff --cached --quiet; then
+            echo "Snapshot unchanged; nothing to commit."
+            exit 0
+          fi
+          git commit -m "chore: refresh storefront snapshot"
+          git push origin HEAD:main
