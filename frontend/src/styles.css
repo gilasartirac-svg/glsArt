@@ -3068,3 +3068,60 @@ button,.btn,.iconbtn,.theme-toggle,.mobile-menu-toggle{min-height:44px;touch-act
   .top{padding-top:env(safe-area-inset-top)}
   .footer{padding-bottom:max(28px,env(safe-area-inset-bottom))}
 }
+
+/* Rewards referral controls — dedicated 2x2 mobile layout */
+.rewards-page .referral-panel .referral-url-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:10px;
+  align-items:stretch;
+}
+.rewards-page .referral-panel .referral-url-row .referral-url{
+  grid-column:1 / -1;
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+.rewards-page .referral-panel .referral-url-row .referral-copy-btn,
+.rewards-page .referral-panel .referral-url-row .referral-sms-btn{
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  min-height:46px;
+  height:46px;
+  margin:0;
+  white-space:nowrap;
+}
+.rewards-page .referral-panel #referral-apply-code{
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  min-height:46px;
+  height:46px;
+}
+@media(max-width:560px){
+  .rewards-page .referral-panel .referral-url-row{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:8px;
+  }
+  .rewards-page .referral-panel .referral-url-row .referral-url{
+    grid-column:1 / -1;
+  }
+  .rewards-page .referral-panel .referral-url-row .referral-copy-btn,
+  .rewards-page .referral-panel .referral-url-row .referral-sms-btn{
+    min-height:44px;
+    height:44px;
+    padding-inline:8px;
+    font-size:clamp(10px,2.8vw,12px);
+  }
+}
+@media(max-width:360px){
+  .rewards-page .referral-panel .referral-url-row{
+    grid-template-columns:1fr;
+  }
+  .rewards-page .referral-panel .referral-url-row .referral-url,
+  .rewards-page .referral-panel .referral-url-row .referral-copy-btn,
+  .rewards-page .referral-panel .referral-url-row .referral-sms-btn{
+    grid-column:1;
+  }
+}
