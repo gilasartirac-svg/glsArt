@@ -8,7 +8,7 @@ export default function StorefrontSnapshot(){
   btn.addEventListener('click',()=>{
    const url='https://github.com/gilasartirac-svg/glsArt/actions/workflows/storefront-snapshot.yml';
    window.open(url,'_blank','noopener,noreferrer');
-   if(msg)msg.textContent='صفحه اجرای Trigger گیت‌هاب باز شد؛ از همان صفحه «Run workflow» را اجرا کنید.';
+   if(msg)msg.textContent='صفحه Trigger گیت‌هاب باز شد؛ همان‌جا «Run workflow» را بزنید تا همین Workflow اجرا شود.';
   });
  },0);
  return `
@@ -17,7 +17,7 @@ export default function StorefrontSnapshot(){
   <div class="panel">
    <div class="admin-snapshot-hero">
     <div><strong>Snapshot فروشگاه</strong><p>محصولات، تصاویر، دسته‌بندی‌ها، ویژگی‌ها و قیمت گزینه‌ها، نظرات تأییدشده، مقالات، اخبار، FAQ و تنظیمات عمومی قابل انتشار در Snapshot قرار می‌گیرند.</p></div>
-    <button id="snapshot-run" class="btn primary" type="button">اجرای Trigger آفلاین‌سازی</button>
+    <button id="snapshot-run" class="btn primary" type="button">باز کردن Trigger اجرای آفلاین‌سازی</button>
    </div>
    <div id="snapshot-message" class="notice" role="status" aria-live="polite">اجرای خودکار هر شب ساعت ۰۰:۰۰ به وقت تهران برنامه‌ریزی شده است.</div>
   </div>
