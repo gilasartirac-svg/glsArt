@@ -128,13 +128,10 @@ async function snapshotApi(path){
   const items=(d.products||[]).filter(p=>Number(p.flash_sale_active)===1&&p.flash_sale_ends_at&&new Date(p.flash_sale_ends_at).getTime()>Date.now()).sort((a,b)=>String(a.flash_sale_ends_at).localeCompare(String(b.flash_sale_ends_at))).slice(0,20).map(snapshotCore);
   return {items};
  }
- if(u.pathname.startsWith('/api/products/')){
-  const slug=decodeURIComponent(u.pathname.split('/').pop()||'');
-  const p=(d.products||[]).find(x=>String(x.slug||'')===slug);
-  if(!p)return null;
-  const images=Array.isArray(p.images)?p.images:[];
-  return {product:{...p,image:p.image||(images.find(x=>Number(x.is_primary)===1)?.path||images[0]?.path||'')},images,attributes:Array.isArray(p.attributes)?p.attributes:[],reviews:Array.isArray(p.reviews)?p.reviews:[],categories:Array.isArray(p.categories)?p.categories:[],quantityDiscountTiers:[]};
- }
+ // Product detail is intentionally NOT served from the static storefront snapshot.
+ // Product-specific attributes/options and their pricing are dynamic and must come
+ // from the Worker/D1 source of truth. This prevents stale/global option lists
+ // from the daily public snapshot from leaking into product dropdowns.
  if(u.pathname==='/api/products'){
   let items=[...(d.products||[])];
   const q=(u.searchParams.get('q')||'').trim().toLowerCase(),cat=u.searchParams.get('category')||'',sort=u.searchParams.get('sort')||'newest',minPrice=Math.max(0,Number(u.searchParams.get('min_price')||0)),maxPrice=Math.max(0,Number(u.searchParams.get('max_price')||0));
