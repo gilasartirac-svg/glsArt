@@ -1,6 +1,6 @@
 const enc=new TextEncoder();
 const json=(data,status=200,extra={})=>{const h=new Headers({'content-type':'application/json; charset=utf-8'});for(const[k,v]of Object.entries(extra)){if(Array.isArray(v))v.forEach(x=>h.append(k,x));else h.set(k,v)}return new Response(JSON.stringify(data),{status,headers:h})};
-const security={'x-content-type-options':'nosniff','referrer-policy':'strict-origin-when-cross-origin','x-frame-options':'DENY','permissions-policy':'camera=(),microphone=(),geolocation=(),otp-credentials=(self)','strict-transport-security':'max-age=31536000; includeSubDomains','content-security-policy':"default-src 'self'; img-src 'self' https: data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://pay.gilasart.ir https://payment.zarinpal.com https://sandbox.zarinpal.com"};
+const security={'x-content-type-options':'nosniff','referrer-policy':'strict-origin-when-cross-origin','x-frame-options':'DENY','permissions-policy':'camera=(),microphone=(),geolocation=(),otp-credentials=(self)','strict-transport-security':'max-age=31536000; includeSubDomains','content-security-policy':"default-src 'self'; img-src 'self' https: data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://pay.gilasart.ir https://payment.zarinpal.com https://sandbox.zarinpal.com https://ipg.novinopay.com"};
 const uid=()=>crypto.randomUUID();
 function adminBootstrapConfigured(env){return /^09\d{9}$/.test(String(env.ADMIN_BOOTSTRAP_MOBILE||'').replace(/\D/g,''));}
 const now=()=>new Date().toISOString();
@@ -452,7 +452,32 @@ async function rewardData(env,me){
 function promotionErrorCode(e){const c=String(e?.message||'');return ['coupon_not_found','coupon_expired_or_inactive','coupon_min_order','coupon_usage_limit','coupon_already_used','coupon_not_applicable'].includes(c)?c:null}
 function allowedImagePath(v){try{const s=String(v||'').trim();const imageFile=/\.(png|jpe?g|webp|gif|svg)$/i;const relative=/^\/(?:art|uploaded)\/[^?#]+$/;if(relative.test(s)&&imageFile.test(s))return true;const u=new URL(s);if(u.protocol!=='https:')return false;if(u.hostname==='raw.githubusercontent.com')return ((u.pathname.startsWith('/gilasartirac-svg/gls-media/main/image/')||u.pathname.startsWith('/gilasartirac-svg/glsArt/main/frontend/public/art/')||u.pathname.startsWith('/gilasartirac-svg/glsArt/main/frontend/public/uploaded/'))&&imageFile.test(u.pathname));if(u.hostname==='www.gilasart.ir'||u.hostname==='gilasart.ir')return u.pathname.startsWith('/art/')||u.pathname.startsWith('/uploaded/')?imageFile.test(u.pathname):false;return false}catch{return false}}
 
+async function paymentEnabled(env,provider){return (await siteSetting(env,'payment_'+provider+'_enabled',provider==='zarinpal'?'1':'0'))==='1'}
+async function paymentOptions(env){
+ const z=await paymentEnabled(env,'zarinpal'),n=await paymentEnabled(env,'novinopay'),c=await paymentEnabled(env,'card_transfer');
+ const card={
+  bankName:await siteSetting(env,'card_transfer_bank_name',''),
+  accountHolder:await siteSetting(env,'card_transfer_account_holder',''),
+  cardNumber:await siteSetting(env,'card_transfer_card_number',''),
+  iban:await siteSetting(env,'card_transfer_iban',''),
+  instructions:await siteSetting(env,'card_transfer_instructions','پس از انتقال وجه، سفارش توسط واحد فروش بررسی و تایید می‌شود.')
+ };
+ return {
+  defaultProvider:await siteSetting(env,'payment_default_provider',z?'zarinpal':n?'novinopay':c?'card_transfer':''),
+  methods:[
+   {id:'zarinpal',title:await siteSetting(env,'payment_zarinpal_title','زرین‌پال'),enabled:z,configured:!!env.ZARINPAL_MERCHANT_ID},
+   {id:'novinopay',title:await siteSetting(env,'payment_novinopay_title','نوینو پی'),enabled:n,configured:!!env.NOVINOPAY_MERCHANT_ID},
+   {id:'card_transfer',title:await siteSetting(env,'payment_card_transfer_title','کارت به کارت'),enabled:c,configured:!!(card.cardNumber||card.iban),card}
+  ].filter(x=>x.enabled)
+ };
+}
 async function zarin(env,endpoint,payload){const mode=await paymentEnvironment(env);const base=mode==='production'?'https://api.zarinpal.com/pg/v4/payment':'https://sandbox.zarinpal.com/pg/v4/payment';const r=await fetch(base+'/'+endpoint,{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify({...payload,merchant_id:env.ZARINPAL_MERCHANT_ID})});return r.json()}
+async function novino(env,endpoint,payload){
+ const base='https://api.novinopay.com/payment/ipg/v2/'+endpoint;
+ const r=await fetch(base,{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify({...payload,merchant_id:env.NOVINOPAY_MERCHANT_ID})});
+ return r.json();
+}
+function paymentRedirectUrl(provider,authority){return provider==='novinopay'?'https://ipg.novinopay.com/StartPay/'+encodeURIComponent(authority):zarinPaymentHost('production')+'/pg/StartPay/'+encodeURIComponent(authority)}
 async function proxyStorefrontImage(req,env,u){
   if(req.method!=='GET')return null;
   const raw=String(u.searchParams.get('path')||'').trim();
@@ -833,6 +858,7 @@ if(u.pathname==='/api/admin/tickets'&&req.method==='GET'){if(!(await requirePerm
 }
 if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const slug=u.pathname.split('/')[3],p=await env.DB.prepare('SELECT id FROM products WHERE slug=? AND active=1').bind(slug).first();if(!p)return json({error:'not_found'},404);const b=await body(req);const rating=Number(b.rating),txt=String(b.body||'').trim();if(!Number.isInteger(rating)||rating<1||rating>5||txt.length<3||txt.length>1000)return json({error:'invalid_review'},400);const reviewId=uid();await env.DB.prepare('INSERT INTO reviews(id,user_id,product_id,rating,body,approved) VALUES(?,?,?,?,?,0)').bind(reviewId,me.id,p.id,rating,txt).run();return json({ok:true,reviewId})}
 
+ if(u.pathname==='/api/payment/options'&&req.method==='GET'){return json(await paymentOptions(env))}
  if(u.pathname==='/api/cart'&&req.method==='GET'){if(!me)return json({items:[],subtotal_irt:0,discount_irt:0,shipping_irt:0,total_irt:0});try{return json(await cartPricing(env,me,''))}catch(e){return json({error:'cart_pricing_failed'},500)}}
  if(u.pathname==='/api/cart/price'&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const b=await body(req),code=String(b.code||'').trim().toUpperCase();if(!code)return json({error:'coupon_required'},400);try{return json(await cartPricing(env,me,code))}catch(e){const c=promotionErrorCode(e);if(c)return json({error:c},400);return json({error:'cart_pricing_failed'},500)}}
  if(u.pathname==='/api/cart'&&req.method==='POST'){
@@ -870,7 +896,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
    const [h,it,p]=await Promise.all([
     env.DB.prepare('SELECT h.*,u.name changed_by_name FROM order_status_history h LEFT JOIN users u ON u.id=h.changed_by_user_id WHERE h.order_id=? ORDER BY h.changed_at ASC').bind(o.id).all(),
     env.DB.prepare('SELECT id,product_id,sku,name,unit_price_irt,quantity,line_total_irt,options_json FROM order_items WHERE order_id=? ORDER BY id').bind(o.id).all(),
-    env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at FROM payments WHERE order_id=?').bind(o.id).first()
+    env.DB.prepare('SELECT status,provider,amount_irt,ref_id,authority,paid_at,created_at,updated_at FROM payments WHERE order_id=?').bind(o.id).first()
    ]);
    histories.push({orderId:o.id,history:h.results||[]});
    items.push({orderId:o.id,items:it.results||[],payment:p||null});
@@ -918,7 +944,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const ids=orders.map(x=>x.id),marks=ids.map(()=>'?').join(',');
   const items=(await env.DB.prepare('SELECT * FROM order_items WHERE order_id IN ('+marks+') ORDER BY order_id,id').bind(...ids).all()).results||[];
   const history=(await env.DB.prepare('SELECT * FROM order_status_history WHERE order_id IN ('+marks+') ORDER BY changed_at ASC').bind(...ids).all()).results||[];
-  const payments=(await env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at,order_id FROM payments WHERE order_id IN ('+marks+')').bind(...ids).all()).results||[];
+  const payments=(await env.DB.prepare('SELECT status,provider,amount_irt,ref_id,authority,paid_at,created_at,updated_at,order_id FROM payments WHERE order_id IN ('+marks+')').bind(...ids).all()).results||[];
   const by=(arr,key)=>arr.reduce((m,x)=>{(m[x[key]]??=[]).push(x);return m},Object.create(null));
   const im=by(items,'order_id'),hm=by(history,'order_id'),pm=by(payments,'order_id');
   return json({items:orders.map(o=>({...o,items:im[o.id]||[],history:hm[o.id]||[],payment:(pm[o.id]||[])[0]||null})),invoice});
@@ -935,8 +961,82 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   ]);
   return json({order:o,items:items.results||[],history:history.results||[],payment:pay||null,invoice:await invoiceSettings(env)});
  }
- if(u.pathname.startsWith('/api/orders/')&&u.pathname.endsWith('/pay')&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const oid=u.pathname.split('/')[3],o=await env.DB.prepare('SELECT * FROM orders WHERE id=? AND user_id=? AND status=\'PENDING\'').bind(oid,me.id).first();if(!o)return json({error:'order_not_payable'},400);const p=await env.DB.prepare('SELECT * FROM payments WHERE order_id=?').bind(oid).first();if(!p)return json({error:'payment_missing'},500);if(p.status==='PAID')return json({ok:true,url:frontend(env)+'/#/payment/success?order='+oid,reused:true});if(p.authority&&['REDIRECTED','CALLBACK','VERIFYING'].includes(p.status)){const mode=await paymentEnvironment(env);const host=zarinPaymentHost(mode);return json({ok:true,url:host+'/pg/StartPay/'+p.authority,reused:true})}if(!env.ZARINPAL_MERCHANT_ID)return json({error:'payment_not_configured'},503);const reqz=await zarin(env,'request.json',{amount:o.total_irt,description:'GilasArt Order '+oid,callback_url:await siteSetting(env,'zarinpal_callback_url',env.PAYMENT_CALLBACK_URL||new URL(req.url).origin+'/api/payment/callback'),mobile:me.mobile,currency:'IRR'});const data=reqz.data||{},code=Number(data.code||reqz.code||0),authority=data.authority;if(code!==100||!authority)return json({error:'payment_request_failed',details:reqz.errors||[]},502);await env.DB.batch([env.DB.prepare("UPDATE payments SET status='REDIRECTED',authority=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND status!='PAID'").bind(authority,p.id),env.DB.prepare('INSERT INTO payment_attempts(id,payment_id,authority,request_code,raw_status) VALUES(?,?,?,?,?)').bind(uid(),p.id,authority,code,JSON.stringify({code,message:data.message||null}))]);const mode=await paymentEnvironment(env);const host=zarinPaymentHost(mode);return json({ok:true,url:host+'/pg/StartPay/'+authority})}
- if(u.pathname==='/api/payment/callback'&&req.method==='GET'){const authority=u.searchParams.get('Authority'),status=u.searchParams.get('Status');if(!authority)return json({error:'missing_authority'},400);const p=await env.DB.prepare('SELECT p.*,o.status order_status FROM payments p JOIN orders o ON o.id=p.order_id WHERE p.authority=?').bind(authority).first();if(!p)return json({error:'payment_not_found'},404);if(status!=='OK'){await releaseReservation(env,p.order_id,'FAILED');return Response.redirect(frontend(env)+'/#/payment/failed?order='+p.order_id,302)}if(p.status==='PAID')return Response.redirect(frontend(env)+'/#/payment/success?order='+p.order_id,302);if(!env.ZARINPAL_MERCHANT_ID)return json({error:'payment_not_configured'},503);const vr=await zarin(env,'verify.json',{amount:p.amount_irt,authority});const code=Number(vr.code||vr.data?.code||0),ref=vr.data?.ref_id,ok=code===100||code===101;await env.DB.prepare('INSERT INTO payment_attempts(id,payment_id,authority,verify_code,callback_status,raw_status) VALUES(?,?,?,?,?,?)').bind(uid(),p.id,authority,code||null,status,JSON.stringify({code,message:vr.message||vr.data?.message||null})).run();if(!ok){await env.DB.prepare("UPDATE payments SET status='FAILED',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status!='PAID'").bind(p.id).run();return Response.redirect(frontend(env)+'/#/payment/failed?order='+p.order_id,302)}const reservationCount=await env.DB.prepare('SELECT COUNT(*) n FROM stock_reservations WHERE order_id=?').bind(p.order_id).first();if(!reservationCount?.n)return json({error:'stock_reservation_missing'},409);const beforeOrderStatus=p.order_status;const statements=[env.DB.prepare("UPDATE payments SET status='PAID',ref_id=COALESCE(?,ref_id),paid_at=COALESCE(paid_at,CURRENT_TIMESTAMP),updated_at=CURRENT_TIMESTAMP WHERE id=? AND status!='PAID' AND EXISTS (SELECT 1 FROM orders oo WHERE oo.id=payments.order_id AND oo.status='PENDING')").bind(ref,p.id),env.DB.prepare("UPDATE orders SET status='PAID',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='PENDING' AND EXISTS (SELECT 1 FROM payments pp WHERE pp.order_id=orders.id AND pp.status='PAID')").bind(p.order_id,p.id),env.DB.prepare('DELETE FROM stock_reservations WHERE order_id=?').bind(p.order_id)];await env.DB.batch(statements);const paidOrder=await env.DB.prepare('SELECT status FROM orders WHERE id=?').bind(p.order_id).first();if(beforeOrderStatus!==paidOrder?.status){await recordOrderStatusChange(env,p.order_id,beforeOrderStatus,paidOrder.status,null);if(paidOrder?.status==='PAID'){const ord=await env.DB.prepare('SELECT user_id,total_irt FROM orders WHERE id=?').bind(p.order_id).first();const purchasePoints=Math.min(30,Math.floor(Number(ord?.total_irt||0)/1000000));if(purchasePoints>0)await awardPoints(env,ord.user_id,purchasePoints,'purchase','order',p.order_id,'خرید موفق در گیلاس آرت');}}return Response.redirect(frontend(env)+'/#/payment/success?order='+p.order_id+'&ref='+encodeURIComponent(ref||''),302)}
+ if(u.pathname.startsWith('/api/orders/')&&u.pathname.endsWith('/pay')&&req.method==='POST'){
+  if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);
+  const b=await body(req),provider=String(b.provider||'zarinpal').toLowerCase(),oid=u.pathname.split('/')[3];
+  if(!['zarinpal','novinopay','card_transfer'].includes(provider))return json({error:'invalid_payment_provider'},400);
+  const o=await env.DB.prepare('SELECT * FROM orders WHERE id=? AND user_id=? AND status='PENDING'').bind(oid,me.id).first();
+  if(!o)return json({error:'order_not_payable'},400);
+  const p=await env.DB.prepare('SELECT * FROM payments WHERE order_id=?').bind(oid).first();
+  if(!p)return json({error:'payment_missing'},500);
+  if(!(await paymentEnabled(env,provider)))return json({error:'payment_method_disabled'},409);
+  await env.DB.prepare('UPDATE payments SET provider=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(provider,p.id).run();
+  if(p.status==='PAID')return json({ok:true,url:frontend(env)+'/payment/success?order='+oid,reused:true});
+  if(provider==='card_transfer'){
+   const opts=await paymentOptions(env),method=opts.methods.find(x=>x.id==='card_transfer');
+   if(!method?.configured)return json({error:'card_transfer_not_configured'},503);
+   return json({ok:true,manual:true,url:frontend(env)+'/payment/manual?order='+encodeURIComponent(oid)});
+  }
+  if(p.authority&&['REDIRECTED','CALLBACK','VERIFYING'].includes(p.status))return json({ok:true,url:paymentRedirectUrl(provider,p.authority),reused:true});
+  if(provider==='zarinpal'){
+   if(!env.ZARINPAL_MERCHANT_ID)return json({error:'payment_not_configured'},503);
+   const reqz=await zarin(env,'request.json',{amount:o.total_irt,description:'GilasArt Order '+oid,callback_url:await siteSetting(env,'zarinpal_callback_url',env.PAYMENT_CALLBACK_URL||new URL(req.url).origin+'/api/payment/callback'),mobile:me.mobile,currency:'IRR'});
+   const data=reqz.data||{},code=Number(data.code||reqz.code||0),authority=data.authority;
+   if(code!==100||!authority)return json({error:'payment_request_failed',details:reqz.errors||[]},502);
+   await env.DB.batch([env.DB.prepare("UPDATE payments SET status='REDIRECTED',authority=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND status!='PAID'").bind(authority,p.id),env.DB.prepare('INSERT INTO payment_attempts(id,payment_id,authority,request_code,raw_status) VALUES(?,?,?,?,?)').bind(uid(),p.id,authority,code,JSON.stringify({provider,code,message:data.message||null}))]);
+   return json({ok:true,url:paymentRedirectUrl(provider,authority)});
+  }
+  if(o.total_irt>1000000000)return json({error:'novino_amount_limit'},400);
+  if(!env.NOVINOPAY_MERCHANT_ID)return json({error:'novinopay_not_configured'},503);
+  const callback=await siteSetting(env,'novinopay_callback_url',env.PAYMENT_CALLBACK_URL||new URL(req.url).origin+'/api/payment/callback');
+  const reqn=await novino(env,'request',{amount:o.total_irt,callback_url:callback,callback_method:'GET',invoice_id:oid,description:'GilasArt Order '+oid,email:'',mobile:me.mobile,name:me.name||''});
+  const ndata=reqn.data||{},ncode=Number(reqn.status||0),authority=ndata.authority;
+  if(ncode!==100||!authority)return json({error:'novinopay_request_failed',details:reqn.errors||[],message:reqn.message||null},502);
+  await env.DB.batch([env.DB.prepare("UPDATE payments SET status='REDIRECTED',authority=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND status!='PAID'").bind(authority,p.id),env.DB.prepare('INSERT INTO payment_attempts(id,payment_id,authority,request_code,raw_status) VALUES(?,?,?,?,?)').bind(uid(),p.id,authority,ncode,JSON.stringify({provider,code:ncode,message:reqn.message||null,trans_id:ndata.trans_id||null}))]);
+  return json({ok:true,url:ndata.payment_url||paymentRedirectUrl(provider,authority)});
+ }
+ if(u.pathname==='/api/payment/callback'&&(req.method==='GET'||req.method==='POST')){
+  let cb={};
+  if(req.method==='GET')cb=Object.fromEntries(u.searchParams.entries());
+  else{
+   const ct=req.headers.get('content-type')||'';
+   try{cb=ct.includes('application/x-www-form-urlencoded')?Object.fromEntries(new URLSearchParams(await req.text()).entries()):await req.json()}catch{cb={}}
+  }
+  const authority=String(cb.Authority||cb.authority||'').trim(),status=String(cb.Status||cb.status||cb.PaymentStatus||cb.paymentStatus||'').trim().toUpperCase();
+  if(!authority)return json({error:'missing_authority'},400);
+  const p=await env.DB.prepare('SELECT p.*,o.status order_status FROM payments p JOIN orders o ON o.id=p.order_id WHERE p.authority=?').bind(authority).first();
+  if(!p)return json({error:'payment_not_found'},404);
+  if(p.status==='PAID')return Response.redirect(frontend(env)+'/payment/success?order='+p.order_id,302);
+  if(p.provider==='card_transfer')return json({error:'invalid_callback_provider'},400);
+  const novinoProvider=p.provider==='novinopay';
+  const successStatus=status==='OK';
+  if(!successStatus){await releaseReservation(env,p.order_id,'FAILED');return Response.redirect(frontend(env)+'/payment/failed?order='+p.order_id,302)}
+  let code=0,ref=null,verifyRaw=null;
+  if(novinoProvider){
+   if(!env.NOVINOPAY_MERCHANT_ID)return json({error:'novinopay_not_configured'},503);
+   const vr=await novino(env,'verification',{amount:p.amount_irt,authority}),d=vr.data||{};
+   code=Number(vr.status||0);ref=d.ref_id||null;verifyRaw={provider:'novinopay',status:code,message:vr.message||null,trans_id:d.trans_id||null,invoice_id:d.invoice_id||cb.InvoiceID||null,card_pan:d.card_pan||null};
+  }else{
+   if(!env.ZARINPAL_MERCHANT_ID)return json({error:'payment_not_configured'},503);
+   const vr=await zarin(env,'verify.json',{amount:p.amount_irt,authority});
+   code=Number(vr.code||vr.data?.code||0);ref=vr.data?.ref_id||null;verifyRaw={provider:'zarinpal',code,message:vr.message||vr.data?.message||null};
+  }
+  const ok=code===100||code===101;
+  await env.DB.prepare('INSERT INTO payment_attempts(id,payment_id,authority,verify_code,callback_status,raw_status) VALUES(?,?,?,?,?,?)').bind(uid(),p.id,authority,code||null,status,JSON.stringify(verifyRaw||{})).run();
+  if(!ok){await env.DB.prepare("UPDATE payments SET status='FAILED',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status!='PAID'").bind(p.id).run();return Response.redirect(frontend(env)+'/payment/failed?order='+p.order_id,302)}
+  const reservationCount=await env.DB.prepare('SELECT COUNT(*) n FROM stock_reservations WHERE order_id=?').bind(p.order_id).first();
+  if(!reservationCount?.n)return json({error:'stock_reservation_missing'},409);
+  const beforeOrderStatus=p.order_status;
+  const statements=[
+   env.DB.prepare("UPDATE payments SET status='PAID',ref_id=COALESCE(?,ref_id),paid_at=COALESCE(paid_at,CURRENT_TIMESTAMP),updated_at=CURRENT_TIMESTAMP WHERE id=? AND status!='PAID' AND EXISTS (SELECT 1 FROM orders oo WHERE oo.id=payments.order_id AND oo.status='PENDING')").bind(ref,p.id),
+   env.DB.prepare("UPDATE orders SET status='PAID',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='PENDING' AND EXISTS (SELECT 1 FROM payments pp WHERE pp.order_id=orders.id AND pp.status='PAID')").bind(p.order_id,p.id),
+   env.DB.prepare('DELETE FROM stock_reservations WHERE order_id=?').bind(p.order_id)
+  ];
+  await env.DB.batch(statements);
+  const paidOrder=await env.DB.prepare('SELECT status FROM orders WHERE id=?').bind(p.order_id).first();
+  if(beforeOrderStatus!==paidOrder?.status){await recordOrderStatusChange(env,p.order_id,beforeOrderStatus,paidOrder.status,null);if(paidOrder?.status==='PAID'){const ord=await env.DB.prepare('SELECT user_id,total_irt FROM orders WHERE id=?').bind(p.order_id).first();const purchasePoints=Math.min(30,Math.floor(Number(ord?.total_irt||0)/1000000));if(purchasePoints>0)await awardPoints(env,ord.user_id,purchasePoints,'purchase','order',p.order_id,'خرید موفق در گیلاس آرت');}}
+  return Response.redirect(frontend(env)+'/payment/success?order='+p.order_id+'&ref='+encodeURIComponent(ref||''),302)
+ }
  if(u.pathname==='/api/favorites'&&req.method==='GET'){if(!me)return json({items:[]});const r=await env.DB.prepare('SELECT p.id,p.slug,p.name,p.price_irt,pi.path image FROM favorites f JOIN products p ON p.id=f.product_id LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE f.user_id=?').bind(me.id).all();return json({items:r.results||[]})}
  if(u.pathname==='/api/favorites'&&req.method==='POST'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const b=await body(req);const favResult=await env.DB.prepare('INSERT OR IGNORE INTO favorites(user_id,product_id) VALUES(?,?)').bind(me.id,String(b.productId||'')).run();if(Number(favResult?.meta?.changes||0)>0)await awardPoints(env,me.id,3,'favorite','product',String(b.productId||''),'افزودن اثر به علاقه‌مندی‌ها');return json({ok:true})}
  if(u.pathname==='/api/favorites'&&req.method==='DELETE'){if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);const pid=u.searchParams.get('productId');await env.DB.prepare('DELETE FROM favorites WHERE user_id=? AND product_id=?').bind(me.id,pid).run();return json({ok:true})}
@@ -958,7 +1058,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
  }
  if(u.pathname==='/api/admin/payments'&&req.method==='GET'){
   if(!(await requirePermission(me,env,'payments.read')))return json({error:'forbidden'},403);
-  const r=await env.DB.prepare('SELECT p.id,p.order_id,p.status,p.amount_irt,p.authority,p.ref_id,p.paid_at,p.created_at,u.mobile FROM payments p JOIN orders o ON o.id=p.order_id JOIN users u ON u.id=o.user_id ORDER BY p.created_at DESC LIMIT 500').all();
+  const r=await env.DB.prepare('SELECT p.id,p.order_id,p.provider,p.status,p.amount_irt,p.authority,p.ref_id,p.paid_at,p.created_at,u.mobile FROM payments p JOIN orders o ON o.id=p.order_id JOIN users u ON u.id=o.user_id ORDER BY p.created_at DESC LIMIT 500').all();
   return json({items:r.results||[]});
  }
 
@@ -1275,23 +1375,35 @@ if(u.pathname==='/api/admin/settings'&&req.method==='PUT'){
 
 if(u.pathname==='/api/admin/integrations'&&req.method==='GET'){
  if(!(await requirePermission(me,env,'settings.read')))return json({error:'forbidden'},403);
- const keys=['kavenegar_sender','kavenegar_message_template','support_ticket_created_sms_template','support_ticket_reply_sms_template','zarinpal_environment','zarinpal_callback_url'];
- const r=await env.DB.prepare("SELECT key,value,updated_at FROM site_settings WHERE key IN ('kavenegar_sender','kavenegar_message_template','support_ticket_created_sms_template','support_ticket_reply_sms_template','zarinpal_environment','zarinpal_callback_url')").all();
+ const keys=['kavenegar_sender','kavenegar_message_template','support_ticket_created_sms_template','support_ticket_reply_sms_template','zarinpal_environment','zarinpal_callback_url','novinopay_callback_url','payment_default_provider','payment_zarinpal_enabled','payment_novinopay_enabled','payment_card_transfer_enabled','payment_zarinpal_title','payment_novinopay_title','payment_card_transfer_title','card_transfer_bank_name','card_transfer_account_holder','card_transfer_card_number','card_transfer_iban','card_transfer_instructions'];
+ const r=await env.DB.prepare("SELECT key,value,updated_at FROM site_settings WHERE key IN ("+keys.map(()=>'?').join(',')+")").bind(...keys).all();
  const map={};for(const x of(r.results||[]))map[x.key]=x.value;
- return json({kavenegar:{sender:map.kavenegar_sender||env.KAVENEGAR_SENDER||'9982007299',messageTemplate:map.kavenegar_message_template||'گیلاس آرت\\nکد ورود : {code}',apiKeyConfigured:!!env.KAVENEGAR_API_KEY},supportSms:{ticketCreatedTemplate:map.support_ticket_created_sms_template||'گیلاس آرت\\nتیکت شما با موفقیت ثبت شد.\\nشماره تیکت: {ticket_id}\\nمشاهده و پیگیری: {ticket_url}',ticketReplyTemplate:map.support_ticket_reply_sms_template||'گیلاس آرت\\nپاسخی برای تیکت شما ثبت شده است.\\nمشاهده پاسخ: {ticket_url}'},zarinpal:{environment:map.zarinpal_environment||env.PAYMENT_ENV||'production',callbackUrl:map.zarinpal_callback_url||env.PAYMENT_CALLBACK_URL||new URL(req.url).origin+'/api/payment/callback',merchantConfigured:!!env.ZARINPAL_MERCHANT_ID}});
+ return json({
+  kavenegar:{sender:map.kavenegar_sender||env.KAVENEGAR_SENDER||'9982007299',messageTemplate:map.kavenegar_message_template||'گیلاس آرت\\nکد ورود : {code}',apiKeyConfigured:!!env.KAVENEGAR_API_KEY},
+  supportSms:{ticketCreatedTemplate:map.support_ticket_created_sms_template||'گیلاس آرت\\nتیکت شما با موفقیت ثبت شد.\\nشماره تیکت: {ticket_id}\\nمشاهده و پیگیری: {ticket_url}',ticketReplyTemplate:map.support_ticket_reply_sms_template||'گیلاس آرت\\nپاسخی برای تیکت شما ثبت شده است.\\nمشاهده پاسخ: {ticket_url}'},
+  zarinpal:{environment:map.zarinpal_environment||env.PAYMENT_ENV||'production',callbackUrl:map.zarinpal_callback_url||env.PAYMENT_CALLBACK_URL||new URL(req.url).origin+'/api/payment/callback',merchantConfigured:!!env.ZARINPAL_MERCHANT_ID,enabled:(map.payment_zarinpal_enabled||'1')==='1',title:map.payment_zarinpal_title||'زرین‌پال'},
+  novinopay:{callbackUrl:map.novinopay_callback_url||env.PAYMENT_CALLBACK_URL||new URL(req.url).origin+'/api/payment/callback',merchantConfigured:!!env.NOVINOPAY_MERCHANT_ID,enabled:(map.payment_novinopay_enabled||'0')==='1',title:map.payment_novinopay_title||'نوینو پی'},
+  cardTransfer:{enabled:(map.payment_card_transfer_enabled||'0')==='1',title:map.payment_card_transfer_title||'کارت به کارت',bankName:map.card_transfer_bank_name||'',accountHolder:map.card_transfer_account_holder||'',cardNumber:map.card_transfer_card_number||'',iban:map.card_transfer_iban||'',instructions:map.card_transfer_instructions||''},
+  defaultProvider:map.payment_default_provider||'zarinpal'
+ });
 }
 if(u.pathname==='/api/admin/integrations'&&req.method==='PUT'){
  if(!(await requirePermission(me,env,'settings.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
  const b=await body(req),updates={};
- const sender=String(b.kavenegarSender||'').trim().slice(0,50),template=String(b.kavenegarMessageTemplate||'').trim().slice(0,500),ticketCreatedTemplate=String(b.supportTicketCreatedSmsTemplate||'').trim().slice(0,500),ticketReplyTemplate=String(b.supportTicketReplySmsTemplate||'').trim().slice(0,500),zenv=String(b.zarinpalEnvironment||'').toLowerCase(),callback=String(b.zarinpalCallbackUrl||'').trim();
+ const sender=String(b.kavenegarSender||'').trim().slice(0,50),template=String(b.kavenegarMessageTemplate||'').trim().slice(0,500),ticketCreatedTemplate=String(b.supportTicketCreatedSmsTemplate||'').trim().slice(0,500),ticketReplyTemplate=String(b.supportTicketReplySmsTemplate||'').trim().slice(0,500),zenv=String(b.zarinpalEnvironment||'').toLowerCase(),zcb=String(b.zarinpalCallbackUrl||'').trim(),ncb=String(b.novinopayCallbackUrl||'').trim();
  if(sender)updates.kavenegar_sender=sender;
  if(template&&template.includes('{code}'))updates.kavenegar_message_template=template;
  if(ticketCreatedTemplate&&ticketCreatedTemplate.includes('{ticket_url}'))updates.support_ticket_created_sms_template=ticketCreatedTemplate;
  if(ticketReplyTemplate&&ticketReplyTemplate.includes('{ticket_url}'))updates.support_ticket_reply_sms_template=ticketReplyTemplate;
  if(zenv==='production'||zenv==='sandbox')updates.zarinpal_environment=zenv;else if(b.zarinpalEnvironment!==undefined)return json({error:'invalid_payment_environment'},400);
- if(callback){try{const x=new URL(callback);if(x.protocol!=='https:'||x.origin!==new URL(req.url).origin||x.pathname!=='/api/payment/callback')return json({error:'invalid_payment_callback'},400)}catch{return json({error:'invalid_payment_callback'},400)}updates.zarinpal_callback_url=callback}
+ for(const [key,value] of [['zarinpal_callback_url',zcb],['novinopay_callback_url',ncb]])if(value){try{const x=new URL(value);if(x.protocol!=='https:'||x.origin!==new URL(req.url).origin||x.pathname!=='/api/payment/callback')return json({error:'invalid_payment_callback'},400)}catch{return json({error:'invalid_payment_callback'},400)}updates[key]=value}
+ const boolKeys=[['payment_zarinpal_enabled',b.zarinpalEnabled],['payment_novinopay_enabled',b.novinopayEnabled],['payment_card_transfer_enabled',b.cardTransferEnabled]];
+ for(const [key,val] of boolKeys)if(val!==undefined)updates[key]=val? '1':'0';
+ if(b.defaultProvider!==undefined){const p=String(b.defaultProvider).toLowerCase();if(!['zarinpal','novinopay','card_transfer'].includes(p))return json({error:'invalid_payment_provider'},400);updates.payment_default_provider=p}
+ const textMap=[['payment_zarinpal_title',b.zarinpalTitle],['payment_novinopay_title',b.novinopayTitle],['payment_card_transfer_title',b.cardTransferTitle],['card_transfer_bank_name',b.cardTransferBankName],['card_transfer_account_holder',b.cardTransferAccountHolder],['card_transfer_card_number',b.cardTransferCardNumber],['card_transfer_iban',b.cardTransferIban],['card_transfer_instructions',b.cardTransferInstructions]];
+ for(const [key,val] of textMap)if(val!==undefined)updates[key]=String(val??'').trim().slice(0,2000);
  for(const [key,value] of Object.entries(updates))await env.DB.prepare("INSERT INTO site_settings(key,value,updated_at) VALUES(?,?,CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP").bind(key,value).run();
- await audit(env,me,'admin.integrations.update','settings','integrations',{updated:Object.keys(updates),secrets:['KAVENEGAR_API_KEY','ZARINPAL_MERCHANT_ID']},req);
+ await audit(env,me,'admin.integrations.update','settings','integrations',{updated:Object.keys(updates),secrets:['KAVENEGAR_API_KEY','ZARINPAL_MERCHANT_ID','NOVINOPAY_MERCHANT_ID']},req);
  return json({ok:true});
 }
 
