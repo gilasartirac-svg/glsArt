@@ -84,7 +84,20 @@ function snapshotCore(p){
 }
 function snapshotSort(items,sort){
  const a=[...items],s=String(sort||'newest');
- const textDesc=(x,y)=>String(y).localeCompare(String(x));
+ const textDesc=(x,y)=>String(y??'').localeCompare(String(x??''));
+ if(s==='buyer_recommended'){
+  const metrics=['sold_count','rating_avg','review_count','favorite_count','view_count'];
+  const ranges=Object.fromEntries(metrics.map(k=>{
+   const vals=a.map(x=>Number(x?.[k]||0));return [k,{min:Math.min(...vals,0),max:Math.max(...vals,0)}];
+  }));
+  const norm=(x,k)=>{
+   const v=Number(x?.[k]||0),r=ranges[k];
+   if(!r||r.max===r.min)return k==='rating_avg'?(v/5):.5;
+   return (v-r.min)/(r.max-r.min);
+  };
+  const score=x=>norm(x,'sold_count')*.35+norm(x,'rating_avg')*.25+norm(x,'review_count')*.15+norm(x,'favorite_count')*.15+norm(x,'view_count')*.10;
+  return a.sort((x,y)=>score(y)-score(x)||Number(y.rating_avg)-Number(x.rating_avg)||Number(y.review_count)-Number(x.review_count)||textDesc(x.created_at,y.created_at)||textDesc(x.id,y.id));
+ }
  return a.sort((x,y)=>{
   if(s==='price_asc')return Number(x.price_irt)-Number(y.price_irt)||textDesc(x.id,y.id);
   if(s==='price_desc')return Number(y.price_irt)-Number(x.price_irt)||textDesc(x.id,y.id);
@@ -355,7 +368,7 @@ async function home(){const [d,s,fs,c]=await Promise.allSettled([api('/api/produ
   if(status)status.textContent=filteredItems.length?(done?'همه آثار این فهرست نمایش داده شد.':'با اسکرول ادامه دهید یا «نمایش آثار بیشتر» را بزنید.'):'با این فیلترها اثری پیدا نشد.';
   startFlashTimers(results);
  };
- const refresh=()=>{
+ let refresh=()=>{
   applyFilters();offset=Math.min(pageSize,filteredItems.length);if(offset===0)offset=0;done=offset>=filteredItems.length;
   renderPage();renderActiveFilters();updatePriceUi();syncUrl();
  };
