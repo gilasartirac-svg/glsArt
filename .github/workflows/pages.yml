@@ -58,7 +58,7 @@ jobs:
         if: steps.gate.outputs.emergency != 'true'
         run: |
           set -euo pipefail
-          curl -fsS --retry 3 --retry-all-errors https://gilasartworker.gilasart-ir-ac.workers.dev/api/health | tee /tmp/health.json
+          curl -fsS --retry 3 --retry-all-errors https://api.gilasart.ir/api/health | tee /tmp/health.json
           node -e "const d=require('/tmp/health.json');if(d.ok!==true||d.db!==true)process.exit(1)"
 
       - name: Configure Pages
