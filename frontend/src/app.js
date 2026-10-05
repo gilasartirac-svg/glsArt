@@ -253,7 +253,7 @@ async function home(){const [d,s,fs,c]=await Promise.allSettled([api('/api/produ
   const [cats,range]=await Promise.all([api('/api/categories'),api('/api/products/price-range')]);
   state.categories=cats.items||[];
   priceCeiling=Math.max(1000000,Number(range.max_price_irt||0));
-  priceStep=Math.max(1000000,Math.ceil(priceCeiling/100)*1000000);
+  priceStep=1000000;
   maxPrice=priceCeiling;
  }catch{
   const cats=await api('/api/categories');state.categories=cats.items||[];
