@@ -50,10 +50,10 @@ test('Kavenegar OTP delivery checks provider response and supports both code pla
 
 test('admin product save accepts current and legacy GitHub Pages image paths',()=>{
  const worker=readFileSync(new URL('../worker/src/index.js',import.meta.url),'utf8');
- assert.match(worker,/startsWith\('\/glsArt\/art\/'\)/);
- assert.match(worker,/startsWith\('\/glsArt\/uploaded\/'\)/);
+ assert.match(worker,/startsWith\('\/art\/'\)/);
+ assert.match(worker,/startsWith\('\/uploaded\/'\)/);
  assert.match(worker,/frontend\/public\/uploaded/);
- assert.match(worker,/gilasartirac-svg\.github\.io/);
+ assert.match(worker,/www\.gilasart\.ir/);
  assert.match(worker,/invalid_image_path/);
 });
 
