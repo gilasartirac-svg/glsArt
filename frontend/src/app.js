@@ -97,7 +97,7 @@ function snapshotSort(items,sort){
  });
 }
 async function snapshotApi(path){
- if(!/^\/api\/(home|products|categories|flash-sales|content|site-rules)(?:[/?]|$)/.test(path))return null;
+ if(!/^\/api\/(home|products|categories|flash-sales|site-rules)(?:[/?]|$)/.test(path))return null;
  const d=await loadStorefrontSnapshot();if(!d)return null;
  const u=new URL(path,'https://snapshot.local');
  if(u.pathname==='/api/home'){
@@ -577,11 +577,11 @@ async function cmsPage(section){
   const visual=coverVisual(items[0]);
   if(section==='contact'){
    const x=items[0]||{}, rows=[
-    x.phone?'<a class="cms-contact-item" href="tel:'+escapeHtml(x.phone)+'"><span>تلفن</span><strong>'+escapeHtml(x.phone)+'</strong></a>':'',
-    x.mobile?'<a class="cms-contact-item" href="tel:'+escapeHtml(x.mobile)+'"><span>موبایل</span><strong>'+escapeHtml(x.mobile)+'</strong></a>':'',
-    x.address?'<div class="cms-contact-item"><span>آدرس هنرکده</span><strong>'+bodyText(x.address)+'</strong></div>':''
+    x.phone?'<a class="cms-contact-item cms-contact-phone" href="tel:'+escapeHtml(x.phone)+'"><span>تلفن هنرکده</span><strong dir="ltr">'+escapeHtml(x.phone)+'</strong></a>':'',
+    x.mobile?'<a class="cms-contact-item cms-contact-phone" href="tel:'+escapeHtml(x.mobile)+'"><span>موبایل / واتساپ</span><strong dir="ltr">'+escapeHtml(x.mobile)+'</strong></a>':'',
+    x.address?'<div class="cms-contact-item cms-contact-address"><span>نشانی هنرکده</span><strong>'+bodyText(x.address)+'</strong></div>':''
    ].filter(Boolean).join('');
-   body='<div class="cms-contact-layout"><article class="panel cms-rich cms-contact-main"><span class="eyebrow">CONTACT</span><h2>'+escapeHtml(x.title||title)+'</h2>'+(x.summary?'<p class="cms-lead">'+escapeHtml(x.summary)+'</p>':'')+'<div class="cms-body">'+bodyText(x.body||'')+'</div><div class="cms-contact-list">'+(rows||'<p class="muted">اطلاعات تماس هنوز ثبت نشده است.</p>')+'</div>'+(x.map_url?'<div class="cms-contact-actions"><a class="btn primary" href="'+escapeHtml(safeUrl(x.map_url))+'" target="_blank" rel="noopener noreferrer">مسیریابی روی نقشه</a><a class="btn ghost" href="#/shop">مشاهده آثار</a></div>':'')+'</article><aside class="panel cms-contact-aside"><span class="eyebrow">GILAS ART</span><h3>در کنار شما هستیم</h3><p class="muted">اگر درباره اثر، ابعاد، قاب، سفارش یا روند خرید پرسشی دارید، از راه ارتباطی ثبت‌شده استفاده کنید.</p><a class="btn ghost" href="#/support">پشتیبانی و تیکت</a></aside></div>';
+   body='<div class="cms-contact-layout cms-contact-layout-premium"><article class="panel cms-rich cms-contact-main"><div class="cms-contact-kicker"><span class="eyebrow">GILAS ART · CONTACT</span><span class="cms-live-badge">اطلاعات رسمی</span></div><h2>'+escapeHtml(x.title||title)+'</h2>'+(x.summary?'<p class="cms-lead cms-contact-lead">'+escapeHtml(x.summary)+'</p>':'')+'<div class="cms-body cms-contact-body">'+bodyText(x.body||'')+'</div><div class="cms-contact-list">'+(rows||'<p class="muted">اطلاعات تماس هنوز ثبت نشده است.</p>')+'</div><div class="cms-contact-actions">'+(x.map_url?'<a class="btn primary" href="'+escapeHtml(safeUrl(x.map_url))+'" target="_blank" rel="noopener noreferrer">مسیریابی روی نقشه</a>':'')+'<a class="btn ghost" href="#/support">ارسال تیکت پشتیبانی</a><a class="btn ghost" href="#/shop">مشاهده آثار</a></div></article><aside class="panel cms-contact-aside cms-contact-aside-premium"><div class="cms-contact-aside-mark">GA</div><span class="eyebrow">ارتباط مستقیم</span><h3>در کنار شما هستیم</h3><p class="muted">برای خرید، انتخاب قاب و ابعاد، پیگیری سفارش یا مشاوره درباره آثار، از اطلاعات تماس ثبت‌شده استفاده کنید.</p><div class="cms-contact-aside-line"></div><small>آخرین اطلاعات منتشرشده توسط هنرکده گیلاس آرت</small></aside></div>';
   }else if(section==='about'){
    const x=items[0];body=x?'<article class="panel cms-rich cms-about-card"><span class="eyebrow">ABOUT GILAS ART</span><h2>'+escapeHtml(x.title||title)+'</h2>'+(x.summary?'<p class="cms-lead">'+escapeHtml(x.summary)+'</p>':'')+'<div class="cms-body">'+bodyText(x.body||'')+'</div><div class="cms-about-actions"><a class="btn primary" href="#/shop">مشاهده آثار</a><a class="btn ghost" href="#/contact">تماس با ما</a></div></article>':'<div class="panel cms-empty"><h2>اطلاعات درباره ما</h2><p class="muted">اطلاعات درباره ما هنوز در پایگاه داده ثبت نشده است.</p></div>';
   }else{
