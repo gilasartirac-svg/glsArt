@@ -122,9 +122,11 @@ async function snapshotApi(path){
  }
  if(u.pathname==='/api/products'){
   let items=[...(d.products||[])];
-  const q=(u.searchParams.get('q')||'').trim().toLowerCase(),cat=u.searchParams.get('category')||'',sort=u.searchParams.get('sort')||'newest';
+  const q=(u.searchParams.get('q')||'').trim().toLowerCase(),cat=u.searchParams.get('category')||'',sort=u.searchParams.get('sort')||'newest',minPrice=Math.max(0,Number(u.searchParams.get('min_price')||0)),maxPrice=Math.max(0,Number(u.searchParams.get('max_price')||0));
   if(q)items=items.filter(p=>[p.name,p.description,p.sku].some(v=>String(v||'').toLowerCase().includes(q)));
   if(cat)items=items.filter(p=>Array.isArray(p.category_ids)&&p.category_ids.includes(cat));
+  if(minPrice>0)items=items.filter(p=>Number(p.price_irt||0)>=minPrice);
+  if(maxPrice>0)items=items.filter(p=>Number(p.price_irt||0)<=maxPrice);
   items=snapshotSort(items,sort);
   const limit=Math.min(60,Math.max(1,Number(u.searchParams.get('limit')||12))),offset=Math.max(0,Math.min(10000,Number(u.searchParams.get('offset')||0)));
   return {items:items.slice(offset,offset+limit).map(snapshotCore),limit,offset,sort};
