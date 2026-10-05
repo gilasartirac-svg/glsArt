@@ -710,7 +710,7 @@ async function checkout(){navigate('/cart')}
 async function router(){
  const base=routeBase();
  let cleanPath=location.pathname.startsWith(base)?location.pathname.slice(base.length):location.pathname;
- cleanPath=cleanPath.replace(/^\\/+|\\/+$/g,'');
+ cleanPath=cleanPath.replace(/^\/+|\/+$/g,'');
  const segments=cleanPath?cleanPath.split('/').filter(Boolean).map(x=>{try{return decodeURIComponent(x)}catch{return x}}):[];
  const known=new Set(['shop','cart','account','rewards','checkout','about','contact','news','articles','terms','support','payment','admin','product']);
  const p=segments.length?(known.has(segments[0])?segments:['product',segments[0]]):[''];
