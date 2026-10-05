@@ -108,9 +108,17 @@ function flashSaleValues(b,before={}){
  return {active:active?1:0,end:active?new Date(String(end)).toISOString():null,price:p};
 }
 function otpSmsMessage(env,code,template){
- const host=new URL(frontend(env)).hostname;
- const base=String(template||'گیلاس آرت\\nکد ورود : {code}').replaceAll('\\r\\n','\\n').replaceAll('\\n','\n').replaceAll('{code}',code).replaceAll('{0}',code).split(/\\r?\\n/).filter(x=>!/^\\s*@[^\\s]+\\s+#\\d{6}\\s*$/.test(x)).join('\\n').trim();
- return `${base}\\n\\n@${host} #${code}`;
+ const host=new URL(frontend(env)).hostname.toLowerCase().replace(/^www\\./,'');
+ const raw=String(template||'<#> گیلاس آرت\\nکد ورود شما: {code}')
+  .replaceAll('\\\\r\\\\n','\\n')
+  .replaceAll('\\\\n','\\n')
+  .replaceAll('{code}',code)
+  .replaceAll('{0}',code);
+ const lines=raw.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean)
+  .filter(x=>!/^@[^\\s]+\\s+#\\d{6}$/.test(x))
+  .filter(x=>x!=='لغو11');
+ const base=lines.join('\\n').trim();
+ return base+'\\n\\n@'+host+' #'+code;
 }
 function normalizeIranMobile(value){
  let m=String(value||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/\\D/g,'');
