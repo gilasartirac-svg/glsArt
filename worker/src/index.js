@@ -151,6 +151,9 @@ async function ensureAdminBootstrap(env){
   if(!/^09\d{9}$/.test(bootstrapMobile)) return false;
   // Avoid replaying the full bootstrap batch on every /api/me request.
   try{
+    await env.DB.prepare("INSERT OR IGNORE INTO inventory(product_id,quantity,updated_at) SELECT p.id,200,CURRENT_TIMESTAMP FROM products p LEFT JOIN inventory i ON i.product_id=p.id WHERE p.active=1 AND i.product_id IS NULL").run();
+  }catch{}
+  try{
     const marker=await env.DB.prepare("SELECT value FROM site_settings WHERE key='admin_bootstrap_v1' LIMIT 1").first();
     if(marker?.value==='ready') return true;
   }catch{}
