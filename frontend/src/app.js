@@ -457,15 +457,19 @@ async function home(){const [d,s,fs,c]=await Promise.allSettled([api('/api/produ
   if(b.dataset.clearCategory){selectedCategories.delete(String(b.dataset.clearCategory));document.querySelector('.cat-check[data-id="'+CSS.escape(String(b.dataset.clearCategory))+'"]')?.click();return}
   refresh();
  });
- const openFilter=()=>{const p=document.querySelector('#shop-filter-panel'),b=document.querySelector('#mobile-filter-backdrop'),o=document.querySelector('#mobile-filter-open');p?.classList.add('is-open');if(b)b.hidden=false;o?.setAttribute('aria-expanded','true');document.body.classList.add('shop-filter-open')};
- const closeFilter=()=>{const p=document.querySelector('#shop-filter-panel'),b=document.querySelector('#mobile-filter-backdrop'),o=document.querySelector('#mobile-filter-open');p?.classList.remove('is-open');if(b)b.hidden=true;o?.setAttribute('aria-expanded','false');document.body.classList.remove('shop-filter-open')};
- document.querySelector('#mobile-filter-open')?.addEventListener('click',openFilter);
- document.querySelector('#mobile-filter-backdrop')?.addEventListener('click',closeFilter);
- document.querySelector('#mobile-filter-apply')?.addEventListener('click',closeFilter);
- document.querySelector('#filter-reset')?.addEventListener('click',()=>{setTimeout(closeFilter,0)});
- const updateBadge=()=>{const n=(query?1:0)+selectedCategories.size+(minPrice>priceFloor||maxPrice<priceCeiling?1:0)+(minRating?1:0);const b=document.querySelector('#filter-badge');if(b)b.textContent=fa(n)};
+ document.querySelectorAll('.shop-control-item').forEach(d=>d.addEventListener('toggle',()=>{
+  if(!d.open)return;
+  document.querySelectorAll('.shop-control-item[open]').forEach(other=>{if(other!==d)other.open=false});
+ }));
+ const updateControlIndicators=()=>{
+  const set=(id,active,label)=>{const el=document.querySelector(id);if(!el)return;el.classList.toggle('has-active',!!active);el.querySelector('.shop-control-indicator')?.classList.toggle('is-active',!!active);if(active)el.dataset.activeLabel=label||'فعال';else delete el.dataset.activeLabel};
+  set('#shop-search-control',!!query,'جستجو فعال');
+  set('#shop-category-control',selectedCategories.size>0,fa(selectedCategories.size)+' دسته');
+  set('#shop-filter-control',minPrice>priceFloor||maxPrice<priceCeiling||!!minRating,'فیلتر فعال');
+  set('#shop-sort-control',sort!=='newest','مرتب‌سازی تغییر کرده');
+ };
  const originalRefresh=refresh;
- refresh=()=>{originalRefresh();updateBadge()};
+ refresh=()=>{originalRefresh();updateControlIndicators()};
  refresh();
 }
 
