@@ -358,10 +358,12 @@ async function home(){const [d,s,fs,c]=await Promise.allSettled([api('/api/produ
   const fill=document.querySelector('.price-range-fill');
   if(fill){const a=(minPrice/priceCeiling)*100,b=(maxPrice/priceCeiling)*100;fill.style.insetInlineStart=a+'%';fill.style.width=Math.max(0,b-a)+'%'}
  };
- const renderPage=()=>{
+ const renderPage=(append=false)=>{
   const results=document.querySelector('#results');if(!results)return;
-  const slice=filteredItems.slice(0,offset);
-  results.innerHTML=slice.map(productCard).join('');
+  const start=append?Math.max(0,offset-pageSize):0;
+  const slice=filteredItems.slice(start,offset);
+  if(append){if(slice.length)results.insertAdjacentHTML('beforeend',slice.map(productCard).join(''))}
+  else results.innerHTML=slice.map(productCard).join('');
   const count=document.querySelector('#results-count');if(count)count.textContent=fa(filteredItems.length)+' اثر';
   const empty=document.querySelector('#empty');if(empty)empty.hidden=filteredItems.length!==0;
   const more=document.querySelector('#load-more');done=offset>=filteredItems.length;if(more)more.hidden=done;
@@ -371,13 +373,13 @@ async function home(){const [d,s,fs,c]=await Promise.allSettled([api('/api/produ
  };
  let refresh=()=>{
   applyFilters();offset=Math.min(pageSize,filteredItems.length);if(offset===0)offset=0;done=offset>=filteredItems.length;
-  renderPage();renderActiveFilters();updatePriceUi();syncUrl();
+  renderPage(false);renderActiveFilters();updatePriceUi();syncUrl();
  };
  const loadMore=()=>{
   if(loading||done)return;
   loading=true;
   const next=Math.min(offset+pageSize,filteredItems.length);
-  offset=next;renderPage();loading=false;
+  offset=next;renderPage(true);loading=false;
  };
  const resetFilters=()=>{
   query='';selectedCategories.clear();minPrice=priceFloor;maxPrice=priceCeiling;minRating=0;sort='newest';
