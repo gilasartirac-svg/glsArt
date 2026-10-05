@@ -91,3 +91,25 @@ test('support CRM and infinite CMS pagination are exposed',()=>{
  const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
  assert.ok(app.includes('سبد خرید'));assert.ok(app.includes('پیشنهاد شگفت‌انگیز'));assert.ok(app.includes('flash-timer'));assert.ok(app.includes('02:00'));assert.ok(app.includes('autocomplete="one-time-code"'));assert.ok(app.includes('پرتال CRM پشتیبانی'));assert.ok(app.includes('IntersectionObserver'));
 });
+
+test('product option defaults are scoped to the assigned product attribute',()=>{
+ assert.match(worker,/pd\.product_id=pa\.product_id/);
+ assert.match(worker,/pdo\.attribute_id=a\.id/);
+ assert.match(worker,/pd\.is_default=1/);
+});
+test('customer product options use responsive radio cards and server-validated selections',()=>{
+ const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../frontend/src/styles.css',import.meta.url),'utf8');
+ assert.match(app,/product-option-card/);
+ assert.match(app,/product-option-input/);
+ assert.match(app,/selections=\(\)=>\[\.\.\.document\.querySelectorAll\('\.product-option-input:checked'\)/);
+ assert.match(app,/options:selections\(\)/);
+ assert.match(app,/product-live-price/);
+ assert.match(css,/\.product-option-grid/);
+ assert.match(css,/\.product-option-card\.selected/);
+});
+test('invoice preserves selected product option snapshots',()=>{
+ const invoice=readFileSync(new URL('../frontend/src/invoice.js',import.meta.url),'utf8');
+ assert.match(invoice,/options_json/);
+ assert.match(invoice,/invoice-option/);
+});

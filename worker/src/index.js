@@ -246,7 +246,18 @@ async function loadProductAttributes(env,productId){
       o.id option_id,
       o.name option_name,
       CASE WHEN pov.product_id IS NOT NULL THEN pov.active ELSE o.active END option_active,
-      CASE WHEN pov.product_id IS NOT NULL THEN pov.is_default ELSE o.is_default END is_default,
+      CASE
+        WHEN EXISTS(
+          SELECT 1
+          FROM product_attribute_option_overrides pd
+          JOIN product_attribute_options pdo ON pdo.id=pd.option_id
+          WHERE pd.product_id=pa.product_id
+            AND pdo.attribute_id=a.id
+            AND pd.active=1
+            AND pd.is_default=1
+        ) THEN CASE WHEN pov.product_id IS NOT NULL THEN pov.is_default ELSE 0 END
+        ELSE o.is_default
+      END is_default,
       CASE WHEN pov.product_id IS NOT NULL THEN pov.price_delta_irt ELSE o.price_delta_irt END price_delta_irt,
       o.sort_order option_sort
     FROM product_attribute_assignments pa
@@ -275,7 +286,18 @@ async function buildStorefrontSnapshot(env){
     env.DB.prepare(`SELECT id,product_id,path,alt_text,sort_order,is_primary FROM product_images WHERE product_id IN (SELECT id FROM products WHERE active=1) ORDER BY product_id,sort_order,is_primary DESC`).all(),
     env.DB.prepare(`SELECT id,slug,name,description,parent_id,sort_order,image,seo_title,seo_description FROM categories WHERE active=1 ORDER BY sort_order,name`).all(),
     env.DB.prepare(`SELECT pca.product_id,pca.category_id,pca.sort_order FROM product_category_assignments pca JOIN products p ON p.id=pca.product_id AND p.active=1 JOIN categories c ON c.id=pca.category_id AND c.active=1 ORDER BY pca.product_id,pca.sort_order,c.name`).all(),
-    env.DB.prepare(`SELECT pa.product_id,a.id attribute_id,a.name attribute_name,pa.required,pa.sort_order attribute_sort,o.id option_id,o.name option_name,o.sort_order option_sort,CASE WHEN pov.product_id IS NOT NULL THEN pov.active ELSE o.active END option_active,CASE WHEN pov.product_id IS NOT NULL THEN pov.is_default ELSE o.is_default END is_default,CASE WHEN pov.product_id IS NOT NULL THEN pov.price_delta_irt ELSE o.price_delta_irt END price_delta_irt FROM product_attribute_assignments pa JOIN products p ON p.id=pa.product_id AND p.active=1 JOIN product_attributes a ON a.id=pa.attribute_id AND a.active=1 JOIN product_attribute_options o ON o.attribute_id=a.id LEFT JOIN product_attribute_option_overrides pov ON pov.product_id=pa.product_id AND pov.option_id=o.id WHERE CASE WHEN pov.product_id IS NOT NULL THEN pov.active ELSE o.active END=1 ORDER BY pa.product_id,pa.sort_order,a.sort_order,o.sort_order`).all(),
+    env.DB.prepare(`SELECT pa.product_id,a.id attribute_id,a.name attribute_name,pa.required,pa.sort_order attribute_sort,o.id option_id,o.name option_name,o.sort_order option_sort,CASE WHEN pov.product_id IS NOT NULL THEN pov.active ELSE o.active END option_active,CASE
+        WHEN EXISTS(
+          SELECT 1
+          FROM product_attribute_option_overrides pd
+          JOIN product_attribute_options pdo ON pdo.id=pd.option_id
+          WHERE pd.product_id=pa.product_id
+            AND pdo.attribute_id=a.id
+            AND pd.active=1
+            AND pd.is_default=1
+        ) THEN CASE WHEN pov.product_id IS NOT NULL THEN pov.is_default ELSE 0 END
+        ELSE o.is_default
+      END is_default,CASE WHEN pov.product_id IS NOT NULL THEN pov.price_delta_irt ELSE o.price_delta_irt END price_delta_irt FROM product_attribute_assignments pa JOIN products p ON p.id=pa.product_id AND p.active=1 JOIN product_attributes a ON a.id=pa.attribute_id AND a.active=1 JOIN product_attribute_options o ON o.attribute_id=a.id LEFT JOIN product_attribute_option_overrides pov ON pov.product_id=pa.product_id AND pov.option_id=o.id WHERE CASE WHEN pov.product_id IS NOT NULL THEN pov.active ELSE o.active END=1 ORDER BY pa.product_id,pa.sort_order,a.sort_order,o.sort_order`).all(),
     env.DB.prepare(`SELECT r.id,r.product_id,r.rating,r.body,r.created_at,u.name,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='like'),0) like_count,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='dislike'),0) dislike_count FROM reviews r JOIN users u ON u.id=r.user_id JOIN products p ON p.id=r.product_id AND p.active=1 WHERE r.approved=1 ORDER BY r.product_id,r.created_at DESC`).all(),
     env.DB.prepare(`SELECT id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE active=1 AND section IN ('about','contact','news','articles') ORDER BY section,published_at DESC,created_at DESC`).all(),
     env.DB.prepare(`SELECT id,question,answer,sort_order,created_at,updated_at FROM faq_entries WHERE active=1 ORDER BY sort_order ASC,created_at ASC`).all(),
