@@ -5,7 +5,7 @@ const PLATFORMS=[
  ['instagram','اینستاگرام'],['telegram','تلگرام'],['aparat','آپارات'],
  ['whatsapp','واتساپ'],['youtube','یوتیوب'],['linkedin','لینکدین'],['other','سایر']
 ];
-const iconPath=id=>`/glsArt/assets/social/${['telegram','instagram','aparat','whatsapp','youtube','linkedin','other'].includes(id)?id:'other'}.svg`;
+const iconPath=id=>`/assets/social/${['telegram','instagram','aparat','whatsapp','youtube','linkedin','other'].includes(id)?id:'other'}.svg`;
 
 function normalizeLinks(raw){
  try{
