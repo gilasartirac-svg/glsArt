@@ -690,7 +690,7 @@ void (async()=>{try{const sd=await api('/api/settings');state.settings=sd.settin
  document.addEventListener('auxclick',e=>{if(e.button===1){e.preventDefault();e.stopPropagation()}},{capture:true});
  document.addEventListener('click',e=>{
    const link=e.target?.closest?.('a[href]');
-   if(link && !link.closest('.footer-social-link') && (link.target==='_blank'||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey)){e.preventDefault();e.stopPropagation();}
+   if(link && !link.closest('.footer-social-link,.footer-trust') && (link.target==='_blank'||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey)){e.preventDefault();e.stopPropagation();}
  },{capture:true});
  document.addEventListener('keydown',e=>{   const k=String(e.key||'').toLowerCase();
    if((e.ctrlKey||e.metaKey)&&['c','x','u','s','p'].includes(k)){e.preventDefault();e.stopPropagation();}
