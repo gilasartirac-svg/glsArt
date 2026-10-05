@@ -4,4 +4,4 @@ Disallow: /admin
 Disallow: /account
 Disallow: /checkout
 Disallow: /cart
-Sitemap: https://gilasartirac-svg.github.io/glsArt/sitemap.xml
+Sitemap: https://www.gilasart.ir/sitemap.xml
