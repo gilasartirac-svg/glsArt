@@ -519,7 +519,7 @@ async function product(slug){
    if(!productCartControl)return;
    if(productCartQuantity<=0){
      productCartControl.innerHTML='<button class="btn primary product-add-btn" id="add" type="button">افزودن به سبد</button>';
-     document.querySelector('#add').onclick=async()=>{try{const btn=document.querySelector('#add');if(btn?.disabled)return;btn?.setAttribute('disabled','disabled');if(!state.user)await ensureLogin();const token=csrf();if(!token)throw new Error('جلسه خرید منقضی شده است؛ لطفاً دوباره وارد حساب شوید.');await api('/api/cart',{method:'POST',body:JSON.stringify({productId:p.id,quantity:1,options:selections()}),headers:{'x-csrf-token':token}});updateCartBadge(Math.max(0,state.cartCount-Number(productCartQuantity||0)+1));productCartQuantity=1;renderProductCartControl(1);alert('به سبد خرید اضافه شد')}catch(e){const msg=String(e?.message||'');alert(msg==='cart_add_failed'?'افزودن به سبد خرید در حال حاضر انجام نشد؛ لطفاً دوباره تلاش کنید.':msg||'افزودن به سبد خرید انجام نشد.')}finally{document.querySelector('#add')?.removeAttribute('disabled')}};
+     document.querySelector('#add').onclick=async()=>{try{const btn=document.querySelector('#add');if(btn?.disabled)return;if(!state.user){navigate('/account');return}btn?.setAttribute('disabled','disabled');const token=csrf();if(!token)throw new Error('جلسه خرید منقضی شده است؛ لطفاً دوباره وارد حساب شوید.');await api('/api/cart',{method:'POST',body:JSON.stringify({productId:p.id,quantity:1,options:selections()}),headers:{'x-csrf-token':token}});updateCartBadge(Math.max(0,state.cartCount-Number(productCartQuantity||0)+1));productCartQuantity=1;renderProductCartControl(1);alert('به سبد خرید اضافه شد')}catch(e){const msg=String(e?.message||'');alert(msg==='cart_add_failed'?'افزودن به سبد خرید در حال حاضر انجام نشد؛ لطفاً دوباره تلاش کنید.':msg||'افزودن به سبد خرید انجام نشد.')}finally{document.querySelector('#add')?.removeAttribute('disabled')}};
      return;
    }
    productCartControl.innerHTML='<div class="product-qty-control" role="group" aria-label="تعداد این تابلو در سبد خرید"><button class="product-qty-btn product-qty-minus" id="product-qty-minus" type="button" aria-label="کاهش تعداد">−</button><div class="product-qty-summary"><span>افزودن به سبد</span><strong>'+fa(productCartQuantity)+'</strong><small>تعداد انتخاب‌شده</small></div><button class="product-qty-btn product-qty-plus" id="product-qty-plus" type="button" aria-label="افزایش تعداد">+</button></div>';
@@ -544,6 +544,7 @@ async function product(slug){
    document.querySelector('#product-qty-plus').onclick=()=>changeQuantity(productCartQuantity+1);
  };
  const loadProductCartQuantity=async()=>{
+   if(!state.meLoadedAt)await loadMe();
    if(!state.user){renderProductCartControl(0);return}
    try{
      const cartData=state.cart||await api('/api/cart');
