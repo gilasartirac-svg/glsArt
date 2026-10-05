@@ -351,14 +351,18 @@ async function resolveProductOptions(env,productId,raw){
   const normalized=[];
   let adjustment=0;
   for(const a of attrs){
+    const defaultOption=a.options.find(v=>v.is_default);
     let o=chosen.get(a.id);
-    if(!o)o=a.options.find(v=>v.is_default);
+    if(!o)o=defaultOption;
     if(!o){
       if(a.required)throw new Error('product_options_required');
       continue;
     }
-    normalized.push({attributeId:a.id,attributeName:a.name,optionId:o.id,optionName:o.name,priceDeltaIrt:Number(o.price_delta_irt||0)});
-    adjustment+=Number(o.price_delta_irt||0);
+    const selectedDelta=Number(o.price_delta_irt||0);
+    const defaultDelta=Number(defaultOption?.price_delta_irt||0);
+    const effectiveDelta=selectedDelta-defaultDelta;
+    normalized.push({attributeId:a.id,attributeName:a.name,optionId:o.id,optionName:o.name,priceDeltaIrt:selectedDelta,priceAdjustmentIrt:effectiveDelta,isDefault:o.id===defaultOption?.id});
+    adjustment+=effectiveDelta;
   }
   if(chosen.size!==normalized.length)throw new Error('invalid_product_options');
   return {options:normalized,adjustment_irt:adjustment};
