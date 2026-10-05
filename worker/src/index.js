@@ -452,7 +452,7 @@ async function proxyStorefrontImage(req,env,u){
   const h=new Headers(r.headers);h.set('cache-control','public, max-age=86400, s-maxage=86400');h.set('access-control-allow-origin','*');
   return new Response(r.body,{status:r.status,headers:h});
 }
-async function route(req,env){const u=new URL(req.url);\n if(u.pathname==='/api/storefront-image'){return proxyStorefrontImage(req,env,u)}if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req,env)});
+async function route(req,env){const u=new URL(req.url); if(u.pathname==='/api/storefront-image'){return proxyStorefrontImage(req,env,u)} if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req,env)});
  if(u.pathname==='/api/visitors/heartbeat'&&req.method==='POST'){
   const b=await body(req),key=String(b.sessionKey||'').replace(/[^A-Za-z0-9_-]/g,'').slice(0,80);
   if(key.length<16)return json({error:'invalid_session_key'},400);
