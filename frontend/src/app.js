@@ -544,7 +544,18 @@ async function product(slug){
    document.querySelector('#product-qty-plus').onclick=()=>changeQuantity(productCartQuantity+1);
  };
  const loadProductCartQuantity=async()=>{
-   if(!state.meLoadedAt)await loadMe();
+   if(!state.meLoadedAt){
+     renderProductCartControl(0);
+     loadMe().then(async()=>{
+       if(!state.user){renderProductCartControl(0);return}
+       try{
+         const cartData=state.cart||await api('/api/cart');
+         const line=(cartData.items||[]).find(x=>String(x.product_id)===String(p.id));
+         renderProductCartControl(line?Number(line.quantity):0);
+       }catch(e){renderProductCartControl(-1);console.warn('cart_quantity_unavailable',e)}
+     }).catch(()=>renderProductCartControl(0));
+     return;
+   }
    if(!state.user){renderProductCartControl(0);return}
    try{
      const cartData=state.cart||await api('/api/cart');
