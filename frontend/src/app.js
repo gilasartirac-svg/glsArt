@@ -6,7 +6,9 @@ async function visitorHeartbeat(){if(!visitorSessionKey)return;try{await fetch(A
 visitorHeartbeat();setInterval(visitorHeartbeat,60000);
 
 let csrfToken='';
-let state={products:[],categories:[],user:null,roles:[],permissions:[],cart:null,cartCount:0,points:0,rewards:null,settings:{}};
+let state={products:[],categories:[],user:null,roles:[],permissions:[],cart:null,cartCount:0,points:0,rewards:null,settings:{},meLoadedAt:0};
+let routeInFlight=null;
+let routeInFlightTarget='';
 const icon=n=>({cart:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 1.9-1.4L21 7H7"/><circle cx="10" cy="20" r="1.2"/><circle cx="18" cy="20" r="1.2"/> </svg>',user:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>',search:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>',send:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 4 18 8-18 8 3-8-3-8Z"/><path d="M6 12h9"/></svg>',check:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>',support:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-5.5 5V15A2.5 2.5 0 0 1 3 12.5v-7Z"/><path d="M7 8h10M7 11h6"/></svg>',plus:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',close:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>',clock:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>',copy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M5 16H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"/></svg>'}[n]||'');
 const fa=n=>new Intl.NumberFormat('fa-IR').format(Number(n||0));const normalizeIranMobile=value=>{let m=String(value||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'');if(m.startsWith('0098'))m='0'+m.slice(4);else if(m.startsWith('98')&&m.length===12)m='0'+m.slice(2);else if(m.startsWith('9')&&m.length===10)m='0'+m;return m};
 const escapeHtml=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));
@@ -232,7 +234,7 @@ function layout(content){
 }
 function routeBase(){return location.pathname.startsWith('/glsArt/')||location.pathname==='/glsArt'?'/glsArt':''}
 function routeUrl(path){const p=String(path||'/');return routeBase()+(p.startsWith('/')?p:'/'+p)}
-function navigate(path,{replace=false}={}){const raw=String(path||'/');const target=raw.startsWith('#/')?raw.slice(1):raw;const url=routeUrl(target||'/');if(replace)history.replaceState({},'',url);else history.pushState({},'',url);void router()}
+function navigate(path,{replace=false}={}){const raw=String(path||'/');const target=raw.startsWith('#/')?raw.slice(1):raw;const url=routeUrl(target||'/');if(url===location.pathname+location.search&&!routeInFlight)return;if(replace)history.replaceState({},'',url);else history.pushState({},'',url);if(routeInFlight&&routeInFlightTarget===url)return;routeInFlightTarget=url;routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget=''});}
 window.GilasArtRouter={navigate};
 function productUrl(slug){const s=String(slug||'').trim();if(!s)return routeUrl('/shop');return routeUrl('/'+encodeURIComponent(s))}
 function productCard(p){
@@ -590,7 +592,7 @@ function startNotificationPolling(){
  clearInterval(notificationTimer);notificationTimer=null;
  if(state.user){pollNotifications();notificationTimer=setInterval(()=>{pollNotifications()},10000)}
 }
-async function loadMe(){try{const d=await api('/api/me');state.user=d.user||null;state.roles=d.roles||[];state.permissions=d.permissions||[];csrfToken=d.csrfToken||csrfToken;if(state.user){const [rewardsResult]=await Promise.allSettled([api('/api/rewards'),syncCartBadge()]);if(rewardsResult.status==='fulfilled'){state.rewards=rewardsResult.value;state.points=Number(state.rewards.balance||0)}else{state.rewards=null;state.points=0}}else{state.rewards=null;state.points=0;updateCartBadge(0)}startNotificationPolling();return d}catch(e){return null}}
+async function loadMe({force=false}={}){const now=Date.now();if(!force&&state.meLoadedAt&&now-state.meLoadedAt<30000)return {user:state.user,roles:state.roles,permissions:state.permissions};try{const d=await api('/api/me');state.user=d.user||null;state.roles=d.roles||[];state.permissions=d.permissions||[];csrfToken=d.csrfToken||csrfToken;state.meLoadedAt=Date.now();if(state.user){if(!state.rewards){try{const rewardsResult=await api('/api/rewards');state.rewards=rewardsResult;state.points=Number(rewardsResult.balance||0)}catch{state.rewards=null;state.points=0}}syncCartBadge().catch(()=>{});}else{state.rewards=null;state.points=0;updateCartBadge(0)}startNotificationPolling();return d}catch(e){return null}}
 async function cart(){
  await loadMe();
  if(!state.user){
@@ -786,8 +788,7 @@ async function rewardsPage(){
  await loadMe();
  if(!state.user){navigate('/account');return}
  let d=state.rewards;
- try{d=await api('/api/rewards');state.rewards=d;state.points=Number(d.balance||0)}
- catch(e){layout('<section class="wrap page"><div class="panel"><h1>باشگاه امتیاز</h1><p class="error">'+escapeHtml(e.message||'خطا')+'</p></div></section>');return}
+ if(!d){try{d=await api('/api/rewards');state.rewards=d;state.points=Number(d.balance||0)}catch(e){layout('<section class="wrap page"><div class="panel"><h1>باشگاه امتیاز</h1><p class="error">'+escapeHtml(e.message||'خطا')+'</p></div></section>');return}}
 
  const balance=Math.max(0,Number(d.balance||0));
  const tiers=[...(d.tiers||[])].sort((a,b)=>Number(a.points)-Number(b.points));
@@ -945,8 +946,9 @@ function migrateLegacyHash(){
  return true;
 }
 migrateLegacyHash();
-window.addEventListener('popstate',()=>{void router()});
-void router().catch(e=>console.error('initial_router_error',e));
+window.addEventListener('popstate',()=>{if(routeInFlight)return;routeInFlightTarget=location.pathname+location.search;routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget=''})});
+routeInFlightTarget=location.pathname+location.search;
+routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget=''}) .catch(e=>console.error('initial_router_error',e));
 
 /* GilasArt interaction guard */
 (()=>{
