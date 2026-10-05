@@ -80,7 +80,7 @@ async function loadStorefrontSnapshot(){
 }
 function snapshotCore(p){
  const image=(p?.images||[]).find(x=>Number(x.is_primary)===1)?.path||(p?.images||[0])?.path||'';
- return {id:p.id,slug:p.slug,sku:p.sku,name:p.name,description:p.description,price_irt:Number(p.price_irt||0),category_id:p.category_id,flash_sale_active:p.flash_sale_active,flash_sale_ends_at:p.flash_sale_ends_at,flash_sale_price_irt:p.flash_sale_price_irt,video_url:p.video_url,view_count:Number(p.view_count||0),rating_avg:Number(p.rating_avg||0),review_count:Number(p.review_count||0),favorite_count:Number(p.favorite_count||0),sold_count:Number(p.sold_count||0),seo_title:p.seo_title,seo_description:p.seo_description,image};
+ return {id:p.id,slug:p.slug,sku:p.sku,name:p.name,description:p.description,price_irt:Number(p.price_irt||0),category_id:p.category_id,category_ids:Array.isArray(p.category_ids)?p.category_ids:[],flash_sale_active:p.flash_sale_active,flash_sale_ends_at:p.flash_sale_ends_at,flash_sale_price_irt:p.flash_sale_price_irt,video_url:p.video_url,view_count:Number(p.view_count||0),rating_avg:Number(p.rating_avg||0),review_count:Number(p.review_count||0),favorite_count:Number(p.favorite_count||0),sold_count:Number(p.sold_count||0),seo_title:p.seo_title,seo_description:p.seo_description,image};
 }
 function snapshotSort(items,sort){
  const a=[...items],s=String(sort||'newest');
