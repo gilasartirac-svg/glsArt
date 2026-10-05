@@ -931,12 +931,19 @@ async function router(){
    const order=new URLSearchParams(location.search||'').get('order')||'';
    if(p[1]==='manual'){
     try{
-     const d=await api('/api/orders/'+encodeURIComponent(order)),cfg=d.invoice||{},pm=d.payment||{},card=(await api('/api/payment/options')).methods?.find(x=>x.id==='card_transfer')?.card||{};
-     layout('<section class="wrap page"><div class="panel payment-manual-panel"><span class="eyebrow">CARD TRANSFER</span><h1>پرداخت کارت به کارت</h1><p>لطفاً مبلغ <strong>'+fa(d.order?.total_irt||0)+' ریال</strong> را به حساب زیر منتقل کنید. پس از بررسی و تایید، وضعیت سفارش به «پرداخت شد» تغییر می‌کند.</p><div class="payment-card-transfer"><div>بانک: '+escapeHtml(card.bankName||'—')+'</div><div>به نام: '+escapeHtml(card.accountHolder||'—')+'</div><div dir="ltr">شماره کارت: '+escapeHtml(card.cardNumber||'—')+'</div><div dir="ltr">شبا: '+escapeHtml(card.iban||'—')+'</div><p>'+escapeHtml(card.instructions||'')+'</p></div><p class="muted">شماره سفارش: '+escapeHtml(order)+'</p><div class="cart-checkout-bar"><a class="btn primary" href="/account">مشاهده سفارش</a></div></div></section>');
+     const d=await api('/api/orders/'+encodeURIComponent(order)),card=(await api('/api/payment/options')).methods?.find(x=>x.id==='card_transfer')?.card||{};
+     layout('<section class="wrap page"><div class="panel payment-manual-panel"><span class="eyebrow">CARD TRANSFER</span><h1>پرداخت کارت به کارت</h1><p>لطفاً مبلغ <strong>'+fa(d.order?.total_irt||0)+' ریال</strong> را به حساب زیر منتقل کنید. پس از بررسی و تأیید، فاکتور فروش برای شما فعال خواهد شد.</p><div class="payment-card-transfer"><div>بانک: '+escapeHtml(card.bankName||'—')+'</div><div>به نام: '+escapeHtml(card.accountHolder||'—')+'</div><div dir="ltr">شماره کارت: '+escapeHtml(card.cardNumber||'—')+'</div><div dir="ltr">شبا: '+escapeHtml(card.iban||'—')+'</div><p>'+escapeHtml(card.instructions||'')+'</p></div><p class="muted">شماره سفارش: '+escapeHtml(order)+'</p><a class="btn primary" href="/account">مشاهده سفارش</a></div></section>');
     }catch(e){layout('<section class="wrap page"><div class="panel"><p class="error">'+escapeHtml(e.message||'خطا')+'</p></div></section>')}
     return;
    }
-   layout('<section class="wrap page"><div class="panel"><h1>'+(p[1]==='success'?'پرداخت با موفقیت تایید شد':'پرداخت ناموفق بود')+'</h1>'+(order?'<p class="muted">'+escapeHtml(order)+'</p>':'')+(p[1]==='success'?'<p>فاکتور سفارش شما از بخش حساب کاربری قابل مشاهده و چاپ است.</p>':'')+'<a class="btn primary" href="/account">مشاهده سفارش و فاکتور</a></div></section>');
+   if(p[1]==='success'){
+    layout('<section class="wrap page"><div class="panel"><span class="eyebrow">PAYMENT CONFIRMED</span><h1>پرداخت با موفقیت تأیید شد</h1>'+(order?'<p class="muted">شماره سفارش: '+escapeHtml(order)+'</p>':'')+'<p>فاکتور فروش سفارش شما آماده است.</p><div class="cart-checkout-bar"><button class="btn primary" id="payment-invoice-print" type="button">نمایش و چاپ فاکتور</button><a class="btn ghost" href="/account">حساب کاربری</a></div></div></section>');
+    document.querySelector('#payment-invoice-print')?.addEventListener('click',async()=>{
+     try{const d=await api('/api/orders/'+encodeURIComponent(order));openInvoiceWindow(d)}catch(e){alert(e.message||'فاکتور دریافت نشد.')}
+    });
+    return;
+   }
+   layout('<section class="wrap page"><div class="panel"><h1>پرداخت ناموفق بود</h1>'+(order?'<p class="muted">شماره سفارش: '+escapeHtml(order)+'</p>':'')+'<a class="btn primary" href="/account">مشاهده سفارش</a></div></section>');
    return;
   }
   return renderNotFound();
