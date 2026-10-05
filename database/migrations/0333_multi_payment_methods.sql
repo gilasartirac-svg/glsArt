@@ -1,7 +1,4 @@
 -- Multi-provider payments: ZarinPal, NovinoPay and manual card transfer.
-ALTER TABLE payments ADD COLUMN provider TEXT NOT NULL DEFAULT 'zarinpal';
-ALTER TABLE payments ADD COLUMN transaction_id TEXT;
-ALTER TABLE payments ADD COLUMN card_pan TEXT;
 CREATE INDEX IF NOT EXISTS idx_payments_provider ON payments(provider);
 INSERT OR IGNORE INTO site_settings(key,value,updated_at) VALUES
 ('payment_zarinpal_enabled','1',CURRENT_TIMESTAMP),
