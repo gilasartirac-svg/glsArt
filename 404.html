@@ -8,7 +8,7 @@
 <style>html.gilasart-routing body{visibility:hidden}</style>
 <script>
 (()=>{document.documentElement.classList.add('gilasart-routing');
-const p=location.pathname,h=location.hash,root=location.hostname.endsWith('github.io')?'/glsArt/':'/';
+const p=location.pathname,h=location.hash,root='/';
 const clean=p.startsWith(root)?p.slice(root.length):'';
 const loadSpa=async()=>{try{const r=await fetch(root+'index.html?spa='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('SPA unavailable');const html=await r.text();document.open();document.write(html);document.close()}catch(e){document.documentElement.classList.remove('gilasart-routing')}};
 if((h&&p===root)||(h&&p===root.slice(0,-1))||clean&&!clean.includes('.')){void loadSpa();return}
