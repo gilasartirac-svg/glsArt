@@ -19,7 +19,7 @@ const loaders={
  payment:()=>import('./pages/PaymentSettings.js?v=20260929-admin'),
  visitors:()=>import('./pages/Visitors.js?v=20260929-admin'),
  about:()=>import('./pages/About.js?v=20261005-about-hardening'),
- contact:()=>import('./pages/Contact.js?v=20261005-contact-modal2'),
+ contact:()=>import('./pages/Contact.js?v=20261005-contact-grid3'),
  news:()=>import('./pages/News.js?v=20260929-admin'),
  articles:()=>import('./pages/Articles.js?v=20260929-admin'),
  support:()=>import('./pages/SupportTickets.js?v=20260929-admin'),
