@@ -2340,3 +2340,52 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 
 /* Contact page — live CMS premium layout */
 .cms-contact-layout-premium{grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);align-items:stretch;gap:20px}.cms-contact-main{position:relative;overflow:hidden}.cms-contact-main::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(180deg,var(--ui-gold),transparent)}.cms-contact-kicker{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.cms-live-badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;border:1px solid color-mix(in srgb,var(--ui-gold) 35%,var(--ui-line));background:color-mix(in srgb,var(--ui-gold) 8%,var(--ui-surface));color:var(--ui-gold-strong);font-size:10px}.cms-contact-lead{font-size:16px;line-height:2}.cms-contact-body{text-align:justify;line-height:2.15}.cms-contact-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:22px}.cms-contact-item{display:grid;gap:7px;padding:15px;border:1px solid var(--ui-line);border-radius:15px;background:linear-gradient(145deg,var(--ui-surface-2),var(--ui-surface));color:var(--ui-text);text-decoration:none}.cms-contact-item:hover{border-color:color-mix(in srgb,var(--ui-gold) 48%,var(--ui-line));transform:translateY(-1px)}.cms-contact-item span{font-size:11px;color:var(--ui-muted)}.cms-contact-item strong{font-size:15px}.cms-contact-address{grid-column:1/-1}.cms-contact-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid var(--ui-line)}.cms-contact-aside-premium{display:flex;flex-direction:column;justify-content:center;min-height:100%;background:radial-gradient(circle at 50% 0,color-mix(in srgb,var(--ui-gold) 12%,transparent),transparent 52%),linear-gradient(145deg,var(--ui-surface-2),var(--ui-surface))}.cms-contact-aside-mark{width:68px;height:68px;display:grid;place-items:center;margin-bottom:20px;border-radius:20px;border:1px solid color-mix(in srgb,var(--ui-gold) 38%,var(--ui-line));color:var(--ui-gold-strong);font-weight:900;letter-spacing:.12em;background:color-mix(in srgb,var(--ui-gold) 7%,var(--ui-surface))}.cms-contact-aside-line{width:70px;height:1px;margin:18px 0;background:var(--ui-gold)}.cms-contact-aside small{color:var(--ui-muted);line-height:1.8}@media(max-width:800px){.cms-contact-layout-premium{grid-template-columns:1fr}.cms-contact-list{grid-template-columns:1fr}.cms-contact-address{grid-column:auto}.cms-contact-aside-premium{min-height:unset}.cms-contact-actions .btn{width:100%}}
+
+
+/* Contact admin GridView — responsive desktop/tablet/mobile */
+.cms-contact-grid-wrap{width:100%;min-width:0}
+.cms-contact-grid{width:100%;table-layout:fixed}
+.cms-contact-grid th,.cms-contact-grid td{vertical-align:middle;overflow-wrap:anywhere}
+.cms-contact-grid th:nth-child(1),.cms-contact-grid td:nth-child(1){width:16%}
+.cms-contact-grid th:nth-child(2),.cms-contact-grid td:nth-child(2){width:10%}
+.cms-contact-grid th:nth-child(3),.cms-contact-grid td:nth-child(3){width:11%}
+.cms-contact-grid th:nth-child(4),.cms-contact-grid td:nth-child(4){width:22%}
+.cms-contact-grid th:nth-child(5),.cms-contact-grid td:nth-child(5){width:8%}
+.cms-contact-grid th:nth-child(6),.cms-contact-grid td:nth-child(6){width:8%}
+.cms-contact-grid th:nth-child(7),.cms-contact-grid td:nth-child(7){width:7%}
+.cms-contact-grid th:nth-child(8),.cms-contact-grid td:nth-child(8){width:10%}
+.cms-contact-grid th:nth-child(9),.cms-contact-grid td:nth-child(9){width:16%}
+.cms-contact-grid .table-actions{white-space:normal;display:flex;gap:6px;flex-wrap:wrap}
+.cms-contact-grid .table-actions .btn{min-height:36px;padding:7px 10px}
+.cms-contact-grid .cms-grid-address{line-height:1.75}
+@media(max-width:1100px){
+ .cms-contact-grid{min-width:940px;table-layout:auto}
+ .cms-contact-grid-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+@media(max-width:700px){
+ .cms-contact-grid-wrap{overflow:visible}
+ .cms-contact-grid{min-width:0;display:block}
+ .cms-contact-grid thead{display:none}
+ .cms-contact-grid tbody{display:grid;gap:12px}
+ .cms-contact-grid tbody tr{display:grid;grid-template-columns:1fr;gap:0;padding:12px;border:1px solid var(--ui-line);border-radius:16px;background:linear-gradient(145deg,var(--ui-surface),var(--ui-surface-2));box-shadow:var(--ui-shadow-soft)}
+ .cms-contact-grid tbody tr[hidden]{display:none}
+ .cms-contact-grid tbody td{display:grid;grid-template-columns:minmax(82px,30%) minmax(0,1fr);gap:10px;align-items:start;width:auto!important;padding:9px 4px;border-bottom:1px solid var(--ui-line);text-align:right;white-space:normal}
+ .cms-contact-grid tbody td:last-child{border-bottom:0;padding-bottom:3px}
+ .cms-contact-grid tbody td::before{color:var(--ui-muted);font-size:11px;font-weight:700}
+ .cms-contact-grid tbody td:nth-child(1)::before{content:"عنوان"}
+ .cms-contact-grid tbody td:nth-child(2)::before{content:"تلفن"}
+ .cms-contact-grid tbody td:nth-child(3)::before{content:"موبایل"}
+ .cms-contact-grid tbody td:nth-child(4)::before{content:"آدرس"}
+ .cms-contact-grid tbody td:nth-child(5)::before{content:"نقشه"}
+ .cms-contact-grid tbody td:nth-child(6)::before{content:"وضعیت"}
+ .cms-contact-grid tbody td:nth-child(7)::before{content:"ترتیب"}
+ .cms-contact-grid tbody td:nth-child(8)::before{content:"آخرین ویرایش"}
+ .cms-contact-grid tbody td:nth-child(9)::before{content:"عملیات"}
+ .cms-contact-grid .table-actions{justify-content:flex-start;gap:8px}
+ .cms-contact-grid .table-actions .btn{flex:1;min-width:100px}
+}
+@media(max-width:380px){
+ .cms-contact-grid tbody td{grid-template-columns:72px minmax(0,1fr);gap:7px;padding:8px 2px}
+ .cms-contact-grid .table-actions{display:grid;grid-template-columns:1fr 1fr}
+ .cms-contact-grid .table-actions .btn{min-width:0;width:100%}
+}
