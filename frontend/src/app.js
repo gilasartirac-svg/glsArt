@@ -481,8 +481,11 @@ async function product(slug){
  const first=mediaItems[0]||null;
  const mediaHtml=item=>item?.type==='video'?'<video class="product-video-player" controls playsinline preload="metadata" src="'+escapeHtml(item.src)+'"><p>مرورگر شما از پخش ویدئو پشتیبانی نمی‌کند.</p></video>':item?.src?'<img src="'+escapeHtml(item.src)+'" alt="'+escapeHtml(item.alt||p.name)+'" loading="eager" fetchpriority="high" decoding="async">':'<div class="product-media-empty">اثر هنری</div>';
  const optionHtml=attributes.map(a=>{
+  const defaultOption=a.options.find(o=>o.is_default);
+  const defaultDelta=Number(defaultOption?.price_delta_irt||0);
   const options=a.options.map((o,i)=>{
-    const delta=Number(o.price_delta_irt||0);
+    const rawDelta=Number(o.price_delta_irt||0);
+    const delta=rawDelta-defaultDelta;
     const deltaLabel=delta===0?'قیمت پایه':(delta>0?'+'+fa(delta)+' ریال':'−'+fa(Math.abs(delta))+' ریال');
     return '<label class="product-option-card '+(o.is_default?'is-default':'')+'"><input class="product-option-input" type="radio" name="product-option-'+escapeHtml(a.id)+'" value="'+escapeHtml(o.id)+'" data-attribute-id="'+escapeHtml(a.id)+'" data-delta="'+delta+'" '+(o.is_default?'checked':'')+'><span class="product-option-card-ui"><span class="product-option-card-top"><strong>'+escapeHtml(o.name)+'</strong>'+(o.is_default?'<span class="product-option-default">پیش‌فرض</span>':'')+'</span><span class="product-option-price '+(delta===0?'is-base':'')+'">'+deltaLabel+'</span></span></label>';
   }).join('');
