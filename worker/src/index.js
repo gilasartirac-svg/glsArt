@@ -977,7 +977,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
    if(!method?.configured)return json({error:'card_transfer_not_configured'},503);
    return json({ok:true,manual:true,url:frontend(env)+'/payment/manual?order='+encodeURIComponent(oid)});
   }
-  if(p.authority&&['REDIRECTED','CALLBACK','VERIFYING'].includes(p.status))return json({ok:true,url:paymentRedirectUrl(provider,p.authority),reused:true});
+  if(p.authority&&['REDIRECTED','CALLBACK','VERIFYING'].includes(p.status))return json({ok:true,url:paymentRedirectUrl(provider,p.authority,await paymentEnvironment(env)),reused:true});
   if(provider==='zarinpal'){
    if(!env.ZARINPAL_MERCHANT_ID)return json({error:'payment_not_configured'},503);
    const reqz=await zarin(env,'request.json',{amount:o.total_irt,description:'GilasArt Order '+oid,callback_url:await siteSetting(env,'zarinpal_callback_url',env.PAYMENT_CALLBACK_URL||new URL(req.url).origin+'/api/payment/callback'),mobile:me.mobile,currency:'IRR'});
