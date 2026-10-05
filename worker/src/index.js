@@ -463,7 +463,7 @@ async function paymentOptions(env){
   instructions:await siteSetting(env,'card_transfer_instructions','پس از انتقال وجه، سفارش توسط واحد فروش بررسی و تایید می‌شود.')
  };
  return {
-  defaultProvider:await siteSetting(env,'payment_default_provider',z?'zarinpal':n?'novinopay':c?'card_transfer':''),
+  defaultProvider:(()=>{const raw=String(await siteSetting(env,'payment_default_provider','zarinpal'));const enabled=new Set([...(z?['zarinpal']:[]),...(n?['novinopay']:[]),...(c?['card_transfer']:[])]);return enabled.has(raw)?raw:(enabled.values().next().value||'')})(),
   methods:[
    {id:'zarinpal',title:await siteSetting(env,'payment_zarinpal_title','زرین‌پال'),enabled:z,configured:!!env.ZARINPAL_MERCHANT_ID},
    {id:'novinopay',title:await siteSetting(env,'payment_novinopay_title','نوینو پی'),enabled:n,configured:!!env.NOVINOPAY_MERCHANT_ID},
@@ -477,7 +477,7 @@ async function novino(env,endpoint,payload){
  const r=await fetch(base,{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify({...payload,merchant_id:env.NOVINOPAY_MERCHANT_ID})});
  return r.json();
 }
-function paymentRedirectUrl(provider,authority){return provider==='novinopay'?'https://ipg.novinopay.com/StartPay/'+encodeURIComponent(authority):zarinPaymentHost('production')+'/pg/StartPay/'+encodeURIComponent(authority)}
+function paymentRedirectUrl(provider,authority,mode='production'){return provider==='novinopay'?'https://ipg.novinopay.com/StartPay/'+encodeURIComponent(authority):zarinPaymentHost(mode)+'/pg/StartPay/'+encodeURIComponent(authority)}
 async function proxyStorefrontImage(req,env,u){
   if(req.method!=='GET')return null;
   const raw=String(u.searchParams.get('path')||'').trim();
@@ -984,7 +984,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
    const data=reqz.data||{},code=Number(data.code||reqz.code||0),authority=data.authority;
    if(code!==100||!authority)return json({error:'payment_request_failed',details:reqz.errors||[]},502);
    await env.DB.batch([env.DB.prepare("UPDATE payments SET status='REDIRECTED',authority=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND status!='PAID'").bind(authority,p.id),env.DB.prepare('INSERT INTO payment_attempts(id,payment_id,authority,request_code,raw_status) VALUES(?,?,?,?,?)').bind(uid(),p.id,authority,code,JSON.stringify({provider,code,message:data.message||null}))]);
-   return json({ok:true,url:paymentRedirectUrl(provider,authority)});
+   return json({ok:true,url:paymentRedirectUrl(provider,authority,await paymentEnvironment(env))});
   }
   if(o.total_irt>1000000000)return json({error:'novino_amount_limit'},400);
   if(!env.NOVINOPAY_MERCHANT_ID)return json({error:'novinopay_not_configured'},503);
@@ -1241,8 +1241,24 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   if(!ORDER_STATUSES.has(next))return json({error:'invalid_order_status'},400);
   if(next===before.status)return json({ok:true,changed:false,status:before.status});
   await env.DB.prepare('UPDATE orders SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(next,id).run();
+  if(next==='PAID'){
+   const payment=await env.DB.prepare('SELECT id,provider,status FROM payments WHERE order_id=?').bind(id).first();
+   if(payment?.provider==='card_transfer'&&payment.status!=='PAID'){
+    const ref=String(b.refId||'').trim().slice(0,120)||null;
+    await env.DB.prepare("UPDATE payments SET status='PAID',ref_id=COALESCE(?,ref_id),paid_at=COALESCE(paid_at,CURRENT_TIMESTAMP),updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(ref,payment.id).run();
+    await env.DB.prepare('DELETE FROM stock_reservations WHERE order_id=?').bind(id).run();
+   }
+  }else if(['CANCELLED','FAILED'].includes(next)){
+   await releaseReservation(env,id,next);
+   await env.DB.prepare("UPDATE payments SET status='FAILED',updated_at=CURRENT_TIMESTAMP WHERE order_id=? AND provider='card_transfer' AND status!='PAID'").bind(id).run();
+  }
   const after=await env.DB.prepare('SELECT * FROM orders WHERE id=?').bind(id).first();
   const sms=await recordOrderStatusChange(env,id,before.status,after.status,me.id);
+  if(next==='PAID'&&before.status!=='PAID'){
+   const ord=await env.DB.prepare('SELECT user_id,total_irt FROM orders WHERE id=?').bind(id).first();
+   const purchasePoints=Math.min(30,Math.floor(Number(ord?.total_irt||0)/1000000));
+   if(purchasePoints>0)await awardPoints(env,ord.user_id,purchasePoints,'purchase','order',id,'خرید موفق در گیلاس آرت');
+  }
   await audit(env,me,'admin.order.status.change','order',id,{before,after,sms},req);
   return json({ok:true,changed:true,status:after.status,sms});
  }
