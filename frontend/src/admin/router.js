@@ -28,9 +28,8 @@ const loaders={
 };
 
 export default async function adminRouter(){
- const hashPage=location.hash.startsWith('#/admin/')?location.hash.replace('#/admin/',''):'';
  const pathPage=location.pathname.replace(/^.*\/admin\/?/,'').replace(/\/$/,'');
- const page=hashPage||pathPage||'dashboard';
+ const page=pathPage||'dashboard';
  const loader=loaders[page]||loaders.dashboard;
  try{
   const mod=await loader();
