@@ -402,13 +402,11 @@ async function home(){const [d,s,fs,c]=await Promise.allSettled([api('/api/produ
   document.querySelectorAll('input[name="min-rating"]').forEach(x=>x.checked=x.value==='0');
   refresh();
  };
- const featuredProduct=allItems[0]||null,featuredImage=featuredProduct?safeUrl(featuredProduct.image):'';
- const hero=featuredImage?'<a class="shop-page-visual" href="'+productUrl(featuredProduct.slug)+'" aria-label="مشاهده اثر '+escapeHtml(featuredProduct.name)+'"><img src="'+escapeHtml(featuredImage)+'" alt="'+escapeHtml(featuredProduct.name)+'" fetchpriority="high" decoding="async"><span><small>اثر منتخب</small><strong>'+escapeHtml(featuredProduct.name)+'</strong></span></a>':'<div class="shop-page-visual shop-page-visual-empty"><span>GILAS ART</span><strong>گالری آثار</strong></div>';
  layout('<section class="wrap page shop-page">'+
- '<header class="page-masthead"><div class="page-masthead-copy"><span class="eyebrow">GILAS ART • COPPER INLAY</span><h1>گالری آثار</h1><p>جستجو، فیلتر و انتخاب آثار گیلاس آرت؛ سریع، دقیق و بدون وابستگی به درخواست‌های مکرر پایگاه داده.</p></div>'+hero+'</header>'+
+ '<header class="page-masthead shop-page-masthead"><div class="page-masthead-copy"><span class="eyebrow">GILAS ART • COPPER INLAY</span><h1>گالری آثار</h1><p>جستجو، فیلتر و انتخاب آثار گیلاس آرت؛ سریع، دقیق و بدون وابستگی به درخواست‌های مکرر پایگاه داده.</p></div></header>'+
  '<section class="shop-control-shell" aria-label="کنترل‌های فروشگاه">'+
- '<div class="shop-searchbar"><label for="shop-search"><span class="shop-control-icon">'+icon('search')+'</span><span class="sr-only">جستجوی آثار</span><input id="shop-search" type="search" value="'+escapeHtml(query)+'" placeholder="جستجو بر اساس نام اثر، کد محصول یا توضیحات..." autocomplete="off" enterkeyhint="search"></label>'+
- '<div class="shop-control-actions"><label class="sort-control"><span>مرتب‌سازی</span><select id="sort-products" aria-label="مرتب‌سازی آثار">'+sortMarkup+'</select></label><button id="mobile-filter-open" class="btn ghost mobile-filter-button" type="button" aria-controls="shop-filter-panel" aria-expanded="false">فیلترها <span id="filter-badge">۰</span></button></div></div>'+
+ '<details class="shop-collapsible-control shop-search-control" '+(query?'open':'')+'><summary><span>جستجو در آثار</span><span class="collapsible-summary-hint">نام اثر، کد محصول یا توضیحات</span></summary><div class="collapsible-control-body"><label class="shop-search-input-wrap" for="shop-search"><span class="shop-control-icon">'+icon('search')+'</span><span class="sr-only">جستجوی آثار</span><input id="shop-search" type="search" value="'+escapeHtml(query)+'" placeholder="نام اثر، کد محصول یا توضیحات..." autocomplete="off" enterkeyhint="search"></label></div></details>'+
+ '<div class="shop-control-actions"><label class="sort-control"><span>مرتب‌سازی</span><select id="sort-products" aria-label="مرتب‌سازی آثار">'+sortMarkup+'</select></label><button id="mobile-filter-open" class="btn ghost mobile-filter-button" type="button" aria-controls="shop-filter-panel" aria-expanded="false">فیلترها <span id="filter-badge">۰</span></button></div>'+
  '<div id="shop-active-filters" class="shop-active-filters" hidden></div>'+
  '</section>'+
  '<section class="gallery-workspace" aria-label="فروشگاه گیلاس آرت">'+
