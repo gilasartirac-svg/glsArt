@@ -967,7 +967,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);
   const b=await body(req),provider=String(b.provider||'zarinpal').toLowerCase(),oid=u.pathname.split('/')[3];
   if(!['zarinpal','novinopay','card_transfer'].includes(provider))return json({error:'invalid_payment_provider'},400);
-  const o=await env.DB.prepare('SELECT * FROM orders WHERE id=? AND user_id=? AND status='PENDING'').bind(oid,me.id).first();
+  const o=await env.DB.prepare("SELECT * FROM orders WHERE id=? AND user_id=? AND status='PENDING'").bind(oid,me.id).first();
   if(!o)return json({error:'order_not_payable'},400);
   const p=await env.DB.prepare('SELECT * FROM payments WHERE order_id=?').bind(oid).first();
   if(!p)return json({error:'payment_missing'},500);
