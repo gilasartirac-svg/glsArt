@@ -56,13 +56,13 @@ export default function Dashboard(){
     <div id="sales-chart" class="dashboard-chart"><div class="dashboard-loading">در حال دریافت...</div></div>
    </article>
    <article class="dashboard-panel">
-    <div class="dashboard-panel-head"><div><h3>سفارش‌های اخیر</h3><p>آخرین فعالیت‌های فروشگاه</p></div><a href="#/admin/orders" class="dashboard-link">مشاهده همه</a></div>
+    <div class="dashboard-panel-head"><div><h3>سفارش‌های اخیر</h3><p>آخرین فعالیت‌های فروشگاه</p></div><a href="/admin/orders" class="dashboard-link">مشاهده همه</a></div>
     <div id="recent-orders" class="dashboard-list"><div class="dashboard-loading">در حال دریافت...</div></div>
    </article>
   </section>
   <section class="dashboard-main-grid dashboard-secondary-grid">
    <article class="dashboard-panel">
-    <div class="dashboard-panel-head"><div><h3>موجودی کم</h3><p>محصولاتی که نیاز به بررسی دارند</p></div><a href="#/admin/inventory" class="dashboard-link">مدیریت موجودی</a></div>
+    <div class="dashboard-panel-head"><div><h3>موجودی کم</h3><p>محصولاتی که نیاز به بررسی دارند</p></div><a href="/admin/inventory" class="dashboard-link">مدیریت موجودی</a></div>
     <div id="low-stock" class="dashboard-list"><div class="dashboard-loading">در حال دریافت...</div></div>
    </article>
    <article class="dashboard-panel dashboard-health">
