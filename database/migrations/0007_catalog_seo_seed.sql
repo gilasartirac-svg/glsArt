@@ -15,12 +15,12 @@ INSERT OR IGNORE INTO products(id,category_id,slug,sku,name,description,price_ir
 ('sample_atiq','cat_classic','atiq','GA-1006','عطرِ عتیق','اثری با حال‌وهوای کلاسیک و پالت گرم، مناسب فضاهای رسمی و دکوراسیون اصیل.',12500000,1,'عطر عتیق | تابلو کلاسیک','تابلو کلاسیک عطر عتیق با پالت گرم و حس اصیل برای فضاهای رسمی.');
 INSERT OR IGNORE INTO inventory(product_id,quantity) VALUES ('sample_mehr',8),('sample_shab',6),('sample_khak',10),('sample_barg',5),('sample_sokoot',12),('sample_atiq',4);
 INSERT OR IGNORE INTO product_images(id,product_id,path,alt_text,sort_order,is_primary) VALUES
-('img_mehr','sample_mehr','/glsArt/art/mehr.svg','تابلو آبستره مهر خاک و نور',0,1),
-('img_shab','sample_shab','/glsArt/art/shab.svg','تابلو مدرن شب آرام',0,1),
-('img_khak','sample_khak','/glsArt/art/khak.svg','تابلو مینیمال هندسه خاک',0,1),
-('img_barg','sample_barg','/glsArt/art/barg.svg','تابلو رقص برگ‌ها',0,1),
-('img_sokoot','sample_sokoot','/glsArt/art/sokoot.svg','تابلو مینیمال سکوت روشن',0,1),
-('img_atiq','sample_atiq','/glsArt/art/atiq.svg','تابلو کلاسیک عطر عتیق',0,1);
+('img_mehr','sample_mehr','/art/mehr.svg','تابلو آبستره مهر خاک و نور',0,1),
+('img_shab','sample_shab','/art/shab.svg','تابلو مدرن شب آرام',0,1),
+('img_khak','sample_khak','/art/khak.svg','تابلو مینیمال هندسه خاک',0,1),
+('img_barg','sample_barg','/art/barg.svg','تابلو رقص برگ‌ها',0,1),
+('img_sokoot','sample_sokoot','/art/sokoot.svg','تابلو مینیمال سکوت روشن',0,1),
+('img_atiq','sample_atiq','/art/atiq.svg','تابلو کلاسیک عطر عتیق',0,1);
 INSERT OR IGNORE INTO permissions(id,name) VALUES
 ('perm_coupons_read','coupons.read'),('perm_coupons_write','coupons.write'),
 ('perm_reviews_read','reviews.read'),('perm_reviews_write','reviews.write'),
