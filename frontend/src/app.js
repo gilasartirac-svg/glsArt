@@ -599,8 +599,8 @@ async function cart(){
   layout('<section class="wrap page"><div class="panel"><h2>سبد خرید</h2><p>برای دیدن سبد خرید وارد حساب شوید.</p><a class="btn primary" href="/account">ورود</a></div></section>');
   return;
  }
- let d=await api('/api/cart'),addressData={items:[]},couponCode='',couponMessage='';
- try{addressData=await api('/api/addresses')}catch{}
+ let d,addressData={items:[]},couponCode='',couponMessage='';
+ [d,addressData]=await Promise.all([api('/api/cart'),api('/api/addresses').catch(()=>({items:[]}))]);
  const savedAddress=(addressData.items||[])[0]||{};
  const idempotencyKey=()=>((crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)).replace(/-/g,''));
  const render=(p=d)=>{
@@ -695,8 +695,10 @@ function referralFromLocation(){try{const q=new URLSearchParams(location.search|
 async function account(){
  await loadMe();
  if(state.user){
-  const invoiceModule=await import('./invoice.js?v=20260929-invoice-2');
-  const ordersData=await api('/api/account/orders');
+  const [invoiceModule,ordersData]=await Promise.all([
+   import('./invoice.js?v=20260929-invoice-2'),
+   api('/api/account/orders')
+  ]);
   const orders=ordersData.items||[],invoiceSettings=ordersData.invoice||{};
   const statusLabels={PENDING:'در انتظار پرداخت',PAID:'پرداخت شد',PROCESSING:'در حال آماده‌سازی',SHIPPED:'ارسال شد',DELIVERED:'تحویل شد',CANCELLED:'لغو شد',FAILED:'ناموفق'};
   const steps=[['PENDING','ثبت سفارش'],['PAID','تأیید پرداخت'],['PROCESSING','آماده‌سازی اثر'],['SHIPPED','تحویل به پست / ارسال'],['DELIVERED','تحویل تابلو']];
