@@ -482,17 +482,14 @@ async function route(req,env){const u=new URL(req.url); if(u.pathname==='/api/st
   return json({products:{items:products.results||[]},categories:{items:categories.results||[]},settings:{settings:out},flash:{items:flash.results||[]}});
  }
  if(u.pathname==='/api/categories'&&req.method==='GET'){const r=await env.DB.prepare('SELECT id,slug,name,description FROM categories WHERE active=1 ORDER BY name').all();return json({items:r.results||[]})}
- if(u.pathname==='/api/products/price-range'&&req.method==='GET'){const r=await env.DB.prepare('SELECT COALESCE(MIN(price_irt),0) min_price_irt,COALESCE(MAX(price_irt),0) max_price_irt FROM products WHERE active=1').first();return json({min_price_irt:Number(r?.min_price_irt||0),max_price_irt:Number(r?.max_price_irt||0)})}
  if(u.pathname==='/api/products'&&req.method==='GET'){
-  const q=(u.searchParams.get('q')||'').trim(),cat=u.searchParams.get('category'),sort=String(u.searchParams.get('sort')||'newest').toLowerCase(),minPrice=Math.max(0,Number(u.searchParams.get('min_price')||0)),maxPrice=Math.max(0,Number(u.searchParams.get('max_price')||0));
+  const q=(u.searchParams.get('q')||'').trim(),cat=u.searchParams.get('category'),sort=String(u.searchParams.get('sort')||'newest').toLowerCase();
   const sortSql={newest:'p.created_at DESC,p.id DESC',price_asc:'p.price_irt ASC,p.id DESC',price_desc:'p.price_irt DESC,p.id DESC',rating:'p.rating_avg DESC,p.review_count DESC,p.created_at DESC,p.id DESC',reviews:'p.review_count DESC,p.rating_avg DESC,p.created_at DESC,p.id DESC',popular:'p.favorite_count DESC,p.view_count DESC,p.created_at DESC,p.id DESC',best_selling:'p.sold_count DESC,p.review_count DESC,p.created_at DESC,p.id DESC',views:'p.view_count DESC,p.favorite_count DESC,p.created_at DESC,p.id DESC'}[sort]||'p.created_at DESC,p.id DESC';
   const limit=Math.min(60,Math.max(1,Number(u.searchParams.get('limit')||12))),offset=Math.max(0,Math.min(10000,Number(u.searchParams.get('offset')||0)));
   let sql='SELECT p.id,p.slug,p.sku,p.name,p.description,p.price_irt,p.category_id,p.flash_sale_active,p.flash_sale_ends_at,p.flash_sale_price_irt,p.video_url,p.view_count,p.rating_avg,p.review_count,p.favorite_count,p.sold_count,pi.path image FROM products p LEFT JOIN product_images pi ON pi.product_id=p.id AND pi.is_primary=1 WHERE p.active=1';
   const args=[];
   if(q){sql+=' AND (p.name LIKE ? OR p.description LIKE ? OR p.sku LIKE ?)';args.push(`%${q}%`,`%${q}%`,`%${q}%`)}
   if(cat){sql+=' AND p.category_id=?';args.push(cat)}
-  if(Number.isFinite(minPrice)&&minPrice>0){sql+=' AND p.price_irt>=?';args.push(Math.floor(minPrice))}
-  if(Number.isFinite(maxPrice)&&maxPrice>0){sql+=' AND p.price_irt<=?';args.push(Math.floor(maxPrice))}
   sql+=' ORDER BY '+sortSql+' LIMIT ? OFFSET ?';args.push(limit,offset);
   const r=await env.DB.prepare(sql).bind(...args).all();
   return json({items:r.results||[],limit,offset,sort});
