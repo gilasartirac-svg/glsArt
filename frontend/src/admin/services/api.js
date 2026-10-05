@@ -1,4 +1,4 @@
-const API=window.GILASART_API||'https://gilasartworker.gilasart-ir-ac.workers.dev';
+const API=window.GILASART_API||((location.hostname==='gilasart.ir'||location.hostname==='www.gilasart.ir')?'https://api.gilasart.ir':'https://gilasartworker.gilasart-ir-ac.workers.dev');
 let csrfToken='';
 let sessionChecked=false;
 
