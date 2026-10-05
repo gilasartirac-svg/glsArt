@@ -2,6 +2,13 @@ import {api} from '../services/api.js';
 import {setupDataGrid} from '../components/Table.js';
 import {coverImageField,setupCoverImageField,setCoverImageField} from '../components/CmsCoverPicker.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function showCmsModal(title,message,type='success'){
+ const old=document.querySelector('#cms-feedback-modal');old?.remove();
+ const tone=type==='error'?'error':type==='info'?'info':'success';
+ const box=document.createElement('div');box.id='cms-feedback-modal';box.className='modal';box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');
+ box.innerHTML='<div class="modalbox cms-feedback-modal"><div class="eyebrow">GILAS ART CMS</div><h3>'+esc(title)+'</h3><p class="'+tone+'">'+esc(message)+'</p><div class="toolbar"><button type="button" class="btn primary">متوجه شدم</button></div></div>';
+ document.body.appendChild(box);const close=()=>box.remove();box.querySelector('button').onclick=close;box.addEventListener('click',e=>{if(e.target===box)close()});setTimeout(()=>box.querySelector('button')?.focus(),0);
+}
 const date=v=>v?new Intl.DateTimeFormat('fa-IR-u-ca-persian',{dateStyle:'short',timeStyle:'short',timeZone:'Asia/Tehran'}).format(new Date(String(v).replace(' ','T')+'Z')):'—';
 export default function Contact(){
  setTimeout(load,0);
@@ -21,9 +28,9 @@ export default function Contact(){
  try{
   const result=await api(id?'/api/admin/cms/'+id:'/api/admin/cms',{method:id?'PUT':'POST',body:JSON.stringify(b)});
   form.reset();delete form.dataset.id;setCoverImageField(form,'');await load();
-  if(status){status.textContent=result?.ok===false?'ذخیره‌سازی انجام نشد.':'تغییرات با موفقیت ذخیره شد.';status.className='cms-save-status success'}
+  if(status){status.textContent='';status.className='cms-save-status'}showCmsModal('ذخیره شد','تغییرات با موفقیت ذخیره شد.','success')
  }catch(err){
-  if(status){status.textContent='ذخیره‌سازی انجام نشد: '+String(err?.message||'خطای نامشخص');status.className='cms-save-status error'}
+  if(status){status.textContent='';status.className='cms-save-status'}showCmsModal('ذخیره انجام نشد',String(err?.message||'خطای نامشخص'),'error')
  }finally{btn.disabled=false}
 }
  return '<div class="admin-page" dir="rtl"><div class="admin-title"><div><div class="eyebrow">GILAS ART CMS</div><h2>تماس با ما</h2><span class="muted">ثبت و ویرایش مستقیم محتوای سایت</span></div></div><div class="panel cms-editor"><form id="cms-form" class="form"><div class="form-grid"><label>عنوان<input name="title" required maxlength="180"></label><label>Slug<input name="slug" maxlength="160"></label><label>خلاصه<textarea name="summary" maxlength="500"></textarea></label><label>متن اصلی<textarea name="body" maxlength="12000"></textarea></label><label>تلفن<input name="phone"></label><label>موبایل<input name="mobile"></label><label>آدرس هنرکده<textarea name="address"></textarea></label><label>لینک نقشه / مسیریابی<input name="mapUrl" type="url"></label>'+coverImageField()+'<label>ترتیب نمایش<input name="sortOrder" type="number" value="0"></label><label class="checkline"><input name="active" type="checkbox" checked> فعال</label></div><div class="toolbar"><button class="btn primary" type="submit">ذخیره</button><span class="cms-save-status" role="status" aria-live="polite"></span><button class="btn ghost" type="reset" id="cms-clear">پاک کردن فرم</button></div></form></div><div class="panel"><div class="sectionhead"><h3>رکوردهای ثبت‌شده</h3><span class="muted">جستجو، مرتب‌سازی و ویرایش از همین جدول</span></div><div class="table-scroll"><table class="admin-table"><thead><tr><th>عنوان</th><th>خلاصه</th><th>وضعیت</th><th>آخرین ویرایش</th><th>عملیات</th></tr></thead><tbody id="cms-grid"><tr><td colspan="5">در حال دریافت...</td></tr></tbody></table></div></div></div>';
