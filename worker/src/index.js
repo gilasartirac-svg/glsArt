@@ -445,7 +445,7 @@ async function zarin(env,endpoint,payload){const mode=await paymentEnvironment(e
 async function proxyStorefrontImage(req,env,u){
   if(req.method!=='GET')return null;
   const raw=String(u.searchParams.get('path')||'').trim();
-  if(!/^\\/(?:art|uploaded)\\/[A-Za-z0-9._\\/-]+\\.(?:png|jpe?g|webp|gif|svg)$/i.test(raw)||raw.includes('..'))return json({error:'invalid_image_path'},400);
+  if(!/^\/(?:art|uploaded)\/[A-Za-z0-9._\/-]+\.(?:png|jpe?g|webp|gif|svg)$/i.test(raw)||raw.includes('..'))return json({error:'invalid_image_path'},400);
   const upstream='https://raw.githubusercontent.com/gilasartirac-svg/glsArt/main/frontend/public'+raw;
   const r=await fetch(upstream,{cf:{cacheTtl:86400,cacheEverything:true}});
   if(!r.ok)return new Response('Not Found',{status:404,headers:{'cache-control':'public, max-age=300'}});
