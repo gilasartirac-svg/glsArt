@@ -113,6 +113,13 @@ async function snapshotApi(path){
   const items=(d.products||[]).filter(p=>Number(p.flash_sale_active)===1&&p.flash_sale_ends_at&&new Date(p.flash_sale_ends_at).getTime()>Date.now()).sort((a,b)=>String(a.flash_sale_ends_at).localeCompare(String(b.flash_sale_ends_at))).slice(0,20).map(snapshotCore);
   return {items};
  }
+ if(u.pathname.startsWith('/api/products/')){
+  const slug=decodeURIComponent(u.pathname.split('/').pop()||'');
+  const p=(d.products||[]).find(x=>String(x.slug||'')===slug);
+  if(!p)return null;
+  const images=Array.isArray(p.images)?p.images:[];
+  return {product:{...p,image:p.image||(images.find(x=>Number(x.is_primary)===1)?.path||images[0]?.path||'')},images,attributes:Array.isArray(p.attributes)?p.attributes:[],reviews:Array.isArray(p.reviews)?p.reviews:[],categories:Array.isArray(p.categories)?p.categories:[],quantityDiscountTiers:[]};
+ }
  if(u.pathname==='/api/products'){
   let items=[...(d.products||[])];
   const q=(u.searchParams.get('q')||'').trim().toLowerCase(),cat=u.searchParams.get('category')||'',sort=u.searchParams.get('sort')||'newest';
@@ -261,7 +268,17 @@ async function home(){const [d,s,fs,c]=await Promise.allSettled([api('/api/produ
  await loadMore(true);
 }
 async function product(slug){
- const d=await api('/api/products/'+encodeURIComponent(slug)),p=d.product||{},images=d.images||[],attributes=d.attributes||[],categories=d.categories||[];
+ let d;
+ try{
+  d=await api('/api/products/'+encodeURIComponent(slug));
+ }catch(primaryError){
+  const snapshot=await loadStorefrontSnapshot();
+  const p0=(snapshot?.products||[]).find(x=>String(x.slug||'')===String(slug||''));
+  if(!p0)throw primaryError;
+  const imgs=Array.isArray(p0.images)?p0.images:[];
+  d={product:{...p0,image:p0.image||(imgs.find(x=>Number(x.is_primary)===1)?.path||imgs[0]?.path||'')},images:imgs,attributes:Array.isArray(p0.attributes)?p0.attributes:[],reviews:Array.isArray(p0.reviews)?p0.reviews:[],categories:Array.isArray(p0.categories)?p0.categories:[],quantityDiscountTiers:[]};
+ }
+ const p=d.product||{},images=d.images||[],attributes=d.attributes||[],categories=d.categories||[];
  try{const key='GilasArtViewed:'+String(p.id||slug);if(!sessionStorage.getItem(key)){sessionStorage.setItem(key,'1');api('/api/products/'+encodeURIComponent(slug)+'/view',{method:'POST'}).catch(()=>{})}}catch{}
  const image=safeUrl(p.image);
  setSeo({title:p.seo_title||p.name+' | گیلاس آرت',description:p.seo_description||p.description,image:image||undefined,jsonLd:{'@context':'https://schema.org','@type':'Product',name:p.name,description:p.description||'',sku:p.sku,image:images.map(x=>safeUrl(x.path)).filter(Boolean),offers:{'@type':'Offer',priceCurrency:'IRR',price:String(p.price_irt),availability:'https://schema.org/InStock',url:location.href}}});
