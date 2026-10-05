@@ -442,7 +442,17 @@ function promotionErrorCode(e){const c=String(e?.message||'');return ['coupon_no
 function allowedImagePath(v){try{const s=String(v||'').trim();const imageFile=/\.(png|jpe?g|webp|gif|svg)$/i;const relative=/^\/(?:art|uploaded)\/[^?#]+$/;if(relative.test(s)&&imageFile.test(s))return true;const u=new URL(s);if(u.protocol!=='https:')return false;if(u.hostname==='raw.githubusercontent.com')return ((u.pathname.startsWith('/gilasartirac-svg/gls-media/main/image/')||u.pathname.startsWith('/gilasartirac-svg/glsArt/main/frontend/public/art/')||u.pathname.startsWith('/gilasartirac-svg/glsArt/main/frontend/public/uploaded/'))&&imageFile.test(u.pathname));if(u.hostname==='www.gilasart.ir'||u.hostname==='gilasart.ir')return u.pathname.startsWith('/art/')||u.pathname.startsWith('/uploaded/')?imageFile.test(u.pathname):false;return false}catch{return false}}
 
 async function zarin(env,endpoint,payload){const mode=await paymentEnvironment(env);const base=mode==='production'?'https://api.zarinpal.com/pg/v4/payment':'https://sandbox.zarinpal.com/pg/v4/payment';const r=await fetch(base+'/'+endpoint,{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify({...payload,merchant_id:env.ZARINPAL_MERCHANT_ID})});return r.json()}
-async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req,env)});
+async function proxyStorefrontImage(req,env,u){
+  if(req.method!=='GET')return null;
+  const raw=String(u.searchParams.get('path')||'').trim();
+  if(!/^\\/(?:art|uploaded)\\/[A-Za-z0-9._\\/-]+\\.(?:png|jpe?g|webp|gif|svg)$/i.test(raw)||raw.includes('..'))return json({error:'invalid_image_path'},400);
+  const upstream='https://raw.githubusercontent.com/gilasartirac-svg/glsArt/main/frontend/public'+raw;
+  const r=await fetch(upstream,{cf:{cacheTtl:86400,cacheEverything:true}});
+  if(!r.ok)return new Response('Not Found',{status:404,headers:{'cache-control':'public, max-age=300'}});
+  const h=new Headers(r.headers);h.set('cache-control','public, max-age=86400, s-maxage=86400');h.set('access-control-allow-origin','*');
+  return new Response(r.body,{status:r.status,headers:h});
+}
+async function route(req,env){const u=new URL(req.url);\n if(u.pathname==='/api/storefront-image'){return proxyStorefrontImage(req,env,u)}if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req,env)});
  if(u.pathname==='/api/visitors/heartbeat'&&req.method==='POST'){
   const b=await body(req),key=String(b.sessionKey||'').replace(/[^A-Za-z0-9_-]/g,'').slice(0,80);
   if(key.length<16)return json({error:'invalid_session_key'},400);
