@@ -462,8 +462,10 @@ async function paymentOptions(env){
   iban:await siteSetting(env,'card_transfer_iban',''),
   instructions:await siteSetting(env,'card_transfer_instructions','پس از انتقال وجه، سفارش توسط واحد فروش بررسی و تایید می‌شود.')
  };
+ const rawDefault=String(await siteSetting(env,'payment_default_provider','zarinpal'));
+ const enabledProviders=[...(z?['zarinpal']:[]),...(n?['novinopay']:[]),...(c?['card_transfer']:[])];
  return {
-  defaultProvider:(()=>{const raw=String(await siteSetting(env,'payment_default_provider','zarinpal'));const enabled=new Set([...(z?['zarinpal']:[]),...(n?['novinopay']:[]),...(c?['card_transfer']:[])]);return enabled.has(raw)?raw:(enabled.values().next().value||'')})(),
+  defaultProvider:enabledProviders.includes(rawDefault)?rawDefault:(enabledProviders[0]||''),
   methods:[
    {id:'zarinpal',title:await siteSetting(env,'payment_zarinpal_title','زرین‌پال'),enabled:z,configured:!!env.ZARINPAL_MERCHANT_ID},
    {id:'novinopay',title:await siteSetting(env,'payment_novinopay_title','نوینو پی'),enabled:n,configured:!!env.NOVINOPAY_MERCHANT_ID},
