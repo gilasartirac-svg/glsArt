@@ -480,7 +480,14 @@ async function product(slug){
  if(p.video_url)mediaItems.push({type:'video',src:safeUrl(p.video_url),alt:'ویدئوی محصول',index:mediaItems.length});
  const first=mediaItems[0]||null;
  const mediaHtml=item=>item?.type==='video'?'<video class="product-video-player" controls playsinline preload="metadata" src="'+escapeHtml(item.src)+'"><p>مرورگر شما از پخش ویدئو پشتیبانی نمی‌کند.</p></video>':item?.src?'<img src="'+escapeHtml(item.src)+'" alt="'+escapeHtml(item.alt||p.name)+'" loading="eager" fetchpriority="high" decoding="async">':'<div class="product-media-empty">اثر هنری</div>';
- const optionHtml=attributes.map(a=>'<label class="product-option"><span>'+escapeHtml(a.name)+'</span><select data-attribute-id="'+escapeHtml(a.id)+'">'+a.options.map(o=>'<option value="'+escapeHtml(o.id)+'" data-delta="'+Number(o.price_delta_irt||0)+'" '+(o.is_default?'selected':'')+'>'+escapeHtml(o.name)+(Number(o.price_delta_irt||0)?' (+'+fa(o.price_delta_irt)+' ریال)':'')+'</option>').join('')+'</select></label>').join('');
+ const optionHtml=attributes.map(a=>{
+  const options=a.options.map((o,i)=>{
+    const delta=Number(o.price_delta_irt||0);
+    const deltaLabel=delta===0?'قیمت پایه':(delta>0?'+'+fa(delta)+' ریال':'−'+fa(Math.abs(delta))+' ریال');
+    return '<label class="product-option-card '+(o.is_default?'is-default':'')+'"><input class="product-option-input" type="radio" name="product-option-'+escapeHtml(a.id)+'" value="'+escapeHtml(o.id)+'" data-attribute-id="'+escapeHtml(a.id)+'" data-delta="'+delta+'" '+(o.is_default?'checked':'')+'><span class="product-option-card-ui"><span class="product-option-card-top"><strong>'+escapeHtml(o.name)+'</strong>'+(o.is_default?'<span class="product-option-default">پیش‌فرض</span>':'')+'</span><span class="product-option-price '+(delta===0?'is-base':'')+'">'+deltaLabel+'</span></span></label>';
+  }).join('');
+  return '<fieldset class="product-option-group" data-attribute-group="'+escapeHtml(a.id)+'"><legend>'+escapeHtml(a.name)+'</legend><div class="product-option-grid">'+options+'</div></fieldset>';
+}).join('');
  layout('<section class="wrap page product"><div class="product-gallery"><div id="product-media" class="product-media">'+mediaHtml(first)+'</div><div class="product-thumbs">'+mediaItems.map((x,i)=>x.type==='video'?'<button class="product-thumb video-thumb '+(i===0?'active':'')+'" data-index="'+i+'" aria-label="نمایش ویدئوی محصول"><span>▶</span><small>ویدئو</small></button>':'<button class="product-thumb '+(i===0?'active':'')+'" data-index="'+i+'" aria-label="نمایش تصویر '+(i+1)+'"><img src="'+escapeHtml(x.src)+'" alt="" loading="lazy" decoding="async"></button>').join('')+'</div></div><div class="product-info"><div class="product-category-pills">'+(categories.length?categories:[{name:p.category_name||'اثر هنری'}]).map(x=>'<span class="pill">'+escapeHtml(x.name)+'</span>').join('')+'</div><h1>'+escapeHtml(p.name)+'</h1><p class="muted">'+escapeHtml(p.description||'')+'</p>'+(optionHtml?'<div class="panel product-options-panel"><h3>انتخاب ویژگی‌ها</h3><div class="product-options">'+optionHtml+'</div></div>':'')+'<div class="price product-live-price" id="product-live-price" style="font-size:24px;margin:24px 0">'+fa(p.price_irt)+' ریال</div><div class="muted" id="product-price-breakdown"></div><div class="toolbar"><div class="product-cart-control" id="product-cart-control" aria-live="polite"><button class="btn primary product-add-btn" id="add" type="button">افزودن به سبد</button></div><button class="btn ghost" id="fav">ذخیره</button></div><div class="quantity-discount-card" id="quantity-discount-card"></div><div class="panel"><h3>نظر خریداران</h3>'+((d.reviews||[]).map(r=>'<article class="review-card" data-review-id="'+escapeHtml(r.id)+'"><div class="review-head"><div><b>'+escapeHtml(r.name||'خریدار')+'</b><div class="review-stars" aria-label="امتیاز '+Number(r.rating||0)+' از 5">'+('★'.repeat(Math.max(0,Math.min(5,Number(r.rating)||0))))+'</div></div><time class="muted">'+escapeHtml(jalaliDate(r.created_at)||'')+'</time></div><p class="review-body">'+escapeHtml(r.body||'')+'</p><div class="review-reactions"><button type="button" class="review-reaction" data-reaction="like" aria-label="پسندیدن نظر">👍 <span>'+fa(r.like_count||0)+'</span></button><button type="button" class="review-reaction" data-reaction="dislike" aria-label="نپسندیدن نظر">👎 <span>'+fa(r.dislike_count||0)+'</span></button></div></article>').join('')||'<span class="muted">هنوز نظری ثبت نشده است.</span>')+'<div class="panel"><h3>ثبت نظر</h3><form id="review-form" class="form"><label>امتیاز<select name="rating"><option value="5">★★★★★</option><option value="4">★★★★</option><option value="3">★★★</option><option value="2">★★</option><option value="1">★</option></select></label><label>نظر شما<textarea name="body" maxlength="1000" required placeholder="نظر خود درباره این اثر را بنویسید"></textarea></label><button class="btn primary" type="submit">ثبت نظر</button><div id="review-msg" aria-live="polite"></div></form></div></div></div></section>');
  document.querySelectorAll('.review-reaction').forEach(btn=>btn.addEventListener('click',async()=>{
    const card=btn.closest('.review-card'),reviewId=card?.dataset.reviewId,reaction=btn.dataset.reaction;
@@ -510,8 +517,21 @@ async function product(slug){
    media.addEventListener('touchend',e=>{const t=e.changedTouches[0],dx=t.clientX-touchStartX,dy=t.clientY-touchStartY;if(Math.abs(dx)<45||Math.abs(dx)<Math.abs(dy))return;const active=Number(document.querySelector('.product-thumb.active')?.dataset.index||0);showMedia(active+(dx<0?1:-1))},{passive:true});
    media.addEventListener('keydown',e=>{if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;e.preventDefault();const active=Number(document.querySelector('.product-thumb.active')?.dataset.index||0);showMedia(active+(e.key==='ArrowLeft'?-1:1))});
  }
- const selections=()=>[...document.querySelectorAll('.product-option select')].map(x=>({attributeId:x.dataset.attributeId,optionId:x.value}));
- const recalc=()=>{let delta=0;document.querySelectorAll('.product-option option:checked').forEach(o=>delta+=Number(o.dataset.delta||0));const total=Number(p.price_irt||0)+delta;document.querySelector('#product-live-price').textContent=fa(total)+' ریال';document.querySelector('#product-price-breakdown').textContent=delta?'قیمت پایه: '+fa(p.price_irt)+' ریال + افزایش ویژگی‌ها: '+fa(delta)+' ریال':'';return total};
+ const selections=()=>[...document.querySelectorAll('.product-option-input:checked')].map(x=>({attributeId:x.dataset.attributeId,optionId:x.value}));
+ const recalc=()=>{
+   let delta=0;
+   document.querySelectorAll('.product-option-input:checked').forEach(o=>delta+=Number(o.dataset.delta||0));
+   const total=Number(p.price_irt||0)+delta;
+   const priceEl=document.querySelector('#product-live-price'),breakdown=document.querySelector('#product-price-breakdown');
+   if(priceEl)priceEl.textContent=fa(total)+' ریال';
+   if(breakdown){
+     breakdown.innerHTML=delta
+       ? '<span>قیمت پایه</span><b>'+fa(p.price_irt)+' ریال</b><span>تغییر ویژگی‌ها</span><b class="product-price-delta '+(delta>0?'is-up':'is-down')+'">'+(delta>0?'+':'−')+fa(Math.abs(delta))+' ریال</b>'
+       : '<span>قیمت پایه</span><b>'+fa(p.price_irt)+' ریال</b><span class="product-price-base-note">ویژگی‌های پیش‌فرض انتخاب شده‌اند</span>';
+   }
+   document.querySelectorAll('.product-option-card').forEach(card=>card.classList.toggle('selected',!!card.querySelector('.product-option-input:checked')));
+   return total;
+ };
  const productCartControl=document.querySelector('#product-cart-control');
  let productCartQuantity=0;
  const renderProductCartControl=qty=>{
@@ -564,7 +584,7 @@ async function product(slug){
    }catch(e){renderProductCartControl(-1);console.warn('cart_quantity_unavailable',e)}
  };
  const quantityTiers=Array.isArray(d.quantityDiscountTiers)?d.quantityDiscountTiers.filter(x=>Number(x.min)>1&&Number(x.percent)>0):[]; const quantityDiscountCard=document.querySelector('#quantity-discount-card'); if(quantityDiscountCard&&quantityTiers.length){const next=quantityTiers[0];quantityDiscountCard.innerHTML='<div class="quantity-discount-head"><span class="quantity-discount-icon">٪</span><div><strong>با خرید چندتایی، بیشتر صرفه‌جویی کنید</strong><small>تخفیف تعدادی فقط برای همین محصول و بر اساس تعداد سفارش محاسبه می‌شود.</small></div></div><div class="quantity-discount-tiers">'+quantityTiers.map(x=>'<span><b>'+fa(x.min)+' عدد</b><em>'+fa(x.percent)+'٪</em></span>').join('')+'</div><div class="quantity-discount-note">از '+fa(next.min)+' عدد، '+fa(next.percent)+'٪ تخفیف خودکار در سبد خرید اعمال می‌شود.</div></div>'}
- document.querySelectorAll('.product-option select').forEach(x=>x.addEventListener('change',recalc));recalc();loadProductCartQuantity();
+ document.querySelectorAll('.product-option-input').forEach(x=>x.addEventListener('change',recalc));recalc();loadProductCartQuantity();
   document.querySelector('#fav').onclick=async()=>{
     try{
       await ensureLogin();
