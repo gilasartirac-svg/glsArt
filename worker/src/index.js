@@ -124,7 +124,7 @@ function normalizeIranMobile(value){
  if(m.startsWith('0098'))m='0'+m.slice(4);else if(m.startsWith('98')&&m.length===12)m='0'+m.slice(2);else if(m.startsWith('9')&&m.length===10)m='0'+m;
  return m;
 }
-function ticketSmsUrl(env,id){return frontend(env)+'/#/support/'+encodeURIComponent(String(id||''))}
+function ticketSmsUrl(env,id){return frontend(env)+'/support/'+encodeURIComponent(String(id||''))}
 function fillSmsTemplate(template,data){
  return String(template||'').replaceAll('\\r\\n','\\n').replaceAll('\\n','\n')
   .replaceAll('{ticket_id}',String(data.ticketId||''))
@@ -443,7 +443,7 @@ async function rewardData(env,me){
  const balance=await pointsBalance(env,me.id),code=await ensureReferralCode(env,me.id);
  const ledger=(await env.DB.prepare('SELECT points,event_type,description,created_at FROM loyalty_points WHERE user_id=? ORDER BY created_at DESC LIMIT 50').bind(me.id).all()).results||[];
  const coupons=(await env.DB.prepare("SELECT id,code,kind,value,points_cost,expires_at FROM coupons WHERE user_id=? AND source='POINTS' ORDER BY expires_at DESC,id DESC LIMIT 20").bind(me.id).all()).results||[];
- return {balance,referralCode:code,referralUrl:frontend(env)+'/?ref='+encodeURIComponent(code)+'#/account',tiers:REWARD_TIERS,ledger,coupons};
+ return {balance,referralCode:code,referralUrl:frontend(env)+'/?ref='+encodeURIComponent(code),tiers:REWARD_TIERS,ledger,coupons};
 }
 function promotionErrorCode(e){const c=String(e?.message||'');return ['coupon_not_found','coupon_expired_or_inactive','coupon_min_order','coupon_usage_limit','coupon_already_used','coupon_not_applicable'].includes(c)?c:null}
 function allowedImagePath(v){try{const s=String(v||'').trim();const imageFile=/\.(png|jpe?g|webp|gif|svg)$/i;const relative=/^\/(?:art|uploaded)\/[^?#]+$/;if(relative.test(s)&&imageFile.test(s))return true;const u=new URL(s);if(u.protocol!=='https:')return false;if(u.hostname==='raw.githubusercontent.com')return ((u.pathname.startsWith('/gilasartirac-svg/gls-media/main/image/')||u.pathname.startsWith('/gilasartirac-svg/glsArt/main/frontend/public/art/')||u.pathname.startsWith('/gilasartirac-svg/glsArt/main/frontend/public/uploaded/'))&&imageFile.test(u.pathname));if(u.hostname==='www.gilasart.ir'||u.hostname==='gilasart.ir')return u.pathname.startsWith('/art/')||u.pathname.startsWith('/uploaded/')?imageFile.test(u.pathname):false;return false}catch{return false}}
