@@ -463,11 +463,12 @@ async function product(slug){
  try{
   d=await api('/api/products/'+encodeURIComponent(slug));
  }catch(primaryError){
-  const snapshot=await loadStorefrontSnapshot();
-  const p0=(snapshot?.products||[]).find(x=>String(x.slug||'')===String(slug||''));
-  if(!p0)throw primaryError;
-  const imgs=Array.isArray(p0.images)?p0.images:[];
-  d={product:{...p0,image:p0.image||(imgs.find(x=>Number(x.is_primary)===1)?.path||imgs[0]?.path||'')},images:imgs,attributes:Array.isArray(p0.attributes)?p0.attributes:[],reviews:Array.isArray(p0.reviews)?p0.reviews:[],categories:Array.isArray(p0.categories)?p0.categories:[],quantityDiscountTiers:[]};
+  // Never fall back to the public snapshot for product detail.
+  // A stale snapshot can contain global options and would produce an incorrect
+  // product configuration. Product detail requires a complete backend response.
+  console.error('product_detail_backend_failed',primaryError);
+  layout('<section class="wrap page"><div class="panel"><h1>جزئیات اثر در دسترس نیست</h1><p class="error">اطلاعات کامل این اثر در حال حاضر از سرویس اصلی دریافت نشد. لطفاً چند لحظه بعد دوباره تلاش کنید.</p><a class="btn primary" href="/shop">بازگشت به فروشگاه</a></div></section>');
+  return;
  }
  const p=d.product||{},images=d.images||[],attributes=d.attributes||[],categories=d.categories||[];
  try{const key='GilasArtViewed:'+String(p.id||slug);if(!sessionStorage.getItem(key)){sessionStorage.setItem(key,'1');api('/api/products/'+encodeURIComponent(slug)+'/view',{method:'POST'}).catch(()=>{})}}catch{}
