@@ -45,8 +45,8 @@ export default function InvoiceSettings(){
      <label>کد پستی<input name="invoice_postal_code" inputmode="numeric" maxlength="20" placeholder="کد پستی"></label>
      <label>آدرس کامل فروشگاه<textarea name="invoice_address" maxlength="1000" rows="4" placeholder="استان، شهر، خیابان، پلاک، واحد..."></textarea></label>
      <h3>هویت بصری فاکتور</h3>
-     <label>مسیر لوگوی فاکتور<input name="invoice_logo_path" maxlength="500" placeholder="/glsArt/invoice/logo.svg"><small class="muted">فایل لوگو در مسیر عمومی پروژه قرار می‌گیرد.</small></label>
-     <label>مسیر مهر و امضا<input name="invoice_signature_path" maxlength="500" placeholder="/glsArt/invoice/stamp-signature.png"><small class="muted">فایل مهر و امضا بهتر است PNG با پس‌زمینه شفاف باشد.</small></label>
+     <label>مسیر لوگوی فاکتور<input name="invoice_logo_path" maxlength="500" placeholder="/invoice/logo.svg"><small class="muted">فایل لوگو در مسیر عمومی پروژه قرار می‌گیرد.</small></label>
+     <label>مسیر مهر و امضا<input name="invoice_signature_path" maxlength="500" placeholder="/invoice/stamp-signature.png"><small class="muted">فایل مهر و امضا بهتر است PNG با پس‌زمینه شفاف باشد.</small></label>
     </div>
     <button class="btn primary" type="submit">ذخیره تنظیمات فاکتور</button>
    </form>
