@@ -2642,7 +2642,7 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
  .shop-searchbar{grid-template-columns:1fr}
  .shop-control-actions{justify-content:space-between}
  .sort-control{min-width:min(300px,48%)}
- .mobile-filter-button{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+ .mobile-filter-button{display:none}
  .gallery-workspace{display:block}
  .filter-panel{position:static;display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:0 22px;margin-bottom:22px;padding:16px}
  .filter-panel-head{grid-column:1/-1}
