@@ -251,57 +251,197 @@ function startSkyAnimation(){
  resize();addEventListener('resize',resize,{passive:true});draw();canvas._cancel=()=>cancelAnimationFrame(raf)
 }
 async function home(){const [d,s,fs,c]=await Promise.allSettled([api('/api/products?limit=8'),api('/api/settings'),api('/api/flash-sales'),api('/api/categories')]);const products=d.status==='fulfilled'?d.value:{items:[]},settings=s.status==='fulfilled'?s.value:{settings:{}},flashData=fs.status==='fulfilled'?fs.value:{items:[]},categoryData=c.status==='fulfilled'?c.value:{items:[]};state.products=products.items||[];state.categories=categoryData.items||[];const ss=settings.settings||{},flash=flashData.items||[];state.settings=ss;const featuredProduct=pickFeaturedProduct(state.products);const heroProduct=featuredProduct||state.products[0]||null,heroImage=heroProduct?safeUrl(heroProduct.image):'';setSeo({title:ss.seo_title||'گیلاس آرت | خرید تابلو و آثار هنری',description:ss.seo_description||ss.site_description,image:heroImage||undefined});const categorySection=state.categories.length?'<section class="wrap home-categories section"><div class="sectionhead"><div><span class="eyebrow">CURATED COLLECTIONS</span><h2>مجموعه‌های گالری</h2><p class="muted">هر مجموعه، مسیری برای رسیدن به اثر مناسب شماست.</p></div><a class="muted" href="/shop">مشاهده همه ←</a></div><div class="category-grid">'+state.categories.slice(0,6).map((cat,i)=>'<a class="category-card" href="/shop?category='+encodeURIComponent(cat.id)+'"><span class="category-index">0'+(i+1)+'</span><span class="category-mark" aria-hidden="true"></span><strong>'+escapeHtml(cat.name)+'</strong><small>مشاهده آثار این مجموعه</small><span class="category-arrow" aria-hidden="true">←</span></a>').join('')+'</div></section>':' ';const flashSection=flash.length?'<section class="wrap flash-section"><div class="flash-head"><div><span class="eyebrow">LIMITED TIME</span><h2>پیشنهاد شگفت‌انگیز</h2><p>فرصت محدود برای انتخاب آثار منتخب</p></div><div class="flash-controls"><button class="icon-circle" id="flash-prev" aria-label="قبلی">‹</button><button class="icon-circle" id="flash-next" aria-label="بعدی">›</button></div></div><div id="flash-track" class="flash-track">'+flash.map(productCard).join('')+'</div></section>':'';const heroMedia=heroImage?'<a class="home-hero-art" href="'+productUrl(heroProduct.slug)+'" aria-label="مشاهده '+escapeHtml(heroProduct.name)+'"><img src="'+escapeHtml(heroImage)+'" alt="'+escapeHtml(heroProduct.name)+'" fetchpriority="high" decoding="async"><span class="home-hero-art-caption"><span>اثر منتخب</span><strong>'+escapeHtml(heroProduct.name)+'</strong></span></a>':'<div class="home-hero-art home-hero-art-empty" aria-label="گالری آثار گیلاس آرت"><span>GILAS ART</span><strong>اثر هنری</strong></div>';layout('<section class="wrap hero home-hero"><div class="hero-copy"><div class="eyebrow">LUXURY IRANIAN ART GALLERY</div><h1>آثاری برای خانه‌هایی که داستان دارند.</h1><p>گیلاس آرت فضایی برای کشف، انتخاب و خرید آثار هنری است؛ با تمرکز بر جزئیات اثر، انتخاب‌های شخصی و تجربه‌ای آرام و روشن.</p><div class="toolbar"><a class="btn primary" href="/shop">مشاهده آثار</a><a class="btn ghost" href="/about">درباره گیلاس آرت</a></div><div class="home-hero-note"><span class="pill">GILAS ART</span><span>اثر هنری، نقطه شروع فضاست.</span></div></div>'+heroMedia+'</section><section class="wrap home-intro"><div class="home-intro-mark" aria-hidden="true">✦</div><div><span class="eyebrow">THE GALLERY APPROACH</span><h2>انتخاب اثر، بخشی از زیبایی آن است.</h2><p>از تصویر و جزئیات اثر تا انتخاب ابعاد و قاب، مسیر خرید باید به اندازه خود اثر ساده، دقیق و خوشایند باشد.</p></div><a class="btn ghost" href="/shop">ورود به گالری</a></section>'+categorySection+flashSection+'<section class="wrap section home-latest"><div class="sectionhead"><div><span class="eyebrow">LATEST ARTWORKS</span><h2>آخرین آثار</h2><p class="muted">تازه‌ترین آثار فعال فروشگاه را ببینید.</p></div><a class="muted" href="/shop">همه آثار ←</a></div><div class="grid">'+(state.products.slice(0,8).map(productCard).join('')||'<div class="panel">هنوز محصول فعالی منتشر نشده است.</div>')+'</div></section><section class="wrap home-process"><div class="sectionhead"><div><span class="eyebrow">A QUIET JOURNEY</span><h2>هنرکده گیلاس آرت</h2><p>تولید کننده ی برتر تابلو های معرق مس در ایران</p></div></div><div class="process-grid"><div><span>01</span><strong>کشف</strong><p>آثار و مجموعه‌های مختلف را مرور کنید.</p></div><div><span>02</span><strong>انتخاب</strong><p>جزئیات اثر، ابعاد و گزینه‌های موجود را بررسی کنید.</p></div><div><span>03</span><strong>سفارش</strong><p>اطلاعات تحویل را ثبت کرده و سفارش را تکمیل کنید.</p></div></div></section>');startFlashTimers();const track=document.querySelector('#flash-track');if(track){const step=()=>{const first=track.querySelector('.card');return first?first.getBoundingClientRect().width+18:280};document.querySelector('#flash-prev').onclick=()=>track.scrollBy({left:-step(),behavior:'smooth'});document.querySelector('#flash-next').onclick=()=>track.scrollBy({left:step(),behavior:'smooth'});let timer=setInterval(()=>{if(!document.body.contains(track)){clearInterval(timer);return}const max=track.scrollWidth-track.clientWidth;if(track.scrollLeft>=max-10)track.scrollTo({left:0,behavior:'smooth'});else track.scrollBy({left:step(),behavior:'smooth'})},5000)}}async function shop(){
- const pageSize=3;let offset=0,loading=false,done=false,query='',category='',sort='newest',minPrice=0,maxPrice=0,priceStep=1000000,priceCeiling=0,requestSeq=0,controller=null,sentinel,observer;
- const hashParams=new URLSearchParams(location.search||'');category=hashParams.get('category')||'';sort=hashParams.get('sort')||'newest';
+ const pageSize=3;
+ let offset=0,loading=false,done=false,query='',sort='newest',minPrice=0,maxPrice=0,minRating=0;
+ let selectedCategories=new Set(),allItems=[],filteredItems=[],sentinel,observer;
+ const params=new URLSearchParams(location.search||'');
+ query=(params.get('q')||'').trim();
+ sort=params.get('sort')||'newest';
+ minPrice=Math.max(0,Number(params.get('min_price')||0));
+ maxPrice=Math.max(0,Number(params.get('max_price')||0));
+ minRating=Math.max(0,Math.min(5,Number(params.get('rating')||0)));
+ (params.get('categories')||params.get('category')||'').split(',').map(x=>x.trim()).filter(Boolean).forEach(x=>selectedCategories.add(x));
  try{
-  const [cats,range]=await Promise.all([api('/api/categories'),api('/api/products/price-range')]);
-  state.categories=cats.items||[];
-  priceCeiling=Math.max(1000000,Number(range.max_price_irt||0));
-  priceStep=Math.max(1000000,Math.ceil(priceCeiling/100)*1000000);
-  maxPrice=priceCeiling;
- }catch{
-  const cats=await api('/api/categories');state.categories=cats.items||[];
-  priceCeiling=500000000;maxPrice=priceCeiling;
+  const snapshot=await loadStorefrontSnapshot();
+  if(!snapshot)throw new Error('داده گالری در دسترس نیست.');
+  state.categories=Array.isArray(snapshot.categories)?snapshot.categories:[];
+  allItems=(snapshot.products||[]).map(snapshotCore);
+ }catch(e){
+  layout('<section class="wrap page"><div class="panel"><h1>فروشگاه</h1><p class="error">'+escapeHtml(e.message||'داده فروشگاه قابل دریافت نیست.')+'</p></div></section>');
+  return;
  }
- const sortOptions=[['newest','جدیدترین آثار'],['price_asc','قیمت: کم به زیاد'],['price_desc','قیمت: زیاد به کم'],['rating','بالاترین امتیاز خریداران'],['reviews','بیشترین نظر خریداران'],['popular','محبوب‌ترین'],['best_selling','پرفروش‌ترین'],['views','پربازدیدترین']];
+ const prices=allItems.map(x=>Number(x.price_irt||0)).filter(Number.isFinite);
+ const priceCeiling=Math.max(1000000,...prices,1000000);
+ const priceFloor=Math.max(0,Math.min(...prices,0));
+ const priceStep=Math.max(100000,Math.ceil(priceCeiling/200/100000)*100000);
+ if(!maxPrice||maxPrice>priceCeiling)maxPrice=priceCeiling;
+ if(minPrice>maxPrice)minPrice=priceFloor;
+ const sortOptions=[
+  ['newest','جدیدترین آثار'],
+  ['buyer_recommended','پیشنهاد خریداران'],
+  ['best_selling','پرفروش‌ترین'],
+  ['popular','محبوب‌ترین'],
+  ['rating','بیشترین امتیاز'],
+  ['reviews','بیشترین نظر'],
+  ['price_asc','ارزان‌ترین'],
+  ['price_desc','گران‌ترین']
+ ];
  const sortMarkup=sortOptions.map(([v,l])=>'<option value="'+v+'" '+(sort===v?'selected':'')+'>'+l+'</option>').join('');
- const categoryMarkup=state.categories.map(c=>'<label class="check-option filter-choice"><input class="cat-check" type="checkbox" data-id="'+escapeHtml(c.id)+'" '+((c.id===category)?'checked':'')+'><span class="check-box" aria-hidden="true"></span><span>'+escapeHtml(c.name)+'</span></label>').join('');
- const priceLabel=v=>fa(Math.max(0,Number(v)||0))+' ریال';
- const loadMore=async(reset=false)=>{
-  if(reset){requestSeq++;controller?.abort();controller=new AbortController();offset=0;done=false;loading=false;document.querySelector('#results')?.replaceChildren()}
-  if(loading||done)return;
-  loading=true;const token=requestSeq,localController=controller||new AbortController();controller=localController;
-  const status=document.querySelector('#load-status'),more=document.querySelector('#load-more');
-  if(status)status.textContent=reset?'در حال به‌روزرسانی گالری…':'در حال دریافت آثار بیشتر…';
-  if(more){more.disabled=true;more.setAttribute('aria-busy','true')}
-  try{
-   const qs=new URLSearchParams({limit:String(pageSize),offset:String(offset),sort});if(query)qs.set('q',query);if(category)qs.set('category',category);
-   const d=await api('/api/products?'+qs.toString(),{signal:localController.signal});if(token!==requestSeq)return;
-   const items=Array.isArray(d.items)?d.items:[];const html=items.map(productCard).join('');
-   if(reset)document.querySelector('#results')?.replaceChildren();
-   if(html)document.querySelector('#results')?.insertAdjacentHTML('beforeend',html);
-   offset+=items.length;done=items.length<pageSize;
-   const count=document.querySelector('#results-count');if(count)count.textContent=fa(offset)+' اثر بارگذاری شده';
-   const empty=document.querySelector('#empty');if(empty)empty.hidden=offset!==0;
-   if(status)status.textContent=done?(offset?'همه آثار این فهرست نمایش داده شد.':'نتیجه‌ای پیدا نشد.'):'با اسکرول ادامه دهید یا از دکمه «نمایش صفحه بعدی» استفاده کنید.';
-   if(more)more.hidden=done;
-   startFlashTimers(document.querySelector('#results'));
-  }catch(e){if(e?.name==='AbortError')return;if(status)status.textContent=e.message||'خطا در دریافت آثار.';throw e}
-  finally{if(token===requestSeq){loading=false;if(more){more.disabled=false;more.removeAttribute('aria-busy')}}}
+ const categoryMarkup=state.categories.map(cat=>{
+  const id=String(cat.id||'');
+  return '<label class="check-option shop-category-option"><input class="cat-check" type="checkbox" data-id="'+escapeHtml(id)+'" '+(selectedCategories.has(id)?'checked':'')+'><span class="check-box" aria-hidden="true"></span><span>'+escapeHtml(cat.name||'بدون نام')+'</span></label>';
+ }).join('');
+ const ratingMarkup=['0','4','3','2'].map(v=>{
+  const label=v==='0'?'همه امتیازها':v+' ستاره و بیشتر';
+  return '<label class="check-option shop-rating-option"><input type="radio" name="min-rating" value="'+v+'" '+(Number(minRating)===Number(v)?'checked':'')+'><span class="radio-box" aria-hidden="true"></span><span>'+label+'</span></label>';
+ }).join('');
+ const priceText=v=>fa(Math.max(0,Number(v)||0))+' ریال';
+ const syncUrl=()=>{
+  const p=new URLSearchParams();
+  if(query)p.set('q',query);
+  if(selectedCategories.size)p.set('categories',[...selectedCategories].join(','));
+  if(minPrice>priceFloor)p.set('min_price',String(Math.round(minPrice)));
+  if(maxPrice<priceCeiling)p.set('max_price',String(Math.round(maxPrice)));
+  if(minRating)p.set('rating',String(minRating));
+  if(sort!=='newest')p.set('sort',sort);
+  const qs=p.toString();
+  history.replaceState({},'',(routeBase()||'')+'/shop'+(qs?'?'+qs:''));
  };
- const featuredProduct=state.products[0]||null,featuredImage=featuredProduct?safeUrl(featuredProduct.image):'';
+ const applyFilters=()=>{
+  const q=query.toLocaleLowerCase();
+  filteredItems=allItems.filter(item=>{
+   if(q&&!([item.name,item.description,item.sku,item.seo_title,item.seo_description].some(v=>String(v||'').toLocaleLowerCase().includes(q))))return false;
+   if(selectedCategories.size){
+    const ids=(item.category_ids||[]).map(String);
+    if(!ids.some(id=>selectedCategories.has(id))&&!selectedCategories.has(String(item.category_id||'')))return false;
+   }
+   const price=Number(item.price_irt||0);
+   if(price<minPrice||price>maxPrice)return false;
+   if(Number(item.rating_avg||0)<minRating)return false;
+   return true;
+  });
+  filteredItems=snapshotSort(filteredItems,sort);
+ };
+ const renderActiveFilters=()=>{
+  const box=document.querySelector('#shop-active-filters');if(!box)return;
+  const chips=[];
+  if(query)chips.push('<button type="button" class="filter-chip" data-clear="q">جستجو: '+escapeHtml(query)+' <span>×</span></button>');
+  selectedCategories.forEach(id=>{const cat=state.categories.find(x=>String(x.id)===String(id));if(cat)chips.push('<button type="button" class="filter-chip" data-clear-category="'+escapeHtml(id)+'">'+escapeHtml(cat.name)+' <span>×</span></button>')});
+  if(minPrice>priceFloor||maxPrice<priceCeiling)chips.push('<button type="button" class="filter-chip" data-clear="price">قیمت <span>×</span></button>');
+  if(minRating)chips.push('<button type="button" class="filter-chip" data-clear="rating">'+minRating+' ستاره به بالا <span>×</span></button>');
+  box.innerHTML=chips.join('');
+  box.hidden=!chips.length;
+ };
+ const updatePriceUi=()=>{
+  const min=document.querySelector('#price-min'),max=document.querySelector('#price-max'),minNum=document.querySelector('#price-min-number'),maxNum=document.querySelector('#price-max-number');
+  if(min){min.value=String(minPrice);min.max=String(priceCeiling);min.step=String(priceStep)}
+  if(max){max.value=String(maxPrice);max.max=String(priceCeiling);max.step=String(priceStep)}
+  if(minNum){minNum.value=String(Math.round(minPrice));minNum.max=String(priceCeiling);minNum.step=String(priceStep)}
+  if(maxNum){maxNum.value=String(Math.round(maxPrice));maxNum.max=String(priceCeiling);maxNum.step=String(priceStep)}
+  const minLabel=document.querySelector('#price-min-label'),maxLabel=document.querySelector('#price-max-label');
+  if(minLabel)minLabel.textContent=priceText(minPrice);
+  if(maxLabel)maxLabel.textContent=priceText(maxPrice);
+  const fill=document.querySelector('.price-range-fill');
+  if(fill){const a=(minPrice/priceCeiling)*100,b=(maxPrice/priceCeiling)*100;fill.style.insetInlineStart=a+'%';fill.style.width=Math.max(0,b-a)+'%'}
+ };
+ const renderPage=()=>{
+  const results=document.querySelector('#results');if(!results)return;
+  const slice=filteredItems.slice(0,offset);
+  results.innerHTML=slice.map(productCard).join('');
+  const count=document.querySelector('#results-count');if(count)count.textContent=fa(filteredItems.length)+' اثر';
+  const empty=document.querySelector('#empty');if(empty)empty.hidden=filteredItems.length!==0;
+  const more=document.querySelector('#load-more');done=offset>=filteredItems.length;if(more)more.hidden=done;
+  const status=document.querySelector('#load-status');
+  if(status)status.textContent=filteredItems.length?(done?'همه آثار این فهرست نمایش داده شد.':'با اسکرول ادامه دهید یا «نمایش آثار بیشتر» را بزنید.'):'با این فیلترها اثری پیدا نشد.';
+  startFlashTimers(results);
+ };
+ const refresh=()=>{
+  applyFilters();offset=Math.min(pageSize,filteredItems.length);if(offset===0)offset=0;done=offset>=filteredItems.length;
+  renderPage();renderActiveFilters();updatePriceUi();syncUrl();
+ };
+ const loadMore=()=>{
+  if(loading||done)return;
+  loading=true;
+  const next=Math.min(offset+pageSize,filteredItems.length);
+  offset=next;renderPage();loading=false;
+ };
+ const resetFilters=()=>{
+  query='';selectedCategories.clear();minPrice=priceFloor;maxPrice=priceCeiling;minRating=0;sort='newest';
+  const q=document.querySelector('#shop-search');if(q)q.value='';
+  const s=document.querySelector('#sort-products');if(s)s.value=sort;
+  document.querySelectorAll('.cat-check').forEach(x=>x.checked=false);
+  document.querySelectorAll('input[name="min-rating"]').forEach(x=>x.checked=x.value==='0');
+  refresh();
+ };
+ const featuredProduct=allItems[0]||null,featuredImage=featuredProduct?safeUrl(featuredProduct.image):'';
  const hero=featuredImage?'<a class="shop-page-visual" href="'+productUrl(featuredProduct.slug)+'" aria-label="مشاهده اثر '+escapeHtml(featuredProduct.name)+'"><img src="'+escapeHtml(featuredImage)+'" alt="'+escapeHtml(featuredProduct.name)+'" fetchpriority="high" decoding="async"><span><small>اثر منتخب</small><strong>'+escapeHtml(featuredProduct.name)+'</strong></span></a>':'<div class="shop-page-visual shop-page-visual-empty"><span>GILAS ART</span><strong>گالری آثار</strong></div>';
- layout('<section class="wrap page shop-page"><header class="page-masthead"><div class="page-masthead-copy"><span class="eyebrow">GILAS ART • COPPER INLAY</span><h1>گالری آثار</h1><p>مجموعه‌ای منظم برای تماشای آثار، جستجو و انتخاب دقیق.</p></div>'+hero+'</header><section class="gallery-workspace" aria-label="جستجو، فیلتر و مرتب‌سازی آثار"><aside class="filter-panel"><div class="filter-panel-head"><div><span class="eyebrow">FILTER & SORT</span><h2>فیلتر و مرتب‌سازی</h2></div><button class="filter-reset" id="filter-reset" type="button">پاک کردن</button></div><label class="search-field"><span>جستجو</span><input id="q" class="search" type="search" placeholder="نام یا کد محصول" autocomplete="off" enterkeyhint="search"></label><label class="sort-field" for="sort-products"><span>مرتب‌سازی آثار</span><select id="sort-products" aria-label="مرتب‌سازی آثار">'+sortMarkup+'</select></label><fieldset class="filter-group"><legend>دسته‌بندی</legend><label class="check-option"><input class="cat-check" type="checkbox" data-id="" '+(!category?'checked':'')+'><span class="check-box" aria-hidden="true"></span><span>همه آثار</span></label>'+categoryMarkup+'</fieldset><div class="filter-help">جستجو، دسته‌بندی و مرتب‌سازی همگی همزمان روی گالری اعمال می‌شوند.</div></aside><div class="gallery-results"><div class="results-head"><div><span class="eyebrow">GALLERY COLLECTION</span><h2>آثار موجود</h2></div><span class="results-count" id="results-count" aria-live="polite"></span></div><div id="results" class="grid product-stream" aria-live="polite"></div><div id="sentinel" class="infinite-sentinel" aria-hidden="true"></div><div class="load-more-wrap"><button id="load-more" class="btn ghost load-more-button" type="button">نمایش صفحه بعدی</button><div id="load-status" class="load-status" role="status" aria-live="polite">در حال آماده سازی گالری ...</div></div><div id="empty" class="panel empty-state" hidden>نتیجه‌ای پیدا نشد.</div></div></section></section>');
+ layout('<section class="wrap page shop-page">'+
+ '<header class="page-masthead"><div class="page-masthead-copy"><span class="eyebrow">GILAS ART • COPPER INLAY</span><h1>گالری آثار</h1><p>جستجو، فیلتر و انتخاب آثار گیلاس آرت؛ سریع، دقیق و بدون وابستگی به درخواست‌های مکرر پایگاه داده.</p></div>'+hero+'</header>'+
+ '<section class="shop-control-shell" aria-label="کنترل‌های فروشگاه">'+
+ '<div class="shop-searchbar"><label for="shop-search"><span class="shop-control-icon">'+icon('search')+'</span><span class="sr-only">جستجوی آثار</span><input id="shop-search" type="search" value="'+escapeHtml(query)+'" placeholder="جستجو بر اساس نام اثر، کد محصول یا توضیحات..." autocomplete="off" enterkeyhint="search"></label>'+
+ '<div class="shop-control-actions"><label class="sort-control"><span>مرتب‌سازی</span><select id="sort-products" aria-label="مرتب‌سازی آثار">'+sortMarkup+'</select></label><button id="mobile-filter-open" class="btn ghost mobile-filter-button" type="button" aria-controls="shop-filter-panel" aria-expanded="false">فیلترها <span id="filter-badge">۰</span></button></div></div>'+
+ '<div id="shop-active-filters" class="shop-active-filters" hidden></div>'+
+ '</section>'+
+ '<section class="gallery-workspace" aria-label="فروشگاه گیلاس آرت">'+
+ '<div id="mobile-filter-backdrop" class="mobile-filter-backdrop" hidden></div>'+
+ '<aside id="shop-filter-panel" class="filter-panel" aria-label="فیلتر آثار">'+
+ '<div class="filter-panel-head"><div><span class="eyebrow">REFINE COLLECTION</span><h2>فیلتر آثار</h2></div><button class="filter-reset" id="filter-reset" type="button">پاک کردن همه</button></div>'+
+ '<fieldset class="filter-group shop-filter-group"><legend>دسته‌بندی</legend><label class="check-option shop-category-option"><input class="cat-check" type="checkbox" data-id="" '+(selectedCategories.size===0?'checked':'')+'><span class="check-box" aria-hidden="true"></span><span>همه آثار</span></label>'+categoryMarkup+'</fieldset>'+
+ '<fieldset class="filter-group shop-filter-group price-filter-group"><legend>محدوده قیمت</legend><div class="price-values"><label><span>از</span><input id="price-min-number" type="number" inputmode="numeric" min="'+priceFloor+'" max="'+priceCeiling+'" step="'+priceStep+'" value="'+Math.round(minPrice)+'" aria-label="حداقل قیمت"></label><label><span>تا</span><input id="price-max-number" type="number" inputmode="numeric" min="'+priceFloor+'" max="'+priceCeiling+'" step="'+priceStep+'" value="'+Math.round(maxPrice)+'" aria-label="حداکثر قیمت"></label></div><div class="price-range" aria-hidden="true"><span class="price-range-track"></span><span class="price-range-fill"></span><input id="price-min" type="range" min="'+priceFloor+'" max="'+priceCeiling+'" step="'+priceStep+'" value="'+Math.round(minPrice)+'" tabindex="-1"><input id="price-max" type="range" min="'+priceFloor+'" max="'+priceCeiling+'" step="'+priceStep+'" value="'+Math.round(maxPrice)+'" tabindex="-1"></div><div class="price-labels"><span id="price-min-label">'+priceText(minPrice)+'</span><span id="price-max-label">'+priceText(maxPrice)+'</span></div></fieldset>'+
+ '<fieldset class="filter-group shop-filter-group"><legend>امتیاز خریداران</legend>'+ratingMarkup+'</fieldset>'+
+ '<div class="filter-panel-note"><strong>فیلترها همزمان اعمال می‌شوند</strong><span>جستجو، دسته‌بندی، قیمت، امتیاز و مرتب‌سازی روی همان دادهٔ JSON فروشگاه اجرا می‌شوند.</span></div>'+
+ '<button id="mobile-filter-apply" class="btn primary mobile-filter-apply" type="button">نمایش نتایج</button>'+
+ '</aside>'+
+ '<div class="gallery-results"><div class="results-head"><div><span class="eyebrow">GALLERY COLLECTION</span><h2>آثار موجود</h2></div><span class="results-count" id="results-count" aria-live="polite"></span></div><div id="results" class="grid product-stream" aria-live="polite"></div><div id="sentinel" class="infinite-sentinel" aria-hidden="true"></div><div class="load-more-wrap"><button id="load-more" class="btn ghost load-more-button" type="button">نمایش آثار بیشتر</button><div id="load-status" class="load-status" role="status" aria-live="polite">در حال آماده‌سازی گالری…</div></div><div id="empty" class="panel empty-state" hidden>نتیجه‌ای پیدا نشد.</div></div>'+
+ '</section></section>');
  sentinel=document.querySelector('#sentinel');
- observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting))loadMore(false)}, {rootMargin:'650px 0px'});observer.observe(sentinel);
- const rerun=()=>{clearTimeout(window.__gaSearchTimer);window.__gaSearchTimer=setTimeout(()=>loadMore(true).catch(()=>{}),220)}; document.querySelector('#q').addEventListener('input',()=>{query=document.querySelector('#q').value.trim();rerun()});
- document.querySelector('#q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();query=document.querySelector('#q').value.trim();clearTimeout(window.__gaSearchTimer);loadMore(true).catch(()=>{})}});
- document.querySelector('#sort-products').addEventListener('change',e=>{sort=e.target.value;rerun()});
- document.querySelectorAll('.cat-check').forEach(x=>x.addEventListener('change',()=>{if(x.checked){category=x.dataset.id||'';document.querySelectorAll('.cat-check').forEach(y=>{if(y!==x)y.checked=false});rerun()}else if(!document.querySelector('.cat-check:checked')){category='';rerun()}}));
- document.querySelector('#filter-reset').onclick=()=>{query='';category='';sort='newest';document.querySelector('#q').value='';document.querySelector('#sort-products').value=sort;document.querySelectorAll('.cat-check').forEach(x=>x.checked=false);document.querySelector('.cat-check[data-id=""]')?.click();loadMore(true).catch(()=>{})};
- document.querySelector('#load-more').onclick=()=>loadMore(false).catch(()=>{});
- await loadMore(true);
+ observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting))loadMore()},{rootMargin:'500px 0px'});
+ observer.observe(sentinel);
+ const search=document.querySelector('#shop-search');
+ let searchTimer=0;
+ search?.addEventListener('input',()=>{query=search.value.trim();clearTimeout(searchTimer);searchTimer=setTimeout(refresh,180)});
+ search?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(searchTimer);refresh()}});
+ document.querySelector('#sort-products')?.addEventListener('change',e=>{sort=e.target.value;refresh()});
+ document.querySelectorAll('.cat-check').forEach(x=>x.addEventListener('change',()=>{
+  const id=String(x.dataset.id||'');
+  if(!id){selectedCategories.clear();document.querySelectorAll('.cat-check').forEach(y=>{if(y.dataset.id)y.checked=false});x.checked=true}
+  else{if(x.checked){selectedCategories.add(id);document.querySelector('.cat-check[data-id=""]')?.removeAttribute('checked');const all=document.querySelector('.cat-check[data-id=""]');if(all)all.checked=false}else selectedCategories.delete(id);if(!selectedCategories.size){const all=document.querySelector('.cat-check[data-id=""]');if(all)all.checked=true}}
+  refresh();
+ }));
+ document.querySelectorAll('input[name="min-rating"]').forEach(x=>x.addEventListener('change',()=>{minRating=Number(x.value||0);refresh()}));
+ const clampPrices=(changed)=>{
+  let a=Math.max(priceFloor,Math.min(priceCeiling,Number(document.querySelector('#price-min-number')?.value||minPrice)));
+  let b=Math.max(priceFloor,Math.min(priceCeiling,Number(document.querySelector('#price-max-number')?.value||maxPrice)));
+  if(changed==='min'&&a>b)b=a;
+  if(changed==='max'&&b<a)a=b;
+  minPrice=a;maxPrice=b;refresh();
+ };
+ document.querySelector('#price-min-number')?.addEventListener('change',()=>clampPrices('min'));
+ document.querySelector('#price-max-number')?.addEventListener('change',()=>clampPrices('max'));
+ document.querySelector('#price-min')?.addEventListener('input',e=>{minPrice=Math.min(Number(e.target.value),maxPrice);updatePriceUi();clearTimeout(searchTimer);searchTimer=setTimeout(refresh,140)});
+ document.querySelector('#price-max')?.addEventListener('input',e=>{maxPrice=Math.max(Number(e.target.value),minPrice);updatePriceUi();clearTimeout(searchTimer);searchTimer=setTimeout(refresh,140)});
+ document.querySelector('#filter-reset')?.addEventListener('click',resetFilters);
+ document.querySelector('#load-more')?.addEventListener('click',loadMore);
+ document.querySelector('#shop-active-filters')?.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-clear],button[data-clear-category]');if(!b)return;
+  if(b.dataset.clear==='q'){query='';const q=document.querySelector('#shop-search');if(q)q.value=''}
+  if(b.dataset.clear==='price'){minPrice=priceFloor;maxPrice=priceCeiling}
+  if(b.dataset.clear==='rating'){minRating=0;document.querySelector('input[name="min-rating"][value="0"]')?.click()}
+  if(b.dataset.clearCategory){selectedCategories.delete(String(b.dataset.clearCategory));document.querySelector('.cat-check[data-id="'+CSS.escape(String(b.dataset.clearCategory))+'"]')?.click();return}
+  refresh();
+ });
+ const openFilter=()=>{const p=document.querySelector('#shop-filter-panel'),b=document.querySelector('#mobile-filter-backdrop'),o=document.querySelector('#mobile-filter-open');p?.classList.add('is-open');if(b)b.hidden=false;o?.setAttribute('aria-expanded','true');document.body.classList.add('shop-filter-open')};
+ const closeFilter=()=>{const p=document.querySelector('#shop-filter-panel'),b=document.querySelector('#mobile-filter-backdrop'),o=document.querySelector('#mobile-filter-open');p?.classList.remove('is-open');if(b)b.hidden=true;o?.setAttribute('aria-expanded','false');document.body.classList.remove('shop-filter-open')};
+ document.querySelector('#mobile-filter-open')?.addEventListener('click',openFilter);
+ document.querySelector('#mobile-filter-backdrop')?.addEventListener('click',closeFilter);
+ document.querySelector('#mobile-filter-apply')?.addEventListener('click',closeFilter);
+ document.querySelector('#filter-reset')?.addEventListener('click',()=>{setTimeout(closeFilter,0)});
+ const updateBadge=()=>{const n=(query?1:0)+selectedCategories.size+(minPrice>priceFloor||maxPrice<priceCeiling?1:0)+(minRating?1:0);const b=document.querySelector('#filter-badge');if(b)b.textContent=fa(n)};
+ const originalRefresh=refresh;
+ refresh=()=>{originalRefresh();updateBadge()};
+ refresh();
 }
+
 async function product(slug){
  let d;
  try{
