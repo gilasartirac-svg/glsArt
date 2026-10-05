@@ -3402,3 +3402,23 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 @media(prefers-reduced-motion:reduce){
   .product-option-card-ui{transition:none}
 }
+
+.cart-options{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-top:7px;
+  line-height:1.5;
+}
+.cart-option-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:4px 8px;
+  border:1px solid var(--ui-line);
+  border-radius:999px;
+  background:color-mix(in srgb,var(--ui-gold) 6%,var(--ui-surface));
+  font-size:10px;
+}
+.cart-option-chip b{color:var(--ui-muted);font-weight:700}
+.cart-option-chip span{color:var(--ui-text)}
