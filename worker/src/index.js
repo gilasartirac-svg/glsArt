@@ -117,7 +117,7 @@ function otpSmsMessage(env,code,template){
   .filter(x=>!/^@[^\\s]+\\s+#\\d{6}$/.test(x))
   .filter(x=>x!=='لغو11');
  const base=lines.join('\\n').trim();
- return base+'\\n\\n@'+host+' #'+code;
+ return `${base}\n\n@${host} #${code}`;
 }
 function normalizeIranMobile(value){
  let m=String(value||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/\\D/g,'');
