@@ -36,7 +36,7 @@ test('account OTP and reward UX has production split-input and notification styl
 });
 test('main navigation and footer expose requested customer content areas',()=>{
  const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
- for(const x of ['#/contact','#/news','#/articles','#/terms','#/support','نماد اعتماد','تیکت پشتیبانی'])assert.ok(app.includes(x),x);
+ for(const x of ['href="/contact"','href="/news"','href="/articles"','href="/terms"','href="/support"','نماد اعتماد','تیکت پشتیبانی'])assert.ok(app.includes(x),x);
 });
 
 test('Kavenegar OTP delivery checks provider response and supports both code placeholders',()=>{
