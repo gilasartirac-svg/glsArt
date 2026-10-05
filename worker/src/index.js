@@ -6,7 +6,7 @@ function adminBootstrapConfigured(env){return /^09\d{9}$/.test(String(env.ADMIN_
 const now=()=>new Date().toISOString();
 async function sha(v){return [...new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(v)))].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function origin(env){return env.APP_ORIGIN||''}
-function frontend(env){return (env.FRONTEND_URL||`${origin(env)}/glsArt`).replace(/\/$/,'')}
+function frontend(env){return (env.FRONTEND_URL||origin(env)).replace(/\/$/,'')}
 function cors(req,env){const o=req.headers.get('Origin'); return o&&o===origin(env)?{'access-control-allow-origin':o,'access-control-allow-credentials':'true','access-control-allow-headers':'content-type,x-csrf-token','access-control-allow-methods':'GET,POST,PUT,DELETE,OPTIONS'}:{}}
 function cookies(req){const out={};for(const x of (req.headers.get('cookie')||'').split(';')){const [k,...v]=x.trim().split('=');if(k)out[k]=v.join('=')}return out}
 async function body(req){return req.json().catch(()=>({}))}
@@ -439,7 +439,7 @@ async function rewardData(env,me){
  return {balance,referralCode:code,referralUrl:frontend(env)+'/?ref='+encodeURIComponent(code)+'#/account',tiers:REWARD_TIERS,ledger,coupons};
 }
 function promotionErrorCode(e){const c=String(e?.message||'');return ['coupon_not_found','coupon_expired_or_inactive','coupon_min_order','coupon_usage_limit','coupon_already_used','coupon_not_applicable'].includes(c)?c:null}
-function allowedImagePath(v){try{const s=String(v||'').trim();const imageFile=/\.(png|jpe?g|webp|gif|svg)$/i;const relative=/^\/glsArt\/(?:art|uploaded)\/[^?#]+$/;if(relative.test(s)&&imageFile.test(s))return true;const u=new URL(s);if(u.protocol!=='https:')return false;if(u.hostname==='raw.githubusercontent.com')return ((u.pathname.startsWith('/gilasartirac-svg/gls-media/main/image/')||u.pathname.startsWith('/gilasartirac-svg/glsArt/main/frontend/public/art/')||u.pathname.startsWith('/gilasartirac-svg/glsArt/main/frontend/public/uploaded/'))&&imageFile.test(u.pathname));if(u.hostname==='gilasartirac-svg.github.io')return u.pathname.startsWith('/glsArt/art/')||u.pathname.startsWith('/glsArt/uploaded/')?imageFile.test(u.pathname):false;return false}catch{return false}}
+function allowedImagePath(v){try{const s=String(v||'').trim();const imageFile=/\.(png|jpe?g|webp|gif|svg)$/i;const relative=/^\/(?:art|uploaded)\/[^?#]+$/;if(relative.test(s)&&imageFile.test(s))return true;const u=new URL(s);if(u.protocol!=='https:')return false;if(u.hostname==='raw.githubusercontent.com')return ((u.pathname.startsWith('/gilasartirac-svg/gls-media/main/image/')||u.pathname.startsWith('/gilasartirac-svg/glsArt/main/frontend/public/art/')||u.pathname.startsWith('/gilasartirac-svg/glsArt/main/frontend/public/uploaded/'))&&imageFile.test(u.pathname));if(u.hostname==='www.gilasart.ir'||u.hostname==='gilasart.ir')return u.pathname.startsWith('/art/')||u.pathname.startsWith('/uploaded/')?imageFile.test(u.pathname):false;return false}catch{return false}}
 
 async function zarin(env,endpoint,payload){const mode=await paymentEnvironment(env);const base=mode==='production'?'https://api.zarinpal.com/pg/v4/payment':'https://sandbox.zarinpal.com/pg/v4/payment';const r=await fetch(base+'/'+endpoint,{method:'POST',headers:{'content-type':'application/json','accept':'application/json'},body:JSON.stringify({...payload,merchant_id:env.ZARINPAL_MERCHANT_ID})});return r.json()}
 async function route(req,env){const u=new URL(req.url);if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req,env)});
