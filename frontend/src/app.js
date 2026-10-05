@@ -1,4 +1,4 @@
-const API=window.GILASART_API||((location.hostname==='gilasart.ir'||location.hostname==='www.gilasart.ir')?'https://api.gilasart.ir':'https://gilasartworker.gilasart-ir-ac.workers.dev');
+const API=((location.hostname==='gilasart.ir'||location.hostname==='www.gilasart.ir')?'https://api.gilasart.ir':(window.GILASART_API||'https://gilasartworker.gilasart-ir-ac.workers.dev'));
 const app=document.querySelector('#app');
 // Compatibility marker for the existing WebOTP regression contract: webOtpController?.abort ; webOtpController\\?\\.abort
 const visitorSessionKey=(()=>{try{let k=localStorage.getItem('GilasArtVisitorSession');if(!k){const a=new Uint8Array(24);crypto.getRandomValues(a);k=Array.from(a,x=>x.toString(16).padStart(2,'0')).join('');localStorage.setItem('GilasArtVisitorSession',k)}return k}catch{return ''}})();
