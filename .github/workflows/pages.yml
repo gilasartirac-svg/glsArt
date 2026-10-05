@@ -74,3 +74,18 @@ jobs:
       - name: Deploy Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify published storefront routes
+        run: |
+          set -euo pipefail
+          for path in / /shop /cart; do
+            echo "Checking https://gilasart.ir$path"
+            ok=false
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              code=$(curl -L -sS -o /tmp/page.html -w '%{http_code}' --retry 2 --retry-all-errors "https://gilasart.ir$path" || true)
+              echo "attempt=$i status=$code"
+              if [ "$code" = "200" ] && grep -qi '<div id="app"></div>' /tmp/page.html; then ok=true; break; fi
+              sleep 10
+            done
+            if [ "$ok" != "true" ]; then echo "Production route verification failed: $path"; exit 1; fi
+          done
