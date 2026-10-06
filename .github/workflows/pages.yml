@@ -79,7 +79,7 @@ jobs:
       - name: Verify published storefront routes
         run: |
           set -euo pipefail
-          for path in / /fa/ /en/ /tr/ /ar/ /shop /payment/manual; do
+          for path in / /fa /fa/ /en/ /tr/ /ar/ /shop /payment/manual; do
             echo "Checking https://gilasart.ir$path"
             ok=false
             for i in 1 2 3 4 5 6 7 8 9 10; do
@@ -90,7 +90,14 @@ jobs:
             done
             if [ "$ok" != "true" ]; then echo "Production route verification failed: $path"; exit 1; fi
           done
-          echo "Checking real 404 route"
+          echo "Checking homepage product image asset"
+  image_path=$(node -e "const d=require('./dist/data/home.json');process.stdout.write(String(d.products?.[0]?.images?.[0]?.path||''))")
+  if [ -z "$image_path" ]; then echo "Homepage image path missing from snapshot"; exit 1; fi
+  image_code=$(curl -L -sS -o /tmp/home-image.bin -w '%{http_code}' --retry 2 --retry-all-errors "https://gilasart.ir$image_path" || true)
+  image_type=$(curl -L -sS -I --retry 2 --retry-all-errors "https://gilasart.ir$image_path" 2>/dev/null | awk 'BEGIN{IGNORECASE=1}/^content-type:/{print $2; exit}' | tr -d '\\r' || true)
+  echo "Homepage image: $image_path status=$image_code content-type=$image_type"
+  if [ "$image_code" != "200" ] || ! printf '%s' "$image_type" | grep -qi '^image/'; then echo "Homepage product image verification failed"; exit 1; fi
+  echo "Checking real 404 route"
           code=$(curl -L -sS -o /tmp/page-404.html -w '%{http_code}' --retry 2 --retry-all-errors "https://gilasart.ir/this-route-must-not-exist-404-check" || true)
           if [ "$code" != "404" ] || ! grep -qi '<div id="app"></div>' /tmp/page-404.html; then
             echo "Production 404 verification failed: status=$code"; exit 1
