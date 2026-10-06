@@ -163,6 +163,10 @@
     "header.languageLabel": "اختيار اللغة",
     "update.close": "إغلاق",
     "update.nativeAndroid": "أندرويد",
-    "update.nativeIos": "iOS"
+    "update.nativeIos": "iOS",
+    "common.loading": "جارٍ التحميل…",
+    "common.error": "حدث خطأ. يُرجى المحاولة مرة أخرى.",
+    "common.empty": "لا يوجد شيء لعرضه.",
+    "common.success": "تمت العملية بنجاح."
   }
 }
