@@ -60,6 +60,20 @@ jobs:
           }
           console.log('shared shell i18n contract: PASS');
           NODE
+      - name: Validate Home i18n contract
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const app=fs.readFileSync('frontend/src/app.js','utf8');
+          const i=app.indexOf('async function home()'),j=app.indexOf('async function shop()',i);
+          if(i<0||j<0)throw new Error('home function boundaries missing');
+          const home=app.slice(i,j);
+          const required=['home.title','home.heroEyebrow2','home.heroTitle','home.heroText','home.viewWorks','home.about','home.collectionsEyebrow','home.collections','home.collectionsText','home.viewAll','home.categoryView','home.limitedTime','home.flashTitle','home.flashText','home.previous','home.next','home.selected','home.galleryArt','home.artwork','home.heroView','home.heroNote','home.approachEyebrow','home.approach','home.approachText','home.enterGallery','home.latestEyebrow','home.latest','home.latestActive','home.allWorks','home.noActive','home.processEyebrow','home.processTitle','home.processText','home.processDiscover','home.processChoose','home.processOrder','home.discoverText','home.chooseText','home.orderText'];
+          for(const key of required)if(!home.includes("t('"+key+"')"))throw new Error('Home UI is not localized: '+key);
+          for(const l of ['fa','en','tr','ar']){const d=JSON.parse(fs.readFileSync('frontend/public/i18n/'+l+'.json','utf8'));for(const key of required)if(typeof d.strings?.[key]!=='string'||!d.strings[key].trim())throw new Error('missing Home key '+key+' in '+l)}
+          for(const raw of ['مجموعه‌های گالری','پیشنهاد شگفت‌انگیز','آثاری برای خانه‌هایی که داستان دارند.','انتخاب اثر، بخشی از زیبایی آن است.','آخرین آثار','هنرکده گیلاس آرت','کشف','انتخاب','سفارش','تولید کننده ی برتر تابلو های معرق مس در ایران'])if(home.includes(raw))throw new Error('hard-coded Home UI text remains: '+raw);
+          console.log('Home i18n contract: PASS');
+          NODE
       - name: Validate four-locale JSON contract
         run: |
           set -euo pipefail
