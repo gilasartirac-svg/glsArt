@@ -3792,3 +3792,23 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
     transition:none!important;
   }
 }
+
+/* Card transfer receipt workflow */
+.payment-receipt-box{margin:18px 0;padding:16px;border:1px solid color-mix(in srgb,var(--ui-gold) 28%,var(--ui-line));border-radius:16px;background:color-mix(in srgb,var(--ui-gold) 5%,var(--ui-surface));display:grid;gap:9px}
+.payment-receipt-box small{color:var(--ui-muted);line-height:1.9}
+.payment-receipt-box .btn{justify-self:start;min-width:190px}
+.payment-receipt-box .btn:disabled{opacity:.62;cursor:not-allowed}
+.card-transfer-receipt-admin{overflow:hidden}
+.receipt-review-box{display:grid;grid-template-columns:minmax(0,280px) minmax(0,1fr);gap:18px;align-items:start}
+.receipt-review-preview{overflow:hidden;border:1px solid var(--ui-line);border-radius:14px;background:var(--ui-surface-2);min-height:180px;display:grid;place-items:center}
+.receipt-review-preview img{display:block;width:100%;height:auto;max-height:420px;object-fit:contain}
+.receipt-review-meta{display:grid;gap:10px;min-width:0;align-content:start}
+.receipt-review-meta span{color:var(--ui-muted);line-height:1.8}
+.receipt-review-meta b{color:var(--ui-text)}
+.receipt-review-meta .btn{justify-self:start;min-width:190px}
+.account-invoice:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:700px){
+ .receipt-review-box{grid-template-columns:minmax(0,1fr)}
+ .receipt-review-preview{max-width:100%;max-height:380px}
+ .receipt-review-meta .btn{width:100%}
+}
