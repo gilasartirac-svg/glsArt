@@ -193,6 +193,7 @@
     "home.orderText": "Teslimat bilgilerini girin ve siparişinizi tamamlayın.",
     "home.processDiscover": "Keşfet",
     "home.processChoose": "Seç",
-    "home.processOrder": "Sipariş ver"
+    "home.processOrder": "Sipariş ver",
+    "home.heroView": "Öne çıkan eseri görüntüle"
   }
 }
