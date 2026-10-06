@@ -114,28 +114,30 @@
 **خروجی فاز 3:** رابط کاربری Shop شامل جستجو، دسته‌بندی، فیلتر قیمت و امتیاز، مرتب‌سازی، شمارنده نتایج، Load More، Infinite Scroll، وضعیت‌های Loading/Empty/Error و Product Card به چهار زبان متصل شد. Product Data و نام واقعی آثار/دسته‌بندی‌ها ترجمه خودکار نمی‌شوند. قرارداد اختصاصی Shop i18n به Quality Gate افزوده شد و پس از اصلاح regressionهای موجود، چهار Workflow اصلی Production برای Commit نهایی با موفقیت اجرا شدند.
 
 ### فاز 4 — Product Detail
-- ☐ فاز 4 کامل
-- ☐ Titles
-- ☐ Price
-- ☐ SKU
-- ☐ Attributes
-- ☐ ابعاد
-- ☐ رنگ قاب
-- ☐ Options
-- ☐ Final price
-- ☐ Inventory
-- ☐ Option selection
-- ☐ Add to Cart
-- ☐ Favorite
-- ☐ Reviews
-- ☐ Rating
-- ☐ Loading
-- ☐ Error
-- ☐ Related products
-- ☐ Purchase messages
-- ☐ Regression test سیستم Product Attribute/Option
-- ☐ تست حفظ Option تا Cart و Quantity change
+- ☑ فاز 4 کامل
+- ☑ Titles
+- ☑ Price
+- ☑ SKU
+- ☑ Attributes
+- ☑ ابعاد
+- ☑ رنگ قاب
+- ☑ Options
+- ☑ Final price
+- ☑ Inventory
+- ☑ Option selection
+- ☑ Add to Cart
+- ☑ Favorite
+- ☑ Reviews
+- ☑ Rating
+- ☑ Loading
+- ☑ Error
+- ☑ Related products
+- ☑ Purchase messages
+- ☑ Regression test سیستم Product Attribute/Option
+- ☑ تست حفظ Option تا Cart و Quantity change
 
+
+**خروجی فاز 4:** Product Detail به قرارداد Production کامل متصل شد: مشخصات و SKU و قیمت، ویژگی‌های اختصاصی محصول و انتخاب گزینه‌ها، محاسبه قیمت نهایی، موجودی واقعی، افزودن به سبد و حفظ Option هنگام تغییر تعداد، علاقه‌مندی، نظرات و امتیاز، وضعیت‌های Loading/Error، پیام‌های خرید و آثار مرتبط. قرارداد اختصاصی Product Detail به Quality Gate اضافه شد و تست چهار زبان نیز با همان JSONهای مشترک حفظ شد.
 ### فاز 5 — Cart / Checkout / Payment
 - ☐ فاز 5 کامل
 - ☐ Cart
