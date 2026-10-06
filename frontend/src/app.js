@@ -7,6 +7,54 @@ visitorHeartbeat();setInterval(visitorHeartbeat,60000);
 
 let csrfToken='';
 let state={products:[],categories:[],user:null,roles:[],permissions:[],cart:null,cartCount:0,points:0,rewards:null,settings:{},meLoadedAt:0};
+const SUPPORTED_LOCALES=['fa','en','tr','ar'];
+const LOCALE_META={fa:{label:'فارسی',dir:'rtl'},en:{label:'English',dir:'ltr'},tr:{label:'Türkçe',dir:'ltr'},ar:{label:'العربية',dir:'rtl'}};
+const COUNTRY_LOCALE={IR:'fa',TR:'tr',IQ:'ar',AE:'ar',SA:'ar',QA:'ar',KW:'ar',BH:'ar',OM:'ar',JO:'ar',EG:'ar',SY:'ar',LB:'ar',YE:'ar',PS:'ar'};
+const BROWSER_LOCALE={fa:'fa',ar:'ar',tr:'tr',en:'en'};
+let currentLocale='fa';
+function localeFromPath(pathname=location.pathname){
+ let p=String(pathname||'/');const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
+ if(base&&p.startsWith(base))p=p.slice(base.length)||'/';
+ const m=p.match(/^\\/(fa|en|tr|ar)(?:\\/|$)/i);return m?m[1].toLowerCase():'';
+}
+function setLocale(locale){const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';currentLocale=l;document.documentElement.lang=l;document.documentElement.dir=LOCALE_META[l].dir;document.documentElement.dataset.locale=l;try{localStorage.setItem('gilasart-locale',l)}catch{}}
+function browserLocale(){const langs=navigator.languages?.length?navigator.languages:[navigator.language||''];for(const x of langs){const k=String(x).toLowerCase().split('-')[0];if(BROWSER_LOCALE[k])return BROWSER_LOCALE[k]}return'en'}
+async function detectPreferredLocale(){
+ try{const r=await fetch(API+'/api/locale',{credentials:'omit',cache:'no-store'});if(r.ok){const d=await r.json();if(SUPPORTED_LOCALES.includes(d?.locale))return d.locale}}catch{}
+ try{const s=localStorage.getItem('gilasart-locale');if(SUPPORTED_LOCALES.includes(s))return s}catch{}
+ return browserLocale();
+}
+function publicPathNeedsLocale(pathname){
+ let p=String(pathname||'/');const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
+ if(base&&p.startsWith(base))p=p.slice(base.length)||'/';
+ const first=p.replace(/^\\/+|\\/+$/g,'').split('/').filter(Boolean)[0]||'';
+ return !first||['shop','cart','account','rewards','checkout','about','contact','news','articles','article','terms','support','payment','product'].includes(first);
+}
+function localePath(path,locale=currentLocale){
+ const p=String(path||'/');if(/^https?:\\/\\//i.test(p)||p.startsWith('//')||p.startsWith('/api/'))return p;
+ const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
+ let clean=p.startsWith('/')?p:'/'+p;
+ if(base&&clean.startsWith(base))clean=clean.slice(base.length)||'/';
+ clean=clean.replace(/^\\/(fa|en|tr|ar)(?=\\/|$)/,'')||'/';
+ return base+'/'+locale+(clean==='/'?'':clean);
+}
+async function bootstrapLocale(){
+ const explicit=localeFromPath();if(explicit){setLocale(explicit);return}
+ if(location.pathname.includes('/admin')){setLocale('fa');return}
+ const preferred=await detectPreferredLocale();setLocale(preferred);
+ if(publicPathNeedsLocale(location.pathname)){
+  const target=localePath(location.pathname+location.search,preferred);
+  if(target!==location.pathname+location.search){history.replaceState({},'',target);scrollRouteTop()}
+ }
+}
+function mountLanguageSwitcher(){
+ if(document.querySelector('.language-switcher'))return;
+ const wrap=document.createElement('div');wrap.className='language-switcher';
+ wrap.innerHTML='<select id="gilasart-language-select" aria-label="Language">'+SUPPORTED_LOCALES.map(l=>'<option value="'+l+'">'+LOCALE_META[l].label+'</option>').join('')+'</select>';
+ document.body.appendChild(wrap);const select=wrap.querySelector('select');select.value=currentLocale;
+ select.addEventListener('change',()=>{const next=select.value;if(!SUPPORTED_LOCALES.includes(next)||next===currentLocale)return;setLocale(next);const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';let p=location.pathname;if(base&&p.startsWith(base))p=p.slice(base.length)||'/';p=p.replace(/^\\/(fa|en|tr|ar)(?=\\/|$)/,'')||'/';const target=localePath(p,next);history.pushState({},'',target);scrollRouteTop();routeInFlightTarget=target;routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget='';scrollRouteTop()})});
+}
+
 let routeInFlight=null;
 let routeInFlightTarget='';
 const icon=n=>({cart:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 1.9-1.4L21 7H7"/><circle cx="10" cy="20" r="1.2"/><circle cx="18" cy="20" r="1.2"/> </svg>',user:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>',search:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>',send:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 4 18 8-18 8 3-8-3-8Z"/><path d="M6 12h9"/></svg>',check:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>',support:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-5.5 5V15A2.5 2.5 0 0 1 3 12.5v-7Z"/><path d="M7 8h10M7 11h6"/></svg>',plus:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',close:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>',clock:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>',copy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M5 16H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"/></svg>'}[n]||'');
@@ -230,7 +278,7 @@ function layout(content){
  app.innerHTML=`<header class="top"><div class="wrap nav"><a class="brand" href="/" aria-label="گیلاس آرت، صفحه اصلی">گیلاس آرت<small>GILAS ART</small></a><nav class="links" id="main-menu" aria-label="منوی اصلی"><a href="/shop" data-route="/shop" data-action="shop" onclick="event.preventDefault();event.stopPropagation();window.GilasArtRouter?.navigate('/shop');return false;">فروشگاه</a><a href="/about">درباره ما</a><a href="/contact">تماس با ما</a><a href="/news">اخبار</a><a href="/articles">مقالات</a><a href="/rewards" class="rewards-nav-link">باشگاه امتیاز</a>${isAdminUser()?'<a class="admin-link" href="/admin">کنترل پنل</a>':''}</nav><div class="spacer"></div><button class="theme-toggle" type="button" aria-label="تغییر حالت نمایش" title="روز / شب" onclick="window.GilasArtTheme&&window.GilasArtTheme.toggle()">◐ <span>روز/شب</span></button><a class="iconbtn cart-link" href="/cart" aria-label="سبد خرید"><div class="cart-icon-wrap">${icon('cart')}<b class="cart-count-badge" aria-label="${state.cartCount} تابلو در سبد خرید"${state.cartCount>0?'':' hidden'}>${state.cartCount>99?'۹۹+':fa(state.cartCount)}</b></div><span>سبد خرید</span></a>${state.user?'<a class="points-badge" href="/rewards" title="امتیازهای من">★ '+fa(state.points)+' امتیاز</a>':''}${accountLink()}<button class="mobile-menu-toggle" type="button" aria-label="باز کردن منوی اصلی" aria-expanded="false" aria-controls="main-menu" onclick="window.GilasArtMobileMenu&&window.GilasArtMobileMenu.toggle(this)"><span></span><span></span><span></span></button></div></header><div class="rewards-promo"><div class="wrap rewards-promo-inner">${state.user?'<span>امتیاز شما: <b>'+fa(state.points)+'</b></span><span>از امتیازهایتان کوپن تا ۲۰٪ تخفیف بسازید.</span><a href="/rewards">تبدیل امتیاز به کوپن ←</a>':'<span>عضویت در گیلاس آرت = <b>۱۰ امتیاز هدیه</b></span><a href="/account">عضو شوید و امتیاز بگیرید ←</a>'}</div></div><main id="main-content" tabindex="-1">${content}</main>${renderFooter()}`;
 }
 function routeBase(){return location.pathname.startsWith('/glsArt/')||location.pathname==='/glsArt'?'/glsArt':''}
-function routeUrl(path){const p=String(path||'/');return routeBase()+(p.startsWith('/')?p:'/'+p)}
+function routeUrl(path){return localePath(path)}
 function scrollRouteTop(){try{window.scrollTo({top:0,left:0,behavior:'auto'});document.documentElement.scrollTop=0;document.body.scrollTop=0}catch{try{window.scrollTo(0,0)}catch{}}}
 function navigate(path,{replace=false}={}){const raw=String(path||'/');const target=raw.startsWith('#/')?raw.slice(1):raw;const url=routeUrl(target||'/');if(url===location.pathname+location.search&&!routeInFlight)return;if(replace)history.replaceState({},'',url);else history.pushState({},'',url);scrollRouteTop();if(routeInFlight&&routeInFlightTarget===url)return;routeInFlightTarget=url;routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget='';scrollRouteTop()});}
 window.GilasArtRouter={navigate};
@@ -921,7 +969,10 @@ async function router(){
  const base=routeBase();
  let cleanPath=location.pathname.startsWith(base)?location.pathname.slice(base.length):location.pathname;
  cleanPath=cleanPath.replace(/^\/+|\/+$/g,'');
- const segments=cleanPath?cleanPath.split('/').filter(Boolean).map(x=>{try{return decodeURIComponent(x)}catch{return x}}):[];
+ const rawSegments=cleanPath?cleanPath.split('/').filter(Boolean).map(x=>{try{return decodeURIComponent(x)}catch{return x}}):[];
+ const pathLocale=rawSegments[0]&&SUPPORTED_LOCALES.includes(String(rawSegments[0]).toLowerCase())?String(rawSegments.shift()).toLowerCase():'';
+ if(pathLocale)setLocale(pathLocale);
+ const segments=rawSegments;
  const known=new Set(['shop','cart','account','rewards','checkout','about','contact','news','articles','terms','support','payment','admin','product']);
  const p=segments.length?(known.has(segments[0])?segments:['product',segments[0]]):[''];
  try{
@@ -1017,8 +1068,7 @@ function migrateLegacyHash(){
 }
 migrateLegacyHash();
 window.addEventListener('popstate',()=>{if(routeInFlight)return;routeInFlightTarget=location.pathname+location.search;routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget=''})});
-routeInFlightTarget=location.pathname+location.search;
-routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget=''}) .catch(e=>console.error('initial_router_error',e));
+(async()=>{try{await bootstrapLocale()}catch(e){console.warn('locale_bootstrap_failed',e)}routeInFlightTarget=location.pathname+location.search;routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget=''}) .catch(e=>console.error('initial_router_error',e));})();
 
 /* GilasArt interaction guard */
 (()=>{
