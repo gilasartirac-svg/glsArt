@@ -174,14 +174,16 @@
 **خروجی فاز 6:** قرارداد Authentication/Account شامل SMS OTP، Session امن D1-backed، WebOTP، CSRF، Profile، Orders، Favorites، Rewards، Referral، Notifications، Logout و Session Hydration با Security Regression Tests تأیید شد.
 
 ### فاز 7 — Customer Support / CRM
-- ☐ فاز 7 کامل
-- ☐ Support
-- ☐ Ticket
-- ☐ Messages
-- ☐ FAQ
-- ☐ Contact
-- ☐ Notifications
-- ☐ Ticket status / stages
+- ☑ فاز 7 کامل
+- ☑ Support
+- ☑ Ticket
+- ☑ Messages
+- ☑ FAQ
+- ☑ Contact
+- ☑ Notifications
+- ☑ Ticket status / stages
+
+**خروجی فاز 7:** مسیر پشتیبانی Customer-facing و CRM مدیریتی با مالکیت کاربر، CSRF، RBAC، Thread پیام‌ها، FAQ عمومی/مدیریتی، وضعیت و مرحله تیکت، پیامک قالب‌محور، Notification داخلی هنگام پاسخ پشتیبانی، صفحه‌بندی CRM و فیلتر وضعیت تکمیل و با قرارداد اختصاصی Phase 7 تست شد.
 
 ### فاز 8 — Admin Panel
 - ☐ فاز 8 کامل
