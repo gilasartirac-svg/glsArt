@@ -186,23 +186,25 @@
 **خروجی فاز 7:** مسیر پشتیبانی Customer-facing و CRM مدیریتی با مالکیت کاربر، CSRF، RBAC، Thread پیام‌ها، FAQ عمومی/مدیریتی، وضعیت و مرحله تیکت، پیامک قالب‌محور، Notification داخلی هنگام پاسخ پشتیبانی، صفحه‌بندی CRM و فیلتر وضعیت تکمیل و با قرارداد اختصاصی Phase 7 تست شد.
 
 ### فاز 8 — Admin Panel
-- ☐ فاز 8 کامل
-- ☐ 8-A Dashboard
-- ☐ 8-B Products
-- ☐ 8-C Categories
-- ☐ 8-D Inventory
-- ☐ 8-E Orders
-- ☐ 8-F Payments
-- ☐ 8-G Reviews
-- ☐ 8-H Customers
-- ☐ 8-I Discounts / Coupons
-- ☐ 8-J Rewards / Referral
-- ☐ 8-K Notifications
-- ☐ 8-L Support / CRM
-- ☐ 8-M CMS
-- ☐ 8-N Settings
-- ☐ 8-O Audit Log / Security
-- ☐ Regression test RBAC / permissions
+- ☑ فاز 8 کامل
+- ☑ 8-A Dashboard
+- ☑ 8-B Products
+- ☑ 8-C Categories
+- ☑ 8-D Inventory
+- ☑ 8-E Orders
+- ☑ 8-F Payments
+- ☑ 8-G Reviews
+- ☑ 8-H Customers
+- ☑ 8-I Discounts / Coupons
+- ☑ 8-J Rewards / Referral
+- ☑ 8-K Notifications
+- ☑ 8-L Support / CRM
+- ☑ 8-M CMS
+- ☑ 8-N Settings
+- ☑ 8-O Audit Log / Security
+- ☑ Regression test RBAC / permissions
+
+**خروجی فاز 8:** پنل مدیریت Production ممیزی و سخت‌سازی شد؛ مسیرهای Dashboard، Products، Categories، Inventory، Orders، Payments، Reviews، Customers، Discounts/Coupons، Rewards/Referral، Notifications، Support/CRM، CMS، Settings و Audit/Security تحت Session + RBAC/Permission قرار گرفتند. مدیریت Rewards/Referral و Notifications به پنل افزوده شد، تغییر امتیازها محدود و Audit شد، ارسال اعلان کاربرمحور با CSRF و Audit انجام می‌شود، و قرارداد اختصاصی Phase 8 به همراه Security Regression Gate اضافه شد.
 
 ### فاز 9 — صفحات خاص و محتوایی
 - ☐ فاز 9 کامل
