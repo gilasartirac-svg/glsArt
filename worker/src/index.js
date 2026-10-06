@@ -1317,6 +1317,8 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const b=await body(req),next=String(b.status||'').trim().toUpperCase();
   if(!ORDER_STATUSES.has(next))return json({error:'invalid_order_status'},400);
   if(next===before.status)return json({ok:true,changed:false,status:before.status});
+  const paymentForTransition=await env.DB.prepare('SELECT provider,status,receipt_status FROM payments WHERE order_id=?').bind(id).first();
+  if(paymentForTransition?.provider==='card_transfer'&&['PAID','PROCESSING','SHIPPED','DELIVERED'].includes(next)&&paymentForTransition.status!=='PAID')return json({error:'card_transfer_payment_not_approved'},409);
   await env.DB.prepare('UPDATE orders SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(next,id).run();
   if(next==='PAID'){
    const payment=await env.DB.prepare('SELECT id,provider,status,receipt_status FROM payments WHERE order_id=?').bind(id).first();
