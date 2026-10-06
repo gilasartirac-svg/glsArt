@@ -79,7 +79,7 @@ jobs:
       - name: Verify published storefront routes
         run: |
           set -euo pipefail
-          for path in / /fa/ /en/ /tr/ /ar/ /shop; do
+          for path in / /fa/ /en/ /tr/ /ar/ /shop /payment/manual; do
             echo "Checking https://gilasart.ir$path"
             ok=false
             for i in 1 2 3 4 5 6 7 8 9 10; do
