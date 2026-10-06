@@ -334,6 +334,7 @@
     "support.emptyText": "Yardıma ihtiyacınız varsa yukarıdaki formdan talebinizi gönderin.",
     "support.back": "← Tüm Talepler",
     "support.contactsUnsupported": "Bu tarayıcıda kişi seçimi desteklenmiyor. Lütfen uyumlu bir tarayıcı veya uygulama kullanın.",
-    "support.noContact": "Gönderim için kişi seçilmedi."
+    "support.noContact": "Gönderim için kişi seçilmedi.",
+    "header.languageMenu": "Dil seçimi"
   }
 }
