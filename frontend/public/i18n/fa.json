@@ -142,6 +142,13 @@
     "notFound.shop": "ورود به فروشگاه",
     "notFound.home": "بازگشت به گالری",
     "terms.loading": "در حال دریافت قوانین...",
-    "terms.unavailable": "قوانین سایت در حال حاضر قابل دریافت نیست."
+    "terms.unavailable": "قوانین سایت در حال حاضر قابل دریافت نیست.",
+    "header.homeAria": "گیلاس آرت، صفحه اصلی",
+    "header.cartAria": "سبد خرید",
+    "header.pointsTitle": "امتیازهای من",
+    "header.pointsSuffix": "امتیاز",
+    "cart.count": "{{count}} تابلو در سبد خرید",
+    "account.login": "ورود",
+    "account.profile": "پروفایل کاربر"
   }
 }
