@@ -4209,3 +4209,9 @@ html[data-theme="dark"] .language-switcher select{background:#111827;color:#f4ef
     display:block;
   }
 }
+
+@media (max-width:900px){
+  .admin-layout>aside>#admin-mobile-drawer{
+    display:flex!important;
+  }
+}
