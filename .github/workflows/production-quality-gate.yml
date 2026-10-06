@@ -60,6 +60,20 @@ jobs:
           }
           console.log('shared shell i18n contract: PASS');
           NODE
+      - name: Validate Shop i18n contract
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const app=fs.readFileSync('frontend/src/app.js','utf8');
+          const i=app.indexOf('async function shop()'),j=app.indexOf('async function product',i);
+          if(i<0||j<0)throw new Error('shop function boundaries missing');
+          const s=app.slice(i,j);
+          const required=['shop.title','shop.description','shop.search','shop.searchHint','shop.searchPlaceholder','shop.searchAria','shop.categories','shop.categoriesHint','shop.allWorks','shop.categoryWorks','shop.filters','shop.filtersHint','shop.priceRange','shop.from','shop.to','shop.minPrice','shop.maxPrice','shop.buyerRating','shop.allRatings','shop.clearAll','shop.sort','shop.sortHint','shop.sortBy','shop.newest','shop.buyerRecommended','shop.bestSelling','shop.popular','shop.bestRated','shop.mostReviewed','shop.priceLow','shop.priceHigh','shop.available','shop.results','shop.more','shop.preparing','shop.continue','shop.allShown','shop.noMatch','shop.empty','shop.error'];
+          for(const key of required)if(!s.includes("t('"+key+"')"))throw new Error('Shop UI is not localized: '+key);
+          for(const l of ['fa','en','tr','ar']){const d=JSON.parse(fs.readFileSync('frontend/public/i18n/'+l+'.json','utf8'));for(const key of required)if(typeof d.strings?.[key]!=='string'||!d.strings[key].trim())throw new Error('missing Shop key '+key+' in '+l)}
+          for(const raw of ['جستجو، فیلتر و انتخاب آثار گیلاس آرت','انتخاب چند دسته','محدوده قیمت','امتیاز خریداران','پاک کردن همه','نمایش آثار بیشتر','در حال آماده‌سازی گالری…','نتیجه‌ای پیدا نشد.'])if(s.includes(raw))throw new Error('hard-coded Shop UI text remains: '+raw);
+          console.log('Shop i18n contract: PASS');
+          NODE
       - name: Validate Home i18n contract
         run: |
           node <<'NODE'
