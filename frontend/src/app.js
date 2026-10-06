@@ -66,7 +66,7 @@ function readLocaleCookie(){
 }
 function writeLocaleCookie(locale){
  const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';
- try{document.cookie='gilasart_locale='+encodeURIComponent(l)+'; Max-Age=31536000; Path=/; SameSite=Lax'}catch{}
+ try{document.cookie='gilasart_locale='+encodeURIComponent(l)+'; Max-Age=31536000; Path=/; SameSite=Lax; Secure'}catch{}
 }
 async function detectPreferredLocale(){
  const saved=readLocaleCookie();if(saved)return saved;
@@ -91,7 +91,7 @@ function localePath(path,locale=currentLocale){
  return base+'/'+locale+(clean==='/'?'':clean);
 }
 async function bootstrapLocale(){
- const explicit=localeFromPath(),locale=explicit||'fa';
+ const explicit=localeFromPath(),locale=explicit||await detectPreferredLocale();
  await loadLocale(locale);setLocale(locale);
  if(location.pathname.includes('/admin'))return;
  const manualPaymentPath=/\/payment\/manual(?:\/index\.html)?(?:\/)?$/.test(String(location.pathname||''));
