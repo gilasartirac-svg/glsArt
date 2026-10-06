@@ -257,6 +257,7 @@ async function loadProductAttributes(env,productId){
           WHERE pd.product_id=pa.product_id
             AND pdo.attribute_id=a.id
             AND pd.active=1
+            AND (pd.is_default=1 OR pd.is_default=0)
         ) THEN CASE WHEN pov.product_id IS NOT NULL THEN pov.is_default ELSE 0 END
         ELSE o.is_default
       END is_default,
@@ -307,6 +308,7 @@ async function buildStorefrontSnapshot(env){
           WHERE pd.product_id=pa.product_id
             AND pdo.attribute_id=a.id
             AND pd.active=1
+            AND (pd.is_default=1 OR pd.is_default=0)
         ) THEN CASE WHEN pov.product_id IS NOT NULL THEN pov.is_default ELSE 0 END
         ELSE o.is_default
       END is_default,CASE WHEN pov.product_id IS NOT NULL THEN pov.price_delta_irt ELSE o.price_delta_irt END price_delta_irt FROM product_attribute_assignments pa JOIN products p ON p.id=pa.product_id AND p.active=1 JOIN product_attributes a ON a.id=pa.attribute_id AND a.active=1 JOIN product_attribute_options o ON o.attribute_id=a.id LEFT JOIN product_attribute_option_overrides pov ON pov.product_id=pa.product_id AND pov.option_id=o.id WHERE o.active=1 AND (
