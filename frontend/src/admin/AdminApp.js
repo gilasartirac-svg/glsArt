@@ -26,6 +26,19 @@ export default function AdminApp(){
     if(typeof window.GilasArtAdminNavigate==='function')window.setTimeout(window.GilasArtAdminNavigate,0);
    },{capture:true});
   }
+  const bindAdminLogout=()=>{
+   const button=document.getElementById('admin-session-logout');if(!button||button.dataset.bound)return;
+   button.dataset.bound='1';
+   button.addEventListener('click',async()=>{
+    button.disabled=true;
+    try{
+     const {api}=await import('./services/api.js');
+     await api('/api/auth/logout',{method:'POST'});
+    }catch{}
+    window.location.href='/account';
+   });
+  };
+  window.addEventListener('admin-mounted',bindAdminLogout);
   window.dispatchEvent(new Event('admin-mounted'));
   const renderAdminPage=async()=>{
    const page=document.getElementById('admin-page');
