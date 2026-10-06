@@ -758,6 +758,11 @@ async function cart(){
     const provider=document.querySelector('input[name="payment-provider"]:checked')?.value||paymentOptions.defaultProvider||'zarinpal';
     const pay=await api('/api/orders/'+encodeURIComponent(o.orderId)+'/pay',{method:'POST',body:JSON.stringify({provider}),headers:{'x-csrf-token':csrf()}});
     if(!pay?.url)throw new Error('آدرس درگاه پرداخت از سرور دریافت نشد.');
+    if(provider==='card_transfer'&&pay.manual){
+     if(msg)msg.innerHTML='<span class="ok">سفارش ثبت شد؛ در حال انتقال به صفحه پرداخت کارت به کارت…</span>';
+     navigate('/payment/manual?order='+encodeURIComponent(o.orderId));
+     return;
+    }
     if(msg)msg.innerHTML='<span class="ok">سفارش ثبت شد؛ در حال انتقال به درگاه پرداخت…</span>';
     location.href=pay.url;
    }catch(e){
