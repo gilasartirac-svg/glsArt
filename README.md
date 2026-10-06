@@ -223,19 +223,21 @@
 **خروجی فاز 9:** صفحات محتوایی About/Contact/News/Articles موجود و مسیرهای آن‌ها در Production حفظ شدند؛ صفحه مستقل Privacy با چهار زبان، صفحه رسمی Enamad با لینک مرجع، و صفحه آموزش‌های Aparat با دریافت RSS کانال gilasart و پخش Inline ویدئوهای قابل Embed اضافه شدند. مسیرهای جدید در routing و locale routing ثبت، متن‌های جدید در هر چهار dictionary هم‌کلید شدند، و قرارداد اختصاصی Phase 9 در tests/phase9-special-content.test.mjs اضافه شد. Security Regression، Production Quality Gate، Deploy Pages و Deploy Worker + D1 برای Commit کد Phase 9 موفق شدند.
 
 ### فاز 10 — SEO و Routing
-- ☐ فاز 10 کامل
-- ☐ Canonical
-- ☐ hreflang
-- ☐ Sitemap
-- ☐ Page title
-- ☐ Meta description
-- ☐ Open Graph
-- ☐ چهار Locale route
-- ☐ Internal links
-- ☐ 404
-- ☐ Redirect
-- ☐ Default language
-- ☐ جلوگیری از duplicate content
+- ☑ فاز 10 کامل
+- ☑ Canonical
+- ☑ hreflang
+- ☑ Sitemap
+- ☑ Page title
+- ☑ Meta description
+- ☑ Open Graph
+- ☑ چهار Locale route
+- ☑ Internal links
+- ☑ 404
+- ☑ Redirect
+- ☑ Default language
+- ☑ جلوگیری از duplicate content
+
+**خروجی فاز 10:** Canonical و hreflang/x-default برای مسیرهای locale، Meta Title/Description، Open Graph/Twitter، JSON-LD عمومی، noindex برای مسیرهای خصوصی، sitemap پویا بر پایه Snapshot محصولات و محتوای منتشرشده، robots.txt هماهنگ با Production و قرارداد جلوگیری از duplicate content تکمیل و در تست اختصاصی Phase 10 پوشش داده شد.
 
 ### فاز 11 — PWA / Service Worker / Cache
 - ☐ فاز 11 کامل
