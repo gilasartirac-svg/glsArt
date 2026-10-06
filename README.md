@@ -204,7 +204,7 @@
 - ☑ 8-O Audit Log / Security
 - ☑ Regression test RBAC / permissions
 
-**خروجی فاز 8:** پنل مدیریت Production ممیزی و سخت‌سازی شد؛ مسیرهای Dashboard، Products، Categories، Inventory، Orders، Payments، Reviews، Customers، Discounts/Coupons، Rewards/Referral، Notifications، Support/CRM، CMS، Settings و Audit/Security تحت Session + RBAC/Permission قرار گرفتند. مدیریت Rewards/Referral و Notifications به پنل افزوده شد، تغییر امتیازها محدود و Audit شد، ارسال اعلان کاربرمحور با CSRF و Audit انجام می‌شود، و قرارداد اختصاصی Phase 8 به همراه Security Regression Gate اضافه شد.
+**خروجی فاز 8:** پنل مدیریت Production ممیزی، سخت‌سازی و آماده استقرار شد؛ مسیرهای Dashboard، Products، Categories، Inventory، Orders، Payments، Reviews، Customers، Discounts/Coupons، Rewards/Referral، Notifications، Support/CRM، CMS، Settings و Audit/Security تحت Session + RBAC/Permission قرار گرفتند. مدیریت Rewards/Referral و Notifications به پنل افزوده شد، تغییر امتیازها محدود و Audit شد، ارسال اعلان کاربرمحور با CSRF و Audit انجام می‌شود، و قرارداد اختصاصی Phase 8 به همراه Security Regression Gate اضافه شد.
 
 ### فاز 9 — صفحات خاص و محتوایی
 - ☐ فاز 9 کامل
