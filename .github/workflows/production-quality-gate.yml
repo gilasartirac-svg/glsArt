@@ -27,10 +27,13 @@ jobs:
           const app=fs.readFileSync('frontend/src/app.js','utf8');
           const worker=fs.readFileSync('worker/src/index.js','utf8');
           if(!app.includes('gilasart_locale='))throw new Error('language cookie missing');
+          if(!app.includes('SameSite=Lax; Secure'))throw new Error('language cookie must be Secure');
           if(!app.includes("return 'fa';"))throw new Error('Persian safe fallback missing');
           if(app.includes("localStorage.setItem('gilasart-locale'"))throw new Error('language preference must use cookie');
           if(!app.includes("fetch(API+'/api/locale'"))throw new Error('server language detection missing');
+          if(!app.includes('const explicit=localeFromPath(),locale=explicit||await detectPreferredLocale();'))throw new Error('locale detection is not active in bootstrap');
           if(!worker.includes("country!=='IR'")||!worker.includes("primary!=='fa'"))throw new Error('conservative geo/language gate missing');
+          if(!worker.includes("'cache-control':'no-store'"))throw new Error('locale detection must not be shared-cached');
           NODE
       - name: Validate four-locale JSON contract
         run: |
