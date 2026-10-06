@@ -19,6 +19,19 @@ jobs:
         run: node --check frontend/src/app.js
       - name: Validate Worker module
         run: cp worker/src/index.js /tmp/gilasart-worker.mjs && node --check /tmp/gilasart-worker.mjs
+      - name: Validate locale preference and conservative detection contract
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const app=fs.readFileSync('frontend/src/app.js','utf8');
+          const worker=fs.readFileSync('worker/src/index.js','utf8');
+          if(!app.includes('gilasart_locale='))throw new Error('language cookie missing');
+          if(!app.includes("return 'fa';"))throw new Error('Persian safe fallback missing');
+          if(app.includes("localStorage.setItem('gilasart-locale'"))throw new Error('language preference must use cookie');
+          if(!app.includes("fetch(API+'/api/locale'"))throw new Error('server language detection missing');
+          if(!worker.includes("country!=='IR'")||!worker.includes("primary!=='fa'"))throw new Error('conservative geo/language gate missing');
+          NODE
       - name: Validate four-locale JSON contract
         run: |
           set -euo pipefail
