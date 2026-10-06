@@ -673,7 +673,7 @@ async function product(slug){
        if(target===0){
          await api('/api/cart?productId='+encodeURIComponent(p.id),{method:'DELETE',headers:{'x-csrf-token':csrf()}});
        }else{
-         await api('/api/cart',{method:'POST',body:JSON.stringify({productId:p.id,quantity:target}),headers:{'x-csrf-token':csrf()}});
+         await api('/api/cart',{method:'POST',body:JSON.stringify({productId:p.id,quantity:target,options:selections()}),headers:{'x-csrf-token':csrf()}});
        }
        updateCartBadge(Math.max(0,state.cartCount+(target-Number(productCartQuantity||0))));
        productCartQuantity=target;
