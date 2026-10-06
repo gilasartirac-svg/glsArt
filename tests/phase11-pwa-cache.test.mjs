@@ -16,7 +16,7 @@ test('phase 11: service worker uses release-versioned cache and removes old shel
 test('phase 11: navigation and JSON use network-first with offline cached fallback',()=>{
  assert.match(sw,/if\(req\.mode==='navigate'\)/);
  assert.match(sw,/networkFirst\(req,true\)/);
- assert.match(sw,/if\(\/\\\.json\$/i\.test\(url\.pathname\)\)/);
+ assert.ok(sw.includes("if(/\\.json$/i.test(url.pathname))"));
  assert.match(sw,/fetch\(req,\{cache:'no-store'\}\)/);
  assert.match(sw,/catch\(\)=>cachedFallback\?caches\.match\(req\):Response\.error\(\)/);
 });
