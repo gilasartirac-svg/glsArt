@@ -1461,3 +1461,49 @@ Worker source و Tests مرجع نهایی Contract دقیق هر endpoint هس�
 قبل از حذف هر قابلیت از README، Source و Production باید بررسی شوند.
 
 **هدف این فایل این است که مهندس بعدی بتواند بدون حدس زدن بفهمد GilasArt امروز دقیقاً چه معماری و چه امکاناتی دارد.**
+
+## 49. Production Internationalization (i18n) — Four Locale Architecture
+
+The public GilasArt storefront uses four explicit locale prefixes. **Persian is the default locale** and browser-language detection must not silently replace it.
+
+| Language | Direction | Production path |
+|---|---|---|
+| فارسی | RTL | `https://gilasart.ir/fa/` |
+| العربية | RTL | `https://gilasart.ir/ar/` |
+| English | LTR | `https://gilasart.ir/en/` |
+| Türkçe | LTR | `https://gilasart.ir/tr/` |
+
+### Locale source files
+
+Translation data is stored in GitHub as four JSON dictionaries under:
+
+- `frontend/public/i18n/fa.json`
+- `frontend/public/i18n/ar.json`
+- `frontend/public/i18n/en.json`
+- `frontend/public/i18n/tr.json`
+
+All four files must contain the **same variable/key set**. Only the values change by language. Each file also declares `locale`, `direction`, `defaultLocale: "fa"`, and `version`.
+
+### Runtime handling
+
+The public application loads the dictionary for the locale in the URL, sets `document.documentElement.lang` and `dir`, and applies the dictionary to rendered UI text/ARIA/placeholder/title/alt values. The locale path is authoritative:
+
+- `/fa/*` → Persian / RTL
+- `/ar/*` → Arabic / RTL
+- `/en/*` → English / LTR
+- `/tr/*` → Turkish / LTR
+
+A bare public route such as `/` or `/shop` is normalized to the Persian equivalent (for example `/fa/` and `/fa/shop`). Admin remains Persian-only unless explicitly internationalized later.
+
+### Translation contract
+
+The Production Quality Gate validates that all four JSON files are valid, version-compatible, use the correct direction, and have identical translation keys. Adding a new user-facing translatable string requires adding the same key to all four locale files.
+
+### SEO and routing
+
+The locale system keeps locale-aware canonical/hreflang routing in the frontend. Locale changes preserve the current public route while replacing only its locale prefix. Product slugs and existing application routing rules remain unchanged.
+
+### Service worker / cache
+
+The PWA service worker caches all four locale dictionaries and uses a new shell cache version whenever the frontend i18n bundle changes, preventing stale locale assets from masking a deployment.
+
