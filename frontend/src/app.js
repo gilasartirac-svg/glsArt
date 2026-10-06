@@ -445,11 +445,11 @@ cat_gilas_religious:'<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/sv
  (params.get('categories')||params.get('category')||'').split(',').map(x=>x.trim()).filter(Boolean).forEach(x=>selectedCategories.add(x));
  try{
   const snapshot=await loadStorefrontSnapshot();
-  if(!snapshot)throw new Error('داده گالری در دسترس نیست.');
+  if(!snapshot)throw new Error(t('shop.error'));
   state.categories=Array.isArray(snapshot.categories)?snapshot.categories:[];
   allItems=(snapshot.products||[]).map(snapshotCore);
  }catch(e){
-  layout('<section class="wrap page"><div class="panel"><h1>فروشگاه</h1><p class="error">'+escapeHtml(e.message||'داده فروشگاه قابل دریافت نیست.')+'</p></div></section>');
+  layout('<section class="wrap page"><div class="panel"><h1>'+t('shop.title')+'</h1><p class="error">'+escapeHtml(e.message||t('shop.error'))+'</p></div></section>');
   return;
  }
  const prices=allItems.map(x=>Number(x.price_irt||0)).filter(Number.isFinite);
@@ -459,25 +459,25 @@ cat_gilas_religious:'<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/sv
  if(!maxPrice||maxPrice>priceCeiling)maxPrice=priceCeiling;
  if(minPrice>maxPrice)minPrice=priceFloor;
  const sortOptions=[
-  ['newest','جدیدترین آثار'],
-  ['buyer_recommended','پیشنهاد خریداران'],
-  ['best_selling','پرفروش‌ترین'],
-  ['popular','محبوب‌ترین'],
-  ['rating','بیشترین امتیاز'],
-  ['reviews','بیشترین نظر'],
-  ['price_asc','ارزان‌ترین'],
-  ['price_desc','گران‌ترین']
+  ['newest',t('shop.newest')],
+  ['buyer_recommended',t('shop.buyerRecommended')],
+  ['best_selling',t('shop.bestSelling')],
+  ['popular',t('shop.popular')],
+  ['rating',t('shop.bestRated')],
+  ['reviews',t('shop.mostReviewed')],
+  ['price_asc',t('shop.priceLow')],
+  ['price_desc',t('shop.priceHigh')]
  ];
  const sortMarkup=sortOptions.map(([v,l])=>'<option value="'+v+'" '+(sort===v?'selected':'')+'>'+l+'</option>').join('');
  const categoryMarkup=state.categories.map(cat=>{
   const id=String(cat.id||'');
-  return '<label class="check-option shop-category-option"><input class="cat-check" type="checkbox" data-id="'+escapeHtml(id)+'" '+(selectedCategories.has(id)?'checked':'')+'><span class="check-box" aria-hidden="true"></span><span>'+escapeHtml(cat.name||'بدون نام')+'</span></label>';
+  return '<label class="check-option shop-category-option"><input class="cat-check" type="checkbox" data-id="'+escapeHtml(id)+'" '+(selectedCategories.has(id)?'checked':'')+'><span class="check-box" aria-hidden="true"></span><span>'+escapeHtml(cat.name||t('shop.categoryNoName'))+'</span></label>';
  }).join('');
  const ratingMarkup=['0','4','3','2'].map(v=>{
-  const label=v==='0'?'همه امتیازها':v+' ستاره و بیشتر';
+  const label=v==='0'?t('shop.allRatings'):v+' '+t('shop.ratingAndMore');
   return '<label class="check-option shop-rating-option"><input type="radio" name="min-rating" value="'+v+'" '+(Number(minRating)===Number(v)?'checked':'')+'><span class="radio-box" aria-hidden="true"></span><span>'+label+'</span></label>';
  }).join('');
- const priceText=v=>fa(Math.max(0,Number(v)||0))+' ریال';
+ const priceText=v=>fa(Math.max(0,Number(v)||0))+' '+t('product.rial');
  const syncUrl=()=>{
   const p=new URLSearchParams();
   if(query)p.set('q',query);
@@ -532,11 +532,11 @@ cat_gilas_religious:'<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/sv
   const slice=filteredItems.slice(start,offset);
   if(append){if(slice.length)results.insertAdjacentHTML('beforeend',slice.map(productCard).join(''))}
   else results.innerHTML=slice.map(productCard).join('');
-  const count=document.querySelector('#results-count');if(count)count.textContent=fa(filteredItems.length)+' اثر';
+  const count=document.querySelector('#results-count');if(count)count.textContent=fa(filteredItems.length)+' '+t('shop.results');
   const empty=document.querySelector('#empty');if(empty)empty.hidden=filteredItems.length!==0;
   const more=document.querySelector('#load-more');done=offset>=filteredItems.length;if(more)more.hidden=done;
   const status=document.querySelector('#load-status');
-  if(status)status.textContent=filteredItems.length?(done?'همه آثار این فهرست نمایش داده شد.':'با اسکرول ادامه دهید یا «نمایش آثار بیشتر» را بزنید.'):'با این فیلترها اثری پیدا نشد.';
+  if(status)status.textContent=filteredItems.length?(done?t('shop.allShown'):t('shop.continue')):t('shop.noMatch');
   startFlashTimers(results);
  };
  let refresh=()=>{
@@ -604,10 +604,10 @@ cat_gilas_religious:'<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/sv
  }));
  const updateControlIndicators=()=>{
   const set=(id,active,label)=>{const el=document.querySelector(id);if(!el)return;el.classList.toggle('has-active',!!active);el.querySelector('.shop-control-indicator')?.classList.toggle('is-active',!!active);if(active)el.dataset.activeLabel=label||'فعال';else delete el.dataset.activeLabel};
-  set('#shop-search-control',!!query,'جستجو فعال');
-  set('#shop-category-control',selectedCategories.size>0,fa(selectedCategories.size)+' دسته');
-  set('#shop-filter-control',minPrice>priceFloor||maxPrice<priceCeiling||!!minRating,'فیلتر فعال');
-  set('#shop-sort-control',sort!=='newest','مرتب‌سازی تغییر کرده');
+  set('#shop-search-control',!!query,t('shop.activeSearch'));
+  set('#shop-category-control',selectedCategories.size>0,fa(selectedCategories.size)+' '+t('shop.activeCategory'));
+  set('#shop-filter-control',minPrice>priceFloor||maxPrice<priceCeiling||!!minRating,t('shop.activeFilter'));
+  set('#shop-sort-control',sort!=='newest',t('shop.activeSort'));
  };
  const originalRefresh=refresh;
  refresh=()=>{originalRefresh();updateControlIndicators()};
