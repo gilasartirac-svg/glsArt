@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
+import {readFile,readdir} from 'node:fs/promises';
 const locales=['fa','en','tr','ar'];
 const dicts={};
 for(const l of locales)dicts[l]=JSON.parse(await readFile('frontend/public/i18n/'+l+'.json','utf8'));
@@ -23,12 +23,14 @@ function add(s){
  if(/^(?:[۰-۹]+|[+−×·٪\s]+)$/.test(s))return;
  if(!faValues.has(s))gaps.add(s);
 }
-for(const [file,source] of sources){\nfor(const tm of source.split('`').filter((_,i)=>i%2===1)){
- const tpl=tm.replace(/\$\{[\s\S]*?\}/g,' ');
- for(const m of tpl.matchAll(/>([^<>\r\n]{2,180})</g))add(m[1]);
- for(const m of tpl.matchAll(/(?:placeholder|title|aria-label|alt)=(['"])(.*?)\1/g))add(m[2]);
+for(const [file,source] of sources){
+ for(const tm of source.split('`').filter((_,i)=>i%2===1)){
+  const tpl=tm.replace(/\$\{[\s\S]*?\}/g,' ');
+  for(const m of tpl.matchAll(/>([^<>\r\n]{2,180})</g))add(m[1]);
+  for(const m of tpl.matchAll(/(?:placeholder|title|aria-label|alt)=(['"])(.*?)\1/g))add(m[2]);
+ }
+ for(const m of source.matchAll(/\b(?:alert|confirm)\s*\(\s*['"]([^'"]+)['"]/g))add(m[1]);
 }
-for(const m of source.matchAll(/\b(?:alert|confirm)\s*\(\s*['"]([^'"]+)['"]/g))add(m[1]);\n}\n}
 test('phase 12: every detected static user-facing Persian string is registered in i18n',()=>{
- assert.equal(gaps.size,0,'Unregistered user-facing Persian strings: '+gaps.size+'\\n'+[...gaps].slice(0,120).join('\\n'));
+ assert.equal(gaps.size,0,'Unregistered user-facing Persian strings: '+gaps.size+'\n'+[...gaps].slice(0,120).join('\n'));
 });
