@@ -156,20 +156,22 @@
 - ☐ تست Server-authoritative pricing/payment
 
 ### فاز 6 — Authentication / Account
-- ☐ فاز 6 کامل
-- ☐ Login
-- ☐ OTP
-- ☐ Mobile number
-- ☐ Profile
-- ☐ Orders
-- ☐ Favorites
-- ☐ Rewards
-- ☐ Referral
-- ☐ Notifications
-- ☐ Account messages
-- ☐ Logout
-- ☐ Session states
-- ☐ عدم تغییر بی‌دلیل منطق امنیتی Authentication
+- ☑ فاز 6 کامل
+- ☑ Login
+- ☑ OTP
+- ☑ Mobile number
+- ☑ Profile
+- ☑ Orders
+- ☑ Favorites
+- ☑ Rewards
+- ☑ Referral
+- ☑ Notifications
+- ☑ Account messages
+- ☑ Logout
+- ☑ Session states
+- ☑ عدم تغییر بی‌دلیل منطق امنیتی Authentication
+
+**خروجی فاز 6:** قرارداد Authentication/Account شامل SMS OTP، Session امن D1-backed، WebOTP، CSRF، Profile، Orders، Favorites، Rewards، Referral، Notifications، Logout و Session Hydration با Security Regression Tests تأیید شد.
 
 ### فاز 7 — Customer Support / CRM
 - ☐ فاز 7 کامل
