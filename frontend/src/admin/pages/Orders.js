@@ -1,6 +1,7 @@
 import {setupDataGrid} from '../components/Table.js';
 import {admin,api} from '../services/api.js?v=20260929-orders';
 import {openInvoice} from '../../invoice.js?v=20260929-invoice-4';
+const ADMIN_API=window.GILASART_API||((location.hostname==='gilasart.ir'||location.hostname==='www.gilasart.ir')?'https://api.gilasart.ir':'https://gilasartworker.gilasart-ir-ac.workers.dev');
 
 const STATUS_LABELS={
  PENDING:'در انتظار پرداخت',
@@ -110,7 +111,7 @@ export default function Orders(){
      </div>
      <section class="order-detail-section"><h4>اقلام سفارش</h4><div class="order-items-list">${items.map(x=>'<div class="order-item"><div><b>'+esc(x.name)+'</b><small>'+esc(x.sku||'')+' · تعداد '+esc(x.quantity)+'</small></div><strong>'+money(x.line_total_irt)+' تومان</strong></div>').join('')||'<div class="order-empty">آیتمی ثبت نشده است.</div>'}</div></section>
      <section class="order-detail-section"><h4>تاریخچه وضعیت</h4><div class="order-history">${history.length?history.map(h=>'<div class="order-history-row"><i></i><div><b>'+esc(statusLabel(h.to_status))+'</b><small>'+dateFa(h.changed_at)+(h.changed_by_name?' · توسط '+esc(h.changed_by_name):'')+'</small></div></div>').join(''):'<div class="order-empty">تاریخچه‌ای ثبت نشده است.</div>'}</div></section>
-     ${(p?.provider==='card_transfer'&&p?.receipt_status&&p.receipt_status!=='NONE')?'<section class="order-detail-section card-transfer-receipt-admin"><h4>فیش واریزی کارت به کارت</h4><div class="receipt-review-box"><div class="receipt-review-preview"><img src="'+api('/api/admin/orders/'+encodeURIComponent(o.id)+'/payment-receipt')+'" alt="فیش واریزی سفارش" loading="lazy"></div><div class="receipt-review-meta"><span>وضعیت: <b>'+esc(p.receipt_status)+'</b></span><span>حجم: '+money(p.receipt_size)+' بایت</span><span>ارسال: '+dateFa(p.receipt_uploaded_at)+'</span>'+(p.receipt_status==='PENDING_REVIEW'?'<button id="approve-card-receipt" class="btn primary" type="button">تأیید و ثبت پرداخت</button>':'<span class="ok">پرداخت تأیید شده است.</span>')+'</div></div></section>':''}
+     ${(p?.provider==='card_transfer'&&p?.receipt_status&&p.receipt_status!=='NONE')?'<section class="order-detail-section card-transfer-receipt-admin"><h4>فیش واریزی کارت به کارت</h4><div class="receipt-review-box"><div class="receipt-review-preview"><img src="'+ADMIN_API+'/api/admin/orders/'+encodeURIComponent(o.id)+'/payment-receipt'" alt="فیش واریزی سفارش" loading="lazy"></div><div class="receipt-review-meta"><span>وضعیت: <b>'+esc(p.receipt_status)+'</b></span><span>حجم: '+money(p.receipt_size)+' بایت</span><span>ارسال: '+dateFa(p.receipt_uploaded_at)+'</span>'+(p.receipt_status==='PENDING_REVIEW'?'<button id="approve-card-receipt" class="btn primary" type="button">تأیید و ثبت پرداخت</button>':'<span class="ok">پرداخت تأیید شده است.</span>')+'</div></div></section>':''}
      ${o.city||o.address?'<section class="order-detail-section"><h4>نشانی ارسال</h4><p class="order-address">'+esc([o.province,o.city,o.address].filter(Boolean).join('، '))+'</p></section>':''}`;
    }catch(e){detail.innerHTML='<div class="order-detail-empty"><strong>جزئیات سفارش دریافت نشد.</strong><p>'+esc(e.message||'خطای سرور')+'</p></div>';}
   }
