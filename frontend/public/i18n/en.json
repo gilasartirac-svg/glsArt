@@ -149,6 +149,20 @@
     "header.pointsSuffix": "points",
     "cart.count": "{{count}} artworks in cart",
     "account.login": "Login",
-    "account.profile": "User profile"
+    "account.profile": "User profile",
+    "header.theme": "Change display mode",
+    "header.themeTitle": "Day / Night",
+    "header.logoAria": "GilasArt, home page",
+    "header.cartCount": "{{count}} artworks in cart",
+    "header.social": "Contact & Social",
+    "header.serviceLinks": "Service links",
+    "header.menu": "Main menu",
+    "header.openMenu": "Open main menu",
+    "header.closeMenu": "Close main menu",
+    "header.language": "Language",
+    "header.languageLabel": "Choose language",
+    "update.close": "Close",
+    "update.nativeAndroid": "Android",
+    "update.nativeIos": "iOS"
   }
 }
