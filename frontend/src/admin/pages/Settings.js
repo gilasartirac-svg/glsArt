@@ -52,6 +52,15 @@ export default function Settings(){
   </div>
 
   <div class="panel">
+   <div class="sectionhead"><div><h3>مرکز کنترل ورود و نشست</h3><p class="muted">ورود کاربر و مدیر، اعتبار Session و خروج از حساب از همین سیاست مرکزی کنترل می‌شود.</p></div></div>
+   <form id="auth-session-form" class="form">
+    <div class="form-grid"><label>مدت اعتبار Session (روز)<input name="auth_session_ttl_days" type="number" min="1" max="90" step="1" inputmode="numeric"></label></div>
+    <div class="notice">مقدار مجاز ۱ تا ۹۰ روز است و برای Sessionهای جدید اعمال می‌شود.</div>
+    <button class="btn primary">ذخیره سیاست ورود</button>
+   </form>
+  </div>
+
+  <div class="panel">
    <div class="sectionhead"><div><h3>نماد اعتماد الکترونیکی</h3><p class="muted">کد رسمی ارائه‌شده توسط شرکت به‌صورت ثابت در Footer سایت قرار می‌گیرد.</p></div></div>
    <div class="enamad-admin-preview">
     <div class="enamad-code-label">کد نماد</div>
@@ -71,6 +80,7 @@ export async function mount(){
   const d=await api('/api/admin/settings');
   (d.items||[]).forEach(x=>map[x.key]=x.value);
   document.querySelectorAll('#seo-form [name]').forEach(e=>{e.value=map[e.name]||''});
+  const sessionDays=document.querySelector('#auth-session-form [name="auth_session_ttl_days"]');if(sessionDays)sessionDays.value=map.auth_session_ttl_days||'30';
   renderSocialLinks(normalizeLinks(map.footer_social_links));
  }catch(e){
   if(error)error.textContent=e.message||'تنظیمات قابل دریافت نیست.';
@@ -84,6 +94,8 @@ export async function mount(){
   for(const k of ['site_name','site_description','seo_title','seo_description','seo_keywords','og_image'])b[k]=String(f.get(k)||'');
   try{await api('/api/admin/settings',{method:'PUT',body:JSON.stringify(b)});alert('تنظیمات عمومی و SEO ذخیره شد')}catch(x){alert(x.message)}
  });
+
+ document.querySelector('#auth-session-form')?.addEventListener('submit',async e=>{e.preventDefault();const n=Number(new FormData(e.currentTarget).get('auth_session_ttl_days'));if(!Number.isInteger(n)||n<1||n>90){alert('مدت اعتبار باید بین ۱ تا ۹۰ روز باشد.');return}try{await api('/api/admin/settings',{method:'PUT',body:JSON.stringify({auth_session_ttl_days:n})});alert('سیاست اعتبار Session ذخیره شد.')}catch(x){alert(x.message)}});
 
  document.querySelector('#social-add')?.addEventListener('click',()=>addSocialRow({id:'instagram',label:'اینستاگرام',url:'',active:true,sort:document.querySelectorAll('.social-link-row').length}));
  document.querySelector('#social-save')?.addEventListener('click',async()=>{
