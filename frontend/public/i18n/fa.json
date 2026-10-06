@@ -193,6 +193,7 @@
     "home.orderText": "اطلاعات تحویل را ثبت کرده و سفارش را تکمیل کنید.",
     "home.processDiscover": "کشف",
     "home.processChoose": "انتخاب",
-    "home.processOrder": "سفارش"
+    "home.processOrder": "سفارش",
+    "home.heroView": "مشاهده اثر منتخب"
   }
 }
