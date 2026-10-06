@@ -19,6 +19,21 @@ jobs:
         run: node --check frontend/src/app.js
       - name: Validate Worker module
         run: cp worker/src/index.js /tmp/gilasart-worker.mjs && node --check /tmp/gilasart-worker.mjs
+      - name: Validate four-locale JSON contract
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const locales=['fa','ar','en','tr'];
+          const docs=Object.fromEntries(locales.map(l=>[l,JSON.parse(fs.readFileSync(`frontend/public/i18n/${l}.json`,'utf8'))]));
+          const base=Object.keys(docs.fa.strings).sort().join('|');
+          for(const l of locales){
+            if(docs[l].version!==1||docs[l].locale!==l)throw new Error('invalid locale metadata: '+l);
+            if(!['fa','ar'].includes(l)&&docs[l].direction!=='ltr')throw new Error('invalid direction: '+l);
+            if(['fa','ar'].includes(l)&&docs[l].direction!=='rtl')throw new Error('invalid direction: '+l);
+            if(Object.keys(docs[l].strings).sort().join('|')!==base)throw new Error('i18n key mismatch: '+l);
+          }
+          NODE
       - name: Validate mobile release and PWA assets
         run: |
           set -euo pipefail
