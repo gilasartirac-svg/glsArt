@@ -90,26 +90,28 @@
 
 **خروجی فاز 2:** تمام متن‌های User-facing صفحه Home شامل Hero، معرفی، مجموعه‌ها، آثار منتخب، پیشنهادهای محدود، CTAها، بخش آخرین آثار، مسیر خرید و وضعیت‌های پویا به چهار JSON متصل شدند. داده‌های محصول و نام دسته‌بندی‌ها به‌عنوان Product/Content Data ترجمه خودکار نمی‌شوند. Quality Gate اختصاصی Home نیز برای وجود کلیدها در هر چهار زبان و حذف متن‌های سخت‌کدشده Home اضافه شد. چهار Workflow نهایی شامل Production Quality Gate، Security Regression Tests، Deploy Worker + D1 و Deploy Pages با موفقیت اجرا شدند.
 ### فاز 3 — Shop
-- ☐ فاز 3 کامل
-- ☐ عنوان فروشگاه
-- ☐ Search
-- ☐ Filters
-- ☐ Sorting
-- ☐ Price
-- ☐ Rating
-- ☐ Review count
-- ☐ View
-- ☐ Load more
-- ☐ Infinite scroll
-- ☐ Empty state
-- ☐ Loading
-- ☐ Error
-- ☐ Product card
-- ☐ Favorite
-- ☐ Cart
-- ☐ Pagination / navigation در صورت وجود
-- ☐ جداسازی قطعی UI text از Product Data
-- ☐ تست چهار زبان
+- ☑ فاز 3 کامل
+- ☑ عنوان فروشگاه
+- ☑ Search
+- ☑ Filters
+- ☑ Sorting
+- ☑ Price
+- ☑ Rating
+- ☑ Review count
+- ☑ View
+- ☑ Load more
+- ☑ Infinite scroll
+- ☑ Empty state
+- ☑ Loading
+- ☑ Error
+- ☑ Product card
+- ☑ Favorite
+- ☑ Cart
+- ☑ Pagination / navigation در صورت وجود
+- ☑ جداسازی قطعی UI text از Product Data
+- ☑ تست چهار زبان
+
+**خروجی فاز 3:** رابط کاربری Shop شامل جستجو، دسته‌بندی، فیلتر قیمت و امتیاز، مرتب‌سازی، شمارنده نتایج، Load More، Infinite Scroll، وضعیت‌های Loading/Empty/Error و Product Card به چهار زبان متصل شد. Product Data و نام واقعی آثار/دسته‌بندی‌ها ترجمه خودکار نمی‌شوند. قرارداد اختصاصی Shop i18n به Quality Gate افزوده شد و پس از اصلاح regressionهای موجود، چهار Workflow اصلی Production برای Commit نهایی با موفقیت اجرا شدند.
 
 ### فاز 4 — Product Detail
 - ☐ فاز 4 کامل
