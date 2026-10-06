@@ -26,7 +26,7 @@ test('Support ticket creation persists ticket and first customer message atomica
 });
 
 test('Support replies create customer notifications and remain bounded',()=>{
- assert.match(worker,/author_type,'admin'/);
+ assert.match(worker,/author_type,body\\).*'admin'/);
  assert.match(worker,/INSERT INTO user_notifications/);
  assert.match(worker,/type,title,message,reference_id/);
  assert.match(worker,/slice\(0,10000\)/);
