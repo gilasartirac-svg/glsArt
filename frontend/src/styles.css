@@ -3812,3 +3812,9 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
  .receipt-review-preview{max-width:100%;max-height:380px}
  .receipt-review-meta .btn{width:100%}
 }
+
+
+.language-switcher{position:fixed;top:14px;left:14px;z-index:9998;display:flex;align-items:center}
+.language-switcher select{min-width:92px;height:36px;padding:0 10px;border:1px solid var(--border,#c7c7c7);border-radius:10px;background:var(--panel,#fff);color:var(--text,#222);font:inherit;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+html[data-theme="dark"] .language-switcher select{background:#111827;color:#f4efe5;border-color:#3a4050}
+@media(max-width:700px){.language-switcher{top:10px;left:10px}.language-switcher select{min-width:82px;height:34px;font-size:.82rem}}
