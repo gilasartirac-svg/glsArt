@@ -6,7 +6,17 @@ async function visitorHeartbeat(){if(!visitorSessionKey)return;try{await fetch(A
 visitorHeartbeat();setInterval(visitorHeartbeat,60000);
 
 let csrfToken='';
+let authSession=null;
+let authSyncTimer=null;
+let authChannel=null;
 let state={products:[],categories:[],user:null,roles:[],permissions:[],cart:null,cartCount:0,points:0,rewards:null,settings:{},meLoadedAt:0};
+try{authChannel='BroadcastChannel' in window?new BroadcastChannel('gilasart-auth'):null}catch{authChannel=null}
+function clearAuthState(){state.user=null;state.roles=[];state.permissions=[];state.rewards=null;state.points=0;state.meLoadedAt=0;authSession=null;csrfToken='';clearInterval(notificationTimer);notificationTimer=null}
+function syncAuthStateFromSession(d){state.user=d?.user||null;state.roles=d?.roles||[];state.permissions=d?.permissions||[];csrfToken=d?.csrfToken||'';authSession=d?.session||null;state.meLoadedAt=Date.now()}
+try{authChannel?.addEventListener('message',e=>{if(e?.data?.type==='logout'){clearAuthState();if(location.pathname.includes('/admin'))location.reload();else if(location.pathname.includes('/account'))router()}})}catch{}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadMe({force:true}).catch(()=>{})});
+window.addEventListener('focus',()=>loadMe({force:true}).catch(()=>{}));
+authSyncTimer=setInterval(()=>{if(document.visibilityState==='visible')loadMe({force:true}).catch(()=>{})},60000);
 const SUPPORTED_LOCALES=['fa','en','tr','ar'];
 const LOCALE_META={fa:{label:'فارسی',dir:'rtl'},en:{label:'English',dir:'ltr'},tr:{label:'Türkçe',dir:'ltr'},ar:{label:'العربية',dir:'rtl'}};
 const COUNTRY_LOCALE={IR:'fa',TR:'tr',IQ:'ar',AE:'ar',SA:'ar',QA:'ar',KW:'ar',BH:'ar',OM:'ar',JO:'ar',EG:'ar',SY:'ar',LB:'ar',YE:'ar',PS:'ar'};
@@ -247,7 +257,7 @@ async function api(path,opt={}){
   const r=await fetch(API+path,{credentials:'include',cache:'no-store',headers,...opt});
   const raw=await r.text();
   let d={};try{d=raw?JSON.parse(raw):{}}catch{}
-  if(!r.ok){const e=new Error(d.error||d.message||(r.status===404?'صفحه پیدا نشد':'خطا در ارتباط با سرویس'));e.status=r.status;throw e}
+  if(!r.ok){if(r.status===401||r.status===403)clearAuthState();const e=new Error(d.error||d.message||(r.status===404?'صفحه پیدا نشد':'خطا در ارتباط با سرویس'));e.status=r.status;throw e}
   const requiredShape=path=>{
    if(path==='/api/health')return d&&d.ok===true&&d.db===true;
    if(/^\/api\/products\?/.test(path)||path==='/api/products')return Array.isArray(d?.items);
@@ -752,7 +762,7 @@ function startNotificationPolling(){
  clearInterval(notificationTimer);notificationTimer=null;
  if(state.user){pollNotifications();notificationTimer=setInterval(()=>{pollNotifications()},10000)}
 }
-async function loadMe({force=false}={}){const now=Date.now();if(!force&&state.meLoadedAt&&now-state.meLoadedAt<30000)return {user:state.user,roles:state.roles,permissions:state.permissions};try{const d=await api('/api/me');state.user=d.user||null;state.roles=d.roles||[];state.permissions=d.permissions||[];csrfToken=d.csrfToken||csrfToken;state.meLoadedAt=Date.now();if(state.user){if(!state.rewards){try{const rewardsResult=await api('/api/rewards');state.rewards=rewardsResult;state.points=Number(rewardsResult.balance||0)}catch{state.rewards=null;state.points=0}}syncCartBadge().catch(()=>{});}else{state.rewards=null;state.points=0;updateCartBadge(0)}startNotificationPolling();return d}catch(e){return null}}
+async function loadMe({force=false}={}){const now=Date.now();if(!force&&state.meLoadedAt&&now-state.meLoadedAt<30000)return {user:state.user,roles:state.roles,permissions:state.permissions};try{const d=await api('/api/me');syncAuthStateFromSession(d);if(state.user){if(!state.rewards){try{const rewardsResult=await api('/api/rewards');state.rewards=rewardsResult;state.points=Number(rewardsResult.balance||0)}catch{state.rewards=null;state.points=0}}syncCartBadge().catch(()=>{});}else{state.rewards=null;state.points=0;updateCartBadge(0)}startNotificationPolling();return d}catch(e){return null}}
 async function cart(){
  await loadMe();
  if(!state.user){
@@ -890,7 +900,7 @@ async function account(){
    }).join('')+(terminal?'<div class="track-terminal"><strong>'+escapeHtml(statusLabels[st]||st)+'</strong><span>این سفارش ادامه مسیر عادی ارسال را طی نمی‌کند.</span></div>':'')+'</div>';
   };
   layout('<section class="wrap page account-page"><div class="profile-panel panel"><div class="profile-head"><div class="profile-avatar">'+icon('user')+'</div><div><span class="eyebrow">MY ACCOUNT</span><h1>پروفایل کاربر</h1><p class="muted">مدیریت سفارش‌ها، فاکتورها و پیگیری مسیر تحویل تابلو</p></div></div><div class="profile-data"><div><span>شماره موبایل</span><strong>'+escapeHtml(state.user.mobile)+'</strong></div><div><span>نام</span><strong>'+escapeHtml(state.user.name||'کاربر گیلاس آرت')+'</strong></div></div><div class="toolbar"><a class="btn ghost" href="'+routeUrl('/support')+'">'+icon('support')+' تیکت پشتیبانی</a>'+ (isAdminUser()?'<a class="btn primary" href="'+routeUrl('/admin')+'">کنترل پنل</a>':'') +'<button class="btn ghost" id="logout">'+icon('close')+' خروج</button></div></div><section class="orders-profile-section"><div class="sectionhead"><div><span class="eyebrow">MY ORDERS</span><h2>سفارش‌های من</h2><p class="muted">از ثبت سفارش تا تحویل تابلو، همه مراحل را یکجا ببینید.</p></div><span class="orders-profile-count">'+fa(orders.length)+' سفارش</span></div><div id="account-orders">'+(orders.length?orders.map(o=>'<article class="customer-order-card" data-order-id="'+escapeHtml(o.id)+'"><div class="customer-order-head"><div><span class="customer-order-number">سفارش #'+escapeHtml(String(o.id).slice(-8))+'</span><h3>'+escapeHtml(o.recipient_name||o.name||'سفارش گیلاس آرت')+'</h3><small>'+date(o.created_at)+'</small></div><div class="customer-order-actions"><span class="order-status-badge status-'+escapeHtml(String(o.status||'').toLowerCase())+'">'+escapeHtml(statusLabels[o.status]||o.status)+'</span><button class="btn ghost account-invoice" type="button" data-id="'+escapeHtml(o.id)+'" '+(String(o.status)==='PENDING'?'disabled aria-disabled="true"':'')+'>'+ (String(o.status)==='PENDING'?'فاکتور پس از تأیید پرداخت فعال می‌شود.':'فاکتور فروش') +'</button></div></div>'+timeline(o)+'<div class="customer-order-summary"><span>'+fa((o.items||[]).reduce((n,x)=>n+Number(x.quantity||0),0))+' قلم</span><span>'+fa(o.total_irt)+' ریال</span><span>'+escapeHtml(o.address_mobile||o.mobile||'-')+'</span></div></article>').join(''):'<div class="panel empty-orders"><strong>هنوز سفارشی ثبت نکرده‌اید.</strong><p class="muted">آثار گیلاس آرت را ببینید و اولین انتخاب خود را ثبت کنید.</p><a class="btn primary" href="'+routeUrl('/shop')+'">مشاهده فروشگاه</a></div>')+'</div></section><section class="rewards-account-card panel"><div><span class="eyebrow">GILAS ART REWARDS</span><h2>باشگاه امتیاز</h2><p class="muted">امتیاز فعلی شما: <strong class="rewards-balance-inline">'+fa(state.points)+'</strong> — امتیازها را به کوپن یک‌بارمصرف تا ۲۰٪ تبدیل کنید.</p></div><a class="btn primary" href="'+routeUrl('/rewards')+'">مشاهده و تبدیل امتیاز</a></section></section>');
-  document.querySelector('#logout').onclick=async()=>{await api('/api/auth/logout',{method:'POST',headers:{'x-csrf-token':csrf()}});state.user=null;state.roles=[];state.permissions=[];navigate('/shop')};
+  document.querySelector('#logout').onclick=async()=>{try{await api('/api/auth/logout',{method:'POST',headers:{'x-csrf-token':csrf()}})}finally{clearAuthState();try{authChannel?.postMessage({type:'logout'})}catch{}navigate('/shop')}};
   document.querySelectorAll('.account-invoice').forEach(b=>b.onclick=()=>{if(b.disabled)return;const o=orders.find(x=>x.id===b.dataset.id);if(o)invoiceModule.openInvoice(o,invoiceSettings)});
   const invoiceFromLink=new URLSearchParams(location.search||'').get('invoice');
   if(invoiceFromLink){const o=orders.find(x=>x.id===invoiceFromLink);if(o&&['PAID','PROCESSING','SHIPPED','DELIVERED'].includes(String(o.status||'').toUpperCase()))setTimeout(()=>invoiceModule.openInvoice(o,invoiceSettings),120);}
