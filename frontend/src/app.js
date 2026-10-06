@@ -231,7 +231,8 @@ function layout(content){
 }
 function routeBase(){return location.pathname.startsWith('/glsArt/')||location.pathname==='/glsArt'?'/glsArt':''}
 function routeUrl(path){const p=String(path||'/');return routeBase()+(p.startsWith('/')?p:'/'+p)}
-function navigate(path,{replace=false}={}){const raw=String(path||'/');const target=raw.startsWith('#/')?raw.slice(1):raw;const url=routeUrl(target||'/');if(url===location.pathname+location.search&&!routeInFlight)return;if(replace)history.replaceState({},'',url);else history.pushState({},'',url);if(routeInFlight&&routeInFlightTarget===url)return;routeInFlightTarget=url;routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget=''});}
+function scrollRouteTop(){try{window.scrollTo({top:0,left:0,behavior:'auto'});document.documentElement.scrollTop=0;document.body.scrollTop=0}catch{try{window.scrollTo(0,0)}catch{}}}
+function navigate(path,{replace=false}={}){const raw=String(path||'/');const target=raw.startsWith('#/')?raw.slice(1):raw;const url=routeUrl(target||'/');if(url===location.pathname+location.search&&!routeInFlight)return;if(replace)history.replaceState({},'',url);else history.pushState({},'',url);scrollRouteTop();if(routeInFlight&&routeInFlightTarget===url)return;routeInFlightTarget=url;routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget='';scrollRouteTop()});}
 window.GilasArtRouter={navigate};
 function productUrl(slug){const s=String(slug||'').trim();if(!s)return routeUrl('/shop');return routeUrl('/'+encodeURIComponent(s))}
 function productCard(p){
@@ -700,6 +701,14 @@ async function cart(){
  render(d);bind();
 }const ORDER_STATUS_LABELS_PUBLIC={PENDING:'در انتظار پرداخت',PAID:'پرداخت شد',PROCESSING:'در حال پردازش',SHIPPED:'ارسال شد',DELIVERED:'تحویل شد',CANCELLED:'لغو شد',FAILED:'ناموفق'};
 const orderStatusPublic=s=>ORDER_STATUS_LABELS_PUBLIC[String(s||'').toUpperCase()]||String(s||'نامشخص');
+async function compressReceiptImage(file,maxBytes=150*1024){
+ if(!file||!String(file.type||'').startsWith('image/'))throw new Error('فقط فایل تصویری مجاز است.');
+ if(file.size<=maxBytes)return file;
+ const img=await new Promise((resolve,reject)=>{const u=URL.createObjectURL(file),x=new Image();x.onload=()=>{URL.revokeObjectURL(u);resolve(x)};x.onerror=()=>{URL.revokeObjectURL(u);reject(new Error('تصویر قابل پردازش نیست.'))};x.src=u});
+ const canvas=document.createElement('canvas');let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;const maxSide=1800;const scale=Math.min(1,maxSide/Math.max(w,h));w=Math.max(1,Math.round(w*scale));h=Math.max(1,Math.round(h*scale));
+ for(let attempt=0;attempt<10;attempt++){canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d',{alpha:false});ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);const quality=Math.max(.35,.88-attempt*.06);const blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',quality));if(!blob)break;if(blob.size<=maxBytes)return blob;w=Math.max(480,Math.round(w*.86));h=Math.max(480,Math.round(h*.86));}
+ throw new Error('حجم تصویر پس از فشرده‌سازی هنوز بیشتر از ۱۵۰ کیلوبایت است.');
+}
 function invoiceHtmlData(d){
  const o=d.order||{},items=d.items||[],p=d.payment||{},cfg=d.invoice||{};
  const paid=['PAID','PROCESSING','SHIPPED','DELIVERED'].includes(String(o.status||'').toUpperCase())||String(p.status||'').toUpperCase()==='PAID'; const title=paid?'فاکتور فروش':'پیش فاکتور فروش';
@@ -906,6 +915,7 @@ async function rewardsPage(){
 async function checkout(){navigate('/cart')}
 
 async function router(){
+ scrollRouteTop();
  const base=routeBase();
  let cleanPath=location.pathname.startsWith(base)?location.pathname.slice(base.length):location.pathname;
  cleanPath=cleanPath.replace(/^\/+|\/+$/g,'');
@@ -953,7 +963,13 @@ async function router(){
    if(p[1]==='manual'){
     try{
      const d=await api('/api/orders/'+encodeURIComponent(order)),card=(await api('/api/payment/options')).methods?.find(x=>x.id==='card_transfer')?.card||{};
-     layout('<section class="wrap page"><div class="panel payment-manual-panel"><span class="eyebrow">CARD TRANSFER</span><h1>پرداخت کارت به کارت</h1><p>لطفاً مبلغ <strong>'+fa(d.order?.total_irt||0)+' ریال</strong> را به حساب زیر منتقل کنید. پس از بررسی و تأیید، فاکتور فروش برای شما فعال خواهد شد.</p><div class="payment-card-transfer"><div>بانک: '+escapeHtml(card.bankName||'—')+'</div><div>به نام: '+escapeHtml(card.accountHolder||'—')+'</div><div dir="ltr">شماره کارت: '+escapeHtml(card.cardNumber||'—')+'</div><div dir="ltr">شبا: '+escapeHtml(card.iban||'—')+'</div><p>'+escapeHtml(card.instructions||'')+'</p></div><p class="muted">شماره سفارش: '+escapeHtml(order)+'</p><a class="btn primary" href="/account">مشاهده سفارش</a></div></section>');
+     const receiptStatus=String(d.payment?.receipt_status||'').toUpperCase();
+     const receiptLabel=receiptStatus==='PENDING_REVIEW'?'رسید شما ارسال شده و در انتظار بررسی مدیر است.':receiptStatus==='APPROVED'?'رسید شما تأیید شده است؛ فاکتور فروش فعال است.':'';
+     layout('<section class="wrap page"><div class="panel payment-manual-panel"><span class="eyebrow">CARD TRANSFER</span><h1>پرداخت کارت به کارت</h1><p>لطفاً مبلغ <strong>'+fa(d.order?.total_irt||0)+' ریال</strong> را به حساب زیر منتقل کنید. سپس تصویر فیش واریزی را ارسال کنید تا توسط مدیر گیلاس آرت بررسی شود.</p><div class="payment-card-transfer"><div>بانک: '+escapeHtml(card.bankName||'—')+'</div><div>به نام: '+escapeHtml(card.accountHolder||'—')+'</div><div dir="ltr">شماره کارت: '+escapeHtml(card.cardNumber||'—')+'</div><div dir="ltr">شبا: '+escapeHtml(card.iban||'—')+'</div><p>'+escapeHtml(card.instructions||'')+'</p></div><p class="muted">شماره سفارش: '+escapeHtml(order)+'</p><div class="payment-receipt-box"><input id="payment-receipt-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><button class="btn primary" id="payment-receipt-upload" type="button" '+(receiptStatus==='PENDING_REVIEW'||receiptStatus==='APPROVED'?'disabled':'')+'>'+(receiptStatus==='PENDING_REVIEW'?'رسید ارسال شده':receiptStatus==='APPROVED'?'رسید تأیید شده':'ارسال فیش واریزی')+'</button><small>فقط یک تصویر؛ سیستم تصویر را به حداکثر ۱۵۰ کیلوبایت فشرده می‌کند.</small><div id="payment-receipt-message" aria-live="polite">'+(receiptLabel?'<span class="ok">'+escapeHtml(receiptLabel)+'</span>':'')+'</div></div><a class="btn ghost" href="/account">مشاهده سفارش</a></div></section>');
+     const uploadBtn=document.querySelector('#payment-receipt-upload'),fileInput=document.querySelector('#payment-receipt-file'),uploadMsg=document.querySelector('#payment-receipt-message');
+     uploadBtn?.addEventListener('click',()=>fileInput?.click());
+     fileInput?.addEventListener('change',async()=>{const file=fileInput.files?.[0];if(!file)return;uploadBtn.disabled=true;uploadMsg.textContent='در حال فشرده‌سازی و ارسال فیش…';try{const blob=await compressReceiptImage(file,150*1024);const fd=new FormData();fd.append('receipt',blob,'receipt.jpg');const r=await api('/api/orders/'+encodeURIComponent(order)+'/payment-receipt',{method:'POST',body:fd,headers:{'x-csrf-token':csrf()}});uploadMsg.innerHTML='<span class="ok">'+escapeHtml(r.message||'فیش با موفقیت ارسال شد. رسید شما بزودی توسط مدیر بررسی و نتیجه پرداخت اعلام می‌گردد.')+'</span>';uploadBtn.textContent='رسید ارسال شده';}catch(e){uploadMsg.innerHTML='<span class="error">'+escapeHtml(e.message||'ارسال فیش انجام نشد.')+'</span>';uploadBtn.disabled=false;}finally{fileInput.value='';}});
+
     }catch(e){layout('<section class="wrap page"><div class="panel"><p class="error">'+escapeHtml(e.message||'خطا')+'</p></div></section>')}
     return;
    }
