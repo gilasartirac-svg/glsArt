@@ -1784,7 +1784,7 @@ All four files must contain the **same variable/key set**. Only the values chang
 
 ### Runtime handling
 
-> **وضعیت تکمیل زیرپروژه:** زیرساخت چهار JSON، مسیرهای locale، Cookie ترجیح، تشخیص محافظه‌کارانه و قرارداد Quality Gate پیاده شده است؛ اما تا زمانی که تمام متن‌های User-facing عمومی و Admin به dictionaryهای چهارگانه منتقل و برای هر چهار زبان بازبینی نشوند، این زیرپروژه Production از نظر محتوای ترجمه‌ای Done نیست.
+> **وضعیت تکمیل زیرپروژه:** Phase 12 audit تکمیل شده است: چهار dictionary هم‌کلید `fa/en/tr/ar` هستند، متن‌های User-facing عمومی و Admin تحت audit استاتیک قرار گرفته‌اند، زبان دستی مشتری با پرچم و انتخاب چهارگانه فعال شده، و Security Regression/Production Quality Gate/Deployهای Production باید قبل از اعلام Done موفق باشند.
 
 The public application loads the dictionary for the locale in the URL, sets `document.documentElement.lang` and `dir`, and applies the dictionary to rendered UI text/ARIA/placeholder/title/alt values. The locale path is authoritative:
 
