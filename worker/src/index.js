@@ -997,7 +997,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const png=data.length>=8&&data[0]===0x89&&data[1]===0x50&&data[2]===0x4e&&data[3]===0x47;
   const webp=data.length>=12&&data[0]===0x52&&data[1]===0x49&&data[2]===0x46&&data[3]===0x46&&data[8]===0x57&&data[9]===0x45&&data[10]===0x42&&data[11]===0x50;
   if(!jpeg&&!png&&!webp)return json({error:'invalid_image_content'},400);
-  await env.DB.prepare("UPDATE payments SET receipt_status='PENDING_REVIEW',receipt_mime=?,receipt_size=?,receipt_data=?,receipt_uploaded_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE id=? AND receipt_status='NONE'").bind(type,data.length,data,order.payment_id).run();
+  await env.DB.prepare("UPDATE payments SET receipt_status='PENDING_REVIEW',receipt_rejection_reason=NULL,receipt_mime=?,receipt_size=?,receipt_data=?,receipt_uploaded_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE id=? AND receipt_status IN ('NONE','REJECTED')").bind(type,data.length,data,order.payment_id).run();
   const saved=await env.DB.prepare('SELECT receipt_status,receipt_size FROM payments WHERE id=?').bind(order.payment_id).first();
   if(saved?.receipt_status!=='PENDING_REVIEW')return json({error:'receipt_already_submitted'},409);
   return json({ok:true,receiptStatus:saved.receipt_status,size:saved.receipt_size,message:'فیش با موفقیت ارسال شد. رسید شما بزودی توسط مدیر بررسی و نتیجه پرداخت اعلام می‌گردد.'});
@@ -1010,7 +1010,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const [items,history,pay]=await Promise.all([
    env.DB.prepare('SELECT * FROM order_items WHERE order_id=? ORDER BY id').bind(oid).all(),
    env.DB.prepare('SELECT h.*,u.name changed_by_name FROM order_status_history h LEFT JOIN users u ON u.id=h.changed_by_user_id WHERE h.order_id=? ORDER BY h.changed_at ASC').bind(oid).all(),
-   env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at,provider,receipt_status,receipt_mime,receipt_size,receipt_uploaded_at,receipt_reviewed_at FROM payments WHERE order_id=?').bind(oid).first()
+   env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at,provider,receipt_status,receipt_mime,receipt_size,receipt_uploaded_at,receipt_reviewed_at,receipt_rejection_reason FROM payments WHERE order_id=?').bind(oid).first()
   ]);
   return json({order:o,items:items.results||[],history:history.results||[],payment:pay||null,invoice:await invoiceSettings(env)});
  }
@@ -1286,6 +1286,20 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
  }
 
 
+ if(u.pathname.startsWith('/api/admin/orders/')&&u.pathname.endsWith('/payment-receipt/reject')&&req.method==='POST'){
+  if(!(await requirePermission(me,env,'orders.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+  const id=u.pathname.split('/')[4];if(!id)return json({error:'not_found'},404);
+  const p=await env.DB.prepare("SELECT p.id,p.provider,p.status,p.receipt_status,o.status order_status,o.user_id FROM payments p JOIN orders o ON o.id=p.order_id WHERE p.order_id=?").bind(id).first();
+  if(!p)return json({error:'not_found'},404);
+  if(p.provider!=='card_transfer')return json({error:'not_card_transfer'},400);
+  if(p.receipt_status!=='PENDING_REVIEW')return json({error:'receipt_not_pending'},409);
+  if(p.order_status!=='PENDING'||p.status==='PAID')return json({error:'order_not_pending'},409);
+  const b=await body(req),reason=String(b.reason||'').trim().slice(0,500);
+  if(!reason)return json({error:'rejection_reason_required'},400);
+  await env.DB.prepare("UPDATE payments SET receipt_status='REJECTED',receipt_rejection_reason=?,receipt_reviewed_at=CURRENT_TIMESTAMP,receipt_reviewed_by=?,updated_at=CURRENT_TIMESTAMP WHERE order_id=? AND receipt_status='PENDING_REVIEW'").bind(reason,me.id,id).run();
+  await audit(env,me,'admin.card_transfer.receipt.reject','order',id,{receiptStatus:'REJECTED',reason},req);
+  return json({ok:true,status:'PENDING',receiptStatus:'REJECTED',reason});
+ }
  if(u.pathname.startsWith('/api/admin/orders/')&&u.pathname.endsWith('/payment-receipt/approve')&&req.method==='POST'){
   if(!(await requirePermission(me,env,'orders.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
   const id=u.pathname.split('/')[4];if(!id)return json({error:'not_found'},404);
