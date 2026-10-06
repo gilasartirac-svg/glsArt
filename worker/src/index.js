@@ -537,7 +537,20 @@ async function proxyStorefrontImage(req,env,u){
   const h=new Headers(r.headers);h.set('cache-control','public, max-age=86400, s-maxage=86400');h.set('access-control-allow-origin','*');
   return new Response(r.body,{status:r.status,headers:h});
 }
-async function route(req,env){const u=new URL(req.url); if(u.pathname==='/api/locale'&&req.method==='GET'){const country=String(req.cf?.country||req.headers.get('CF-IPCountry')||'').toUpperCase();const accept=String(req.headers.get('Accept-Language')||'').toLowerCase();const countryMap={IR:'fa',TR:'tr',IQ:'ar',AE:'ar',SA:'ar',QA:'ar',KW:'ar',BH:'ar',OM:'ar',JO:'ar',EG:'ar',SY:'ar',LB:'ar',YE:'ar',PS:'ar'};let locale=countryMap[country]||'';if(!locale){for(const lang of accept.split(',').map(x=>x.trim().split(';')[0].split('-')[0])){if(['fa','ar','tr','en'].includes(lang)){locale=lang;break}}}if(!locale)locale='en';return json({locale,country:country||null,language:accept.split(',')[0]||null},200,{'cache-control':'no-store'});} if(u.pathname==='/api/storefront-image'){return proxyStorefrontImage(req,env,u)} if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req,env)});
+async function route(req,env){const u=new URL(req.url); if(u.pathname==='/api/locale'&&req.method==='GET'){
+ const country=String(req.cf?.country||req.headers.get('CF-IPCountry')||'').toUpperCase();
+ const accepted=String(req.headers.get('Accept-Language')||'').toLowerCase().split(',').map(x=>x.trim().split(';')[0].split('-')[0]).filter(Boolean);
+ const supported=new Set(['fa','ar','tr','en']);
+ const primary=accepted.find(x=>supported.has(x))||'';
+ // Persian is the safe default. A non-Iran country alone is never enough to infer a non-Persian user.
+ // We only select another language when geography and the browser's explicit language agree.
+ let locale='fa',confidence='default';
+ if(country && country!=='IR' && primary && primary!=='fa'){
+  const countryLocale={TR:'tr',IQ:'ar',AE:'ar',SA:'ar',QA:'ar',KW:'ar',BH:'ar',OM:'ar',JO:'ar',EG:'ar',SY:'ar',LB:'ar',YE:'ar',PS:'ar'}[country];
+  if(countryLocale===primary || (primary==='en' && !countryLocale)){locale=primary;confidence='country+language'}
+ }
+ return json({locale,country:country||null,language:primary||null,confidence},200,{'cache-control':'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800'});
+} if(u.pathname==='/api/storefront-image'){return proxyStorefrontImage(req,env,u)} if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req,env)});
  if(u.pathname==='/api/visitors/heartbeat'&&req.method==='POST'){
   const b=await body(req),key=String(b.sessionKey||'').replace(/[^A-Za-z0-9_-]/g,'').slice(0,80);
   if(key.length<16)return json({error:'invalid_session_key'},400);
