@@ -142,6 +142,13 @@
     "notFound.shop": "الدخول إلى المتجر",
     "notFound.home": "العودة إلى المعرض",
     "terms.loading": "جارٍ تحميل قوانين الموقع...",
-    "terms.unavailable": "قوانين الموقع غير متاحة حالياً."
+    "terms.unavailable": "قوانين الموقع غير متاحة حالياً.",
+    "header.homeAria": "جيلاس آرت، الصفحة الرئيسية",
+    "header.cartAria": "سلة التسوق",
+    "header.pointsTitle": "نقاطي",
+    "header.pointsSuffix": "نقطة",
+    "cart.count": "{{count}} عمل فني في سلة التسوق",
+    "account.login": "تسجيل الدخول",
+    "account.profile": "الملف الشخصي"
   }
 }
