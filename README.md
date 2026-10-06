@@ -1,865 +1,1463 @@
-I inspected the actual `gilasartirac-svg/glsArt` repository, especially `frontend/src/app.js`, `worker/src/index.js`, the D1 migrations, and `docs/SECURITY.md`. The authentication is **OTP-based, session-cookie-based authentication**, not JWT.
 
-## 1. Architecture
+# GilasArt — Production Architecture & Feature Reference
 
-The authentication components are:
-
-```text
-Browser / GitHub Pages
-        │
-        │ HTTPS + fetch(credentials:"include")
-        ▼
-Cloudflare Worker
-        │
-        ├── OTP generation/verification
-        ├── Session validation
-        ├── CSRF validation
-        ├── RBAC / permissions
-        └── API authorization
-        │
-        ▼
-Cloudflare D1
-        ├── users
-        ├── otp_challenges
-        ├── sessions
-        ├── roles / user_roles
-        ├── admin_roles
-        ├── admin_users
-        ├── permissions
-        └── audit_logs
-
-Worker ───────► Kavenegar
-                 SMS OTP
-```
-
-The frontend deliberately does **not** authenticate directly against D1 or Kavenegar. Everything sensitive goes through the Worker.
+> مرجع فنی و معماری زنده پروژه Production گیلاس آرت / GilasArt
+>
+> Repository: gilasartirac-svg/glsArt
+> Production: https://gilasart.ir
+> Public API: https://api.gilasart.ir
+> Cloudflare Worker: gilasartworker
+> D1: gilasartdatabase / binding: DB
+> Last audited: 2026-10-06
 
 ---
 
-# 2. Login starts in the frontend
+## 1. هدف و وضعیت پروژه
 
-The main account page in `frontend/src/app.js` asks for a mobile number.
+GilasArt یک گالری و فروشگاه آنلاین آثار هنری با معماری Serverless است. پروژه فقط یک Storefront ساده نیست و این لایه‌ها را در یک معماری واحد دارد:
 
-The important call is essentially:
+- وب‌سایت عمومی و چندزبانه
+- Home و Landing Gallery
+- فروشگاه و کاتالوگ آثار
+- جستجو، فیلتر و مرتب‌سازی
+- صفحه جزئیات محصول
+- ویژگی و گزینه اختصاصی هر محصول
+- سبد خرید
+- تخفیف تعدادی
+- Coupon و Discount
+- ثبت سفارش
+- پرداخت چندروشی
+- فاکتور
+- پرداخت کارت‌به‌کارت و بررسی فیش
+- حساب کاربری
+- آدرس و اطلاعات تحویل
+- علاقه‌مندی
+- Reviews و Like/Dislike
+- باشگاه امتیاز
+- Referral
+- Notification
+- پشتیبانی و Ticket/CRM
+- FAQ
+- CMS برای About، Contact، News و Articles
+- کنترل پنل کامل مدیریت
+- مدیریت محصول، ویژگی، گزینه، دسته‌بندی و موجودی
+- مدیریت سفارش و پرداخت
+- RBAC و Permission Matrix
+- Audit Log
+- Reports
+- Visitor Analytics
+- SEO
+- PWA و Service Worker
+- Public Storefront Snapshot برای کاهش مصرف D1
+- CI/CD و Quality/Security Gates
 
-```js
-await api('/api/auth/request-otp', {
-    method: 'POST',
-    body: JSON.stringify({
-        mobile: document.querySelector('#mobile').value
-    })
-});
-```
+اصل معماری:
 
-The common `api()` function uses:
+    Frontend
+        |
+        v
+    Cloudflare Worker
+        |
+        v
+    Cloudflare D1
 
-```js
-fetch(API + path, {
-    credentials: 'include',
-    cache: 'no-store',
-    headers,
-    ...opt
-});
-```
-
-That `credentials: 'include'` is important.
-
-It tells the browser to send/receive cookies with requests to the Worker.
-
-So the frontend **does not store a bearer token and attach**
-
-```http
-Authorization: Bearer ...
-```
-
-Instead, authentication is primarily represented by an HTTP-only session cookie.
+سرویس‌های حساس مانند Kavenegar و درگاه‌های پرداخت فقط از سمت Worker مصرف می‌شوند.
 
 ---
 
-# 3. Step 1 — Request OTP
+## 2. ساختار Repository
 
-The browser sends:
+    /
+    ├── .github/workflows/
+    │   ├── cloudflare-usage-guard.yml
+    │   ├── pages.yml
+    │   ├── production-quality-gate.yml
+    │   ├── security-tests.yml
+    │   ├── storefront-snapshot.yml
+    │   └── worker-deploy.yml
+    │
+    ├── database/
+    │   ├── migrations/
+    │   └── seed/
+    │
+    ├── docs/
+    │   ├── DEPLOYMENT.md
+    │   └── SECURITY.md
+    │
+    ├── frontend/
+    │   ├── public/
+    │   └── src/
+    │       ├── app.js
+    │       ├── index.html
+    │       ├── styles.css
+    │       ├── invoice.js
+    │       ├── shop/
+    │       └── admin/
+    │           ├── AdminApp.js
+    │           ├── router.js
+    │           ├── components/
+    │           ├── pages/
+    │           └── services/
+    │
+    ├── scripts/
+    │   └── build-frontend.mjs
+    ├── tests/
+    ├── worker/src/index.js
+    ├── package.json
+    ├── wrangler.toml
+    ├── CNAME
+    ├── 404.html
+    └── README.md
 
-```http
+---
+
+## 3. معماری Production
+
+    User / Web / PWA
+          |
+          v
+    GitHub Pages / Frontend
+          |
+          | HTTPS API
+          v
+    Cloudflare Worker
+    api.gilasart.ir
+          |
+          +----> Cloudflare D1
+          |
+          +----> Kavenegar
+          |
+          +----> ZarinPal
+          |
+          +----> NovinoPay
+
+Frontend منبع حقیقت موارد حساس نیست. قیمت نهایی، SKU، موجودی، اقلام سفارش، تخفیف، وضعیت پرداخت، دسترسی و گزینه‌های معتبر محصول باید توسط Backend تعیین شوند.
+
+---
+
+## 4. Frontend Routing
+
+Router اصلی در frontend/src/app.js قرار دارد.
+
+مسیرهای اصلی:
+
+| Route | کاربرد |
+|---|---|
+| / | صفحه اصلی |
+| /shop | فروشگاه |
+| /product/<slug> | جزئیات اثر |
+| /cart | سبد خرید و ثبت سفارش |
+| /account | حساب کاربری |
+| /rewards | باشگاه امتیاز |
+| /checkout | مسیر checkout فعلی |
+| /about | درباره ما |
+| /contact | تماس |
+| /news | اخبار |
+| /news/<slug> | خبر |
+| /articles | مقالات |
+| /articles/<slug> | مقاله |
+| /terms | قوانین |
+| /support | پشتیبانی |
+| /support/<id> | جزئیات تیکت |
+| /payment/manual?order=<id> | کارت‌به‌کارت |
+| /payment/success?order=<id> | پرداخت موفق |
+| /admin/... | کنترل پنل |
+
+Localeهای رسمی:
+
+- fa
+- en
+- tr
+- ar
+
+برای Locale از path، browser، local storage و API تشخیص استفاده می‌شود. Canonical، hreflang و x-default نیز مدیریت می‌شوند.
+
+Legacy hash route مانند #/shop به مسیر واقعی منتقل می‌شود.
+
+---
+
+## 5. Home
+
+Home از Public Storefront Snapshot استفاده می‌کند تا درخواست‌های غیرضروری به D1 کاهش پیدا کند.
+
+اجزای اصلی:
+
+- Hero Gallery
+- اثر منتخب
+- معرفی گالری
+- مجموعه‌ها و دسته‌بندی‌ها
+- Flash Sale
+- آخرین آثار
+- معرفی هنرکده گیلاس آرت
+- CTA فروشگاه و درباره ما
+- SEO و Open Graph
+- تصویر اثر منتخب
+
+اگر داده Dynamic کامل در دسترس نباشد، صفحه نباید وانمود کند که اطلاعات کامل فروشگاه را دارد.
+
+---
+
+## 6. Shop
+
+Shop یک کاتالوگ کم‌مصرف و Snapshot-based است.
+
+قابلیت‌ها:
+
+### جستجو
+بر اساس نام، توضیحات، SKU و داده‌های SEO.
+
+### فیلتر دسته‌بندی
+انتخاب یک یا چند دسته.
+
+### فیلتر قیمت
+حداقل، حداکثر، Slider و ورودی عددی.
+
+### فیلتر امتیاز
+- همه
+- 4 ستاره و بیشتر
+- 3 ستاره و بیشتر
+- 2 ستاره و بیشتر
+
+### Sort
+- جدیدترین آثار
+- پیشنهاد خریداران
+- پرفروش‌ترین
+- محبوب‌ترین
+- بیشترین امتیاز
+- بیشترین نظر
+- ارزان‌ترین
+- گران‌ترین
+
+### Loading
+- صفحه‌بندی تدریجی
+- Infinite Scroll
+- دکمه نمایش آثار بیشتر
+- جلوگیری از بارگذاری همه محصولات در اولین Render
+
+Filter state در Query String نگهداری می‌شود تا Refresh و Back/Forward رفتار قابل پیش‌بینی داشته باشند.
+
+---
+
+## 7. Product Detail
+
+مسیر /product/<slug> عمداً به Backend اصلی متصل است.
+
+Product Detail نباید برای اطلاعات حساس یا گزینه‌های اختصاصی از Snapshot ناقص fallback بگیرد.
+
+اطلاعات:
+
+- نام
+- SKU
+- قیمت پایه
+- تصویر اصلی
+- گالری
+- توضیحات
+- دسته‌ها
+- ویدئو
+- ویژگی‌ها
+- گزینه‌ها
+- قیمت تغییر گزینه
+- گزینه پیش‌فرض
+- موجودی
+- Reviews
+- Like/Dislike
+- quantity discount
+
+### Product Attributes
+
+مدل:
+
+    Attribute
+       |
+       +-- Global Options
+       |
+       +-- Product Assignment
+              |
+              +-- Product-specific Overrides
+
+ویژگی‌های فعلی مهم:
+
+- ابعاد
+- رنگ قاب
+
+اگر یک Product برای یک Attribute تنظیم اختصاصی داشته باشد، گزینه‌های Global آن Attribute نباید به آن Product نشت کنند.
+
+### قیمت
+
+    Final Price =
+    Base Price
+    + Selected Option Delta
+    - Default Option Delta
+
+Delta منفی معتبر است و نباید بدون دلیل Clamp شود.
+
+گزینه انتخاب‌شده باید تا Cart و تغییر تعداد حفظ شود.
+
+---
+
+## 8. Product Option Examples
+
+نمونه قرارداد فعلی:
+
+### Gilas411
+
+ابعاد:
+- 30x30 = +0، پیش‌فرض
+- 70x70 = +80,000,000 ریال
+
+رنگ قاب:
+- مشکی = +0، پیش‌فرض
+- طلایی گلدار = +8,500,000 ریال
+- سفید = +5,500,000 ریال
+
+### Gilas020
+
+ابعاد:
+- 80x40 = +0، پیش‌فرض
+- 110x60 = +85,000,000 ریال
+
+رنگ قاب:
+- مشکی = +0، پیش‌فرض
+- طلایی گلدار = +10,500,000 ریال
+- سفید = +5,500,000 ریال
+- قهوه‌ای تنه درختی = +6,500,000 ریال
+
+این موارد در Production Quality Gate نیز Regression Check دارند.
+
+---
+
+## 9. Reviews
+
+قابلیت‌ها:
+
+- نمایش Reviewهای تأییدشده
+- امتیاز 1 تا 5
+- نام و تاریخ
+- Like
+- Dislike
+- شمارش واکنش‌ها
+- Moderation در Admin
+
+هر کاربر برای هر Review یک Reaction یکتا دارد.
+
+Review جدید ابتدا در جریان moderation قرار می‌گیرد.
+
+---
+
+## 10. Favorites
+
+کاربر واردشده می‌تواند اثر را:
+
+- اضافه به علاقه‌مندی کند
+- حذف کند
+- در حساب مشاهده کند
+
+این رویداد در Loyalty نیز می‌تواند امتیاز ایجاد کند.
+
+---
+
+## 11. Authentication
+
+Authentication فعلی:
+
+    SMS OTP
+        |
+        v
+    hashed OTP challenge
+        |
+        v
+    D1-backed opaque session
+        |
+        v
+    HttpOnly/Secure cookie
+
+این معماری JWT نیست.
+
+### Request OTP
+
 POST /api/auth/request-otp
-Content-Type: application/json
 
-{
-  "mobile": "09123456789"
-}
-```
+- Validate mobile
+- Rate limit روی mobile
+- Rate limit روی IP
+- crypto.getRandomValues
+- SHA-256 + OTP_PEPPER
+- ثبت challenge در D1
+- ارسال SMS از Kavenegar
 
-The Worker:
+### Verify OTP
 
-### Validates the number
-
-```js
-if (!/^09\d{9}$/.test(mobile))
-    return json({error:'invalid_mobile'},400);
-```
-
-### Applies rate limits
-
-There are separate limits for:
-
-```text
-mobile
-IP address
-```
-
-The code currently calls:
-
-```js
-rate(env, mobile, 3, 10)
-rate(env, ip, 12, 10)
-```
-
-So the authentication endpoint is not simply:
-
-> "send unlimited OTPs."
-
-It has both mobile and IP throttling.
-
----
-
-# 4. OTP generation
-
-The Worker generates the six-digit OTP using Web Crypto:
-
-```js
-const raw = new Uint32Array(1);
-crypto.getRandomValues(raw);
-
-const code = String(
-    100000 + (raw[0] % 900000)
-);
-```
-
-The important security property is that it isn't using something predictable like:
-
-```js
-Math.random()
-```
-
-It uses:
-
-```js
-crypto.getRandomValues()
-```
-
----
-
-# 5. The OTP itself is NOT stored in D1
-
-This is an important part of the design.
-
-The Worker calculates:
-
-```js
-sha(`${env.OTP_PEPPER || 'gilasart'}:${code}`)
-```
-
-and stores the resulting hash in:
-
-```text
-otp_challenges.code_hash
-```
-
-rather than storing the plaintext OTP.
-
-The database record also contains things such as:
-
-```text
-challenge ID
-mobile
-code_hash
-expires_at
-request_ip
-attempts
-consumed_at
-```
-
-The documented security policy says OTPs expire after **2 minutes** and are limited to **5 verification attempts**.
-
-So conceptually:
-
-```text
-OTP = 583921
-
-             SHA-256 + pepper
-                    │
-                    ▼
-              code_hash
-                    │
-                    ▼
-                  D1
-```
-
-The plaintext OTP is sent to the customer through Kavenegar but isn't intended to be persisted as plaintext.
-
----
-
-# 6. Kavenegar credential
-
-The Worker uses:
-
-```js
-env.KAVENEGAR_API_KEY
-```
-
-to call Kavenegar.
-
-That credential is **not in the frontend JavaScript**.
-
-The deployment documentation identifies it as a **Worker secret**:
-
-```text
-KAVENEGAR_API_KEY
-```
-
-Likewise:
-
-```text
-OTP_PEPPER
-ZARINPAL_MERCHANT_ID
-```
-
-are intended to be secrets rather than frontend configuration.
-
-This is the correct architectural boundary:
-
-```text
-Browser
-   │
-   │ mobile number
-   ▼
-Worker
-   │
-   │ KAVENEGAR_API_KEY
-   ▼
-Kavenegar
-```
-
-not:
-
-```text
-Browser
-   │
-   └── KAVENEGAR_API_KEY ❌
-```
-
----
-
-# 7. Step 2 — Verify OTP
-
-After receiving the SMS, the frontend sends:
-
-```http
 POST /api/auth/verify-otp
 
-{
-  "challengeId": "...",
-  "code": "583921"
-}
-```
+- بررسی challenge
+- بررسی expiration
+- حداکثر 5 تلاش
+- hash کردن OTP ورودی
+- مقایسه hash
+- ایجاد/یافتن User
+- ایجاد Session
 
-The Worker first finds the challenge:
+Session cookie:
 
-```js
-SELECT *
-FROM otp_challenges
-WHERE id=?
-  AND consumed_at IS NULL
-  AND unixepoch(expires_at)>unixepoch('now')
-```
+    __Host-gs_session
 
-It also checks:
+CSRF:
 
-```js
-c.attempts >= 5
-```
+    gs_csrf
 
-Then it hashes the submitted OTP:
-
-```js
-sha(`${env.OTP_PEPPER || 'gilasart'}:${String(b.code || '')}`)
-```
-
-and compares it with:
-
-```text
-c.code_hash
-```
-
-So the Worker never needs to retrieve a plaintext OTP from the database.
+Mutationهای authenticated باید CSRF معتبر داشته باشند.
 
 ---
 
-# 8. User creation
+## 12. Session Hydration
 
-After successful verification:
+Frontend قبل از Render مسیرها /api/me را hydrate می‌کند.
 
-```js
-SELECT id,mobile,name
-FROM users
-WHERE mobile=?
-```
+اطلاعات Session:
 
-If the user doesn't exist:
+- user
+- roles
+- permissions
+- csrfToken
+- session expiration
 
-```js
-INSERT INTO users(id,mobile)
-VALUES(?,?)
-```
+این کار باعث می‌شود Home، Shop، Product، Account و Admin در تشخیص User و Admin state رفتار یکسان داشته باشند.
 
-So the mobile number acts as the identity for the customer authentication system.
-
-There isn't a conventional:
-
-```text
-username + password
-```
-
-system here.
+Session ID در localStorage به‌عنوان bearer token ذخیره نمی‌شود.
 
 ---
 
-# 9. The actual authentication token is a session ID
+## 13. RBAC / Authorization
 
-This is the most important distinction.
+Admin بر اساس Role و Permission کنترل می‌شود.
 
-After successful OTP verification:
+ساختار:
 
-```js
-const sid = uid();
-```
+    User
+      |
+    admin_users
+      |
+    admin_roles
+      |
+    role_permissions
+      |
+    permissions
 
-Then:
+نمونه Permissionها:
 
-```js
-INSERT INTO sessions(
-    id,
-    user_id,
-    expires_at
-)
-VALUES(
-    ?,
-    ?,
-    datetime('now','+30 days')
-)
-```
+- products.read
+- products.write
+- orders.read
+- orders.write
+- users.manage
+- roles.manage
+- reviews.read
+- reviews.write
+- reports.read
+- settings.read
+- settings.write
+- support.read
 
-So the Worker generates a random session identifier and stores the session server-side in D1.
-
-The browser receives:
-
-```http
-Set-Cookie:
-__Host-gs_session=<session-id>;
-Path=/;
-HttpOnly;
-Secure;
-SameSite=None;
-Max-Age=2592000
-```
-
-Therefore the authentication model is:
-
-```text
-                  D1
-             ┌─────────────┐
-             │ sessions    │
-             │             │
-             │ id ─────────┼──► user_id
-             │ expires_at  │
-             │ revoked_at  │
-             └─────────────┘
-                    ▲
-                    │
-              session ID
-                    │
-Browser ───── Cookie┘
-```
-
-This is **opaque server-side session authentication**.
-
-It is not JWT.
+ورود به /api/admin/* نیازمند Authentication و Permission است. UI فقط نمایش‌دهنده مجوز است و Backend همیشه باید Authorization را enforce کند.
 
 ---
 
-# 10. What does the browser actually possess?
+## 14. Admin Pages
 
-The browser gets two cookies.
+کنترل پنل فعلی شامل:
 
-### Authentication cookie
-
-```text
-__Host-gs_session
-```
-
-with:
-
-```text
-HttpOnly
-Secure
-Path=/
-```
-
-This is the actual authentication credential.
-
-Because it is `HttpOnly`, normal JavaScript cannot read it using:
-
-```js
-document.cookie
-```
-
-That's desirable for reducing token theft through XSS.
-
-### CSRF cookie
-
-The Worker also creates:
-
-```text
-gs_csrf
-```
-
-This is intentionally accessible to JavaScript.
-
-The frontend receives the CSRF token from the login response:
-
-```js
-csrfToken = v.csrfToken || csrfToken;
-```
-
-and later sends it as:
-
-```http
-X-CSRF-Token: ...
-```
+| صفحه | قابلیت |
+|---|---|
+| Dashboard | فروش، سفارش‌های اخیر، موجودی کم، وضعیت |
+| Products | محصول، تصویر، SEO، ویژگی و گزینه |
+| Categories | دسته‌بندی |
+| Orders | سفارش، اقلام، وضعیت، فیش |
+| Site Rules | قوانین |
+| Customers | مشتری |
+| Inventory | موجودی |
+| Payments | پرداخت‌ها |
+| Discounts | تخفیف |
+| Coupons | کوپن |
+| Reviews | moderation |
+| Reports | گزارش‌ها |
+| Access Control | سطح دسترسی |
+| Audit | لاگ |
+| Settings | SEO و تنظیمات |
+| Invoice Settings | Seller و Invoice |
+| SMS | سیستم پیامکی |
+| Payment | درگاه‌ها |
+| Visitors | بازدیدکنندگان |
+| Storefront Snapshot | Snapshot |
+| Support | Ticket/CRM و FAQ |
+| About | درباره ما |
+| Contact | تماس |
+| News | اخبار |
+| Articles | مقالات |
 
 ---
 
-# 11. Why are there two tokens?
+## 15. Admin Products
 
-Because they serve different purposes.
+Products یکی از حساس‌ترین بخش‌های Admin است.
 
-### Session cookie
+قابلیت‌ها:
 
-Answers:
+- ایجاد
+- ویرایش
+- فعال/غیرفعال
+- Slug
+- SKU
+- نام
+- توضیحات
+- قیمت
+- موجودی
+- تصویر
+- Alt Text
+- SEO title
+- SEO description
+- Video URL
+- Flash Sale
+- پایان Flash Sale
+- قیمت Flash Sale
+- دسته‌بندی
+- انتخاب Attribute
+- تنظیم Option Override
+- Default Option
+- Price Delta
+- Media Picker
+- Catalog data
 
-> "Who is this user?"
+APIهای مرتبط:
 
-```text
-__Host-gs_session
-```
-
-### CSRF token
-
-Answers:
-
-> "Did this state-changing request originate from the legitimate application?"
-
-```text
-gs_csrf
-```
-
-The Worker checks:
-
-```js
-function requireCsrf(req) {
-    return req.headers.get('X-CSRF-Token')
-        &&
-        req.headers.get('X-CSRF-Token')
-        === cookies(req)['gs_csrf'];
-}
-```
-
-So an authenticated mutation normally requires both:
-
-```text
-valid session cookie
-+
-valid CSRF header
-```
-
----
-
-# 12. Every authenticated request re-validates the session
-
-The Worker has:
-
-```js
-async function user(req, env) {
-    const sid = cookies(req)['__Host-gs_session'];
-
-    if (!sid) return null;
-
-    return env.DB.prepare(`
-        SELECT u.id,u.mobile,u.name
-        FROM sessions s
-        JOIN users u ON u.id=s.user_id
-        WHERE s.id=?
-          AND s.revoked_at IS NULL
-          AND unixepoch(s.expires_at)>unixepoch('now')
-    `).bind(sid).first();
-}
-```
-
-This is important.
-
-The Worker doesn't simply trust:
-
-```text
-"the browser has a cookie"
-```
-
-It checks D1.
-
-It requires:
-
-```text
-session exists
-AND
-session isn't revoked
-AND
-session hasn't expired
-```
-
-Then it joins the session to the corresponding user.
+    /api/admin/products
+    /api/admin/products/<id>
+    /api/admin/products/<id>/attribute-options
+    /api/admin/product-attributes
+    /api/admin/product-attributes/<id>
+    /api/admin/product-attributes/<id>/options
+    /api/admin/product-attribute-options/<id>
+    /api/admin/media-images
 
 ---
 
-# 13. `/api/me` reconstructs the logged-in state
+## 16. Categories
 
-The frontend calls:
+Admin می‌تواند:
 
-```js
-api('/api/me')
-```
-
-The Worker returns:
-
-```js
-{
-    user: u0,
-    roles: await roles(u0, env),
-    csrfToken
-}
-```
-
-The frontend then stores the user information in runtime memory:
-
-```js
-state.user = d.user;
-state.roles = d.roles || [];
-csrfToken = d.csrfToken || csrfToken;
-```
-
-Notice that the frontend does **not** persist the session ID in:
-
-```text
-localStorage
-sessionStorage
-```
-
-The session remains in the browser's cookie jar.
+- مشاهده
+- ایجاد
+- ویرایش
+- فعال/غیرفعال
+- تغییر slug
+- توضیحات
+- حذف در صورت نداشتن محصول وابسته
 
 ---
 
-# 14. Logout
+## 17. Inventory
 
-Logout is:
+Inventory در D1 نگهداری می‌شود.
 
-```http
-POST /api/auth/logout
-X-CSRF-Token: ...
-Cookie: __Host-gs_session=...
-```
+قابلیت Admin:
 
-The Worker first checks CSRF:
+- مشاهده موجودی
+- تغییر موجودی
+- بررسی کمبود
+- پشتیبانی از Reservation
 
-```js
-if (!requireCsrf(req))
-    return json({error:'forbidden'},403);
-```
-
-Then:
-
-```js
-UPDATE sessions
-SET revoked_at=datetime('now')
-WHERE id=?
-```
-
-And it expires both cookies.
-
-So logout isn't merely:
-
-```js
-localStorage.removeItem(...)
-```
-
-It actually invalidates the server-side session.
+موجودی Frontend منبع حقیقت نیست.
 
 ---
 
-# 15. Admin authentication is a separate authorization layer
+## 18. Cart
 
-This is where the repository gets more interesting.
+Cart برای User در Backend نگهداری می‌شود.
 
-Authentication and authorization are separate.
+قابلیت‌ها:
 
-Authentication establishes:
+- Add
+- Remove
+- Quantity +/-
+- نمایش Product Options
+- Unit Price
+- Line Total
+- Quantity Discount
+- Coupon
+- Shipping
+- Grand Total
+- Address
+- Payment Method
 
-```text
-This is user X.
-```
-
-Authorization establishes:
-
-```text
-What is user X allowed to do?
-```
-
-The Worker retrieves roles from both:
-
-```text
-legacy roles
-+
-enterprise admin roles
-```
-
-The code does:
-
-```js
-SELECT r.name
-FROM roles r
-JOIN user_roles ur ON ur.role_id=r.id
-WHERE ur.user_id=?
-```
-
-and:
-
-```js
-SELECT ar.name
-FROM admin_roles ar
-JOIN admin_users au
-    ON au.role_id=ar.id
-WHERE au.user_id=?
-  AND au.active=1
-```
-
-The two sets are combined.
+قیمت نهایی باید Server-authoritative باشد.
 
 ---
 
-# 16. Permissions are database-driven
+## 19. Discounts / Coupons
 
-The enterprise authorization model uses:
+Discount و Coupon دو مفهوم جدا هستند.
 
-```text
-admin_users
-     │
-     ▼
-admin_roles
-     │
-     ▼
-role_permissions
-     │
-     ▼
-permissions
-```
+Discount:
+- قوانین تخفیف فروش
 
-For example:
-
-```text
-admin
- │
- ├── products.read
- ├── products.write
- ├── orders.read
- ├── orders.write
- ├── customers.read
- ├── payments.read
- ├── reports.read
- ├── settings.write
- └── ...
-```
-
-The Worker resolves those permissions from D1:
-
-```js
-SELECT DISTINCT p.name
-FROM permissions p
-JOIN role_permissions rp
-    ON rp.permission_id=p.id
-JOIN admin_roles ar
-    ON ar.id=rp.role_id
-JOIN admin_users au
-    ON au.role_id=ar.id
-WHERE au.user_id=?
-  AND au.active=1
-```
-
-Then:
-
-```js
-requirePermission(me, env, 'orders.write')
-```
-
-determines whether the operation is permitted.
+Coupon:
+- کد قابل ورود
+- درصدی یا مبلغ ثابت
+- فعال/غیرفعال
+- تاریخ انقضا
+- محدودیت User
+- یک‌بار مصرف
+- پشتیبانی از Couponهای Loyalty
 
 ---
 
-# 17. There is currently an important admin-specific restriction
+## 20. Loyalty / Rewards
 
-The repository's current Worker contains:
+Migration اصلی Loyalty:
 
-```js
-if (
-    u.pathname.startsWith('/api/admin')
-    && me?.mobile !== '09153090907'
-)
-    return json({error:'forbidden'},403);
-```
+    141_loyalty_points.sql
 
-And the frontend contains:
+فعالیت‌های امتیازی:
 
-```js
-function isAdminUser() {
-    return state.user?.mobile === "09153090907";
-}
-```
+- ثبت‌نام: 10
+- Review تأییدشده: 5
+- معرفی دوست پس از ثبت‌نام او: 30
+- تکمیل اطلاعات ارسال: 5
+- افزودن به علاقه‌مندی: 3
+- خرید موفق: طبق مقدار خرید و سقف تعریف‌شده
 
-So **currently the admin panel is still hard-coded around that mobile number**.
+تبدیل:
 
-The repository also has the more general D1 RBAC infrastructure:
+- 100 امتیاز = 5%
+- 200 امتیاز = 10%
+- 300 امتیاز = 15%
+- 400 امتیاز = 20%
 
-```text
-admin_users
-admin_roles
-role_permissions
-permissions
-```
-
-but the `/api/admin` entry gate still contains the explicit mobile-number check.
-
-That means the system is **not yet purely RBAC-controlled at the top-level admin boundary**.
-
-That's something I would specifically flag for production hardening.
+Coupon باشگاه User-bound، یک‌بار مصرف و دارای expiration است.
 
 ---
 
-# 18. Complete request flow
+## 21. Referral
 
-Putting everything together:
+هر User می‌تواند Referral Code داشته باشد.
 
-```text
-USER
- │
- │ 1. Enter mobile
- ▼
-GitHub Pages frontend
- │
- │ POST /api/auth/request-otp
- ▼
-Cloudflare Worker
- │
- ├── validate mobile
- ├── rate-limit mobile
- ├── rate-limit IP
- ├── crypto.getRandomValues()
- │
- ├── OTP
- │     │
- │     └── SHA256(OTP_PEPPER + OTP)
- │                │
- │                ▼
- │               D1
- │
- └── Kavenegar
-        │
-        ▼
-       SMS
-        │
-        ▼
-      USER
-        │
-        │ enters OTP
-        ▼
-Frontend
-        │
-        │ POST /api/auth/verify-otp
-        ▼
-Worker
-        │
-        ├── load challenge
-        ├── check expiry
-        ├── check attempts
-        ├── hash supplied OTP
-        ├── compare hash
-        │
-        ├── find/create user
-        │
-        ├── generate session ID
-        │
-        ├── store session in D1
-        │
-        └── Set-Cookie
-              │
-              ├── __Host-gs_session
-              └── gs_csrf
-```
+جریان:
 
-After that:
+    User A
+      |
+      | referral code
+      v
+    User B registers
+      |
+      +--> signup reward
+      |
+      +--> referral reward for A
 
-```text
-Browser
-   │
-   │ Cookie: __Host-gs_session
-   │ X-CSRF-Token: ...
-   ▼
-Cloudflare Worker
-   │
-   ├── lookup session in D1
-   ├── verify not expired
-   ├── verify not revoked
-   ├── identify user
-   ├── resolve roles
-   ├── resolve permissions
-   ├── check authorization
-   ▼
-D1 / protected operation
-```
+رویداد Referral می‌تواند Notification نیز ایجاد کند.
 
 ---
 
-## 19. Where credentials live
+## 22. Notifications
 
-| Credential / token   | Location                                    | Exposed to JS?              |
-| -------------------- | ------------------------------------------- | --------------------------- |
-| Kavenegar API key    | Worker secret                               | **No**                      |
-| OTP pepper           | Worker secret                               | **No**                      |
-| ZarinPal merchant ID | Worker secret                               | **No**                      |
-| OTP plaintext        | Kavenegar request / transient Worker memory | Not persisted intentionally |
-| OTP hash             | D1                                          | No                          |
-| Session ID           | D1 + HttpOnly browser cookie                | **No, not to JS**           |
-| CSRF token           | Browser cookie + frontend runtime           | Yes                         |
-| User identity        | D1 + frontend runtime state                 | Yes                         |
-| Roles                | D1 → `/api/me` response                     | Yes                         |
-| Permissions          | D1 → admin API                              | Yes                         |
+کاربر واردشده Notificationهای خوانده‌نشده را دریافت می‌کند.
 
-The deployment documentation explicitly separates Worker variables from Worker secrets, including `KAVENEGAR_API_KEY`, `OTP_PEPPER`, and `ZARINPAL_MERCHANT_ID`. [Deployment documentation](https://github.com/gilasartirac-svg/glsArt/blob/main/docs/DEPLOYMENT.md?utm_source=chatgpt.com)
+Frontend Polling دارد.
 
-The repository's security documentation also explicitly describes OTP hashing, expiry/attempt limits, HttpOnly/Secure sessions, CSRF protection, restricted CORS, and server-side payment verification. [Security documentation](https://github.com/gilasartirac-svg/glsArt/blob/main/docs/SECURITY.md?utm_source=chatgpt.com)
+مواردی مانند Referral Reward و رویدادهای حساب/پشتیبانی می‌توانند Notification ایجاد کنند.
 
-### Bottom line
+Read با API و CSRF کنترل می‌شود.
 
-The repo's authentication is:
+---
 
-**SMS OTP → hashed OTP challenge → D1-backed opaque session → HttpOnly/Secure cookie → CSRF token for mutations → D1-based roles/permissions for authorization.**
+## 23. Support / CRM
 
-There is **no JWT authentication mechanism in the active flow** that I found.
+Public:
 
-One security issue worth addressing before calling the admin authentication fully production-grade is the hard-coded `09153090907` admin gate: the repository has RBAC tables and permission checks, but the top-level `/api/admin` protection still depends on that mobile number.
+    /support
 
+Admin:
+
+    /admin/support
+
+قابلیت‌ها:
+
+- Ticket
+- Subject
+- Category
+- Priority
+- Status
+- Stage
+- Message Thread
+- پاسخ Admin
+- بستن/مدیریت Ticket
+- FAQ
+- SMS Template برای ایجاد Ticket
+- SMS Template برای پاسخ
+
+---
+
+## 24. CMS
+
+CMS برای:
+
+- About
+- Contact
+- News
+- Articles
+
+داده‌هایی مانند:
+
+- title
+- slug
+- summary
+- body
+- cover_image
+- phone
+- mobile
+- address
+- map_url
+- active
+- published_at
+- sort_order
+
+را مدیریت می‌کند.
+
+Admin Cover Picker از Media Repository تصویر واقعی انتخاب می‌کند.
+
+---
+
+## 25. Payment Architecture
+
+فقط یک معماری Order/Payment/Invoice وجود دارد.
+
+Providerها:
+
+1. ZarinPal
+2. NovinoPay
+3. Card Transfer
+
+اصل مهم:
+
+Callback به‌تنهایی موفقیت پرداخت نیست.
+
+فقط Server-side Verify باید Payment را Paid کند.
+
+---
+
+## 26. Card Transfer
+
+جریان:
+
+    Create Order
+       |
+    Payment Method: Card Transfer
+       |
+    User transfers money
+       |
+    Upload receipt
+       |
+    Admin Review
+       |
+    Approve / Reject
+
+وضعیت‌ها:
+
+- PENDING_REVIEW
+- APPROVED
+- REJECTED
+
+در Reject دلیل رد می‌تواند به کاربر نمایش داده شود.
+
+تصویر فیش در Frontend به حدود 150KB فشرده می‌شود.
+
+---
+
+## 27. Orders / Payments / Invoice
+
+موجودیت‌های اصلی:
+
+    orders
+      |
+      +-- order_items
+      +-- payments
+      +-- payment_attempts
+      +-- order_status_history
+      +-- invoice tracking
+      +-- card transfer receipt
+
+Idempotency برای جلوگیری از Order/Payment تکراری و Replay مهم است.
+
+Invoice از Assets رسمی زیر استفاده می‌کند:
+
+    frontend/public/invoice/logo.svg
+    frontend/public/invoice/stamp-signature.png
+
+Admin می‌تواند Seller Identity و Invoice Settings را مدیریت کند.
+
+---
+
+## 28. Catalog Metrics
+
+Product metricهای materialized:
+
+- view_count
+- review_count
+- rating_avg
+- favorite_count
+- sold_count
+
+Migrationهای مرتبط Triggerهایی برای Review، Favorite، Order و Order Item دارند.
+
+این metricها برای Sort حرفه‌ای Shop استفاده می‌شوند.
+
+---
+
+## 29. Visitor Analytics
+
+Frontend برای Visitor Session یک شناسه تصادفی محلی ایجاد می‌کند.
+
+Heartbeat:
+
+    POST /api/visitors/heartbeat
+
+Admin:
+
+    /admin/visitors
+
+گزارش‌ها شامل Online Visitors و Visitor Reports است.
+
+اطلاعات حساس Visitor نباید وارد Public Snapshot شود.
+
+---
+
+## 30. Public Storefront Snapshot
+
+فایل‌های اصلی:
+
+    frontend/public/data/home.json
+    frontend/public/data/storefront.json
+    frontend/public/data/storefront-manifest.json
+
+Snapshot برای کاهش D1 Reads داده‌های عمومی مانند:
+
+- Product Catalog
+- Categories
+- Public Settings
+- FAQ
+- News
+- Articles
+- Reviews طبق Snapshot
+- Flash Sales
+
+را در اختیار Frontend قرار می‌دهد.
+
+### هرگز نباید در Snapshot عمومی قرار گیرد
+
+- Secret
+- Admin Bootstrap
+- Kavenegar credential
+- Payment credential
+- Session
+- National ID
+- Postal/private account data
+- اطلاعات خصوصی فاکتور
+
+Product Detail به‌صورت عمدی از Snapshot fallback نمی‌گیرد، چون ویژگی و قیمت‌گذاری اختصاصی باید از Backend اصلی خوانده شود.
+
+---
+
+## 31. Service Worker / PWA
+
+Assets:
+
+    frontend/public/sw.js
+    frontend/public/site.webmanifest
+    frontend/public/mobile-release.json
+
+قابلیت‌ها:
+
+- PWA standalone
+- cache shell
+- network refresh
+- versioned cache
+- حذف cache قدیمی
+- Mobile Release Check
+- Update prompt برای نسخه جدید Android/iOS
+
+هر تغییر مهم Frontend باید Cache Version را نیز بررسی کند.
+
+---
+
+## 32. Mobile UX
+
+هدف:
+
+    320
+    360
+    375
+    390
+    414
+    768
+    1024
+    Desktop
+
+قابلیت‌ها:
+
+- Mobile-first
+- RTL
+- Hamburger Menu
+- Admin Mobile Drawer
+- Touch-friendly UI
+- Day/Night Theme
+- App-like layout
+- کنترل interaction طبق سیاست فعلی پروژه
+
+---
+
+## 33. Design System
+
+جهت طراحی:
+
+**Luxury Iranian Art Gallery**
+
+اصول:
+
+- RTL-first
+- Mobile-first
+- اثر هنری در مرکز توجه
+- Deep Navy / Charcoal
+- Warm Cream
+- Warm Gold / Brass
+- Copper / Terracotta
+- Warm Gray
+- Arabesque / Islamic accents
+- پنل‌های حرفه‌ای
+- بدون 3D افراطی
+- عدم تغییر بی‌دلیل Font
+- تصویر واقعی اثر
+
+---
+
+## 34. SEO
+
+قابلیت‌ها:
+
+- Dynamic Title
+- Meta Description
+- Open Graph
+- Canonical
+- hreflang
+- x-default
+- Product SEO
+- CMS SEO
+- Sitemap
+- robots.txt
+- JSON-LD
+- Cover Image
+
+Assets:
+
+    frontend/public/robots.txt
+    frontend/public/sitemap.xml
+
+---
+
+## 35. Security
+
+اصول امنیتی:
+
+- HTTPS
+- محدودیت CORS
+- Security Headers
+- CSP
+- HttpOnly Session
+- Secure Cookie
+- CSRF
+- OTP Rate Limit
+- OTP Hash + Pepper
+- RBAC
+- Permission enforcement
+- Audit Log
+- Server-authoritative price
+- Server-authoritative inventory
+- Server-side payment verification
+- Idempotency
+- Public Snapshot isolation
+- Image/Video URL validation
+- Parameterized SQL
+- عمومی‌سازی Internal Error
+- تشخیص D1 service limit
+
+Secretها فقط در Worker/Cloudflare/GitHub Secrets قرار می‌گیرند.
+
+---
+
+## 36. Audit Log
+
+Mutationهای حساس Admin مانند موارد زیر Audit می‌شوند:
+
+- Product
+- Category
+- Discount
+- Coupon
+- Review moderation
+- Role assignment/revocation
+- Admin status
+- Order
+- Payment Receipt
+- Settings
+- سایر عملیات حساس
+
+---
+
+## 37. Database
+
+Schema به‌صورت Migration-based تکامل یافته است.
+
+موجودیت‌های مهم:
+
+    users
+    sessions
+    otp_challenges
+
+    roles
+    user_roles
+    permissions
+    admin_roles
+    admin_users
+    role_permissions
+
+    categories
+    products
+    product_images
+    product_category_assignments
+    inventory
+
+    product_attributes
+    product_attribute_options
+    product_attribute_assignments
+    product_attribute_option_overrides
+
+    carts
+    cart_items
+
+    orders
+    order_items
+    order_status_history
+    payments
+    payment_attempts
+
+    addresses
+    favorites
+    reviews
+    review_reactions
+
+    coupons
+    coupon_usages
+    discounts
+
+    loyalty_points
+    referral_codes
+    referrals
+    user_notifications
+
+    support_tickets
+    ticket_messages
+    faq_entries
+
+    cms_entries
+    site_settings
+
+    visitor_sessions
+    audit_logs
+
+Migrationهای پروژه علاوه بر Core Schema، قابلیت‌های Flash Sale، Invoice، Seller Identity، Social Links، SEO، Product Video/Grid، Review Indexing، Card Transfer، Multi-payment، Stock Reservation، Loyalty، Catalog Metrics و Support SMS را نیز پوشش می‌دهند.
+
+---
+
+## 38. Social Links
+
+Footer Social Links از Settings کنترل می‌شوند.
+
+Assets:
+
+    frontend/public/assets/social/
+
+شامل:
+
+- Telegram
+- Instagram
+- Aparat
+- WhatsApp
+- YouTube
+- LinkedIn
+- Other
+
+---
+
+## 39. Media
+
+Admin Media Picker:
+
+    /api/admin/media-images
+
+برای Product و CMS Cover استفاده می‌شود.
+
+Worker مسیرهای تصویر را Validate می‌کند.
+
+---
+
+## 40. Service Status / D1 Limit
+
+فایل:
+
+    frontend/public/service-status.json
+
+در Deployment Gate استفاده می‌شود.
+
+اگر D1/Cloudflare موقتاً محدود باشد:
+
+- Dynamic UI نباید وانمود کند کامل است.
+- Public Catalog در صورت معتبر بودن Snapshot می‌تواند کار کند.
+- Product Detail نباید با Optionهای ناقص Render شود.
+- پیام Customer-facing باید انسانی باشد.
+- متن فنی D1 quota نباید مستقیماً به مشتری نمایش داده شود.
+- Deployment ناقص نباید Success تلقی شود.
+
+Worker خطاهای شناخته‌شده D1 Free Tier را به service-limit تبدیل می‌کند.
+
+---
+
+## 41. CI/CD
+
+### Pages
+
+.github/workflows/pages.yml
+
+موارد اصلی:
+
+1. Checkout
+2. Node setup
+3. npm ci
+4. npm check
+5. Syntax check
+6. Tests
+7. Deployment Gate
+8. Live API Health
+9. Build
+10. Upload Artifact
+11. Deploy Pages
+12. Production route verification
+13. Homepage image verification
+14. 404 verification
+
+### Worker + D1
+
+.github/workflows/worker-deploy.yml
+
+- Credentials
+- Migration reconciliation
+- D1 migration apply
+- Bootstrap secret sync در صورت وجود
+- Worker deploy
+
+### Production Quality Gate
+
+.github/workflows/production-quality-gate.yml
+
+بررسی می‌کند:
+
+- Frontend syntax
+- Worker syntax
+- PWA
+- Service status
+- Worker deployment
+- API health
+- Home API
+- Products API
+- Categories
+- Flash Sales
+- Settings
+- Storefront Snapshot
+- CORS
+- Product Attribute regression
+
+### Security Regression
+
+.github/workflows/security-tests.yml
+
+    npm run check
+    node --test tests/*.test.mjs
+
+### Snapshot
+
+Workflow مستقل برای تولید/به‌روزرسانی Public Storefront Snapshot وجود دارد.
+
+### Usage Guard
+
+Workflow مستقل برای کنترل Cloudflare/D1 usage وجود دارد.
+
+---
+
+## 42. Test Commands
+
+    npm ci
+    npm run check
+    npm test
+    npm run build
+
+Scripts:
+
+    check
+      node --check worker/src/index.js
+      node --check scripts/build-frontend.mjs
+
+    test
+      node --test tests/*.test.mjs
+
+    build
+      npm run build:frontend
+
+---
+
+## 43. Production Quality Contract
+
+قبل از اعلام موفقیت هر تغییر:
+
+    DISCOVER
+       ↓
+    TRACE
+       ↓
+    UNDERSTAND
+       ↓
+    ROOT CAUSE
+       ↓
+    MINIMAL FIX
+       ↓
+    SYNTAX
+       ↓
+    REGRESSION TEST
+       ↓
+    API CONTRACT
+       ↓
+    D1 HEALTH / DATA
+       ↓
+    SECURITY
+       ↓
+    DEPLOY
+       ↓
+    DEPLOYMENT STATUS
+       ↓
+    PRODUCTION VERIFY
+       ↓
+    REPORT
+
+Build موفق به‌تنهایی Production Success نیست.
+
+---
+
+## 44. Current API Surface
+
+### Public
+
+    GET  /api/locale
+    GET  /api/health
+    GET  /api/home
+    GET  /api/categories
+    GET  /api/products
+    GET  /api/products/<slug>
+    POST /api/products/<slug>/view
+    GET  /api/flash-sales
+    GET  /api/settings
+    GET  /api/site-rules
+    GET  /api/faq
+    GET  /api/content
+    GET  /api/content/<section>/<slug>
+    GET  /api/storefront-snapshot
+    GET  /api/payment/options
+
+### Authentication
+
+    POST /api/auth/request-otp
+    POST /api/auth/verify-otp
+    GET  /api/me
+    POST /api/auth/logout
+
+### User
+
+    GET/POST /api/addresses
+    GET /api/rewards
+    POST /api/rewards/redeem
+    POST /api/referrals/apply
+    GET /api/notifications
+    POST /api/notifications/read
+    GET/POST/DELETE /api/favorites
+    GET/POST /api/reviews/...
+    GET/POST /api/support/tickets
+    GET/POST /api/support/tickets/...
+
+### Commerce
+
+    GET/POST/PUT/DELETE /api/cart...
+    POST /api/orders
+    GET /api/orders
+    GET /api/orders/<id>
+    POST /api/orders/<id>/pay
+    POST /api/orders/<id>/payment-receipt
+    GET/POST /api/payment/callback
+
+### Admin
+
+    /api/admin/me
+    /api/admin/permissions
+    /api/admin/users
+    /api/admin/roles
+    /api/admin/products
+    /api/admin/product-attributes
+    /api/admin/product-attribute-options
+    /api/admin/categories
+    /api/admin/orders
+    /api/admin/inventory
+    /api/admin/payments
+    /api/admin/reviews
+    /api/admin/cms
+    /api/admin/site-rules
+    /api/admin/invoice-settings
+    /api/admin/settings
+    /api/admin/integrations
+    /api/admin/discounts
+    /api/admin/coupons
+    /api/admin/media-images
+    /api/admin/stats
+    /api/admin/audit
+    /api/admin/reports/*
+    /api/admin/export/*
+    /api/admin/tickets
+    /api/admin/faq
+    /api/admin/visitors
+    /api/admin/storefront-snapshot/trigger
+
+Worker source و Tests مرجع نهایی Contract دقیق هر endpoint هستند.
+
+---
+
+## 45. Architectural Rules
+
+1. پروژه از صفر بازنویسی نشود.
+2. قبل از تغییر، Source واقعی و مسیر داده بررسی شود.
+3. Minimal Fix ترجیح دارد.
+4. Authentication دوباره‌نویسی نشود.
+5. Order/Payment/Invoice موازی ساخته نشود.
+6. D1 Schema بدون دلیل تغییر نکند.
+7. Secret وارد Frontend یا Snapshot نشود.
+8. Frontend منبع حقیقت قیمت و موجودی نیست.
+9. Product-specific options با Global options مخلوط نشوند.
+10. Product selection تا Cart/Order حفظ شود.
+11. Product Detail با Snapshot ناقص تغذیه نشود.
+12. داده User/Order بدون دلیل حذف نشود.
+13. Migration موجود بدون بررسی تاریخچه تغییر نکند.
+14. Cache Version بعد از تغییر Frontend بررسی شود.
+15. Routing و click/event handling قبل از تغییر بررسی شود.
+16. RTL و Mobile UX حفظ شود.
+17. هیچ Deployment ناقصی Success اعلام نشود.
+18. هر قابلیت جدید Production باید در README ثبت شود.
+19. README نباید قابلیت حذف‌شده را به‌عنوان قابلیت فعال معرفی کند.
+20. README نباید قابلیت فعال Production را فراموش کند.
+
+---
+
+## 46. Files That Are Architectural Contracts
+
+فایل‌های زیر قبل از تغییرات بزرگ باید بررسی شوند:
+
+    frontend/src/app.js
+    frontend/src/styles.css
+    frontend/src/index.html
+    frontend/src/admin/AdminApp.js
+    frontend/src/admin/router.js
+    frontend/src/admin/components/Sidebar.js
+    frontend/src/admin/services/api.js
+    worker/src/index.js
+    wrangler.toml
+    scripts/build-frontend.mjs
+    database/migrations/*
+    .github/workflows/*
+    tests/*
+    docs/SECURITY.md
+    docs/DEPLOYMENT.md
+
+---
+
+## 47. Final Architecture
+
+    GILAS ART
+        |
+        +-- Storefront
+        |     +-- Home
+        |     +-- Shop
+        |     +-- Product
+        |     +-- CMS
+        |
+        +-- Customer
+        |     +-- Auth
+        |     +-- Account
+        |     +-- Cart
+        |     +-- Orders
+        |     +-- Payments
+        |     +-- Rewards
+        |     +-- Referral
+        |     +-- Support
+        |
+        +-- Admin
+        |     +-- Products
+        |     +-- Orders
+        |     +-- Payments
+        |     +-- Inventory
+        |     +-- Customers
+        |     +-- CMS
+        |     +-- Reports
+        |     +-- RBAC
+        |     +-- Audit
+        |
+        +-- Cloudflare Worker
+        |
+        +-- D1
+        |
+        +-- Kavenegar
+        |
+        +-- ZarinPal / NovinoPay
+        |
+        +-- PWA / Snapshot / CI-CD
+
+هدف این معماری:
+
+**یک سیستم واحد، امن، قابل نگهداری، کم‌مصرف و Server-authoritative برای گالری، فروشگاه، حساب کاربری، پرداخت و کنترل پنل GilasArt.**
+
+---
+
+## 48. README Maintenance Policy
+
+این README یک سند معماری زنده است، نه متن تبلیغاتی.
+
+هر قابلیت جدیدی که در Production اضافه شود و روی یکی از موارد زیر اثر بگذارد باید در همین فایل ثبت شود:
+
+- Route
+- API
+- Database
+- Admin Page
+- Customer Feature
+- Payment
+- Authentication
+- Authorization
+- PWA/Mobile
+- Security
+- Deployment
+- Snapshot
+- Business Rule
+- Product Option
+- Loyalty/Referral
+- CMS
+- Reporting
+
+قبل از حذف هر قابلیت از README، Source و Production باید بررسی شوند.
+
+**هدف این فایل این است که مهندس بعدی بتواند بدون حدس زدن بفهمد GilasArt امروز دقیقاً چه معماری و چه امکاناتی دارد.**
