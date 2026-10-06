@@ -149,6 +149,20 @@
     "header.pointsSuffix": "نقطة",
     "cart.count": "{{count}} عمل فني في سلة التسوق",
     "account.login": "تسجيل الدخول",
-    "account.profile": "الملف الشخصي"
+    "account.profile": "الملف الشخصي",
+    "header.theme": "تغيير وضع العرض",
+    "header.themeTitle": "نهاري / ليلي",
+    "header.logoAria": "GilasArt، الصفحة الرئيسية",
+    "header.cartCount": "{{count}} من الأعمال في السلة",
+    "header.social": "التواصل والشبكات",
+    "header.serviceLinks": "روابط الخدمات",
+    "header.menu": "القائمة الرئيسية",
+    "header.openMenu": "فتح القائمة الرئيسية",
+    "header.closeMenu": "إغلاق القائمة الرئيسية",
+    "header.language": "اللغة",
+    "header.languageLabel": "اختيار اللغة",
+    "update.close": "إغلاق",
+    "update.nativeAndroid": "أندرويد",
+    "update.nativeIos": "iOS"
   }
 }
