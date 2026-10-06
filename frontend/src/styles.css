@@ -4955,3 +4955,165 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
     min-height:40px;
   }
 }
+
+
+/* Rewards Invite Friends — final responsive layout hardening v5 */
+/* Keep the invite panel deterministic at every viewport. */
+.rewards-page .referral-panel{
+  box-sizing:border-box;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  position:relative;
+}
+.rewards-page .referral-panel *{
+  box-sizing:border-box;
+}
+.rewards-page .referral-panel::before{
+  pointer-events:none;
+}
+.rewards-page .referral-code{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  align-items:center;
+}
+.rewards-page .referral-code code{
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.rewards-page .referral-code-copy,
+.rewards-page .referral-copy-btn,
+.rewards-page .referral-paste-btn,
+.rewards-page .referral-sms-btn{
+  flex:0 0 auto;
+}
+.rewards-page .referral-code-copy svg,
+.rewards-page .referral-copy-btn svg,
+.rewards-page .referral-paste-btn svg,
+.rewards-page .referral-sms-btn svg{
+  display:block;
+  flex:0 0 auto;
+  width:18px;
+  height:18px;
+  max-width:18px;
+  max-height:18px;
+}
+.rewards-page .referral-url-row{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+.rewards-page .referral-url{
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.rewards-page .referral-copy-btn,
+.rewards-page .referral-paste-btn,
+.rewards-page .referral-sms-btn{
+  min-width:0;
+  max-width:100%;
+}
+
+/* Desktop */
+@media (min-width:1025px){
+  .rewards-page .referral-url-row{
+    grid-template-columns:minmax(0,1fr) minmax(120px,150px) minmax(160px,210px);
+  }
+  .rewards-page .referral-url-row .referral-url{
+    grid-column:auto;
+    grid-row:auto;
+  }
+}
+
+/* Tablet: URL remains full-width; actions form a clean two-column row. */
+@media (min-width:681px) and (max-width:1024px){
+  .rewards-page .referral-url-row{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:10px;
+  }
+  .rewards-page .referral-url-row .referral-url{
+    grid-column:1 / -1;
+    grid-row:1;
+  }
+  .rewards-page .referral-copy-btn,
+  .rewards-page .referral-paste-btn,
+  .rewards-page .referral-sms-btn{
+    width:100%;
+    min-height:48px;
+  }
+  .rewards-page .referral-copy-btn{grid-column:1;grid-row:2}
+  .rewards-page .referral-sms-btn{grid-column:2;grid-row:2}
+  .rewards-page .referral-paste-btn{grid-column:1 / -1;grid-row:3}
+}
+
+/* Phones: never allow horizontal compression or side-by-side controls. */
+@media (max-width:680px){
+  .rewards-page .referral-panel{
+    padding:16px;
+  }
+  .rewards-page .referral-code{
+    grid-template-columns:minmax(0,1fr) 42px;
+    gap:8px;
+  }
+  .rewards-page .referral-code-copy{
+    width:42px;
+    min-width:42px;
+    max-width:42px;
+    height:42px;
+  }
+  .rewards-page .referral-url-row{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:9px;
+  }
+  .rewards-page .referral-url-row .referral-url,
+  .rewards-page .referral-copy-btn,
+  .rewards-page .referral-paste-btn,
+  .rewards-page .referral-sms-btn{
+    grid-column:1;
+    grid-row:auto;
+    width:100%;
+    min-width:0;
+    min-height:48px;
+  }
+  .rewards-page .referral-copy-btn,
+  .rewards-page .referral-paste-btn,
+  .rewards-page .referral-sms-btn{
+    white-space:normal;
+  }
+  .rewards-page .referral-copy-btn span,
+  .rewards-page .referral-paste-btn span,
+  .rewards-page .referral-sms-btn span{
+    min-width:0;
+    max-width:100%;
+    overflow-wrap:anywhere;
+  }
+  .rewards-page .referral-privacy-note{
+    grid-template-columns:auto minmax(0,1fr);
+    overflow:hidden;
+  }
+}
+
+/* Very narrow phones: reduce only spacing, never the control hierarchy. */
+@media (max-width:380px){
+  .rewards-page .referral-panel{padding:12px}
+  .rewards-page .referral-code{
+    grid-template-columns:minmax(0,1fr) 40px;
+    gap:6px;
+  }
+  .rewards-page .referral-code-copy{
+    width:40px;
+    min-width:40px;
+    max-width:40px;
+    height:40px;
+    min-height:40px;
+  }
+}
+
