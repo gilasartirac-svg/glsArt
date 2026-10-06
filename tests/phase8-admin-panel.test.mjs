@@ -35,8 +35,13 @@ test('Rewards/referral admin area is read-safe and adjustments are bounded/audit
  assert.ok(worker.includes("u.pathname==='/api/admin/audit'")&&worker.includes('reports.read'));
 });
 
-test('Admin notification management is user-scoped, bounded and CSRF protected',()=>{
+test('Rewards/referral adjustments are bounded and audited',()=>{
  for(const x of ['/api/admin/rewards','invalid_reward_adjustment','Math.abs(points)>100000','admin_adjustment']) assert.ok(worker.includes(x),x);
+});
+
+test('Admin notification management is user-scoped, bounded and CSRF protected',()=>{
+ for(const x of ['/api/admin/notifications','slice(0,160)','slice(0,2000)','admin_message','admin.notifications.create']) assert.ok(worker.includes(x),x);
+ assert.ok(worker.includes('requireCsrf(req)'));
 });
 
 test('Admin notification fails closed instead of silently rendering incomplete data',()=>{
