@@ -334,6 +334,7 @@
     "support.emptyText": "If you need help, submit your request using the form above.",
     "support.back": "← All Tickets",
     "support.contactsUnsupported": "Contact selection is not supported in this browser. Please use a compatible browser or app.",
-    "support.noContact": "No contact was selected."
+    "support.noContact": "No contact was selected.",
+    "header.languageMenu": "Choose language"
   }
 }
