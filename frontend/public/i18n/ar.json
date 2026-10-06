@@ -262,6 +262,10 @@
     "product.addErrorShort": "تعذرت الإضافة إلى السلة.",
     "product.quantityError": "تعذر تغيير الكمية.",
     "product.optionUpdateError": "تعذر تحديث خصائص المنتج.",
-    "product.gallery": "معرض صور المنتج"
+    "product.gallery": "معرض صور المنتج",
+    "product.inStock": "متوفر",
+    "product.outOfStock": "هذا العمل غير متوفر حالياً",
+    "product.purchaseMessage": "يتم التحقق من السعر النهائي والخصائص المختارة والمخزون الفعلي عند تسجيل الطلب.",
+    "product.related": "أعمال ذات صلة"
   }
 }
