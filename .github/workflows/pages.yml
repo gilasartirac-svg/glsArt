@@ -1,6 +1,10 @@
 name: Deploy Pages
 # production route verification enabled
 
+concurrency:
+  group: gilasart-github-pages-production
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]
@@ -102,3 +106,18 @@ jobs:
           if [ "$code" != "404" ] || ! grep -qi '<div id="app"></div>' /tmp/page-404.html; then
             echo "Production 404 verification failed: status=$code"; exit 1
           fi
+
+          echo "Checking locale SEO contract"
+          for path in /fa/ /en/ /tr/ /ar/; do
+            curl -fsSL --retry 2 --retry-all-errors "https://gilasart.ir$path" -o /tmp/locale.html
+            node - "$path" /tmp/locale.html <<'NODE'
+          const fs=require('fs');
+          const path=process.argv[2],html=fs.readFileSync(process.argv[3],'utf8');
+          const canonical=(html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i)||[])[1]||'';
+          if(!canonical.endsWith(path))throw new Error(path+' canonical mismatch: '+canonical);
+          for(const l of ['fa','ar','en','tr']){
+            if(!html.includes('hreflang="'+l+'"')&&!html.includes("hreflang='"+l+"'"))throw new Error(path+' missing hreflang '+l);
+          }
+          if(!html.includes('hreflang="x-default"')&&!html.includes("hreflang='x-default'"))throw new Error(path+' missing x-default');
+          NODE
+          done
