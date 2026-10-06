@@ -392,16 +392,16 @@ function productCard(p){
  const rating=Number(p.rating_avg||0),reviews=Number(p.review_count||0),sold=Number(p.sold_count||0);
  const socialProof=reviews>0||sold>0;
  const ratingText=rating>0?rating.toFixed(1):"—";
- return `<article class="card product-card product-showcase"><a class="product-card-link" href="${href}" aria-label="مشاهده ${name}">
- <div class="product-card-media"><div class="product-art-frame">${image?`<img src="${escapeHtml(image)}" alt="${name}" loading="lazy" decoding="async">`:'<div class="product-image-empty" aria-hidden="true">اثر هنری</div>'}</div>
- <div class="product-card-overlay" aria-hidden="true"><span>مشاهده جزئیات اثر</span><span>←</span></div>
- <div class="product-card-badges"><span class="product-art-badge">اثر هنری</span>${flash?`<span class="flash-badge">${icon("clock")} پیشنهاد شگفت‌انگیز</span>`:""}</div>
+ return `<article class="card product-card product-showcase"><a class="product-card-link" href="${href}" aria-label="${t('product.view')} ${name}">
+ <div class="product-card-media"><div class="product-art-frame">${image?`<img src="${escapeHtml(image)}" alt="${name}" loading="lazy" decoding="async">`:'<div class="product-image-empty" aria-hidden="true">${t('product.artwork')}</div>'}</div>
+ <div class="product-card-overlay" aria-hidden="true"><span>${t('product.details')}</span><span>←</span></div>
+ <div class="product-card-badges"><span class="product-art-badge">اثر هنری</span>${flash?`<span class="flash-badge">${icon("clock")} ${t('product.featured')}</span>`:""}</div>
  <div class="product-card-corner" aria-hidden="true"><span>GILAS</span><b>ART</b></div></div>
  <div class="cardbody product-card-body">
   <div class="product-card-heading"><div class="product-title-wrap"><span class="product-card-kicker">GILAS ART</span><h3>${name}</h3></div>${sku?`<span class="product-sku" dir="ltr">${sku}</span>`:""}</div>
-  ${socialProof?`<div class="product-social-proof" aria-label="بازخورد خریداران"><span class="product-rating"><b>★</b> ${ratingText}</span><span>${fa(reviews)} نظر</span>${sold?`<span>${fa(sold)} فروش</span>`:""}</div>`:""}
-  ${flash?`<div class="flash-timer product-card-timer" data-flash-end="${escapeHtml(p.flash_sale_ends_at)}" aria-label="زمان باقی‌مانده"></div>`:""}
-  <div class="product-card-footer"><div class="product-price-group"><span class="product-price-label">${hasFlashPrice?"قیمت ویژه":"قیمت اثر"}</span><strong class="price product-card-price">${fa(shown)} <small>ریال</small></strong>${hasFlashPrice?`<span class="muted flash-old">${fa(p.price_irt)} ریال</span>`:""}</div><span class="product-card-arrow" aria-hidden="true">←</span></div>
+  ${socialProof?`<div class="product-social-proof" aria-label="${t('product.buyerFeedback')}"><span class="product-rating"><b>★</b> ${ratingText}</span><span>${fa(reviews)} ${t('product.reviews')}</span>${sold?`<span>${fa(sold)} ${t('product.sales')}</span>`:""}</div>`:""}
+  ${flash?`<div class="flash-timer product-card-timer" data-flash-end="${escapeHtml(p.flash_sale_ends_at)}" aria-label="${t('product.remaining')}"></div>`:""}
+  <div class="product-card-footer"><div class="product-price-group"><span class="product-price-label">${hasFlashPrice?t('product.specialPrice'):t('product.price')}</span><strong class="price product-card-price">${fa(shown)} <small>${t('product.rial')}</small></strong>${hasFlashPrice?`<span class="muted flash-old">${fa(p.price_irt)} ${t('product.rial')}</span>`:""}</div><span class="product-card-arrow" aria-hidden="true">←</span></div>
  </div></a></article>`;
 }
 function jalaliDate(v){try{return new Intl.DateTimeFormat('fa-IR-u-ca-persian',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Tehran'}).format(new Date(v))}catch{return ''}}
