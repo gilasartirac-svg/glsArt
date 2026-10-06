@@ -43,7 +43,7 @@ for(const x of (snapshot?.articles||[])){if(x?.slug)addRoute('/articles/'+encode
 for(const x of (snapshot?.news||[])){if(x?.slug)addRoute('/news/'+encodeURIComponent(String(x.slug)),x.updated_at||x.published_at)}
 const sitemapBody=Array.from(urls.values()).map(x=>'<url><loc>'+x.loc+'</loc>'+(x.lastmod&&/^\\d{4}-\\d{2}-\\d{2}/.test(String(x.lastmod))?'<lastmod>'+String(x.lastmod).slice(0,10)+'</lastmod>':'')+'</url>').join('');
 await writeFile('dist/sitemap.xml','<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+sitemapBody+'</urlset>');
-const release=JSON.parse(await readFile('frontend/public/mobile-release.json','utf8'));await writeFile('dist/config.js',`window.GILASART_API=${JSON.stringify(process.env.GILASART_API||'https://api.gilasart.ir')};window.GILASART_APP_VERSION=${JSON.stringify(release.web?.version||'dev')};\n`);console.log('frontend built');
+const release=JSON.parse(await readFile('frontend/public/mobile-release.json','utf8'));const buildVersion=String(release.web?.version||'dev').replace(/[^A-Za-z0-9._-]/g,'-');const swSource=await readFile('dist/sw.js','utf8');await writeFile('dist/sw.js',swSource.replaceAll('__GILASART_VERSION__',buildVersion));await writeFile('dist/config.js',`window.GILASART_API=${JSON.stringify(process.env.GILASART_API||'https://api.gilasart.ir')};window.GILASART_APP_VERSION=${JSON.stringify(release.web?.version||'dev')};\n`);console.log('frontend built');
 await cp('404.html','dist/404.html');
 await cp('CNAME','dist/CNAME');
 
