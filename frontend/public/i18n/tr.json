@@ -163,6 +163,10 @@
     "header.languageLabel": "Dil seçin",
     "update.close": "Kapat",
     "update.nativeAndroid": "Android",
-    "update.nativeIos": "iOS"
+    "update.nativeIos": "iOS",
+    "common.loading": "Yükleniyor…",
+    "common.error": "Bir hata oluştu. Lütfen tekrar deneyin.",
+    "common.empty": "Görüntülenecek bir içerik yok.",
+    "common.success": "İşlem başarıyla tamamlandı."
   }
 }
