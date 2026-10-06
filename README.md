@@ -52,26 +52,28 @@
 **خروجی فاز 0:** معماری i18n قفل و تأیید شد. Production route E2E برای `/`, `/fa/`, `/en/`, `/tr/`, `/ar/`, `/shop`، دارایی تصویر Home، 404 و همچنین Canonical/Hreflang/X-Default در GitHub Pages پس از Deployment Commit `263bf9ec489e39c51da18979a4344cd007924840` با موفقیت تأیید شدند.
 
 ### فاز 1 — هسته و اجزای مشترک
-- ☐ فاز 1 کامل
-- ☐ Header
-- ☐ Logo
-- ☐ منوی اصلی
-- ☐ Hamburger
-- ☐ Language switcher
-- ☐ Cart
-- ☐ Account
-- ☐ Login / Logout
-- ☐ Points
-- ☐ Footer
-- ☐ Social links
-- ☐ Buttons
-- ☐ Loading
-- ☐ Error
-- ☐ Empty states
-- ☐ Success / Error messages
-- ☐ Modalها
-- ☐ Accessibility labels
-- ☐ Tooltipها
+- ☑ فاز 1 کامل
+- ☑ Header
+- ☑ Logo
+- ☑ منوی اصلی
+- ☑ Hamburger
+- ☑ Language switcher
+- ☑ Cart
+- ☑ Account
+- ☑ Login / Logout
+- ☑ Points
+- ☑ Footer
+- ☑ Social links
+- ☑ Buttons
+- ☑ Loading
+- ☑ Error
+- ☑ Empty states
+- ☑ Success / Error messages
+- ☑ Modalها
+- ☑ Accessibility labels
+- ☑ Tooltipها
+
+**خروجی فاز 1:** هسته مشترک Storefront شامل Header، Footer، ناوبری، Hamburger، انتخاب زبان، حساب، سبد، امتیاز، وضعیت‌های عمومی و Accessibility labels به i18n متصل و با چهار JSON هم‌کلید شد. نسخه Cache نیز به‌روزرسانی شد. Production Quality Gate، Security Regression Tests، Deploy Worker و Deploy Pages برای Commit نهایی `1cc62b79e975e119678eb7dc83b07c9ecda50772` موفق شدند.
 
 ### فاز 2 — Home
 - ☐ فاز 2 کامل
