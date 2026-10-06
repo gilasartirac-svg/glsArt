@@ -17,8 +17,8 @@ const faValues=new Set(Object.values(dicts.fa.strings).map(v=>String(v).trim()).
 const gaps=new Set();
 function add(s){
  s=String(s||'').trim();
- if(!s||s.length>180||!/[\\u0600-\\u06FF]/.test(s)||s.includes('$'+'{'))return;
- if(/^(?:[۰-۹]+|[+−×·٪\\s]+)$/.test(s))return;
+ if(!s||s.length>180||!/[\u0600-\u06FF]/.test(s)||s.includes('$'+'{'))return;
+ if(/^(?:[۰-۹]+|[+−×·٪\s]+)$/.test(s))return;
  if(!faValues.has(s))gaps.add(s);
 }
 for(const tm of source.split('`').filter((_,i)=>i%2===1)){
