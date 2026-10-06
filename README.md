@@ -1771,7 +1771,7 @@ The public application loads the dictionary for the locale in the URL, sets `doc
 - `/en/*` → English / LTR
 - `/tr/*` → Turkish / LTR
 
-A bare public route such as `/` or `/shop` is normalized to the Persian equivalent (for example `/fa/` and `/fa/shop`). Admin remains Persian-only unless explicitly internationalized later.
+A bare public route such as `/` is eligible for conservative automatic locale selection only when there is no saved language Cookie and the Worker has explicit non-Iran country + compatible non-Persian browser-language evidence; otherwise it resolves to Persian. An explicit locale path such as `/fa/`, `/ar/`, `/en/`, or `/tr/` is authoritative. Admin remains Persian-only unless explicitly internationalized later.
 
 ### Translation contract
 
