@@ -4754,21 +4754,31 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
 }
 
 
-/* Rewards — INVITE FRIENDS responsive composition v2
-   One deterministic layout for desktop / tablet / phone. */
+/* =========================================================
+   GilasArt Rewards — Invite Friends responsive standard v4
+   Single deterministic composition:
+   phone <=680 / tablet 681-1024 / desktop >=1025
+   Hierarchy: title -> explanation -> code -> URL -> actions -> notes.
+   ========================================================= */
 .rewards-page .referral-panel{
   display:flex;
   flex-direction:column;
+  width:100%;
   min-width:0;
+  padding:22px;
   gap:0;
+  overflow:hidden;
+}
+.rewards-page .referral-panel > .eyebrow{
+  margin:0 0 6px;
 }
 .rewards-page .referral-panel > h2{
-  margin:4px 0 8px;
-  line-height:1.45;
+  margin:0 0 8px;
+  line-height:1.5;
   overflow-wrap:anywhere;
 }
 .rewards-page .referral-panel > .muted{
-  margin:0 0 14px;
+  margin:0 0 16px;
   line-height:1.9;
   overflow-wrap:anywhere;
 }
@@ -4777,25 +4787,33 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
   grid-template-columns:minmax(0,1fr) 42px;
   align-items:center;
   gap:8px;
-  margin:2px 0 16px;
-}
-.rewards-page .referral-code code{
   width:100%;
   min-width:0;
-  min-height:42px;
+  margin:0 0 16px;
+}
+.rewards-page .referral-code code{
   display:flex;
   align-items:center;
   justify-content:center;
+  width:100%;
+  min-width:0;
+  min-height:42px;
+  padding:9px 10px;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  padding:9px 10px;
 }
 .rewards-page .referral-code-copy{
-  flex:0 0 42px;
+  width:42px;
+  min-width:42px;
+  height:42px;
+  min-height:42px;
+  margin:0;
+  padding:0;
 }
 .rewards-page .referral-label{
   display:block;
+  width:100%;
   margin:0 0 7px;
   color:var(--ui-muted);
   font-size:11px;
@@ -4811,191 +4829,22 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
 }
 .rewards-page .referral-url-row .referral-url{
   grid-column:1 / -1;
-  grid-row:auto;
+  grid-row:1;
   width:100%;
   min-width:0;
-  min-height:44px;
-}
-.rewards-page .referral-copy-btn,
-.rewards-page .referral-sms-btn{
-  width:100%;
-  min-width:0;
-  min-height:44px;
-  padding-inline:10px;
-  white-space:normal;
-  text-align:center;
-  line-height:1.45;
-}
-.rewards-page .referral-copy-btn span,
-.rewards-page .referral-sms-btn span{
-  min-width:0;
-  overflow-wrap:anywhere;
-}
-.rewards-page .referral-note{
-  margin:12px 0 0;
-}
-.rewards-page .referral-privacy-note{
-  display:grid;
-  grid-template-columns:auto minmax(0,1fr);
-  align-items:start;
-  gap:8px;
-  margin-top:12px;
-  min-width:0;
-}
-.rewards-page .referral-privacy-note > div{
-  min-width:0;
-  overflow-wrap:anywhere;
-}
-
-/* Desktop: generous two-column action row, never squeeze the URL field. */
-@media (min-width:961px){
-  .rewards-page .referral-panel{
-    padding:22px;
-  }
-  .rewards-page .referral-url-row{
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  }
-}
-
-/* Tablet: keep the same hierarchy, with full-width URL above actions. */
-@media (min-width:681px) and (max-width:960px){
-  .rewards-page .referral-panel{
-    padding:20px;
-  }
-  .rewards-page .referral-url-row{
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  }
-}
-
-/* Phone: one-column controls for predictable touch targets. */
-@media (max-width:680px){
-  .rewards-page .referral-code{
-    grid-template-columns:minmax(0,1fr) 42px;
-  }
-  .rewards-page .referral-url-row{
-    grid-template-columns:minmax(0,1fr);
-  }
-  .rewards-page .referral-url-row .referral-url{
-    grid-column:auto;
-  }
-  .rewards-page .referral-copy-btn,
-  .rewards-page .referral-sms-btn{
-    grid-column:auto;
-    min-height:46px;
-  }
-}
-
-/* Very narrow phones: preserve readable padding and never force horizontal overflow. */
-@media (max-width:360px){
-  .rewards-page .referral-panel{
-    padding:12px;
-  }
-  .rewards-page .referral-code{
-    grid-template-columns:minmax(0,1fr) 40px;
-    gap:6px;
-  }
-  .rewards-page .referral-code-copy{
-    width:40px;
-    min-width:40px;
-    height:40px;
-  }
-  .rewards-page .referral-url-row{
-    gap:7px;
-  }
-}
-
-
-/* =========================================================
-   Rewards / Invite Friends — Responsive Layout v3
-   Final scoped override: mobile / tablet / desktop.
-   Hierarchy: code -> URL -> actions -> notes.
-   ========================================================= */
-.rewards-page .referral-panel{
-  display:flex;
-  flex-direction:column;
-  min-width:0;
-  width:100%;
-}
-.rewards-page .referral-panel > .eyebrow{
-  margin:0 0 6px;
-}
-.rewards-page .referral-panel > h2{
-  margin:0 0 8px;
-  line-height:1.5;
-  overflow-wrap:anywhere;
-}
-.rewards-page .referral-panel > .muted{
-  margin:0 0 16px;
-  line-height:1.9;
-  overflow-wrap:anywhere;
-}
-
-/* Referral code: code always gets the flexible space; copy icon stays fixed. */
-.rewards-page .referral-code{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 42px;
-  gap:8px;
-  align-items:center;
-  width:100%;
-  margin:0 0 16px;
-}
-.rewards-page .referral-code code{
-  min-width:0;
-  width:100%;
-  min-height:42px;
-  padding:9px 10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  min-height:46px;
+  margin:0;
+  padding-inline:12px;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
 }
-.rewards-page .referral-code-copy{
-  width:42px;
-  min-width:42px;
-  height:42px;
-  min-height:42px;
-  margin:0;
-  padding:0;
-}
-
-/* URL is deliberately on its own row. */
-.rewards-page .referral-label{
-  display:block;
-  width:100%;
-  margin:0 0 7px;
-  color:var(--ui-muted);
-  font-size:11px;
-  line-height:1.7;
-}
-.rewards-page .referral-url-row{
-  display:grid;
-  grid-template-columns:minmax(0,1fr);
-  gap:8px;
-  width:100%;
-  min-width:0;
-  align-items:stretch;
-}
-.rewards-page .referral-url-row .referral-url{
-  grid-column:auto;
-  grid-row:auto;
-  width:100%;
-  min-width:0;
-  min-height:44px;
-  margin:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-
-/* Action buttons form a separate two-column row on larger screens. */
 .rewards-page .referral-copy-btn,
 .rewards-page .referral-sms-btn{
   width:100%;
   min-width:0;
   max-width:none;
-  min-height:44px;
+  min-height:46px;
   margin:0;
   padding-inline:10px;
   display:inline-flex;
@@ -5011,18 +4860,27 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
   min-width:0;
   overflow-wrap:anywhere;
 }
-
-/* Keep the two action buttons together as a dedicated row. */
-@media (min-width:681px){
-  .rewards-page .referral-url-row{
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  }
-  .rewards-page .referral-url-row .referral-url{
-    grid-column:1 / -1;
-  }
+.rewards-page .referral-note{
+  margin:12px 0 0;
+  line-height:1.8;
+  overflow-wrap:anywhere;
+}
+.rewards-page .referral-privacy-note{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:start;
+  gap:8px;
+  width:100%;
+  min-width:0;
+  margin:12px 0 0;
+  padding:10px 12px;
+}
+.rewards-page .referral-privacy-note > div{
+  min-width:0;
+  overflow-wrap:anywhere;
 }
 
-/* Desktop: two reward panels side-by-side; invite actions stay balanced. */
+/* Desktop: redeem + invite panels share one balanced row. */
 @media (min-width:1025px){
   .rewards-page .rewards-grid{
     grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
@@ -5034,7 +4892,7 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
   }
 }
 
-/* Tablet: panels stack, with comfortable touch targets and no squeezing. */
+/* Tablet: panels stack to protect readable controls and touch targets. */
 @media (min-width:681px) and (max-width:1024px){
   .rewards-page{
     padding-inline:16px;
@@ -5048,15 +4906,14 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
   }
   .rewards-page .referral-copy-btn,
   .rewards-page .referral-sms-btn{
-    min-height:46px;
+    min-height:48px;
   }
 }
 
-/* Phone: everything becomes one predictable vertical flow. */
+/* Phone: one vertical flow; every action gets its own full-width row. */
 @media (max-width:680px){
   .rewards-page{
     padding-inline:12px;
-    padding-bottom:40px;
   }
   .rewards-page .rewards-grid{
     grid-template-columns:minmax(0,1fr);
@@ -5067,18 +4924,19 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
   }
   .rewards-page .referral-url-row{
     grid-template-columns:minmax(0,1fr);
+    gap:8px;
   }
   .rewards-page .referral-url-row .referral-url{
     grid-column:auto;
+    grid-row:auto;
   }
   .rewards-page .referral-copy-btn,
   .rewards-page .referral-sms-btn{
     min-height:48px;
-    width:100%;
   }
 }
 
-/* Narrow phones: reduce padding only; never reduce touch target size. */
+/* Narrow phones: preserve 40px copy control and safe horizontal padding. */
 @media (max-width:380px){
   .rewards-page{
     padding-inline:8px;
@@ -5095,8 +4953,5 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
     min-width:40px;
     height:40px;
     min-height:40px;
-  }
-  .rewards-page .referral-url-row{
-    gap:7px;
   }
 }
