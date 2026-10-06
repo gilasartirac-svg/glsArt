@@ -193,6 +193,7 @@
     "home.orderText": "Enter delivery details and complete your order.",
     "home.processDiscover": "Discover",
     "home.processChoose": "Choose",
-    "home.processOrder": "Order"
+    "home.processOrder": "Order",
+    "home.heroView": "View featured artwork"
   }
 }
