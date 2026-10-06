@@ -41,7 +41,7 @@ function publicPathNeedsLocale(pathname){
  return !first||['shop','cart','account','rewards','checkout','about','contact','news','articles','article','terms','support','payment','product'].includes(first);
 }
 function localePath(path,locale=currentLocale){
- const p=String(path||'/');if(/^https?:\\/\\//i.test(p)||p.startsWith('//')||p.startsWith('/api/'))return p;
+ const p=String(path||'/');if(p.startsWith('http://')||p.startsWith('https://')||p.startsWith('//')||p.startsWith('/api/'))return p;
  const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
  let clean=p.startsWith('/')?p:'/'+p;
  if(base&&clean.startsWith(base))clean=clean.slice(base.length)||'/';
