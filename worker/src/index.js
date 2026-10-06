@@ -257,7 +257,6 @@ async function loadProductAttributes(env,productId){
           WHERE pd.product_id=pa.product_id
             AND pdo.attribute_id=a.id
             AND pd.active=1
-            AND pd.is_default=1
         ) THEN CASE WHEN pov.product_id IS NOT NULL THEN pov.is_default ELSE 0 END
         ELSE o.is_default
       END is_default,
@@ -270,8 +269,18 @@ async function loadProductAttributes(env,productId){
       ON pov.product_id=pa.product_id AND pov.option_id=o.id
     WHERE pa.product_id=?
       AND a.active=1
-      AND (pov.product_id IS NULL OR pov.active=1)
       AND o.active=1
+      AND (
+        pov.product_id IS NOT NULL
+        OR NOT EXISTS(
+          SELECT 1
+          FROM product_attribute_option_overrides pox
+          JOIN product_attribute_options px ON px.id=pox.option_id
+          WHERE pox.product_id=pa.product_id
+            AND px.attribute_id=a.id
+        )
+      )
+      AND (pov.product_id IS NULL OR pov.active=1)
     ORDER BY pa.sort_order,a.sort_order,o.sort_order
   `).bind(productId).all()).results||[];
   const map=new Map();
@@ -298,10 +307,16 @@ async function buildStorefrontSnapshot(env){
           WHERE pd.product_id=pa.product_id
             AND pdo.attribute_id=a.id
             AND pd.active=1
-            AND pd.is_default=1
         ) THEN CASE WHEN pov.product_id IS NOT NULL THEN pov.is_default ELSE 0 END
         ELSE o.is_default
-      END is_default,CASE WHEN pov.product_id IS NOT NULL THEN pov.price_delta_irt ELSE o.price_delta_irt END price_delta_irt FROM product_attribute_assignments pa JOIN products p ON p.id=pa.product_id AND p.active=1 JOIN product_attributes a ON a.id=pa.attribute_id AND a.active=1 JOIN product_attribute_options o ON o.attribute_id=a.id LEFT JOIN product_attribute_option_overrides pov ON pov.product_id=pa.product_id AND pov.option_id=o.id WHERE (pov.product_id IS NULL OR pov.active=1) AND o.active=1 ORDER BY pa.product_id,pa.sort_order,a.sort_order,o.sort_order`).all(),
+      END is_default,CASE WHEN pov.product_id IS NOT NULL THEN pov.price_delta_irt ELSE o.price_delta_irt END price_delta_irt FROM product_attribute_assignments pa JOIN products p ON p.id=pa.product_id AND p.active=1 JOIN product_attributes a ON a.id=pa.attribute_id AND a.active=1 JOIN product_attribute_options o ON o.attribute_id=a.id LEFT JOIN product_attribute_option_overrides pov ON pov.product_id=pa.product_id AND pov.option_id=o.id WHERE o.active=1 AND (
+        pov.product_id IS NOT NULL
+        OR NOT EXISTS(
+          SELECT 1 FROM product_attribute_option_overrides pox
+          JOIN product_attribute_options px ON px.id=pox.option_id
+          WHERE pox.product_id=pa.product_id AND px.attribute_id=a.id
+        )
+      ) AND (pov.product_id IS NULL OR pov.active=1) ORDER BY pa.product_id,pa.sort_order,a.sort_order,o.sort_order`).all(),
     env.DB.prepare(`SELECT r.id,r.product_id,r.rating,r.body,r.created_at,u.name,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='like'),0) like_count,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='dislike'),0) dislike_count FROM reviews r JOIN users u ON u.id=r.user_id JOIN products p ON p.id=r.product_id AND p.active=1 WHERE r.approved=1 ORDER BY r.product_id,r.created_at DESC`).all(),
     env.DB.prepare(`SELECT id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE active=1 AND section IN ('about','contact','news','articles') ORDER BY section,published_at DESC,created_at DESC`).all(),
     env.DB.prepare(`SELECT id,question,answer,sort_order,created_at,updated_at FROM faq_entries WHERE active=1 ORDER BY sort_order ASC,created_at ASC`).all(),
