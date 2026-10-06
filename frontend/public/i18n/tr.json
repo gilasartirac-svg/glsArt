@@ -262,6 +262,10 @@
     "product.addErrorShort": "Sepete eklenemedi.",
     "product.quantityError": "Adet değiştirilemedi.",
     "product.optionUpdateError": "Ürün seçenekleri güncellenemedi.",
-    "product.gallery": "Ürün görsel galerisi"
+    "product.gallery": "Ürün görsel galerisi",
+    "product.inStock": "Stokta",
+    "product.outOfStock": "Bu eser şu anda stokta yok",
+    "product.purchaseMessage": "Nihai fiyat, seçilen seçenekler ve gerçek stok sipariş sırasında kontrol edilir.",
+    "product.related": "İlgili eserler"
   }
 }
