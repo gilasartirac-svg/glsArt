@@ -193,12 +193,12 @@ function quantityDiscountTiers(){return QUANTITY_DISCOUNT_TIERS.map(x=>({...x}))
 const ORDER_STATUS_LABELS={PENDING:'در انتظار پرداخت',PAID:'پرداخت شد',PROCESSING:'در حال پردازش',SHIPPED:'ارسال شد',DELIVERED:'تحویل شد',CANCELLED:'لغو شد',FAILED:'ناموفق'};
 const ORDER_STATUSES=new Set(Object.keys(ORDER_STATUS_LABELS));
 function orderStatusLabel(status){return ORDER_STATUS_LABELS[String(status||'').toUpperCase()]||String(status||'نامشخص')}
-async function recordOrderStatusChange(env,orderId,fromStatus,toStatus,changedByUserId=null){
+async function recordOrderStatusChange(env,orderId,fromStatus,toStatus,changedByUserId=null,messageOverride=null){
  if(!toStatus||fromStatus===toStatus)return {sent:false,reason:'unchanged'};
  await env.DB.prepare('INSERT INTO order_status_history(id,order_id,from_status,to_status,changed_by_user_id) VALUES(?,?,?,?,?)').bind(uid(),orderId,fromStatus||null,toStatus,changedByUserId||null).run();
  const order=await env.DB.prepare('SELECT o.id,u.mobile FROM orders o JOIN users u ON u.id=o.user_id WHERE o.id=?').bind(orderId).first();
  if(!order?.mobile)return {sent:false,reason:'mobile_missing'};
- const message='گیلاس آرت\nوضعیت سفارش: '+orderStatusLabel(toStatus);
+ const message=String(messageOverride||('گیلاس آرت\nوضعیت سفارش: '+orderStatusLabel(toStatus))).slice(0,700);
  let deliveryStatus='SKIPPED',providerStatus=null;
  const key=String(env.KAVENEGAR_API_KEY||'');
  const sender=String(await siteSetting(env,'kavenegar_sender',env.KAVENEGAR_SENDER||'')).trim().slice(0,50);
@@ -978,6 +978,30 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const im=by(items,'order_id'),hm=by(history,'order_id'),pm=by(payments,'order_id');
   return json({items:orders.map(o=>({...o,items:im[o.id]||[],history:hm[o.id]||[],payment:(pm[o.id]||[])[0]||null})),invoice});
  }
+ if(u.pathname.startsWith('/api/orders/')&&u.pathname.endsWith('/payment-receipt')&&req.method==='POST'){
+  if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);
+  const parts=u.pathname.split('/'),oid=parts[3];
+  const order=await env.DB.prepare("SELECT o.id,o.status,p.id payment_id,p.provider,p.receipt_status FROM orders o JOIN payments p ON p.order_id=o.id WHERE o.id=? AND o.user_id=?").bind(oid,me.id).first();
+  if(!order)return json({error:'not_found'},404);
+  if(order.provider!=='card_transfer')return json({error:'receipt_not_allowed'},400);
+  if(order.status!=='PENDING')return json({error:'order_not_pending'},409);
+  if(order.receipt_status==='PENDING_REVIEW'||order.receipt_status==='APPROVED')return json({error:'receipt_already_submitted'},409);
+  let form;try{form=await req.formData()}catch{return json({error:'invalid_multipart'},400)}
+  const file=form.get('receipt');
+  if(!(file instanceof File))return json({error:'receipt_required'},400);
+  const type=String(file.type||'').toLowerCase();
+  if(!['image/jpeg','image/png','image/webp'].includes(type))return json({error:'receipt_image_only'},400);
+  const data=new Uint8Array(await file.arrayBuffer());
+  if(data.length===0||data.length>150*1024)return json({error:'receipt_too_large'},400);
+  const jpeg=data.length>=3&&data[0]===0xff&&data[1]===0xd8&&data[2]===0xff;
+  const png=data.length>=8&&data[0]===0x89&&data[1]===0x50&&data[2]===0x4e&&data[3]===0x47;
+  const webp=data.length>=12&&data[0]===0x52&&data[1]===0x49&&data[2]===0x46&&data[3]===0x46&&data[8]===0x57&&data[9]===0x45&&data[10]===0x42&&data[11]===0x50;
+  if(!jpeg&&!png&&!webp)return json({error:'invalid_image_content'},400);
+  await env.DB.prepare("UPDATE payments SET receipt_status='PENDING_REVIEW',receipt_mime=?,receipt_size=?,receipt_data=?,receipt_uploaded_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE id=? AND receipt_status='NONE'").bind(type,data,data.length,order.payment_id).run();
+  const saved=await env.DB.prepare('SELECT receipt_status,receipt_size FROM payments WHERE id=?').bind(order.payment_id).first();
+  if(saved?.receipt_status!=='PENDING_REVIEW')return json({error:'receipt_already_submitted'},409);
+  return json({ok:true,receiptStatus:saved.receipt_status,size:saved.receipt_size,message:'فیش با موفقیت ارسال شد. رسید شما بزودی توسط مدیر بررسی و نتیجه پرداخت اعلام می‌گردد.'});
+ }
  if(u.pathname.startsWith('/api/orders/')&&req.method==='GET'){
   if(!me)return json({error:'unauthorized'},401);
   const oid=u.pathname.split('/')[3];
@@ -986,7 +1010,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const [items,history,pay]=await Promise.all([
    env.DB.prepare('SELECT * FROM order_items WHERE order_id=? ORDER BY id').bind(oid).all(),
    env.DB.prepare('SELECT h.*,u.name changed_by_name FROM order_status_history h LEFT JOIN users u ON u.id=h.changed_by_user_id WHERE h.order_id=? ORDER BY h.changed_at ASC').bind(oid).all(),
-   env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at FROM payments WHERE order_id=?').bind(oid).first()
+   env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at,provider,receipt_status,receipt_mime,receipt_size,receipt_uploaded_at,receipt_reviewed_at FROM payments WHERE order_id=?').bind(oid).first()
   ]);
   return json({order:o,items:items.results||[],history:history.results||[],payment:pay||null,invoice:await invoiceSettings(env)});
  }
@@ -1262,6 +1286,30 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
  }
 
 
+ if(u.pathname.startsWith('/api/admin/orders/')&&u.pathname.endsWith('/payment-receipt/approve')&&req.method==='POST'){
+  if(!(await requirePermission(me,env,'orders.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
+  const id=u.pathname.split('/')[4];if(!id)return json({error:'not_found'},404);
+  const p=await env.DB.prepare("SELECT p.id,p.provider,p.status,p.receipt_status,p.ref_id,o.status order_status,o.user_id FROM payments p JOIN orders o ON o.id=p.order_id WHERE p.order_id=?").bind(id).first();
+  if(!p)return json({error:'not_found'},404);
+  if(p.provider!=='card_transfer')return json({error:'not_card_transfer'},400);
+  if(p.receipt_status!=='PENDING_REVIEW')return json({error:'receipt_not_pending'},409);
+  if(p.order_status!=='PENDING'||p.status==='PAID')return json({error:'order_not_pending'},409);
+  const statements=[
+   env.DB.prepare("UPDATE payments SET status='PAID',receipt_status='APPROVED',receipt_reviewed_at=CURRENT_TIMESTAMP,receipt_reviewed_by=?,paid_at=COALESCE(paid_at,CURRENT_TIMESTAMP),updated_at=CURRENT_TIMESTAMP WHERE order_id=? AND receipt_status='PENDING_REVIEW'").bind(me.id,id),
+   env.DB.prepare("UPDATE orders SET status='PAID',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='PENDING'").bind(id),
+   env.DB.prepare("DELETE FROM stock_reservations WHERE order_id=?").bind(id)
+  ];
+  await env.DB.batch(statements);
+  const after=await env.DB.prepare('SELECT status FROM orders WHERE id=?').bind(id).first();
+  const invoiceUrl=frontend(env)+'/account?invoice='+encodeURIComponent(id);
+  const smsMessage='گیلاس آرت\nبا سلام\nواریز وجه مورد تایید قرار گرفت. جهت چاپ فاکتور بر روی لینک زیر کلیک کنید:\n'+invoiceUrl;
+  const sms=await recordOrderStatusChange(env,id,'PENDING',after?.status||'PAID',me.id,smsMessage);
+  const ord=await env.DB.prepare('SELECT user_id,total_irt FROM orders WHERE id=?').bind(id).first();
+  const purchasePoints=Math.min(30,Math.floor(Number(ord?.total_irt||0)/1000000));
+  if(purchasePoints>0)await awardPoints(env,ord.user_id,purchasePoints,'purchase','order',id,'خرید موفق در گیلاس آرت');
+  await audit(env,me,'admin.card_transfer.receipt.approve','order',id,{receiptStatus:'APPROVED',sms},req);
+  return json({ok:true,status:'PAID',receiptStatus:'APPROVED',invoiceUrl,sms});
+ }
  if(u.pathname.startsWith('/api/admin/orders/') && u.pathname.endsWith('/status') && req.method==='PUT'){
   if(!(await requirePermission(me,env,'orders.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
   const id=u.pathname.split('/')[4],before=await env.DB.prepare('SELECT * FROM orders WHERE id=?').bind(id).first();
@@ -1271,7 +1319,8 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   if(next===before.status)return json({ok:true,changed:false,status:before.status});
   await env.DB.prepare('UPDATE orders SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(next,id).run();
   if(next==='PAID'){
-   const payment=await env.DB.prepare('SELECT id,provider,status FROM payments WHERE order_id=?').bind(id).first();
+   const payment=await env.DB.prepare('SELECT id,provider,status,receipt_status FROM payments WHERE order_id=?').bind(id).first();
+   if(payment?.provider==='card_transfer'&&payment.receipt_status!=='APPROVED')return json({error:'card_transfer_receipt_not_approved'},409);
    if(payment?.provider==='card_transfer'&&payment.status!=='PAID'){
     const ref=String(b.refId||'').trim().slice(0,120)||null;
     await env.DB.prepare("UPDATE payments SET status='PAID',ref_id=COALESCE(?,ref_id),paid_at=COALESCE(paid_at,CURRENT_TIMESTAMP),updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(ref,payment.id).run();
@@ -1291,6 +1340,13 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   await audit(env,me,'admin.order.status.change','order',id,{before,after,sms},req);
   return json({ok:true,changed:true,status:after.status,sms});
  }
+ if(u.pathname.startsWith('/api/admin/orders/')&&u.pathname.endsWith('/payment-receipt')&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'orders.read')))return json({error:'forbidden'},403);
+  const id=u.pathname.split('/')[4];if(!id)return json({error:'not_found'},404);
+  const p=await env.DB.prepare("SELECT receipt_status,receipt_mime,receipt_size,receipt_data FROM payments WHERE order_id=?").bind(id).first();
+  if(!p||p.receipt_status==='NONE'||!p.receipt_data)return json({error:'receipt_not_found'},404);
+  return new Response(p.receipt_data,{status:200,headers:{'content-type':p.receipt_mime||'image/jpeg','content-length':String(p.receipt_size||p.receipt_data.length),'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
+ }
  if(u.pathname.startsWith('/api/admin/orders/') && req.method==='GET'){
   if(!(await requirePermission(me,env,'orders.read')))return json({error:'forbidden'},403);
   const id=u.pathname.split('/')[4];if(!id)return json({error:'not_found'},404);
@@ -1299,7 +1355,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const [items,history,payment,seller]=await Promise.all([
    env.DB.prepare('SELECT id,product_id,sku,name,unit_price_irt,quantity,line_total_irt,options_json FROM order_items WHERE order_id=? ORDER BY id').bind(id).all(),
    env.DB.prepare('SELECT h.*,u.name changed_by_name,u.mobile changed_by_mobile FROM order_status_history h LEFT JOIN users u ON u.id=h.changed_by_user_id WHERE h.order_id=? ORDER BY h.changed_at DESC').bind(id).all(),
-   env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at FROM payments WHERE order_id=?').bind(id).first(),
+   env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at,provider,receipt_status,receipt_mime,receipt_size,receipt_uploaded_at,receipt_reviewed_at,receipt_reviewed_by FROM payments WHERE order_id=?').bind(id).first(),
    env.DB.prepare("SELECT key,value FROM site_settings WHERE key IN ('invoice_seller_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address')").all()
   ]);
   const sm=Object.fromEntries((seller.results||[]).map(x=>[x.key,x.value]));
