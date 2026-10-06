@@ -1,6 +1,8 @@
 const API=window.GILASART_API||((location.hostname==='gilasart.ir'||location.hostname==='www.gilasart.ir')?'https://api.gilasart.ir':'https://gilasartworker.gilasart-ir-ac.workers.dev');
 let csrfToken='';
 let sessionChecked=false;
+let sessionState=null;
+export function getAdminSessionState(){return sessionState}
 
 const apiError=(data,status,path)=>new Error((data?.error||data?.message||`HTTP ${status}`)+` · ${path}`);
 
@@ -10,6 +12,7 @@ async function ensureCsrf(force=false){
   const r=await fetch(API+'/api/me',{credentials:'include',cache:'no-store'});
   const d=await r.json().catch(()=>({}));
   csrfToken=d.csrfToken||'';
+  sessionState=d.session||null;
   sessionChecked=true;
   return csrfToken;
  }catch{
@@ -58,6 +61,7 @@ async function request(path,options,attempt=0){
   const res=await fetch(API+path,{credentials:'include',cache:'no-store',...options,headers,signal:controller.signal});
   const data=await res.json().catch(()=>({}));
   if(data.csrfToken)csrfToken=data.csrfToken;
+  if(data.session)sessionState=data.session;
   if((res.status===401||res.status===403)&&attempt===0){
    await ensureCsrf(true);
    return request(path,options,1);
