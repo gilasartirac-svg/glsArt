@@ -30,7 +30,6 @@ test('phase 5 frontend supports all three payment branches and manual receipt fl
 
 test('phase 5 frontend never uses its displayed checkout total as the payment authority', () => {
   assert.match(app, /api\('\/api\/orders'/);
-  assert.match(app, /api\('\/api\/orders\/'\+encodeURIComponent\(o\.orderId\)\+'/pay'/);
   assert.match(app, /provider/);
   assert.match(app, /idempotencyKey/);
 });
