@@ -207,18 +207,20 @@
 **خروجی فاز 8:** پنل مدیریت Production ممیزی، سخت‌سازی و آماده استقرار شد؛ مسیرهای Dashboard، Products، Categories، Inventory، Orders، Payments، Reviews، Customers، Discounts/Coupons، Rewards/Referral، Notifications، Support/CRM، CMS، Settings و Audit/Security تحت Session + RBAC/Permission قرار گرفتند. مدیریت Rewards/Referral و Notifications به پنل افزوده شد، تغییر امتیازها محدود و Audit شد، ارسال اعلان کاربرمحور با CSRF و Audit انجام می‌شود، و قرارداد اختصاصی Phase 8 به همراه Security Regression Gate اضافه شد.
 
 ### فاز 9 — صفحات خاص و محتوایی
-- ☐ فاز 9 کامل
-- ☐ درباره ما
-- ☐ قوانین
-- ☐ حریم خصوصی
-- ☐ تماس
-- ☐ Enamad
-- ☐ مقالات
-- ☐ اخبار
-- ☐ آموزش‌ها
-- ☐ Aparat
-- ☐ صفحات SEO
-- ☐ صفحات قانونی
+- ☑ فاز 9 کامل
+- ☑ درباره ما
+- ☑ قوانین
+- ☑ حریم خصوصی
+- ☑ تماس
+- ☑ Enamad
+- ☑ مقالات
+- ☑ اخبار
+- ☑ آموزش‌ها
+- ☑ Aparat
+- ☑ صفحات SEO
+- ☑ صفحات قانونی
+
+**خروجی فاز 9:** صفحات محتوایی About/Contact/News/Articles موجود و مسیرهای آن‌ها در Production حفظ شدند؛ صفحه مستقل Privacy با چهار زبان، صفحه رسمی Enamad با لینک مرجع، و صفحه آموزش‌های Aparat با دریافت RSS کانال gilasart و پخش Inline ویدئوهای قابل Embed اضافه شدند. مسیرهای جدید در routing و locale routing ثبت، متن‌های جدید در هر چهار dictionary هم‌کلید شدند، و قرارداد اختصاصی Phase 9 در tests/phase9-special-content.test.mjs اضافه شد. Security Regression، Production Quality Gate، Deploy Pages و Deploy Worker + D1 برای Commit کد Phase 9 موفق شدند.
 
 ### فاز 10 — SEO و Routing
 - ☐ فاز 10 کامل
