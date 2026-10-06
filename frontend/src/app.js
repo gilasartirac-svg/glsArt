@@ -1059,6 +1059,10 @@ async function checkout(){navigate('/cart')}
 
 async function router(){
  scrollRouteTop();
+ // Authentication is a global application concern, not an account-page concern.
+ // Hydrate the server session before ANY page renders so the header, admin link,
+ // roles and permissions are identical on home/shop/product/account/admin routes.
+ await loadMe();
  const base=routeBase();
  let cleanPath=location.pathname.startsWith(base)?location.pathname.slice(base.length):location.pathname;
  cleanPath=cleanPath.replace(/^\/+|\/+$/g,'');
