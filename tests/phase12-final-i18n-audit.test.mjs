@@ -21,12 +21,12 @@ function add(s){
  if(/^(?:[۰-۹]+|[+−×·٪\\s]+)$/.test(s))return;
  if(!faValues.has(s))gaps.add(s);
 }
-for(const tm of source.matchAll(/\\x60([\\s\\S]*?)\\x60/g)){
- const tpl=tm[1].replace(/\\$\\{[\\s\\S]*?\\}/g,' ');
- for(const m of tpl.matchAll(/>([^<>\\r\\n]{2,180})</g))add(m[1]);
- for(const m of tpl.matchAll(/(?:placeholder|title|aria-label|alt)=(['\"])(.*?)\\1/g))add(m[2]);
+for(const tm of source.split('`').filter((_,i)=>i%2===1)){
+ const tpl=tm.replace(/\$\{[\s\S]*?\}/g,' ');
+ for(const m of tpl.matchAll(/>([^<>\r\n]{2,180})</g))add(m[1]);
+ for(const m of tpl.matchAll(/(?:placeholder|title|aria-label|alt)=(['"])(.*?)\1/g))add(m[2]);
 }
-for(const m of source.matchAll(/\\b(?:alert|confirm)\\s*\\(\\s*['\"]([^'\"]+)['\"]/g))add(m[1]);
+for(const m of source.matchAll(/\b(?:alert|confirm)\s*\(\s*['"]([^'"]+)['"]/g))add(m[1]);
 test('phase 12: every detected static user-facing Persian string is registered in i18n',()=>{
  assert.equal(gaps.size,0,'Unregistered user-facing Persian strings: '+gaps.size+'\\n'+[...gaps].slice(0,120).join('\\n'));
 });
