@@ -2,6 +2,8 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /account
-Disallow: /checkout
 Disallow: /cart
-Sitemap: https://www.gilasart.ir/sitemap.xml
+Disallow: /checkout
+Disallow: /payment
+Disallow: /api/
+Sitemap: https://gilasart.ir/sitemap.xml
