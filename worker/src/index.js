@@ -997,7 +997,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const png=data.length>=8&&data[0]===0x89&&data[1]===0x50&&data[2]===0x4e&&data[3]===0x47;
   const webp=data.length>=12&&data[0]===0x52&&data[1]===0x49&&data[2]===0x46&&data[3]===0x46&&data[8]===0x57&&data[9]===0x45&&data[10]===0x42&&data[11]===0x50;
   if(!jpeg&&!png&&!webp)return json({error:'invalid_image_content'},400);
-  await env.DB.prepare("UPDATE payments SET receipt_status='PENDING_REVIEW',receipt_mime=?,receipt_size=?,receipt_data=?,receipt_uploaded_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE id=? AND receipt_status='NONE'").bind(type,data,data.length,order.payment_id).run();
+  await env.DB.prepare("UPDATE payments SET receipt_status='PENDING_REVIEW',receipt_mime=?,receipt_size=?,receipt_data=?,receipt_uploaded_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE id=? AND receipt_status='NONE'").bind(type,data.length,data,order.payment_id).run();
   const saved=await env.DB.prepare('SELECT receipt_status,receipt_size FROM payments WHERE id=?').bind(order.payment_id).first();
   if(saved?.receipt_status!=='PENDING_REVIEW')return json({error:'receipt_already_submitted'},409);
   return json({ok:true,receiptStatus:saved.receipt_status,size:saved.receipt_size,message:'فیش با موفقیت ارسال شد. رسید شما بزودی توسط مدیر بررسی و نتیجه پرداخت اعلام می‌گردد.'});
