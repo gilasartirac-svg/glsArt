@@ -1622,6 +1622,9 @@ Build موفق به‌تنهایی Production Success نیست.
     /api/admin/export/*
     /api/admin/tickets
     /api/admin/faq
+    /api/admin/rewards
+    /api/admin/rewards/points
+    /api/admin/notifications
     /api/admin/visitors
     /api/admin/storefront-snapshot/trigger
 
