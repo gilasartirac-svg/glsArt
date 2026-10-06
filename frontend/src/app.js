@@ -308,7 +308,48 @@ async function api(path,opt={}){
  }catch(e){throw e}
 }
 function csrf(){return csrfToken||''}
-function setSeo({title,description,image,type='website',jsonLd}={}){if(title){document.title=title;let t=document.querySelector('meta[name="description"]');if(!t){t=document.createElement('meta');t.name='description';document.head.appendChild(t)}t.content=description||'';const og=document.querySelector('meta[property="og:title"]');if(og)og.content=title;const od=document.querySelector('meta[property="og:description"]');if(od)od.content=description||'';if(image){let oi=document.querySelector('meta[property="og:image"]');if(!oi){oi=document.createElement('meta');oi.setAttribute('property','og:image');document.head.appendChild(oi)}oi.content=image}}document.querySelectorAll('script[data-gilasart-jsonld]').forEach(x=>x.remove());if(jsonLd){const s=document.createElement('script');s.type='application/ld+json';s.dataset.gilasartJsonld='1';s.textContent=JSON.stringify(jsonLd).replace(/</g,'\\u003c');document.head.appendChild(s)}}
+function seoUrl(value){try{const u=new URL(String(value||''),location.href);return u.href}catch{return ''}}
+function ensureMeta(selector,attrs){let el=document.head.querySelector(selector);if(!el){el=document.createElement('meta');Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));document.head.appendChild(el)}return el}
+function setRobots(indexable=true){const m=ensureMeta('meta[name="robots"]',{name:'robots'});m.content=indexable?'index,follow,max-image-preview:large':'noindex,follow'}
+function updateSeoLinks(){
+ const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
+ let p=location.pathname;if(base&&p.startsWith(base))p=p.slice(base.length)||'/';
+ const parts=p.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();
+ p='/'+parts.join('/');
+ const canonical=location.origin+localePath(p,currentLocale);
+ document.querySelectorAll('link[data-gilasart-seo-link]').forEach(x=>x.remove());
+ for(const l of SUPPORTED_LOCALES){const a=document.createElement('link');a.rel='alternate';a.hreflang=l;a.href=location.origin+localePath(p,l);a.dataset.gilasartSeoLink='1';document.head.appendChild(a)}
+ const xd=document.createElement('link');xd.rel='alternate';xd.hreflang='x-default';xd.href=location.origin+localePath(p,'fa');xd.dataset.gilasartSeoLink='1';document.head.appendChild(xd);
+ let canonicalEl=document.querySelector('link[rel="canonical"]');if(!canonicalEl){canonicalEl=document.createElement('link');canonicalEl.rel='canonical';document.head.appendChild(canonicalEl)}canonicalEl.href=canonical;
+ return canonical;
+}
+function setSeo({title,description,image,type='website',jsonLd,indexable=true}={}){
+ const canonical=updateSeoLinks();
+ if(title)document.title=String(title);
+ const desc=ensureMeta('meta[name="description"]',{name:'description'});desc.content=String(description||'');
+ setRobots(indexable);
+ const ogTitle=ensureMeta('meta[property="og:title"]',{property:'og:title'});ogTitle.content=String(title||document.title||'GilasArt');
+ const ogDesc=ensureMeta('meta[property="og:description"]',{property:'og:description'});ogDesc.content=String(description||'');
+ const ogType=ensureMeta('meta[property="og:type"]',{property:'og:type'});ogType.content=type;
+ const ogUrl=ensureMeta('meta[property="og:url"]',{property:'og:url'});ogUrl.content=canonical;
+ const siteName=ensureMeta('meta[property="og:site_name"]',{property:'og:site_name'});siteName.content='GilasArt';
+ const twitterTitle=ensureMeta('meta[name="twitter:title"]',{name:'twitter:title'});twitterTitle.content=String(title||document.title||'GilasArt');
+ const twitterDesc=ensureMeta('meta[name="twitter:description"]',{name:'twitter:description'});twitterDesc.content=String(description||'');
+ if(image){
+  const absoluteImage=seoUrl(image);
+  const oi=ensureMeta('meta[property="og:image"]',{property:'og:image'});oi.content=absoluteImage;
+  const ti=ensureMeta('meta[name="twitter:image"]',{name:'twitter:image'});ti.content=absoluteImage;
+ }
+ document.querySelectorAll('script[data-gilasart-jsonld]').forEach(x=>x.remove());
+ const data=jsonLd||{'@context':'https://schema.org','@type':'WebPage',name:String(title||document.title||'GilasArt'),description:String(description||''),url:canonical,inLanguage:String(currentLocale||'fa')};
+ const s=document.createElement('script');s.type='application/ld+json';s.dataset.gilasartJsonld='1';s.textContent=JSON.stringify(data).replace(/</g,'\\u003c');document.head.appendChild(s);
+}
+function applyRouteSeoPolicy(pathSegments){
+ const first=String(pathSegments?.[0]||'').toLowerCase();
+ const privateRoutes=new Set(['account','cart','checkout','payment','admin']);
+ setRobots(!privateRoutes.has(first));
+ updateSeoLinks();
+}
 function isAdminUser(){return state.roles?.includes("admin")||state.roles?.includes("super_admin")||state.roles?.includes("administrator")||state.roles?.includes("admin-role")}
 function renderNotFound(){
  setSeo({title:'صفحه پیدا نشد | گیلاس آرت',description:'این مسیر در گالری گیلاس آرت پیدا نشد.'});
@@ -1150,6 +1191,7 @@ async function router(){
  const segments=rawSegments;
  const known=new Set(['shop','cart','account','rewards','checkout','about','contact','news','articles','terms','privacy','enamad','aparat','support','payment','admin','product']);
  const p=segments.length?(known.has(segments[0])?segments:['product',segments[0]]):[''];
+ applyRouteSeoPolicy(p);
  try{
   if(!p[0])return home();
   if(p[0]==='admin'){
