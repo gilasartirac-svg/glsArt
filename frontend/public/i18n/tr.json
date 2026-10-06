@@ -149,6 +149,20 @@
     "header.pointsSuffix": "puan",
     "cart.count": "Sepette {{count}} eser",
     "account.login": "Giriş",
-    "account.profile": "Kullanıcı profili"
+    "account.profile": "Kullanıcı profili",
+    "header.theme": "Görüntü modunu değiştir",
+    "header.themeTitle": "Gündüz / Gece",
+    "header.logoAria": "GilasArt, ana sayfa",
+    "header.cartCount": "Sepette {{count}} eser",
+    "header.social": "İletişim ve sosyal ağlar",
+    "header.serviceLinks": "Hizmet bağlantıları",
+    "header.menu": "Ana menü",
+    "header.openMenu": "Ana menüyü aç",
+    "header.closeMenu": "Ana menüyü kapat",
+    "header.language": "Dil",
+    "header.languageLabel": "Dil seçin",
+    "update.close": "Kapat",
+    "update.nativeAndroid": "Android",
+    "update.nativeIos": "iOS"
   }
 }
