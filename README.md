@@ -28,6 +28,266 @@
 
 ---
 
+## 0. برنامه اجرایی چهارزبانه‌سازی GilasArt — Master Checklist
+
+این برنامه یک **زیرپروژه مستقل Production** است و تا وقتی فاز 12 و Definition of Done نهایی تأیید نشده‌اند، چهارزبانه‌سازی کامل اعلام نمی‌شود. این چک‌لیست مرجع وضعیت اجراست؛ هر مورد فقط پس از بررسی/تست واقعی با **☑** علامت می‌خورد. موارد انجام‌نشده با **☐** باقی می‌مانند.
+
+### فاز 0 — قفل معماری i18n
+- ☐ فاز 0 کامل و قفل معماری تأیید شده است.
+- ☑ چهار Locale رسمی: `fa / en / tr / ar`
+- ☑ چهار JSON زبان با ساختار و کلیدهای یکسان
+- ☑ فارسی زبان پیش‌فرض و fallback امن
+- ☑ Cookie ترجیح زبان با عمر یک‌سال
+- ☑ Cookie قبل از auto-detection بررسی می‌شود
+- ☑ auto-detection محافظه‌کارانه: کشور غیرایران + زبان صریح و سازگار مرورگر
+- ☑ ابهام/VPN/زبان فارسی → فارسی
+- ☑ بدون D1 برای locale detection
+- ☑ Google Translate ممنوع در قرارداد پروژه
+- ☑ RTL برای fa/ar و LTR برای en/tr
+- ☐ مسیرهای Production چهارگانه به‌صورت کامل End-to-End تأیید شده‌اند
+- ☐ Canonical / hreflang / x-default به‌صورت کامل End-to-End تأیید شده‌اند
+- ☑ Service Worker چهار JSON زبان را در Cache دارد
+- ☑ Quality Gate قرارداد چهار JSON و detection را بررسی می‌کند
+
+**خروجی فاز 0:** معماری i18n فقط زمانی قفل‌شده اعلام می‌شود که تمام موارد بالا ☑ شوند.
+
+### فاز 1 — هسته و اجزای مشترک
+- ☐ فاز 1 کامل
+- ☐ Header
+- ☐ Logo
+- ☐ منوی اصلی
+- ☐ Hamburger
+- ☐ Language switcher
+- ☐ Cart
+- ☐ Account
+- ☐ Login / Logout
+- ☐ Points
+- ☐ Footer
+- ☐ Social links
+- ☐ Buttons
+- ☐ Loading
+- ☐ Error
+- ☐ Empty states
+- ☐ Success / Error messages
+- ☐ Modalها
+- ☐ Accessibility labels
+- ☐ Tooltipها
+
+### فاز 2 — Home
+- ☐ فاز 2 کامل
+- ☐ Hero
+- ☐ معرفی GilasArt
+- ☐ Categories
+- ☐ Featured products
+- ☐ CTAها
+- ☐ بخش‌های معرفی
+- ☐ Footer اختصاصی Home
+- ☐ SEO text
+- ☐ Dynamic messages
+- ☐ تست کامل هر چهار زبان
+
+### فاز 3 — Shop
+- ☐ فاز 3 کامل
+- ☐ عنوان فروشگاه
+- ☐ Search
+- ☐ Filters
+- ☐ Sorting
+- ☐ Price
+- ☐ Rating
+- ☐ Review count
+- ☐ View
+- ☐ Load more
+- ☐ Infinite scroll
+- ☐ Empty state
+- ☐ Loading
+- ☐ Error
+- ☐ Product card
+- ☐ Favorite
+- ☐ Cart
+- ☐ Pagination / navigation در صورت وجود
+- ☐ جداسازی قطعی UI text از Product Data
+- ☐ تست چهار زبان
+
+### فاز 4 — Product Detail
+- ☐ فاز 4 کامل
+- ☐ Titles
+- ☐ Price
+- ☐ SKU
+- ☐ Attributes
+- ☐ ابعاد
+- ☐ رنگ قاب
+- ☐ Options
+- ☐ Final price
+- ☐ Inventory
+- ☐ Option selection
+- ☐ Add to Cart
+- ☐ Favorite
+- ☐ Reviews
+- ☐ Rating
+- ☐ Loading
+- ☐ Error
+- ☐ Related products
+- ☐ Purchase messages
+- ☐ Regression test سیستم Product Attribute/Option
+- ☐ تست حفظ Option تا Cart و Quantity change
+
+### فاز 5 — Cart / Checkout / Payment
+- ☐ فاز 5 کامل
+- ☐ Cart
+- ☐ Order summary
+- ☐ Discount
+- ☐ Coupon
+- ☐ Payment method selection
+- ☐ ZarinPal
+- ☐ NovinoPay
+- ☐ Card Transfer
+- ☐ Receipt upload
+- ☐ Payment messages
+- ☐ Payment errors
+- ☐ Order
+- ☐ Invoice
+- ☐ تست Server-authoritative pricing/payment
+
+### فاز 6 — Authentication / Account
+- ☐ فاز 6 کامل
+- ☐ Login
+- ☐ OTP
+- ☐ Mobile number
+- ☐ Profile
+- ☐ Orders
+- ☐ Favorites
+- ☐ Rewards
+- ☐ Referral
+- ☐ Notifications
+- ☐ Account messages
+- ☐ Logout
+- ☐ Session states
+- ☐ عدم تغییر بی‌دلیل منطق امنیتی Authentication
+
+### فاز 7 — Customer Support / CRM
+- ☐ فاز 7 کامل
+- ☐ Support
+- ☐ Ticket
+- ☐ Messages
+- ☐ FAQ
+- ☐ Contact
+- ☐ Notifications
+- ☐ Ticket status / stages
+
+### فاز 8 — Admin Panel
+- ☐ فاز 8 کامل
+- ☐ 8-A Dashboard
+- ☐ 8-B Products
+- ☐ 8-C Categories
+- ☐ 8-D Inventory
+- ☐ 8-E Orders
+- ☐ 8-F Payments
+- ☐ 8-G Reviews
+- ☐ 8-H Customers
+- ☐ 8-I Discounts / Coupons
+- ☐ 8-J Rewards / Referral
+- ☐ 8-K Notifications
+- ☐ 8-L Support / CRM
+- ☐ 8-M CMS
+- ☐ 8-N Settings
+- ☐ 8-O Audit Log / Security
+- ☐ Regression test RBAC / permissions
+
+### فاز 9 — صفحات خاص و محتوایی
+- ☐ فاز 9 کامل
+- ☐ درباره ما
+- ☐ قوانین
+- ☐ حریم خصوصی
+- ☐ تماس
+- ☐ Enamad
+- ☐ مقالات
+- ☐ اخبار
+- ☐ آموزش‌ها
+- ☐ Aparat
+- ☐ صفحات SEO
+- ☐ صفحات قانونی
+
+### فاز 10 — SEO و Routing
+- ☐ فاز 10 کامل
+- ☐ Canonical
+- ☐ hreflang
+- ☐ Sitemap
+- ☐ Page title
+- ☐ Meta description
+- ☐ Open Graph
+- ☐ چهار Locale route
+- ☐ Internal links
+- ☐ 404
+- ☐ Redirect
+- ☐ Default language
+- ☐ جلوگیری از duplicate content
+
+### فاز 11 — PWA / Service Worker / Cache
+- ☐ فاز 11 کامل
+- ☐ چهار JSON زبان
+- ☐ Cache
+- ☐ Versioning
+- ☐ Offline behavior
+- ☐ Update behavior
+- ☐ Stale content prevention
+- ☐ Saved language behavior
+- ☐ Site/app version changes
+- ☐ عدم نمایش Locale قدیمی پس از Deployment
+
+### فاز 12 — ممیزی نهایی «حتی یک کلمه جا نمانده»
+- ☐ فاز 12 کامل
+- ☐ اسکن کامل Frontend عمومی
+- ☐ اسکن کامل Admin
+- ☐ Persian hard-coded UI text = صفر مورد مجاز
+- ☐ عنوان‌ها
+- ☐ button
+- ☐ placeholder
+- ☐ title
+- ☐ aria-label
+- ☐ alt
+- ☐ alert
+- ☐ confirm
+- ☐ toast
+- ☐ error
+- ☐ loading
+- ☐ empty state
+- ☐ modal
+- ☐ validation
+- ☐ UI text → i18n
+- ☐ Product data → ترجمه خودکار نشود
+- ☐ Customer/User content → ترجمه خودکار نشود
+- ☐ Technical/internal text فقط در صورت User-facing بودن → i18n
+- ☐ هیچ متن User-facing جاافتاده باقی نماند
+- ☐ هر چهار زبان End-to-End تست شوند
+
+### قانون سخت CI برای ادامه پروژه
+- ☑ اختلاف کلید بین چهار JSON باید Build/Quality Gate را Fail کند.
+- ☑ Locale/version/direction نامعتبر باید Quality Gate را Fail کند.
+- ☑ قرارداد Cookie و conservative detection باید Quality Gate را Fail کند.
+- ☐ Hard-coded User-facing UI text جدید باید به‌صورت خودکار در Quality Gate شناسایی و Fail/Report شود.
+- ☐ CI باید پوشش ممیزی نهایی تمام Frontend و Admin را به‌صورت قابل تکرار داشته باشد.
+
+### Definition of Done کل زیرپروژه
+- ☐ فازهای 0 تا 12 کامل و تأیید شده‌اند.
+- ☐ تمام متن‌های User-facing عمومی و Admin تعیین تکلیف شده‌اند.
+- ☐ چهار JSON کلیدهای کاملاً یکسان دارند.
+- ☐ ترجمه‌ها روان، طبیعی و بازبینی‌شده‌اند.
+- ☐ فارسی fallback امن باقی مانده است.
+- ☐ Cookie انتخاب دستی پایدار است و از detection مجدد جلوگیری می‌کند.
+- ☐ auto-detection فقط در شرایط مطمئن انجام می‌شود.
+- ☐ D1 در locale detection استفاده نمی‌شود.
+- ☐ Google Translate استفاده نشده است.
+- ☐ RTL/LTR و routeها End-to-End تأیید شده‌اند.
+- ☐ SEO/hreflang/canonical تأیید شده‌اند.
+- ☐ Service Worker/cache تأیید شده‌اند.
+- ☐ Quality Gate و Security/Regression tests موفق هستند.
+- ☐ Production با همه چهار Locale تأیید شده است.
+- ☐ README و وضعیت همین Checklist در همان تغییر Production به‌روز شده‌اند.
+
+**قاعده وضعیت:** فقط مواردی که واقعاً بررسی و تست شده‌اند با ☑ علامت می‌خورند. هر مورد ☐ یعنی هنوز نباید آن را Done فرض کرد.
+
+---
+
 ## 1. هدف و وضعیت پروژه
 
 GilasArt یک گالری و فروشگاه آنلاین آثار هنری با معماری Serverless است. پروژه فقط یک Storefront ساده نیست و این لایه‌ها را در یک معماری واحد دارد:
