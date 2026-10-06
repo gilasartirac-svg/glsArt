@@ -149,6 +149,20 @@
     "header.pointsSuffix": "امتیاز",
     "cart.count": "{{count}} تابلو در سبد خرید",
     "account.login": "ورود",
-    "account.profile": "پروفایل کاربر"
+    "account.profile": "پروفایل کاربر",
+    "header.theme": "تغییر حالت نمایش",
+    "header.themeTitle": "روز / شب",
+    "header.logoAria": "گیلاس آرت، صفحه اصلی",
+    "header.cartCount": "{{count}} تابلو در سبد خرید",
+    "header.social": "ارتباط و شبکه‌ها",
+    "header.serviceLinks": "پیوندهای خدمات",
+    "header.menu": "منوی اصلی",
+    "header.openMenu": "باز کردن منوی اصلی",
+    "header.closeMenu": "بستن منوی اصلی",
+    "header.language": "زبان",
+    "header.languageLabel": "انتخاب زبان",
+    "update.close": "بستن",
+    "update.nativeAndroid": "اندروید",
+    "update.nativeIos": "iOS"
   }
 }
