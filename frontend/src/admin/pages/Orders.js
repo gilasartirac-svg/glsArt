@@ -119,7 +119,7 @@ export default function Orders(){
    if(e.target?.id==='order-detail-invoice'){admin.order(selectedId).then(d=>{if(['PAID','PROCESSING','SHIPPED','DELIVERED'].includes(String(d.order?.status||'').toUpperCase()))openInvoice({...d.order,items:d.items||[]},d.invoice||{})}).catch(err=>{error.textContent=err.message||'فاکتور دریافت نشد.'})}
    if(e.target?.id==='approve-card-receipt'){
     const b=e.target;b.disabled=true;b.textContent='در حال تأیید…';
-    try{await api('/api/admin/orders/'+encodeURIComponent(selectedId)+'/payment-receipt/approve',{method:'POST',headers:{'x-csrf-token':window.GilasArtAdminCsrf?.()||''}});await load();await showDetail(selectedId);}
+    try{await api('/api/admin/orders/'+encodeURIComponent(selectedId)+'/payment-receipt/approve',{method:'POST'});await load();await showDetail(selectedId);}
     catch(err){error.textContent=err.message||'تأیید فیش انجام نشد.';b.disabled=false;b.textContent='تأیید و ثبت پرداخت';}
    }
   });
