@@ -123,7 +123,7 @@ export default function Orders(){
     const b=e.target,reason=window.prompt('دلیل رد فیش را وارد کنید:','تصویر فیش قابل تأیید نیست. لطفاً فیش صحیح و خوانا را دوباره ارسال کنید.');
     if(!reason?.trim())return;
     b.disabled=true;b.textContent='در حال ثبت رد…';
-    try{await api('/api/admin/orders/'+encodeURIComponent(selectedId)+'/payment-receipt/reject',{method:'POST',body:JSON.stringify({reason:reason.trim()}),headers:{'x-csrf-token':document.cookie.match(/(?:^|; )gs_csrf=([^;]+)/)?.[1]||''}});await load();await showDetail(selectedId);}
+    try{await api('/api/admin/orders/'+encodeURIComponent(selectedId)+'/payment-receipt/reject',{method:'POST',body:JSON.stringify({reason:reason.trim()})});await load();await showDetail(selectedId);}
     catch(err){error.textContent=err.message||'رد فیش انجام نشد.';b.disabled=false;b.textContent='رد فیش';}
    }
    if(e.target?.id==='approve-card-receipt'){
