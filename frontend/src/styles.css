@@ -4215,3 +4215,9 @@ html[data-theme="dark"] .language-switcher select{background:#111827;color:#f4ef
     display:flex!important;
   }
 }
+
+/* Homepage fast first-paint state */
+.home-loading{min-height:70vh;display:grid;place-items:center;align-content:center;gap:12px;text-align:center;padding:48px 20px}
+.home-loading-mark{font-size:clamp(1.6rem,5vw,2.5rem);letter-spacing:.18em;font-weight:700;color:var(--gold,#d9a441)}
+.home-loading-copy{display:grid;gap:6px;color:var(--text,#eee)}
+.home-loading-copy span{color:var(--muted,#999);font-size:.92rem}
