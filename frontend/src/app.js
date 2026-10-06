@@ -48,16 +48,7 @@ function localeFromPath(pathname=location.pathname){
  if(base&&p.startsWith(base))p=p.slice(base.length)||'/';
  const first=p.split('/').filter(Boolean)[0]||'';return SUPPORTED_LOCALES.includes(first.toLowerCase())?first.toLowerCase():'';
 }
-function updateLocaleSeo(){
- const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
- let p=location.pathname;if(base&&p.startsWith(base))p=p.slice(base.length)||'/';
- const parts=p.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();p='/'+parts.join('/');
- const clean=base+((p==='/'?'':p));
- document.querySelectorAll('link[data-gilasart-locale]').forEach(x=>x.remove());
- SUPPORTED_LOCALES.forEach(l=>{const a=document.createElement('link');a.rel='alternate';a.hreflang=l;a.href=location.origin+base+'/'+l+(p==='/'?'':p);a.dataset.gilasartLocale='1';document.head.appendChild(a)});
- const x=document.createElement('link');x.rel='alternate';x.hreflang='x-default';x.href=location.origin+(clean||'/');x.dataset.gilasartLocale='1';document.head.appendChild(x);
- let canonical=document.querySelector('link[rel="canonical"]');if(!canonical){canonical=document.createElement('link');canonical.rel='canonical';document.head.appendChild(canonical)}canonical.href=location.origin+localePath(p,currentLocale);
-}
+function updateLocaleSeo(){try{updateSeoLinks()}catch{}}
 function setLocale(locale){const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';currentLocale=l;document.documentElement.lang=l;document.documentElement.dir=LOCALE_META[l].dir;document.documentElement.dataset.locale=l;writeLocaleCookie(l);updateLocaleSeo();translateRenderedContent(document)}
 function browserLocale(){const langs=navigator.languages?.length?navigator.languages:[navigator.language||''];for(const x of langs){const k=String(x).toLowerCase().split('-')[0];if(BROWSER_LOCALE[k])return BROWSER_LOCALE[k]}return'en'}
 function readLocaleCookie(){
