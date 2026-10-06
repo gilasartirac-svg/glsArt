@@ -1,6 +1,6 @@
 const VERSION='gilasart-shell-20261006-07';
 const CACHE=VERSION;
-const STATIC=['./','./index.html','./styles.css?v=20261006.03','./app.js?v=20261006.04','./site.webmanifest','./mobile-release.json','./data/storefront-manifest.json','./data/home.json','./fa/','./fa/index.html','./en/','./en/index.html','./tr/','./tr/index.html','./ar/','./ar/index.html'];
+const STATIC=['./','./index.html','./styles.css?v=20261006.03','./app.js?v=20261006.05','./site.webmanifest','./mobile-release.json','./data/storefront-manifest.json','./data/home.json','./fa/','./fa/index.html','./en/','./en/index.html','./tr/','./tr/index.html','./ar/','./ar/index.html'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(STATIC).catch(()=>{})).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('gilasart-shell-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()});
