@@ -76,18 +76,19 @@
 **خروجی فاز 1:** هسته مشترک Storefront شامل Header، Footer، ناوبری، Hamburger، انتخاب زبان، حساب، سبد، امتیاز، وضعیت‌های عمومی و Accessibility labels به i18n متصل و با چهار JSON هم‌کلید شد. نسخه Cache نیز به‌روزرسانی شد. Production Quality Gate، Security Regression Tests، Deploy Worker و Deploy Pages برای Commit نهایی `1cc62b79e975e119678eb7dc83b07c9ecda50772` موفق شدند.
 
 ### فاز 2 — Home
-- ☐ فاز 2 کامل
-- ☐ Hero
-- ☐ معرفی GilasArt
-- ☐ Categories
-- ☐ Featured products
-- ☐ CTAها
-- ☐ بخش‌های معرفی
-- ☐ Footer اختصاصی Home
-- ☐ SEO text
-- ☐ Dynamic messages
-- ☐ تست کامل هر چهار زبان
+- ☑ فاز 2 کامل
+- ☑ Hero
+- ☑ معرفی GilasArt
+- ☑ Categories
+- ☑ Featured products
+- ☑ CTAها
+- ☑ بخش‌های معرفی
+- ☑ Footer اختصاصی Home
+- ☑ SEO text
+- ☑ Dynamic messages
+- ☑ تست کامل هر چهار زبان
 
+**خروجی فاز 2:** تمام متن‌های User-facing صفحه Home شامل Hero، معرفی، مجموعه‌ها، آثار منتخب، پیشنهادهای محدود، CTAها، بخش آخرین آثار، مسیر خرید و وضعیت‌های پویا به چهار JSON متصل شدند. داده‌های محصول و نام دسته‌بندی‌ها به‌عنوان Product/Content Data ترجمه خودکار نمی‌شوند. Quality Gate اختصاصی Home نیز برای وجود کلیدها در هر چهار زبان و حذف متن‌های سخت‌کدشده Home اضافه شد. چهار Workflow نهایی شامل Production Quality Gate، Security Regression Tests، Deploy Worker + D1 و Deploy Pages با موفقیت اجرا شدند.
 ### فاز 3 — Shop
 - ☐ فاز 3 کامل
 - ☐ عنوان فروشگاه
