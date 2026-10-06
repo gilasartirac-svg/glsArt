@@ -24,7 +24,7 @@ for(const locale of ['fa','en','tr','ar']){
   html=html.replace(/<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${canonical}">`);
   html=html.replace(/<link rel="canonical" href="[^"]*">/, seo);
   html=html.replace(/<title>[^<]*<\/title>/, `<title>${meta.title}</title>`);
-  html=html.replace(/"url":"https:\/\/gilasart\.ir\/"|\\"url\\":\\"https:\/\/gilasart\.ir\\/\\"/, `"url":"${canonical}"`);
+  html=html.replace('"url":"https://gilasart.ir/"', `"url":"${canonical}"`);
   html=html.replace(/"inLanguage":"fa-IR"/, `"inLanguage":"${meta.lang}"`);
   await mkdir(`dist/${locale}`,{recursive:true});
   await writeFile(`dist/${locale}/index.html`,html);
