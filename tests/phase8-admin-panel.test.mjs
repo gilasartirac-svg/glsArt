@@ -26,7 +26,7 @@ test('Admin dashboard and mutations are session/permission protected',()=>{
 
 test('Admin audit records sensitive mutations and audit endpoint is protected',()=>{
  assert.ok(worker.includes('async function audit('));
- assert.match(worker,/u\\.pathname==='\\/api\\/admin\\/audit'/); assert.match(worker,/reports\\.read/);
+ assert.ok(worker.includes("u.pathname==='/api/admin/audit'")&&worker.includes('reports.read'));
 });
 
 test('Rewards/referral admin area is read-safe and adjustments are bounded/audited',()=>{
