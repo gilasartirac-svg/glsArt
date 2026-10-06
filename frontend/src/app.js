@@ -61,8 +61,18 @@ function mountLanguageSwitcher(){
  if(document.querySelector('.language-switcher'))return;
  const wrap=document.createElement('div');wrap.className='language-switcher';
  wrap.innerHTML='<select id="gilasart-language-select" aria-label="Language">'+SUPPORTED_LOCALES.map(l=>'<option value="'+l+'">'+LOCALE_META[l].label+'</option>').join('')+'</select>';
- document.body.appendChild(wrap);const select=wrap.querySelector('select');select.value=currentLocale;
- const parts=p.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();p='/'+parts.join('/');
+ document.body.appendChild(wrap);
+ const select=wrap.querySelector('select');select.value=currentLocale;
+ select.addEventListener('change',()=>{
+  const next=select.value;if(!SUPPORTED_LOCALES.includes(next)||next===currentLocale)return;
+  setLocale(next);
+  const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
+  let p=location.pathname;if(base&&p.startsWith(base))p=p.slice(base.length)||'/';
+  const parts=p.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();p='/'+parts.join('/');
+  const target=localePath(p,next);
+  history.pushState({},'',target);scrollRouteTop();routeInFlightTarget=target;
+  routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget='';scrollRouteTop()});
+ });
 }
 
 let routeInFlight=null;
