@@ -142,6 +142,13 @@
     "notFound.shop": "Mağazaya gir",
     "notFound.home": "Galeriye dön",
     "terms.loading": "Site kuralları yükleniyor...",
-    "terms.unavailable": "Site kuralları şu anda kullanılamıyor."
+    "terms.unavailable": "Site kuralları şu anda kullanılamıyor.",
+    "header.homeAria": "GilasArt, ana sayfa",
+    "header.cartAria": "Sepet",
+    "header.pointsTitle": "Puanlarım",
+    "header.pointsSuffix": "puan",
+    "cart.count": "Sepette {{count}} eser",
+    "account.login": "Giriş",
+    "account.profile": "Kullanıcı profili"
   }
 }
