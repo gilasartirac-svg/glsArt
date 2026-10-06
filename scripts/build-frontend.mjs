@@ -29,6 +29,20 @@ for(const locale of ['fa','en','tr','ar']){
   await mkdir(`dist/${locale}`,{recursive:true});
   await writeFile(`dist/${locale}/index.html`,html);
 }
+// Generate a locale-aware sitemap from the public storefront snapshot so published product/content routes are discoverable.
+const siteOrigin='https://gilasart.ir';
+const locales=['fa','en','tr','ar'];
+const publicRoutes=['/','/shop','/about','/contact','/news','/articles','/terms','/privacy','/enamad','/aparat','/rewards','/support'];
+let snapshot=null;
+try{snapshot=JSON.parse(await readFile('frontend/public/data/storefront.json','utf8'))}catch{}
+const urls=new Map();
+const addRoute=(path,lastmod)=>{const clean=String(path||'/').startsWith('/')?String(path||'/'):'/'+String(path||'');for(const locale of locales){const loc=siteOrigin+'/'+locale+(clean==='/'?'':clean);urls.set(loc,{loc,lastmod})}};
+publicRoutes.forEach(p=>addRoute(p));
+for(const p of (snapshot?.products||[])){if(p?.active!==0&&p?.slug)addRoute('/'+encodeURIComponent(String(p.slug)),p.updated_at||p.created_at)}
+for(const x of (snapshot?.articles||[])){if(x?.slug)addRoute('/articles/'+encodeURIComponent(String(x.slug)),x.updated_at||x.published_at)}
+for(const x of (snapshot?.news||[])){if(x?.slug)addRoute('/news/'+encodeURIComponent(String(x.slug)),x.updated_at||x.published_at)}
+const sitemapBody=Array.from(urls.values()).map(x=>'<url><loc>'+x.loc+'</loc>'+(x.lastmod&&/^\\d{4}-\\d{2}-\\d{2}/.test(String(x.lastmod))?'<lastmod>'+String(x.lastmod).slice(0,10)+'</lastmod>':'')+'</url>').join('');
+await writeFile('dist/sitemap.xml','<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+sitemapBody+'</urlset>');
 const release=JSON.parse(await readFile('frontend/public/mobile-release.json','utf8'));await writeFile('dist/config.js',`window.GILASART_API=${JSON.stringify(process.env.GILASART_API||'https://api.gilasart.ir')};window.GILASART_APP_VERSION=${JSON.stringify(release.web?.version||'dev')};\n`);console.log('frontend built');
 await cp('404.html','dist/404.html');
 await cp('CNAME','dist/CNAME');
