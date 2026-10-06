@@ -4,7 +4,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const dateFa=v=>{if(!v)return '-';const d=new Date(String(v).replace(' ','T')+(String(v).endsWith('Z')?'':'Z'));return Number.isNaN(d.getTime())?esc(v):new Intl.DateTimeFormat('fa-IR-u-ca-persian',{dateStyle:'medium',timeStyle:'short'}).format(d)};
 const paidStatuses=new Set(['PAID','PROCESSING','SHIPPED','DELIVERED']);
 function invoiceTitle(status){return paidStatuses.has(String(status||'').toUpperCase())?'فاکتور فروش':'پیش‌فاکتور فروش'}
-function openInvoice(order,invoiceSettings={}){
+function openInvoice(order,invoiceSettings={},targetWindow=null){
  const o=order||{},items=Array.isArray(o.items)?o.items:[],status=String(o.status||'PENDING').toUpperCase();
  const sellerName=invoiceSettings.sellerName||invoiceSettings.invoice_store_name||'فروشگاه صنایع دستی گیلاس آرت';
  const totalQty=items.reduce((n,x)=>n+Number(x.quantity||0),0);
@@ -45,8 +45,9 @@ function openInvoice(order,invoiceSettings={}){
  '<footer class="footer"><div class="note">این سند بر اساس اطلاعات ثبت‌شده در سامانه گیلاس آرت تهیه شده است. '+(status==='PENDING'?'تا پیش از تأیید پرداخت، این سند «پیش‌فاکتور فروش» محسوب می‌شود.':'پرداخت سفارش در سامانه ثبت شده و این سند «فاکتور فروش» است.')+'</div><div class="sign"><img src="'+esc(signaturePath)+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'"><div class="fallback" style="display:none">مهر و امضای مدیرعامل<br>گیلاس آرت</div></div></footer></main></body></html>';
  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
  const url=URL.createObjectURL(blob);
- const w=window.open(url,'_blank','width=1000,height=900');
+ const w=(targetWindow&&!targetWindow.closed)?targetWindow:window.open(url,'_blank','width=1000,height=900');
  if(!w){URL.revokeObjectURL(url);alert('مرورگر اجازه باز شدن فاکتور را نداد. لطفاً پنجره‌های بازشو را برای سایت فعال کنید.');return}
+ if(targetWindow&&!targetWindow.closed){try{targetWindow.location.href=url}catch{}}
  setTimeout(()=>{try{w.focus()}catch{}},150);
  setTimeout(()=>URL.revokeObjectURL(url),60000);
 }
