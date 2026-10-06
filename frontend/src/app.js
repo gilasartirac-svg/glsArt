@@ -55,12 +55,26 @@ function updateLocaleSeo(){
  const x=document.createElement('link');x.rel='alternate';x.hreflang='x-default';x.href=location.origin+(clean||'/');x.dataset.gilasartLocale='1';document.head.appendChild(x);
  let canonical=document.querySelector('link[rel="canonical"]');if(!canonical){canonical=document.createElement('link');canonical.rel='canonical';document.head.appendChild(canonical)}canonical.href=location.origin+localePath(p,currentLocale);
 }
-function setLocale(locale){const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';currentLocale=l;document.documentElement.lang=l;document.documentElement.dir=LOCALE_META[l].dir;document.documentElement.dataset.locale=l;try{localStorage.setItem('gilasart-locale',l)}catch{}updateLocaleSeo();translateRenderedContent(document)}
+function setLocale(locale){const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';currentLocale=l;document.documentElement.lang=l;document.documentElement.dir=LOCALE_META[l].dir;document.documentElement.dataset.locale=l;writeLocaleCookie(l);updateLocaleSeo();translateRenderedContent(document)}
 function browserLocale(){const langs=navigator.languages?.length?navigator.languages:[navigator.language||''];for(const x of langs){const k=String(x).toLowerCase().split('-')[0];if(BROWSER_LOCALE[k])return BROWSER_LOCALE[k]}return'en'}
+function readLocaleCookie(){
+ try{
+  const m=document.cookie.split(';').map(x=>x.trim()).find(x=>x.startsWith('gilasart_locale='));
+  const v=decodeURIComponent((m||'').split('=').slice(1).join('='));
+  return SUPPORTED_LOCALES.includes(v)?v:'';
+ }catch{return ''}
+}
+function writeLocaleCookie(locale){
+ const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';
+ try{document.cookie='gilasart_locale='+encodeURIComponent(l)+'; Max-Age=31536000; Path=/; SameSite=Lax'}catch{}
+}
 async function detectPreferredLocale(){
- try{const r=await fetch(API+'/api/locale',{credentials:'omit',cache:'no-store'});if(r.ok){const d=await r.json();if(SUPPORTED_LOCALES.includes(d?.locale))return d.locale}}catch{}
- try{const s=localStorage.getItem('gilasart-locale');if(SUPPORTED_LOCALES.includes(s))return s}catch{}
- return browserLocale();
+ const saved=readLocaleCookie();if(saved)return saved;
+ try{
+  const r=await fetch(API+'/api/locale',{credentials:'omit',cache:'no-store'});
+  if(r.ok){const d=await r.json();if(SUPPORTED_LOCALES.includes(d?.locale))return d.locale}
+ }catch{}
+ return 'fa';
 }
 function publicPathNeedsLocale(pathname){
  let p=String(pathname||'/');const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
