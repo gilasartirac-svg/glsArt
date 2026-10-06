@@ -294,6 +294,7 @@ function pickFeaturedProduct(products){
  return next;
 }
 function footerSocialLinks(){try{return JSON.parse(String(state.settings?.footer_social_links||'[]'))||[]}catch{return []}}
+let footerSocialRefreshInFlight=false;
 async function refreshFooterSocialLinks(){
  if(footerSocialRefreshInFlight)return;
  const raw=String(state.settings?.footer_social_links||'[]');
@@ -329,6 +330,7 @@ function updateCartBadge(count){const n=Math.max(0,Number(count)||0);state.cartC
 async function syncCartBadge(){if(!state.user){updateCartBadge(0);return}try{const d=await api('/api/cart');state.cart=d;const count=(d.items||[]).reduce((sum,x)=>sum+Math.max(0,Number(x.quantity)||0),0);updateCartBadge(count)}catch{updateCartBadge(0)}}
 function layout(content){
  app.innerHTML=`<header class="top"><div class="wrap nav"><a class="brand" href="${routeUrl('/')}" aria-label="گیلاس آرت، صفحه اصلی">گیلاس آرت<small>GILAS ART</small></a><nav class="links" id="main-menu" aria-label="منوی اصلی"><a href="${routeUrl('/shop')}" data-route="/shop" data-action="shop" onclick="event.preventDefault();event.stopPropagation();window.GilasArtRouter?.navigate('/shop');return false;">فروشگاه</a><a href="${routeUrl('/about')}">درباره ما</a><a href="${routeUrl('/contact')}">تماس با ما</a><a href="${routeUrl('/news')}">اخبار</a><a href="${routeUrl('/articles')}">مقالات</a><a href="${routeUrl('/rewards')}" class="rewards-nav-link">باشگاه امتیاز</a>${isAdminUser()?'<a class="admin-link" href="'+routeUrl('/admin')+'">کنترل پنل</a>':''}</nav><div class="spacer"></div><button class="theme-toggle" type="button" aria-label="تغییر حالت نمایش" title="روز / شب" onclick="window.GilasArtTheme&&window.GilasArtTheme.toggle()">◐ <span>روز/شب</span></button><a class="iconbtn cart-link" href="${routeUrl('/cart')}" aria-label="سبد خرید"><div class="cart-icon-wrap">${icon('cart')}<b class="cart-count-badge" aria-label="${state.cartCount} تابلو در سبد خرید"${state.cartCount>0?'':' hidden'}>${state.cartCount>99?'۹۹+':fa(state.cartCount)}</b></div><span>سبد خرید</span></a>${state.user?'<a class="points-badge" href="'+routeUrl('/rewards')+'" title="امتیازهای من">★ '+fa(state.points)+' امتیاز</a>':''}${accountLink()}<button class="mobile-menu-toggle" type="button" aria-label="باز کردن منوی اصلی" aria-expanded="false" aria-controls="main-menu" onclick="window.GilasArtMobileMenu&&window.GilasArtMobileMenu.toggle(this)"><span></span><span></span><span></span></button></div></header><div class="rewards-promo"><div class="wrap rewards-promo-inner">${state.user?'<span>امتیاز شما: <b>'+fa(state.points)+'</b></span><span>از امتیازهایتان کوپن تا ۲۰٪ تخفیف بسازید.</span><a href="'+routeUrl('/rewards')+'">تبدیل امتیاز به کوپن ←</a>':'<span>عضویت در گیلاس آرت = <b>۱۰ امتیاز هدیه</b></span><a href="'+routeUrl('/account')+'">عضو شوید و امتیاز بگیرید ←</a>'}</div></div><main id="main-content" tabindex="-1">${content}</main>${renderFooter()}`;
+ refreshFooterSocialLinks();
 }
 function routeBase(){return location.pathname.startsWith('/glsArt/')||location.pathname==='/glsArt'?'/glsArt':''}
 function routeUrl(path){return localePath(path)}
