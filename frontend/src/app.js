@@ -393,7 +393,7 @@ function productCard(p){
  const socialProof=reviews>0||sold>0;
  const ratingText=rating>0?rating.toFixed(1):"—";
  return `<article class="card product-card product-showcase"><a class="product-card-link" href="${href}" aria-label="${t('product.view')} ${name}">
- <div class="product-card-media"><div class="product-art-frame">${image?`<img src="${escapeHtml(image)}" alt="${name}" loading="lazy" decoding="async">`:'<div class="product-image-empty" aria-hidden="true">${t('product.artwork')}</div>'}</div>
+ <div class="product-card-media"><div class="product-art-frame">${image?`<img src="${escapeHtml(image)}" alt="${name}" loading="lazy" decoding="async">`:'<div class="product-image-empty" aria-hidden="true">'+t('product.artwork')+'</div>'}</div>
  <div class="product-card-overlay" aria-hidden="true"><span>${t('product.details')}</span><span>←</span></div>
  <div class="product-card-badges"><span class="product-art-badge">اثر هنری</span>${flash?`<span class="flash-badge">${icon("clock")} ${t('product.featured')}</span>`:""}</div>
  <div class="product-card-corner" aria-hidden="true"><span>GILAS</span><b>ART</b></div></div>
