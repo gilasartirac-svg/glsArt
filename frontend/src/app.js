@@ -31,7 +31,7 @@ async function loadLocale(locale){
 }
 function t(key,vars={}){const value=i18nData?.strings?.[key]??key;return String(value).replace(/\{\{(\w+)\}\}/g,(_,name)=>String(vars?.[name]??''))}
 function translateRenderedContent(root=document){
- if(!i18nReverse||currentLocale==='fa')return;
+ if(!i18nReverse)return;
  const trv=v=>{const raw=String(v??''),key=i18nReverse.get(raw.trim());return key?t(key):raw};
  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];let n;while((n=w.nextNode()))nodes.push(n);
  for(const node of nodes){if(!node.parentElement||/^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA)$/i.test(node.parentElement.tagName))continue;const raw=node.nodeValue||'',trim=raw.trim();if(!trim)continue;const v=trv(trim);if(v!==trim)node.nodeValue=raw.replace(trim,v)}
@@ -83,7 +83,7 @@ function publicPathNeedsLocale(pathname){
  let p=String(pathname||'/');const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
  if(base&&p.startsWith(base))p=p.slice(base.length)||'/';
  const first=p.split('/').filter(Boolean)[0]||'';
- return !first||['shop','cart','account','rewards','checkout','about','contact','news','articles','article','terms','support','payment','product'].includes(first);
+ return !first||['shop','cart','account','rewards','checkout','about','contact','news','articles','article','terms','privacy','enamad','aparat','support','payment','product'].includes(first);
 }
 function localePath(path,locale=currentLocale){
  const p=String(path||'/');if(p.startsWith('http://')||p.startsWith('https://')||p.startsWith('//')||p.startsWith('/api/'))return p;
@@ -367,8 +367,8 @@ function footerIconPath(id){return '/assets/social/'+(['telegram','instagram','a
 function renderFooter(){
  const socials=footerSocialLinks();
  const socialMarkup=footerSocialMarkup(socials);
- const enamad="<a referrerpolicy='origin' target='_blank' href='https://trustseal.enamad.ir/?id=22286&Code=u04bawyWrXOcWNwCSK6B'><img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=22286&Code=u04bawyWrXOcWNwCSK6B' alt='' style='cursor:pointer' code='u04bawyWrXOcWNwCSK6B'></a>";
- return '<footer class="footer"><div class="wrap footer-grid footer-grid-refined"><section class="footer-brand"><strong>'+t('app.name')+'</strong><p>'+t('app.tagline')+'</p><span class="footer-caption">'+t('footer.caption')+'</span></section><nav aria-label="'+t('header.serviceLinks')+'" class="footer-links"><strong>'+t('footer.quick')+'</strong><a href="'+routeUrl('/shop')+'">'+t('footer.shop')+'</a><a href="'+routeUrl('/terms')+'">'+t('footer.terms')+'</a><a href="'+routeUrl('/rewards')+'">'+t('footer.rewards')+'</a><a href="'+routeUrl('/support')+'">'+t('footer.support')+'</a><a href="' + routeUrl('/contact') + '">'+t('footer.contact')+'</a></nav><section class="footer-socials"><strong>'+t('footer.social')+'</strong><div class="footer-social-list">'+(socialMarkup||'<span class="muted">'+t('footer.soon')+'</span>')+'</div></section><section class="footer-trust"><strong>'+t('footer.trust')+'</strong><div class="trust-badges">'+enamad+'</div></section></div><div class="wrap footer-bottom"><span>© '+t('app.name')+'</span><span>'+t('footer.rights')+'</span></div></footer>';
+ const enamad="<a class='enamad-seal-link' href='"+routeUrl('/enamad')+"' aria-label='"+t('footer.enamad')+"'><img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=22286&Code=u04bawyWrXOcWNwCSK6B' alt='"+t('footer.enamad')+"' loading='lazy' decoding='async' style='cursor:pointer' code='u04bawyWrXOcWNwCSK6B'></a>";
+ return '<footer class="footer"><div class="wrap footer-grid footer-grid-refined"><section class="footer-brand"><strong>'+t('app.name')+'</strong><p>'+t('app.tagline')+'</p><span class="footer-caption">'+t('footer.caption')+'</span></section><nav aria-label="'+t('header.serviceLinks')+'" class="footer-links"><strong>'+t('footer.quick')+'</strong><a href="'+routeUrl('/shop')+'">'+t('footer.shop')+'</a><a href="'+routeUrl('/about')+'">'+t('footer.about')+'</a><a href="'+routeUrl('/terms')+'">'+t('footer.terms')+'</a><a href="'+routeUrl('/privacy')+'">'+t('footer.privacy')+'</a><a href="'+routeUrl('/articles')+'">'+t('footer.articles')+'</a><a href="'+routeUrl('/news')+'">'+t('footer.news')+'</a><a href="'+routeUrl('/aparat')+'">'+t('footer.aparat')+'</a><a href="'+routeUrl('/rewards')+'">'+t('footer.rewards')+'</a><a href="'+routeUrl('/support')+'">'+t('footer.support')+'</a><a href="'+routeUrl('/contact')+'">'+t('footer.contact')+'</a></nav><section class="footer-socials"><strong>'+t('footer.social')+'</strong><div class="footer-social-list">'+(socialMarkup||'<span class="muted">'+t('footer.soon')+'</span>')+'</div></section><section class="footer-trust"><strong>'+t('footer.trust')+'</strong><div class="trust-badges">'+enamad+'</div></section></div><div class="wrap footer-bottom"><span>© '+t('app.name')+'</span><span>'+t('footer.rights')+'</span></div></footer>';
 }
 function updateCartBadge(count){const n=Math.max(0,Number(count)||0);state.cartCount=n;document.querySelectorAll('.cart-count-badge').forEach(el=>{el.textContent=n>99?'۹۹+':fa(n);el.hidden=n<=0;el.setAttribute('aria-label',t('cart.count',{count:fa(n)}))})}
 async function syncCartBadge(){if(!state.user){updateCartBadge(0);return}try{const d=await api('/api/cart');state.cart=d;const count=(d.items||[]).reduce((sum,x)=>sum+Math.max(0,Number(x.quantity)||0),0);updateCartBadge(count)}catch{updateCartBadge(0)}}
@@ -1011,6 +1011,38 @@ async function cmsPage(section){
   setSeo({title:title+' | گیلاس آرت',description:items[0]?.summary||'اطلاعات رسمی گیلاس آرت',image:safeUrl(items[0]?.cover_image)||undefined});
  }catch(e){const root=document.querySelector('.cms-page');if(root)root.innerHTML='<div class="cms-hero cms-hero-compact"><div><div class="eyebrow">GILAS ART</div><h1>'+escapeHtml(title)+'</h1></div></div><div class="panel"><p class="error">اطلاعات این بخش از پایگاه داده دریافت نشد.</p><p class="muted">'+escapeHtml(e.message||'خطای ارتباط با سرور')+'</p><button class="btn ghost" type="button" onclick="location.reload()">تلاش دوباره</button></div>'}
 }
+async function privacyPage(){
+ const title=t('privacy.title');
+ layout('<section class="wrap page legal-page"><div class="cms-hero"><div><div class="eyebrow">'+t('privacy.eyebrow')+'</div><h1>'+t('privacy.title')+'</h1><p class="cms-hero-lead">'+t('privacy.lead')+'</p></div><div class="cms-hero-mark" aria-hidden="true">P</div></div><article class="panel legal-content"><h2>'+t('privacy.collectionTitle')+'</h2><p>'+t('privacy.collectionBody')+'</p><h2>'+t('privacy.useTitle')+'</h2><p>'+t('privacy.useBody')+'</p><h2>'+t('privacy.providersTitle')+'</h2><p>'+t('privacy.providersBody')+'</p><h2>'+t('privacy.securityTitle')+'</h2><p>'+t('privacy.securityBody')+'</p><h2>'+t('privacy.rightsTitle')+'</h2><p>'+t('privacy.rightsBody')+'</p><h2>'+t('privacy.contactTitle')+'</h2><p>'+t('privacy.contactBody')+'</p></article></section>');
+ setSeo({title:title+' | GilasArt',description:t('privacy.lead')});
+}
+async function enamadPage(){
+ const seal='https://trustseal.enamad.ir/logo.aspx?id=22286&Code=u04bawyWrXOcWNwCSK6B';
+ layout('<section class="wrap page legal-page"><div class="cms-hero"><div><div class="eyebrow">'+t('enamad.eyebrow')+'</div><h1>'+t('enamad.title')+'</h1><p class="cms-hero-lead">'+t('enamad.lead')+'</p></div><div class="cms-hero-mark" aria-hidden="true">✓</div></div><article class="panel enamad-page"><img src="'+seal+'" alt="'+t('enamad.sealAlt')+'" loading="eager" decoding="async"><h2>'+t('enamad.verifiedTitle')+'</h2><p>'+t('enamad.verifiedBody')+'</p><a class="btn primary" href="https://trustseal.enamad.ir/?id=22286&Code=u04bawyWrXOcWNwCSK6B" target="_blank" rel="noopener noreferrer">'+t('enamad.openOfficial')+'</a></article></section>');
+ setSeo({title:t('enamad.title')+' | GilasArt',description:t('enamad.lead')});
+}
+async function aparatPage(){
+ layout('<section class="wrap page aparat-page"><div class="cms-hero"><div><div class="eyebrow">APARAT</div><h1>'+t('aparat.title')+'</h1><p class="cms-hero-lead">'+t('aparat.lead')+'</p></div><div class="cms-hero-mark" aria-hidden="true">▶</div></div><div id="aparat-status" class="panel cms-loading" role="status" aria-live="polite">'+t('aparat.loading')+'</div><div id="aparat-grid" class="aparat-grid"></div></section>');
+ setSeo({title:t('aparat.title')+' | GilasArt',description:t('aparat.lead')});
+ const status=document.querySelector('#aparat-status'),grid=document.querySelector('#aparat-grid');
+ const escapeXml=v=>String(v||'').replace(/<!\[CDATA\[|\]\]>/g,'').trim();
+ const tag=(node,name)=>node.getElementsByTagName(name)[0]?.textContent||'';
+ const embedUrl=url=>{const m=String(url||'').match(/\/v\/([A-Za-z0-9_-]+)/);return m?'https://www.aparat.com/video/video/embed/videohash/'+m[1]+'?data[rnddiv]=1&data[responsive]=1':''};
+ try{
+  const r=await fetch('https://www.aparat.com/rss/gilasart',{cache:'no-store',credentials:'omit'});
+  if(!r.ok)throw new Error('rss_'+r.status);
+  const xml=await r.text(),doc=new DOMParser().parseFromString(xml,'application/xml');
+  if(doc.querySelector('parsererror'))throw new Error('rss_parse');
+  let items=[...doc.querySelectorAll('item')].map(item=>{const link=tag(item,'link'),title=escapeXml(tag(item,'title')),description=escapeXml(tag(item,'description'));return {link,title,description,embed:embedUrl(link)}}).filter(x=>x.embed&&x.link);
+  for(let i=items.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]]}
+  items=items.slice(0,24);
+  if(!items.length)throw new Error('rss_empty');
+  status?.remove();
+  if(grid)grid.innerHTML=items.map((x,i)=>'<article class="panel aparat-card"><div class="aparat-player"><iframe src="'+escapeHtml(x.embed)+'" title="'+escapeHtml(x.title||t('aparat.videoAlt'))+'" loading="'+(i<2?'eager':'lazy')+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div><div class="aparat-card-body"><h2>'+escapeHtml(x.title||t('aparat.untitled'))+'</h2><a class="btn ghost" href="'+escapeHtml(x.link)+'" target="_blank" rel="noopener noreferrer">'+t('aparat.openAparat')+'</a></div></article>').join('');
+ }catch(e){
+  if(status)status.innerHTML='<strong>'+t('aparat.unavailableTitle')+'</strong><p>'+t('aparat.unavailableBody')+'</p><a class="btn primary" href="https://www.aparat.com/gilasart" target="_blank" rel="noopener noreferrer">'+t('aparat.openChannel')+'</a>';
+ }
+}
 async function contentDetail(section,slug){
  const labels={news:'اخبار گیلاس آرت',articles:'مقالات'},title=labels[section]||'گیلاس آرت';
  layout('<section class="wrap page cms-page"><article class="panel cms-detail"><div class="cms-loading" aria-live="polite">در حال دریافت محتوا...</div></article></section>');
@@ -1116,7 +1148,7 @@ async function router(){
  const pathLocale=rawSegments[0]&&SUPPORTED_LOCALES.includes(String(rawSegments[0]).toLowerCase())?String(rawSegments.shift()).toLowerCase():'';
  if(pathLocale)setLocale(pathLocale);
  const segments=rawSegments;
- const known=new Set(['shop','cart','account','rewards','checkout','about','contact','news','articles','terms','support','payment','admin','product']);
+ const known=new Set(['shop','cart','account','rewards','checkout','about','contact','news','articles','terms','privacy','enamad','aparat','support','payment','admin','product']);
  const p=segments.length?(known.has(segments[0])?segments:['product',segments[0]]):[''];
  try{
   if(!p[0])return home();
@@ -1139,6 +1171,9 @@ async function router(){
   if((p[0]==='article'||p[0]==='articles')&&p[1])return contentDetail('articles',p[1]);
   if(p[0]==='news'&&p[1])return contentDetail('news',p[1]);
   if(p[0]==='news'||p[0]==='articles')return cmsPage(p[0]);
+  if(p[0]==='privacy')return privacyPage();
+  if(p[0]==='enamad')return enamadPage();
+  if(p[0]==='aparat')return aparatPage();
   if(p[0]==='terms'){
    layout('<section class="wrap page"><div class="panel"><h1 id="terms-title">قوانین سایت</h1><div id="terms-body" class="terms-content">در حال دریافت قوانین...</div></div></section>');
    try{
