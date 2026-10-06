@@ -25,7 +25,8 @@ test('phase 5 frontend supports all three payment branches and manual receipt fl
   assert.match(app, /name="payment-provider"/);
   assert.match(app, /card_transfer/);
   assert.match(app, /\/payment\/manual\/index\.html\?order=/);
-  assert.match(app, /\/payment\/success\?order=/);
+  assert.match(app, /p\[1\]==='success'/);
+  assert.match(worker, /\/payment\/success\?order=/);
   assert.match(app, /\/payment\/.*payment-receipt|payment-receipt/);
 });
 
