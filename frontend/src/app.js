@@ -707,7 +707,7 @@ async function product(slug){
        if(Number.isFinite(serverPrice)&&serverPrice!==total){
          const priceEl=document.querySelector('#product-live-price');if(priceEl)priceEl.textContent=fa(serverPrice)+' ریال';
        }
-       alert('ویژگی انتخاب‌شده برای این محصول در سبد خرید به‌روزرسانی شد.');
+       
      }catch(e){
        alert(e?.message||'به‌روزرسانی ویژگی محصول انجام نشد.');
      }
