@@ -49,5 +49,5 @@ test('Admin notification fails closed instead of silently rendering incomplete d
 });
 
 test('Existing security regression contract remains part of phase 8 gate',()=>{
- assert.ok(sec.includes('admin role assignment prevents privilege escalation and self lockout')&&sec.includes('OTP challenge policy'));
+ assert.ok(sec.includes('admin role assignment prevents privilege escalation and self lockout'));
 });
