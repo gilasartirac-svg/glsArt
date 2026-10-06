@@ -1297,8 +1297,11 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const b=await body(req),reason=String(b.reason||'').trim().slice(0,500);
   if(!reason)return json({error:'rejection_reason_required'},400);
   await env.DB.prepare("UPDATE payments SET receipt_status='REJECTED',receipt_rejection_reason=?,receipt_reviewed_at=CURRENT_TIMESTAMP,receipt_reviewed_by=?,updated_at=CURRENT_TIMESTAMP WHERE order_id=? AND receipt_status='PENDING_REVIEW'").bind(reason,me.id,id).run();
-  await audit(env,me,'admin.card_transfer.receipt.reject','order',id,{receiptStatus:'REJECTED',reason},req);
-  return json({ok:true,status:'PENDING',receiptStatus:'REJECTED',reason});
+  const customer=await env.DB.prepare('SELECT mobile FROM users WHERE id=?').bind(p.user_id).first();
+  const customerUrl=frontend(env)+'/payment/manual/index.html?order='+encodeURIComponent(id);
+  const sms=await sendKavenegarSms(env,customer?.mobile,'گیلاس آرت\nفیش واریزی سفارش شما تأیید نشد.\nدلیل: '+reason+'\nلطفاً فیش صحیح را دوباره ارسال کنید:\n'+customerUrl);
+  await audit(env,me,'admin.card_transfer.receipt.reject','order',id,{receiptStatus:'REJECTED',reason,sms},req);
+  return json({ok:true,status:'PENDING',receiptStatus:'REJECTED',reason,sms});
  }
  if(u.pathname.startsWith('/api/admin/orders/')&&u.pathname.endsWith('/payment-receipt/approve')&&req.method==='POST'){
   if(!(await requirePermission(me,env,'orders.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
