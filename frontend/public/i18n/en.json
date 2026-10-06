@@ -142,6 +142,13 @@
     "notFound.shop": "Enter the shop",
     "notFound.home": "Back to gallery",
     "terms.loading": "Loading site rules...",
-    "terms.unavailable": "Site rules are currently unavailable."
+    "terms.unavailable": "Site rules are currently unavailable.",
+    "header.homeAria": "GilasArt, home page",
+    "header.cartAria": "Shopping cart",
+    "header.pointsTitle": "My points",
+    "header.pointsSuffix": "points",
+    "cart.count": "{{count}} artworks in cart",
+    "account.login": "Login",
+    "account.profile": "User profile"
   }
 }
