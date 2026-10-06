@@ -86,7 +86,7 @@ function localePath(path,locale=currentLocale){
 }
 async function bootstrapLocale(){
  const explicit=localeFromPath(),locale=explicit||await detectPreferredLocale();
- await loadLocale(locale);setLocale(locale);
+ await loadLocale(locale);setLocale(locale);mountLanguageSwitcher();
  if(location.pathname.includes('/admin'))return;
  const manualPaymentPath=/\/payment\/manual(?:\/index\.html)?(?:\/)?$/.test(String(location.pathname||''));
  if(publicPathNeedsLocale(location.pathname)&&!manualPaymentPath){const target=localePath(location.pathname+location.search,locale);if(target!==location.pathname+location.search){history.replaceState({},'',target);scrollRouteTop()}}
@@ -94,22 +94,15 @@ async function bootstrapLocale(){
 function mountLanguageSwitcher(){
  if(document.querySelector('.language-switcher'))return;
  const wrap=document.createElement('div');wrap.className='language-switcher';
- wrap.innerHTML='<select id="gilasart-language-select" aria-label="'+t('header.languageLabel')+'">'+SUPPORTED_LOCALES.map(l=>'<option value="'+l+'">'+LOCALE_META[l].label+'</option>').join('')+'</select>';
+ wrap.innerHTML='<button type="button" class="language-switcher-toggle" id="gilasart-language-toggle" aria-haspopup="listbox" aria-expanded="false" aria-label="'+t('header.languageLabel')+'"><span class="language-current-flag fi fi-ir" aria-hidden="true"></span><span class="language-current-label"></span><span class="language-chevron" aria-hidden="true">⌄</span></button><div class="language-switcher-menu" role="listbox" aria-label="'+t('header.languageMenu')+'">'+SUPPORTED_LOCALES.map(l=>'<button type="button" class="language-option" role="option" data-locale="'+l+'" aria-selected="false"><span class="language-flag fi fi-'+({fa:'ir',en:'gb',tr:'tr',ar:'sa'}[l])+'" aria-hidden="true"></span><span class="language-option-label">'+LOCALE_META[l].label+'</span></button>').join('')+'</div>';
  document.body.appendChild(wrap);
- const select=wrap.querySelector('select');select.value=currentLocale;
- select.addEventListener('change',async()=>{
-  const next=select.value;if(!SUPPORTED_LOCALES.includes(next)||next===currentLocale)return;
-  await loadLocale(next);setLocale(next);
-  const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
-  let p=location.pathname;if(base&&p.startsWith(base))p=p.slice(base.length)||'/';
-  const parts=p.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();p='/'+parts.join('/');
-  const target=localePath(p,next);
-  history.pushState({},'',target);scrollRouteTop();routeInFlightTarget=target;
-  routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget='';scrollRouteTop()});
- });
-}
-
-let routeInFlight=null;
+ const toggle=wrap.querySelector('#gilasart-language-toggle'),menu=wrap.querySelector('.language-switcher-menu');
+ const refresh=()=>{const l=currentLocale||'fa',meta=LOCALE_META[l]||LOCALE_META.fa;wrap.querySelector('.language-current-flag').className='language-current-flag fi fi-'+({fa:'ir',en:'gb',tr:'tr',ar:'sa'}[l]);wrap.querySelector('.language-current-label').textContent=meta.label;wrap.querySelectorAll('.language-option').forEach(b=>{const active=b.dataset.locale===l;b.setAttribute('aria-selected',String(active));b.classList.toggle('is-active',active)});toggle.setAttribute('aria-label',t('header.languageLabel')+': '+meta.label)};
+ refresh();
+ toggle.addEventListener('click',()=>{const open=wrap.classList.toggle('is-open');toggle.setAttribute('aria-expanded',String(open));if(open)wrap.querySelector('.language-option.is-active')?.focus()});
+ wrap.querySelectorAll('.language-option').forEach(button=>button.addEventListener('click',async()=>{const next=button.dataset.locale;if(!SUPPORTED_LOCALES.includes(next)||next===currentLocale){wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');return}await loadLocale(next);setLocale(next);refresh();const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';let p=location.pathname;if(base&&p.startsWith(base))p=p.slice(base.length)||'/';const parts=p.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();p='/'+parts.join('/');const target=localePath(p,next);history.pushState({},'',target);scrollRouteTop();routeInFlightTarget=target;wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget='';scrollRouteTop()})}));
+ document.addEventListener('click',e=>{if(!wrap.contains(e.target)){wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false')}});
+}null;
 let routeInFlightTarget='';
 const icon=n=>({cart:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 1.9-1.4L21 7H7"/><circle cx="10" cy="20" r="1.2"/><circle cx="18" cy="20" r="1.2"/> </svg>',user:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>',search:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>',send:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 4 18 8-18 8 3-8-3-8Z"/><path d="M6 12h9"/></svg>',check:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>',support:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-5.5 5V15A2.5 2.5 0 0 1 3 12.5v-7Z"/><path d="M7 8h10M7 11h6"/></svg>',plus:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',close:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>',clock:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>',copy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M5 16H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"/></svg>'}[n]||'');
 const fa=n=>new Intl.NumberFormat(currentLocale==='fa'?'fa-IR':currentLocale==='ar'?'ar':'tr-TR').format(Number(n||0));const normalizeIranMobile=value=>{let m=String(value||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'');if(m.startsWith('0098'))m='0'+m.slice(4);else if(m.startsWith('98')&&m.length===12)m='0'+m.slice(2);else if(m.startsWith('9')&&m.length===10)m='0'+m;return m};
