@@ -35,6 +35,31 @@ jobs:
           if(!worker.includes("country!=='IR'")||!worker.includes("primary!=='fa'"))throw new Error('conservative geo/language gate missing');
           if(!worker.includes("'cache-control':'no-store'"))throw new Error('locale detection must not be shared-cached');
           NODE
+      - name: Validate shared shell i18n contract
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const c=fs.readFileSync('frontend/src/app.js','utf8');
+          const ranges=[
+            ['layout','function layout(content){','function routeBase()'],
+            ['footer','function renderFooter(){','function updateCartBadge'],
+            ['language switcher','function mountLanguageSwitcher(){','let routeInFlight=']
+          ];
+          for(const [name,a,b] of ranges){
+            const i=c.indexOf(a),j=c.indexOf(b,i+1);
+            if(i<0||j<0) throw new Error('missing shared '+name);
+            const s=c.slice(i,j);
+            if(!s.includes("t('")) throw new Error(name+' has no i18n usage');
+            if(/aria-label="(?:Language|گیلاس آرت، صفحه اصلی|سبد خرید|منوی اصلی|باز کردن منوی اصلی|بستن منوی اصلی)"/.test(s)) throw new Error(name+' contains hard-coded shared accessibility label');
+          }
+          for(const key of ['nav.shop','nav.about','nav.contact','nav.news','nav.articles','nav.rewards','nav.admin','nav.cart','nav.login','nav.profile','nav.dayNight','nav.openMenu','nav.closeMenu','footer.quick','footer.shop','footer.terms','footer.rewards','footer.support','footer.contact','footer.social','footer.trust','footer.rights','header.languageLabel','header.theme','header.themeTitle','update.close']){
+            for(const l of ['fa','en','tr','ar']){
+              const d=JSON.parse(fs.readFileSync('frontend/public/i18n/'+l+'.json','utf8'));
+              if(typeof d.strings?.[key]!=='string'||!d.strings[key].trim()) throw new Error('missing shared i18n key '+key+' in '+l);
+            }
+          }
+          console.log('shared shell i18n contract: PASS');
+          NODE
       - name: Validate four-locale JSON contract
         run: |
           set -euo pipefail
