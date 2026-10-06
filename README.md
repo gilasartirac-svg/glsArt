@@ -240,16 +240,18 @@
 **خروجی فاز 10:** Canonical و hreflang/x-default برای مسیرهای locale، Meta Title/Description، Open Graph/Twitter، JSON-LD عمومی، noindex برای مسیرهای خصوصی، sitemap پویا بر پایه Snapshot محصولات و محتوای منتشرشده، robots.txt هماهنگ با Production و قرارداد جلوگیری از duplicate content تکمیل و در تست اختصاصی Phase 10 پوشش داده شد.
 
 ### فاز 11 — PWA / Service Worker / Cache
-- ☐ فاز 11 کامل
-- ☐ چهار JSON زبان
-- ☐ Cache
-- ☐ Versioning
-- ☐ Offline behavior
-- ☐ Update behavior
-- ☐ Stale content prevention
-- ☐ Saved language behavior
-- ☐ Site/app version changes
-- ☐ عدم نمایش Locale قدیمی پس از Deployment
+- ☑ فاز 11 کامل
+- ☑ چهار JSON زبان
+- ☑ Cache
+- ☑ Versioning
+- ☑ Offline behavior
+- ☑ Update behavior
+- ☑ Stale content prevention
+- ☑ Saved language behavior
+- ☑ Site/app version changes
+- ☑ عدم نمایش Locale قدیمی پس از Deployment
+
+**خروجی فاز 11:** Service Worker نسخه‌گذاری‌شده بر اساس نسخه وب، حذف خودکار Cache قدیمی، Network-first برای navigation و JSON با fallback آفلاین، جلوگیری از نمایش Locale/داده قدیمی پس از Deployment، حفظ Locale انتخاب‌شده، و کنترل نسخه وب/Android/iOS با رفتار Update تکمیل و در تست اختصاصی Phase 11 پوشش داده شد.
 
 ### فاز 12 — ممیزی نهایی «حتی یک کلمه جا نمانده»
 - ☐ فاز 12 کامل
