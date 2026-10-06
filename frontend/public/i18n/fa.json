@@ -262,6 +262,10 @@
     "product.addErrorShort": "افزودن به سبد خرید انجام نشد.",
     "product.quantityError": "تغییر تعداد انجام نشد.",
     "product.optionUpdateError": "به‌روزرسانی ویژگی محصول انجام نشد.",
-    "product.gallery": "گالری تصاویر محصول"
+    "product.gallery": "گالری تصاویر محصول",
+    "product.inStock": "موجود است",
+    "product.outOfStock": "این اثر در حال حاضر ناموجود است",
+    "product.purchaseMessage": "قیمت نهایی، ویژگی‌های انتخاب‌شده و موجودی واقعی هنگام ثبت سفارش بررسی می‌شوند.",
+    "product.related": "آثار مرتبط"
   }
 }
