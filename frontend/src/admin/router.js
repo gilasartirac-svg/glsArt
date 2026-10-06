@@ -16,6 +16,8 @@ const loaders={
  reviews:()=>import('./pages/Reviews.js?v=20261001-reviews'),
  discounts:()=>import('./pages/Discounts.js?v=20260929-admin'),
  sms:()=>import('./pages/SmsSettings.js?v=20260929-admin'),
+ rewards:()=>import('./pages/Rewards.js?v=20261006-phase8'),
+ notifications:()=>import('./pages/Notifications.js?v=20261006-phase8'),
  payment:()=>import('./pages/PaymentSettings.js?v=20260929-admin'),
  visitors:()=>import('./pages/Visitors.js?v=20260929-admin'),
  about:()=>import('./pages/About.js?v=20261005-about-hardening'),
