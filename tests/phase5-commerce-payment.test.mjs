@@ -20,8 +20,9 @@ test('phase 5 frontend exposes one-page cart/checkout flow', () => {
 });
 
 test('phase 5 frontend supports all three payment branches and manual receipt flow', () => {
-  assert.match(app, /zarinpal/);
-  assert.match(app, /novinopay/);
+  assert.match(app, /\/api\/payment\/options/);
+  assert.match(app, /paymentOptions\.methods/);
+  assert.match(app, /name="payment-provider"/);
   assert.match(app, /card_transfer/);
   assert.match(app, /\/payment\/manual\/index\.html\?order=/);
   assert.match(app, /\/payment\/success\?order=/);
