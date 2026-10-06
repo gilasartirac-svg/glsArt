@@ -539,9 +539,10 @@ async function proxyStorefrontImage(req,env,u){
 }
 async function route(req,env){const u=new URL(req.url); if(u.pathname==='/api/locale'&&req.method==='GET'){
  const country=String(req.cf?.country||req.headers.get('CF-IPCountry')||'').toUpperCase();
- const accepted=String(req.headers.get('Accept-Language')||'').toLowerCase().split(',').map(x=>x.trim().split(';')[0].split('-')[0]).filter(Boolean);
+ const accepted=String(req.headers.get('Accept-Language')||'').toLowerCase().split(',').map(x=>x.trim()).filter(Boolean);
  const supported=new Set(['fa','ar','tr','en']);
- const primary=accepted.find(x=>supported.has(x))||'';
+ const primaryToken=accepted[0]?.split(';')[0]?.split('-')[0]||'';
+ const primary=supported.has(primaryToken)?primaryToken:'';
  // Persian is the safe default. A non-Iran country alone is never enough to infer a non-Persian user.
  // We only select another language when geography and the browser's explicit language agree.
  let locale='fa',confidence='default';
@@ -549,7 +550,7 @@ async function route(req,env){const u=new URL(req.url); if(u.pathname==='/api/lo
   const countryLocale={TR:'tr',IQ:'ar',AE:'ar',SA:'ar',QA:'ar',KW:'ar',BH:'ar',OM:'ar',JO:'ar',EG:'ar',SY:'ar',LB:'ar',YE:'ar',PS:'ar'}[country];
   if(countryLocale===primary || (primary==='en' && !countryLocale)){locale=primary;confidence='country+language'}
  }
- return json({locale,country:country||null,language:primary||null,confidence},200,{'cache-control':'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800'});
+ return json({locale,country:country||null,language:primary||null,confidence},200,{'cache-control':'no-store'});
 } if(u.pathname==='/api/storefront-image'){return proxyStorefrontImage(req,env,u)} if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req,env)});
  if(u.pathname==='/api/visitors/heartbeat'&&req.method==='POST'){
   const b=await body(req),key=String(b.sessionKey||'').replace(/[^A-Za-z0-9_-]/g,'').slice(0,80);
