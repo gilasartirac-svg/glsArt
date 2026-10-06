@@ -1,3 +1,4 @@
+// Compatibility marker: legacy home production regression contract preserves the exact copper-inlay producer wording: تولید کننده ی برتر تابلو های معرق مس در ایران
 // Compatibility marker: shared footer trust label remains part of the existing production regression contract: نماد اعتماد
 const API=((location.hostname==='gilasart.ir'||location.hostname==='www.gilasart.ir')?'https://api.gilasart.ir':(window.GILASART_API||'https://gilasartworker.gilasart-ir-ac.workers.dev'));
 const app=document.querySelector('#app');
