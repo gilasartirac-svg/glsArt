@@ -388,14 +388,14 @@ function productCard(p){
  const image=safeUrl(p.image),flash=Number(p.flash_sale_active||p.flashSaleActive)===1&&p.flash_sale_ends_at;
  const hasFlashPrice=flash&&p.flash_sale_price_irt!==null&&p.flash_sale_price_irt!==undefined;
  const shown=hasFlashPrice?Number(p.flash_sale_price_irt):Number(p.price_irt||0);
- const name=escapeHtml(p.name||"اثر هنری"),sku=escapeHtml(p.sku||""),href=productUrl(p.slug);
+ const name=escapeHtml(p.name||t("product.artwork")),sku=escapeHtml(p.sku||""),href=productUrl(p.slug);
  const rating=Number(p.rating_avg||0),reviews=Number(p.review_count||0),sold=Number(p.sold_count||0);
  const socialProof=reviews>0||sold>0;
  const ratingText=rating>0?rating.toFixed(1):"—";
  return `<article class="card product-card product-showcase"><a class="product-card-link" href="${href}" aria-label="${t('product.view')} ${name}">
  <div class="product-card-media"><div class="product-art-frame">${image?`<img src="${escapeHtml(image)}" alt="${name}" loading="lazy" decoding="async">`:'<div class="product-image-empty" aria-hidden="true">'+t('product.artwork')+'</div>'}</div>
  <div class="product-card-overlay" aria-hidden="true"><span>${t('product.details')}</span><span>←</span></div>
- <div class="product-card-badges"><span class="product-art-badge">اثر هنری</span>${flash?`<span class="flash-badge">${icon("clock")} ${t('product.featured')}</span>`:""}</div>
+ <div class="product-card-badges"><span class="product-art-badge">${t('product.artwork')}</span>${flash?`<span class="flash-badge">${icon("clock")} ${t('product.featured')}</span>`:""}</div>
  <div class="product-card-corner" aria-hidden="true"><span>GILAS</span><b>ART</b></div></div>
  <div class="cardbody product-card-body">
   <div class="product-card-heading"><div class="product-title-wrap"><span class="product-card-kicker">GILAS ART</span><h3>${name}</h3></div>${sku?`<span class="product-sku" dir="ltr">${sku}</span>`:""}</div>
