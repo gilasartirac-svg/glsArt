@@ -4903,3 +4903,200 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
     gap:7px;
   }
 }
+
+
+/* =========================================================
+   Rewards / Invite Friends — Responsive Layout v3
+   Final scoped override: mobile / tablet / desktop.
+   Hierarchy: code -> URL -> actions -> notes.
+   ========================================================= */
+.rewards-page .referral-panel{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  width:100%;
+}
+.rewards-page .referral-panel > .eyebrow{
+  margin:0 0 6px;
+}
+.rewards-page .referral-panel > h2{
+  margin:0 0 8px;
+  line-height:1.5;
+  overflow-wrap:anywhere;
+}
+.rewards-page .referral-panel > .muted{
+  margin:0 0 16px;
+  line-height:1.9;
+  overflow-wrap:anywhere;
+}
+
+/* Referral code: code always gets the flexible space; copy icon stays fixed. */
+.rewards-page .referral-code{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 42px;
+  gap:8px;
+  align-items:center;
+  width:100%;
+  margin:0 0 16px;
+}
+.rewards-page .referral-code code{
+  min-width:0;
+  width:100%;
+  min-height:42px;
+  padding:9px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.rewards-page .referral-code-copy{
+  width:42px;
+  min-width:42px;
+  height:42px;
+  min-height:42px;
+  margin:0;
+  padding:0;
+}
+
+/* URL is deliberately on its own row. */
+.rewards-page .referral-label{
+  display:block;
+  width:100%;
+  margin:0 0 7px;
+  color:var(--ui-muted);
+  font-size:11px;
+  line-height:1.7;
+}
+.rewards-page .referral-url-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:8px;
+  width:100%;
+  min-width:0;
+  align-items:stretch;
+}
+.rewards-page .referral-url-row .referral-url{
+  grid-column:auto;
+  grid-row:auto;
+  width:100%;
+  min-width:0;
+  min-height:44px;
+  margin:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* Action buttons form a separate two-column row on larger screens. */
+.rewards-page .referral-copy-btn,
+.rewards-page .referral-sms-btn{
+  width:100%;
+  min-width:0;
+  max-width:none;
+  min-height:44px;
+  margin:0;
+  padding-inline:10px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  white-space:normal;
+  text-align:center;
+  line-height:1.45;
+}
+.rewards-page .referral-copy-btn span,
+.rewards-page .referral-sms-btn span{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+
+/* Keep the two action buttons together as a dedicated row. */
+@media (min-width:681px){
+  .rewards-page .referral-url-row{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  }
+  .rewards-page .referral-url-row .referral-url{
+    grid-column:1 / -1;
+  }
+}
+
+/* Desktop: two reward panels side-by-side; invite actions stay balanced. */
+@media (min-width:1025px){
+  .rewards-page .rewards-grid{
+    grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
+    align-items:start;
+    gap:20px;
+  }
+  .rewards-page .referral-panel{
+    padding:22px;
+  }
+}
+
+/* Tablet: panels stack, with comfortable touch targets and no squeezing. */
+@media (min-width:681px) and (max-width:1024px){
+  .rewards-page{
+    padding-inline:16px;
+  }
+  .rewards-page .rewards-grid{
+    grid-template-columns:minmax(0,1fr);
+    gap:16px;
+  }
+  .rewards-page .referral-panel{
+    padding:20px;
+  }
+  .rewards-page .referral-copy-btn,
+  .rewards-page .referral-sms-btn{
+    min-height:46px;
+  }
+}
+
+/* Phone: everything becomes one predictable vertical flow. */
+@media (max-width:680px){
+  .rewards-page{
+    padding-inline:12px;
+    padding-bottom:40px;
+  }
+  .rewards-page .rewards-grid{
+    grid-template-columns:minmax(0,1fr);
+    gap:14px;
+  }
+  .rewards-page .referral-panel{
+    padding:16px;
+  }
+  .rewards-page .referral-url-row{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .rewards-page .referral-url-row .referral-url{
+    grid-column:auto;
+  }
+  .rewards-page .referral-copy-btn,
+  .rewards-page .referral-sms-btn{
+    min-height:48px;
+    width:100%;
+  }
+}
+
+/* Narrow phones: reduce padding only; never reduce touch target size. */
+@media (max-width:380px){
+  .rewards-page{
+    padding-inline:8px;
+  }
+  .rewards-page .referral-panel{
+    padding:13px;
+  }
+  .rewards-page .referral-code{
+    grid-template-columns:minmax(0,1fr) 40px;
+    gap:6px;
+  }
+  .rewards-page .referral-code-copy{
+    width:40px;
+    min-width:40px;
+    height:40px;
+    min-height:40px;
+  }
+  .rewards-page .referral-url-row{
+    gap:7px;
+  }
+}
