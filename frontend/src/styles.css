@@ -3422,3 +3422,373 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 }
 .cart-option-chip b{color:var(--ui-muted);font-weight:700}
 .cart-option-chip span{color:var(--ui-text)}
+
+
+/* Rewards responsive UI hardening — scoped to /rewards only */
+.rewards-page{
+  width:100%;
+  max-width:1180px;
+  margin-inline:auto;
+  box-sizing:border-box;
+  overflow:visible;
+}
+.rewards-page *,
+.rewards-page *::before,
+.rewards-page *::after{box-sizing:border-box}
+.rewards-page .page-masthead{
+  min-width:0;
+  grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);
+}
+.rewards-masthead .page-masthead-copy,
+.rewards-balance-hero,
+.rewards-grid>.panel,
+.rewards-page>.panel{min-width:0}
+.rewards-masthead h1{
+  margin-bottom:10px;
+  line-height:1.35;
+  text-wrap:balance;
+}
+.rewards-masthead .page-masthead-copy>p{
+  max-width:68ch;
+  line-height:2;
+}
+.rewards-microcopy{max-width:100%}
+.rewards-microcopy span{max-width:100%;white-space:normal}
+.rewards-balance-hero{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height:210px;
+  padding:24px;
+  border:1px solid color-mix(in srgb,var(--ui-gold) 32%,var(--ui-line));
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 12% 18%,color-mix(in srgb,var(--ui-gold) 12%,transparent),transparent 34%),
+    linear-gradient(145deg,color-mix(in srgb,var(--ui-gold) 7%,var(--ui-surface)),var(--ui-surface-2));
+  box-shadow:var(--ui-shadow-soft);
+}
+.rewards-balance-hero>strong{
+  display:block;
+  margin-top:5px;
+  font-size:clamp(30px,4vw,46px);
+  line-height:1.15;
+  font-variant-numeric:tabular-nums;
+  overflow-wrap:anywhere;
+}
+.rewards-progress-copy{line-height:1.8;overflow-wrap:anywhere}
+.rewards-grid{
+  grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
+}
+.rewards-grid>.panel,
+.rewards-page>.panel{
+  border-radius:20px;
+  min-width:0;
+}
+.rewards-convert-panel,
+.referral-panel,
+.rewards-earn-panel,
+.reward-coupons-panel,
+.reward-activity-panel{
+  overflow:hidden;
+}
+.reward-tiers,
+.reward-coupons,
+.reward-earn-grid{min-width:0}
+.reward-tier,
+.reward-coupon,
+.reward-earn-item{
+  min-width:0;
+  overflow:hidden;
+}
+.reward-tier strong,
+.reward-tier p,
+.reward-coupon code,
+.reward-coupon-meta,
+.reward-earn-item strong,
+.reward-earn-item small{
+  overflow-wrap:anywhere;
+}
+.reward-tier .btn{
+  min-width:0;
+  width:100%;
+}
+.referral-code{
+  min-width:0;
+}
+.referral-code code{
+  min-width:0;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.referral-code-copy{
+  flex:0 0 42px;
+  width:42px;
+  height:42px;
+  min-width:42px;
+  display:grid;
+  place-items:center;
+}
+.referral-url-row{
+  grid-template-columns:minmax(0,1fr) minmax(125px,auto) minmax(170px,auto);
+}
+.referral-url{
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.referral-copy-btn,
+.referral-sms-btn{
+  min-width:0;
+  max-width:100%;
+}
+.referral-copy-btn span,
+.referral-sms-btn span{
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.referral-note,
+.referral-privacy-note{
+  line-height:1.9;
+  overflow-wrap:anywhere;
+}
+.reward-coupon-head,
+.reward-coupon-meta{
+  min-width:0;
+}
+.reward-coupon-head code{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.table-wrap{
+  max-width:100%;
+  overflow-x:auto;
+  overscroll-behavior-inline:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.rewards-ledger{
+  min-width:520px;
+}
+.rewards-ledger th,
+.rewards-ledger td{
+  white-space:normal;
+  vertical-align:middle;
+}
+.rewards-ledger th:nth-child(2),
+.rewards-ledger td:nth-child(2){
+  width:120px;
+  white-space:nowrap;
+}
+.rewards-ledger th:nth-child(3),
+.rewards-ledger td:nth-child(3){
+  width:170px;
+  white-space:nowrap;
+}
+.rewards-page .btn{
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.rewards-page button{
+  touch-action:manipulation;
+}
+.rewards-page :is(button,a,input):focus-visible{
+  outline:2px solid var(--ui-gold);
+  outline-offset:2px;
+}
+
+/* Tablet */
+@media (max-width:960px){
+  .rewards-page .page-masthead{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .rewards-balance-hero{
+    min-height:180px;
+  }
+  .rewards-grid{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .reward-earn-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .referral-url-row{
+    grid-template-columns:minmax(0,1fr) minmax(145px,auto);
+  }
+  .referral-url-row .referral-url{
+    grid-column:1 / -1;
+  }
+}
+
+/* Small tablet / large phone */
+@media (max-width:680px){
+  .rewards-page{
+    padding-inline:12px;
+    padding-bottom:40px;
+  }
+  .rewards-page .page-masthead{
+    gap:14px;
+  }
+  .rewards-masthead .page-masthead-copy{
+    padding:2px 0;
+  }
+  .rewards-microcopy{
+    margin-top:12px;
+  }
+  .rewards-balance-hero{
+    min-height:165px;
+    padding:20px;
+    border-radius:18px;
+  }
+  .rewards-grid>.panel,
+  .rewards-page>.panel{
+    padding:18px;
+    border-radius:17px;
+  }
+  .reward-tiers{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .reward-tier{
+    min-height:0;
+  }
+  .reward-earn-grid{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .reward-coupons{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .referral-url-row{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  }
+  .referral-copy-btn,
+  .referral-sms-btn{
+    width:100%;
+    min-height:44px;
+  }
+  .referral-copy-btn span,
+  .referral-sms-btn span{
+    white-space:normal;
+    line-height:1.4;
+    text-overflow:clip;
+    overflow:visible;
+  }
+}
+
+/* Phone */
+@media (max-width:480px){
+  .rewards-page{
+    padding-inline:10px;
+  }
+  .rewards-page .page-masthead h1{
+    font-size:clamp(24px,7vw,32px);
+  }
+  .rewards-page .page-masthead p{
+    font-size:12px;
+    line-height:2;
+  }
+  .rewards-microcopy{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .rewards-microcopy span{
+    justify-content:center;
+    min-height:34px;
+    padding-inline:8px;
+    text-align:center;
+  }
+  .rewards-microcopy span:last-child{
+    grid-column:1 / -1;
+  }
+  .rewards-balance-hero{
+    min-height:155px;
+    padding:17px;
+  }
+  .rewards-balance-hero>strong{
+    font-size:clamp(28px,10vw,38px);
+  }
+  .rewards-grid>.panel,
+  .rewards-page>.panel{
+    padding:15px;
+  }
+  .rewards-page .sectionhead{
+    align-items:flex-start;
+    flex-wrap:wrap;
+  }
+  .rewards-page .sectionhead>div{
+    min-width:0;
+    width:100%;
+  }
+  .rewards-page .sectionhead h2{
+    font-size:18px;
+    line-height:1.55;
+    overflow-wrap:anywhere;
+  }
+  .referral-code{
+    gap:8px;
+  }
+  .referral-code code{
+    padding:10px 8px;
+    font-size:13px;
+  }
+  .referral-url-row{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .referral-url-row .referral-url{
+    grid-column:auto;
+  }
+  .referral-copy-btn,
+  .referral-sms-btn{
+    grid-column:auto;
+    min-width:0;
+  }
+  .referral-copy-btn span,
+  .referral-sms-btn span{
+    white-space:normal;
+  }
+  .referral-privacy-note{
+    font-size:10px;
+    padding:10px;
+  }
+  .rewards-ledger{
+    min-width:480px;
+  }
+}
+
+/* Very narrow phones */
+@media (max-width:360px){
+  .rewards-page{
+    padding-inline:8px;
+  }
+  .rewards-page .page-masthead h1{
+    font-size:23px;
+  }
+  .rewards-balance-hero>strong{
+    font-size:27px;
+  }
+  .rewards-microcopy{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .rewards-microcopy span:last-child{
+    grid-column:auto;
+  }
+  .rewards-grid>.panel,
+  .rewards-page>.panel{
+    padding:13px;
+  }
+  .reward-tier,
+  .reward-coupon,
+  .reward-earn-item{
+    padding:13px;
+  }
+  .section-count{
+    width:100%;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion:reduce){
+  .reward-tier,
+  .rewards-progress span{
+    transition:none!important;
+  }
+}
