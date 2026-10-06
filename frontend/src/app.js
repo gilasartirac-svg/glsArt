@@ -697,7 +697,22 @@ async function product(slug){
    }catch(e){renderProductCartControl(-1);console.warn('cart_quantity_unavailable',e)}
  };
  const quantityTiers=Array.isArray(d.quantityDiscountTiers)?d.quantityDiscountTiers.filter(x=>Number(x.min)>1&&Number(x.percent)>0):[]; const quantityDiscountCard=document.querySelector('#quantity-discount-card'); if(quantityDiscountCard&&quantityTiers.length){const next=quantityTiers[0];quantityDiscountCard.innerHTML='<div class="quantity-discount-head"><span class="quantity-discount-icon">٪</span><div><strong>با خرید چندتایی، بیشتر صرفه‌جویی کنید</strong><small>تخفیف تعدادی فقط برای همین محصول و بر اساس تعداد سفارش محاسبه می‌شود.</small></div></div><div class="quantity-discount-tiers">'+quantityTiers.map(x=>'<span><b>'+fa(x.min)+' عدد</b><em>'+fa(x.percent)+'٪</em></span>').join('')+'</div><div class="quantity-discount-note">از '+fa(next.min)+' عدد، '+fa(next.percent)+'٪ تخفیف خودکار در سبد خرید اعمال می‌شود.</div></div>'}
- document.querySelectorAll('.product-option-input').forEach(x=>x.addEventListener('change',recalc));recalc();loadProductCartQuantity();
+ document.querySelectorAll('.product-option-input').forEach(x=>x.addEventListener('change',async()=>{
+   const total=recalc();
+   if(productCartQuantity>0){
+     try{
+       const token=csrf();if(!token)throw new Error('جلسه خرید منقضی شده است؛ لطفاً دوباره وارد حساب شوید.');
+       const result=await api('/api/cart',{method:'POST',body:JSON.stringify({productId:p.id,quantity:productCartQuantity,options:selections()}),headers:{'x-csrf-token':token}});
+       const serverPrice=Number(result?.unitPriceIrt);
+       if(Number.isFinite(serverPrice)&&serverPrice!==total){
+         const priceEl=document.querySelector('#product-live-price');if(priceEl)priceEl.textContent=fa(serverPrice)+' ریال';
+       }
+       alert('ویژگی انتخاب‌شده برای این محصول در سبد خرید به‌روزرسانی شد.');
+     }catch(e){
+       alert(e?.message||'به‌روزرسانی ویژگی محصول انجام نشد.');
+     }
+   }
+ }));recalc();loadProductCartQuantity();
   document.querySelector('#fav').onclick=async()=>{
     try{
       await ensureLogin();
