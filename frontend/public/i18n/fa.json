@@ -163,6 +163,10 @@
     "header.languageLabel": "انتخاب زبان",
     "update.close": "بستن",
     "update.nativeAndroid": "اندروید",
-    "update.nativeIos": "iOS"
+    "update.nativeIos": "iOS",
+    "common.loading": "در حال بارگذاری…",
+    "common.error": "خطایی رخ داد. لطفاً دوباره تلاش کنید.",
+    "common.empty": "موردی برای نمایش وجود ندارد.",
+    "common.success": "عملیات با موفقیت انجام شد."
   }
 }
