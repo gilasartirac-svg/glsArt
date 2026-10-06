@@ -1,4 +1,4 @@
-const VERSION='gilasart-shell-20261006-07';
+const VERSION='gilasart-shell-20261006-08';
 const CACHE=VERSION;
 const STATIC=['./','./index.html','./styles.css?v=20261006.03','./app.js?v=20261006.05','./site.webmanifest','./mobile-release.json','./data/storefront-manifest.json','./data/home.json','./fa/','./fa/index.html','./en/','./en/index.html','./tr/','./tr/index.html','./ar/','./ar/index.html'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(STATIC).catch(()=>{})).then(()=>self.skipWaiting()))});
