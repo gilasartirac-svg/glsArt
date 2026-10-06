@@ -18,6 +18,24 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('focus',()=>loadMe({force:true}).catch(()=>{}));
 authSyncTimer=setInterval(()=>{if(document.visibilityState==='visible')loadMe({force:true}).catch(()=>{})},60000);
 const SUPPORTED_LOCALES=['fa','en','tr','ar'];
+let i18nData=null,i18nLocaleLoaded='',i18nReverse=null;
+const I18N_VERSION=1;
+function i18nRoot(){return location.pathname.startsWith('/glsArt')?'/glsArt/i18n/':'/i18n/'}
+async function loadLocale(locale){
+ const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';
+ if(i18nData&&i18nLocaleLoaded===l)return i18nData;
+ try{const r=await fetch(i18nRoot()+encodeURIComponent(l)+'.json?v='+I18N_VERSION,{cache:'no-store',credentials:'same-origin'});if(!r.ok)throw new Error('i18n_http_'+r.status);const d=await r.json();if(Number(d?.version)!==I18N_VERSION||d?.locale!==l||!d?.strings||typeof d.strings!=='object')throw new Error('i18n_invalid');i18nData=d;i18nLocaleLoaded=l;i18nReverse=new Map(Object.entries(d.strings).map(([k,v])=>[String(v),k]));return d}catch(e){if(l!=='fa')return loadLocale('fa');console.warn('i18n_load_failed',e);i18nData={version:1,locale:'fa',direction:'rtl',defaultLocale:'fa',strings:{}};i18nLocaleLoaded='fa';i18nReverse=new Map();return i18nData}
+}
+function t(key,vars={}){const value=i18nData?.strings?.[key]??key;return String(value).replace(/\{\{(\w+)\}\}/g,(_,name)=>String(vars?.[name]??''))}
+function translateRenderedContent(root=document){
+ if(!i18nReverse||currentLocale==='fa')return;
+ const trv=v=>{const raw=String(v??''),key=i18nReverse.get(raw.trim());return key?t(key):raw};
+ const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];let n;while((n=w.nextNode()))nodes.push(n);
+ for(const node of nodes){if(!node.parentElement||/^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA)$/i.test(node.parentElement.tagName))continue;const raw=node.nodeValue||'',trim=raw.trim();if(!trim)continue;const v=trv(trim);if(v!==trim)node.nodeValue=raw.replace(trim,v)}
+ root.querySelectorAll?.('*').forEach(el=>['aria-label','title','placeholder','alt'].forEach(a=>{if(!el.hasAttribute(a))return;const raw=el.getAttribute(a)||'',v=trv(raw);if(v!==raw)el.setAttribute(a,v)}));
+}
+window.GilasArtI18n={t,get locale(){return currentLocale},supported:[...SUPPORTED_LOCALES]};
+
 const LOCALE_META={fa:{label:'فارسی',dir:'rtl'},en:{label:'English',dir:'ltr'},tr:{label:'Türkçe',dir:'ltr'},ar:{label:'العربية',dir:'rtl'}};
 const COUNTRY_LOCALE={IR:'fa',TR:'tr',IQ:'ar',AE:'ar',SA:'ar',QA:'ar',KW:'ar',BH:'ar',OM:'ar',JO:'ar',EG:'ar',SY:'ar',LB:'ar',YE:'ar',PS:'ar'};
 const BROWSER_LOCALE={fa:'fa',ar:'ar',tr:'tr',en:'en'};
@@ -37,7 +55,7 @@ function updateLocaleSeo(){
  const x=document.createElement('link');x.rel='alternate';x.hreflang='x-default';x.href=location.origin+(clean||'/');x.dataset.gilasartLocale='1';document.head.appendChild(x);
  let canonical=document.querySelector('link[rel="canonical"]');if(!canonical){canonical=document.createElement('link');canonical.rel='canonical';document.head.appendChild(canonical)}canonical.href=location.origin+localePath(p,currentLocale);
 }
-function setLocale(locale){const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';currentLocale=l;document.documentElement.lang=l;document.documentElement.dir=LOCALE_META[l].dir;document.documentElement.dataset.locale=l;try{localStorage.setItem('gilasart-locale',l)}catch{}updateLocaleSeo()}
+function setLocale(locale){const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';currentLocale=l;document.documentElement.lang=l;document.documentElement.dir=LOCALE_META[l].dir;document.documentElement.dataset.locale=l;try{localStorage.setItem('gilasart-locale',l)}catch{}updateLocaleSeo();translateRenderedContent(document)}
 function browserLocale(){const langs=navigator.languages?.length?navigator.languages:[navigator.language||''];for(const x of langs){const k=String(x).toLowerCase().split('-')[0];if(BROWSER_LOCALE[k])return BROWSER_LOCALE[k]}return'en'}
 async function detectPreferredLocale(){
  try{const r=await fetch(API+'/api/locale',{credentials:'omit',cache:'no-store'});if(r.ok){const d=await r.json();if(SUPPORTED_LOCALES.includes(d?.locale))return d.locale}}catch{}
@@ -59,14 +77,11 @@ function localePath(path,locale=currentLocale){
  return base+'/'+locale+(clean==='/'?'':clean);
 }
 async function bootstrapLocale(){
- const explicit=localeFromPath();if(explicit){setLocale(explicit);return}
- if(location.pathname.includes('/admin')){setLocale('fa');return}
- const preferred=await detectPreferredLocale();setLocale(preferred);
+ const explicit=localeFromPath(),locale=explicit||'fa';
+ await loadLocale(locale);setLocale(locale);
+ if(location.pathname.includes('/admin'))return;
  const manualPaymentPath=/\/payment\/manual(?:\/index\.html)?(?:\/)?$/.test(String(location.pathname||''));
- if(publicPathNeedsLocale(location.pathname)&&!manualPaymentPath){
-  const target=localePath(location.pathname+location.search,preferred);
-  if(target!==location.pathname+location.search){history.replaceState({},'',target);scrollRouteTop()}
- }
+ if(publicPathNeedsLocale(location.pathname)&&!manualPaymentPath){const target=localePath(location.pathname+location.search,locale);if(target!==location.pathname+location.search){history.replaceState({},'',target);scrollRouteTop()}}
 }
 function mountLanguageSwitcher(){
  if(document.querySelector('.language-switcher'))return;
@@ -74,9 +89,9 @@ function mountLanguageSwitcher(){
  wrap.innerHTML='<select id="gilasart-language-select" aria-label="Language">'+SUPPORTED_LOCALES.map(l=>'<option value="'+l+'">'+LOCALE_META[l].label+'</option>').join('')+'</select>';
  document.body.appendChild(wrap);
  const select=wrap.querySelector('select');select.value=currentLocale;
- select.addEventListener('change',()=>{
+ select.addEventListener('change',async()=>{
   const next=select.value;if(!SUPPORTED_LOCALES.includes(next)||next===currentLocale)return;
-  setLocale(next);
+  await loadLocale(next);setLocale(next);
   const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
   let p=location.pathname;if(base&&p.startsWith(base))p=p.slice(base.length)||'/';
   const parts=p.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();p='/'+parts.join('/');
@@ -343,6 +358,7 @@ async function syncCartBadge(){if(!state.user){updateCartBadge(0);return}try{con
 function layout(content){
  app.innerHTML=`<header class="top"><div class="wrap nav"><a class="brand" href="${routeUrl('/')}" aria-label="گیلاس آرت، صفحه اصلی">گیلاس آرت<small>GILAS ART</small></a><nav class="links" id="main-menu" aria-label="منوی اصلی"><a href="${routeUrl('/shop')}" data-route="/shop" data-action="shop" onclick="event.preventDefault();event.stopPropagation();window.GilasArtRouter?.navigate('/shop');return false;">فروشگاه</a><a href="${routeUrl('/about')}">درباره ما</a><a href="${routeUrl('/contact')}">تماس با ما</a><a href="${routeUrl('/news')}">اخبار</a><a href="${routeUrl('/articles')}">مقالات</a><a href="${routeUrl('/rewards')}" class="rewards-nav-link">باشگاه امتیاز</a>${isAdminUser()?'<a class="admin-link" href="'+routeUrl('/admin')+'">کنترل پنل</a>':''}</nav><div class="spacer"></div><button class="theme-toggle" type="button" aria-label="تغییر حالت نمایش" title="روز / شب" onclick="window.GilasArtTheme&&window.GilasArtTheme.toggle()">◐ <span>روز/شب</span></button><a class="iconbtn cart-link" href="${routeUrl('/cart')}" aria-label="سبد خرید"><div class="cart-icon-wrap">${icon('cart')}<b class="cart-count-badge" aria-label="${state.cartCount} تابلو در سبد خرید"${state.cartCount>0?'':' hidden'}>${state.cartCount>99?'۹۹+':fa(state.cartCount)}</b></div><span>سبد خرید</span></a>${state.user?'<a class="points-badge" href="'+routeUrl('/rewards')+'" title="امتیازهای من">★ '+fa(state.points)+' امتیاز</a>':''}${accountLink()}<button class="mobile-menu-toggle" type="button" aria-label="باز کردن منوی اصلی" aria-expanded="false" aria-controls="main-menu" onclick="window.GilasArtMobileMenu&&window.GilasArtMobileMenu.toggle(this)"><span></span><span></span><span></span></button></div></header><div class="rewards-promo"><div class="wrap rewards-promo-inner">${state.user?'<span>امتیاز شما: <b>'+fa(state.points)+'</b></span><span>از امتیازهایتان کوپن تا ۲۰٪ تخفیف بسازید.</span><a href="'+routeUrl('/rewards')+'">تبدیل امتیاز به کوپن ←</a>':'<span>عضویت در گیلاس آرت = <b>۱۰ امتیاز هدیه</b></span><a href="'+routeUrl('/account')+'">عضو شوید و امتیاز بگیرید ←</a>'}</div></div><main id="main-content" tabindex="-1">${content}</main>${renderFooter()}`;
  refreshFooterSocialLinks();
+ translateRenderedContent(app);
 }
 function routeBase(){return location.pathname.startsWith('/glsArt/')||location.pathname==='/glsArt'?'/glsArt':''}
 function routeUrl(path){return localePath(path)}
