@@ -52,7 +52,8 @@ async function bootstrapLocale(){
  const explicit=localeFromPath();if(explicit){setLocale(explicit);return}
  if(location.pathname.includes('/admin')){setLocale('fa');return}
  const preferred=await detectPreferredLocale();setLocale(preferred);
- if(publicPathNeedsLocale(location.pathname)){
+ const manualPaymentPath=/\/payment\/manual(?:\/index\.html)?(?:\/)?$/.test(String(location.pathname||''));
+ if(publicPathNeedsLocale(location.pathname)&&!manualPaymentPath){
   const target=localePath(location.pathname+location.search,preferred);
   if(target!==location.pathname+location.search){history.replaceState({},'',target);scrollRouteTop()}
  }
@@ -760,7 +761,7 @@ async function cart(){
     if(!pay?.url)throw new Error('آدرس درگاه پرداخت از سرور دریافت نشد.');
     if(provider==='card_transfer'&&pay.manual){
      if(msg)msg.innerHTML='<span class="ok">سفارش ثبت شد؛ در حال انتقال به صفحه پرداخت کارت به کارت…</span>';
-     navigate('/payment/manual?order='+encodeURIComponent(o.orderId));
+     location.assign('/payment/manual/index.html?order='+encodeURIComponent(o.orderId));
      return;
     }
     if(msg)msg.innerHTML='<span class="ok">سفارش ثبت شد؛ در حال انتقال به درگاه پرداخت…</span>';
