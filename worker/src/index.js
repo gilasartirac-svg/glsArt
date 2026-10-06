@@ -714,16 +714,19 @@ if(u.pathname.startsWith('/api/admin/faq/')&&req.method==='DELETE'){
  await env.DB.prepare('DELETE FROM faq_entries WHERE id=?').bind(id).run();await audit(env,me,'admin.faq.delete','faq',id,{before,after:null},req);return json({ok:true});
 }
 
-if(u.pathname==='/api/admin/tickets'&&req.method==='GET'){if(!(await requirePermission(me,env,'support.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT t.*,u.mobile FROM support_tickets t JOIN users u ON u.id=t.user_id ORDER BY t.updated_at DESC LIMIT 500').all();return json({items:r.results||[]})}
+if(u.pathname==='/api/admin/tickets'&&req.method==='GET'){if(!(await requirePermission(me,env,'support.read')))return json({error:'forbidden'},403);const limit=Math.min(100,Math.max(1,Number(u.searchParams.get('limit')||50))),offset=Math.max(0,Number(u.searchParams.get('offset')||0));const statusFilter=String(u.searchParams.get('status')||'').trim();let sql='SELECT t.*,u.mobile FROM support_tickets t JOIN users u ON u.id=t.user_id';const args=[];if(['open','closed'].includes(statusFilter)){sql+=' WHERE t.status=?';args.push(statusFilter)}sql+=' ORDER BY t.updated_at DESC LIMIT ? OFFSET ?';args.push(limit,offset);const r=await env.DB.prepare(sql).bind(...args).all();return json({items:r.results||[],limit,offset,hasMore:(r.results||[]).length===limit})}
  if(u.pathname.startsWith('/api/admin/tickets/')&&req.method==='GET'){if(!(await requirePermission(me,env,'support.read')))return json({error:'forbidden'},403);const id=u.pathname.split('/').pop(),t=await env.DB.prepare('SELECT t.*,u.mobile FROM support_tickets t JOIN users u ON u.id=t.user_id WHERE t.id=?').bind(id).first();if(!t)return json({error:'not_found'},404);const m=await env.DB.prepare('SELECT id,author_type,body,created_at FROM ticket_messages WHERE ticket_id=? ORDER BY created_at ASC').bind(id).all();return json({ticket:t,messages:m.results||[]})}
  if(u.pathname.startsWith('/api/admin/tickets/')&&req.method==='POST'){
   if(!(await requirePermission(me,env,'support.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
   const id=u.pathname.split('/').pop(),t=await env.DB.prepare('SELECT t.*,u.mobile FROM support_tickets t JOIN users u ON u.id=t.user_id WHERE t.id=?').bind(id).first();
   if(!t)return json({error:'not_found'},404);
   const b=await body(req),message=String(b.message||'').trim().slice(0,10000),sendSms=b.sendSms===true||b.sendSms==='true'||b.sendSms===1;
-  const status=['open','closed'].includes(String(b.status))?String(b.status):t.status,stage=String(b.stage||'پاسخ داده شد').slice(0,80);
+  const status=['open','closed'].includes(String(b.status))?String(b.status):t.status;
+  const allowedStages=['ثبت شده','در حال بررسی','پاسخ داده شد','در انتظار بررسی','بسته شده'];
+  const stage=allowedStages.includes(String(b.stage))?String(b.stage):(t.stage||'ثبت شده');
   const stm=[env.DB.prepare("UPDATE support_tickets SET status=?,stage=?,updated_at=CURRENT_TIMESTAMP,closed_at=CASE WHEN ?='closed' THEN CURRENT_TIMESTAMP ELSE NULL END WHERE id=?").bind(status,stage,status,id)];
   if(message)stm.push(env.DB.prepare("INSERT INTO ticket_messages(id,ticket_id,user_id,author_type,body) VALUES(?,?,?, 'admin',?)").bind(uid(),id,me.id,message));
+  if(message)stm.push(env.DB.prepare("INSERT INTO user_notifications(id,user_id,type,title,message,reference_id) VALUES(?,?,?,?,?,?)").bind(uid(),t.user_id,'support_reply','پاسخ جدید پشتیبانی','پاسخ جدیدی برای تیکت شما ثبت شد.',id));
   await env.DB.batch(stm);
   let sms={sent:false,reason:'not_requested'};
   if(sendSms){
