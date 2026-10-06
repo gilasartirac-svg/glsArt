@@ -262,6 +262,10 @@
     "product.addErrorShort": "Could not add to cart.",
     "product.quantityError": "Could not change quantity.",
     "product.optionUpdateError": "Could not update the product options.",
-    "product.gallery": "Product image gallery"
+    "product.gallery": "Product image gallery",
+    "product.inStock": "In stock",
+    "product.outOfStock": "This artwork is currently out of stock",
+    "product.purchaseMessage": "The final price, selected options, and actual inventory are checked when the order is placed.",
+    "product.related": "Related artworks"
   }
 }
