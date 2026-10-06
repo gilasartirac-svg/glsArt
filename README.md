@@ -186,7 +186,7 @@ Localeهای رسمی:
 - tr
 - ar
 
-برای Locale از path، browser، local storage و API تشخیص استفاده می‌شود. Canonical، hreflang و x-default نیز مدیریت می‌شوند.
+برای Locale از path، Cookie ترجیح کاربر و فقط در نبود Cookie از تشخیص محافظه‌کارانه Worker با کشور Cloudflare و Accept-Language استفاده می‌شود. **localStorage منبع ترجیح زبان نیست.** Canonical، hreflang و x-default نیز مدیریت می‌شوند.
 
 Legacy hash route مانند #/shop به مسیر واقعی منتقل می‌شود.
 
@@ -1501,6 +1501,8 @@ Translation data is stored in GitHub as four JSON dictionaries under:
 All four files must contain the **same variable/key set**. Only the values change by language. Each file also declares `locale`, `direction`, `defaultLocale: "fa"`, and `version`.
 
 ### Runtime handling
+
+> **وضعیت تکمیل زیرپروژه:** زیرساخت چهار JSON، مسیرهای locale، Cookie ترجیح، تشخیص محافظه‌کارانه و قرارداد Quality Gate پیاده شده است؛ اما تا زمانی که تمام متن‌های User-facing عمومی و Admin به dictionaryهای چهارگانه منتقل و برای هر چهار زبان بازبینی نشوند، این زیرپروژه Production از نظر محتوای ترجمه‌ای Done نیست.
 
 The public application loads the dictionary for the locale in the URL, sets `document.documentElement.lang` and `dir`, and applies the dictionary to rendered UI text/ARIA/placeholder/title/alt values. The locale path is authoritative:
 
