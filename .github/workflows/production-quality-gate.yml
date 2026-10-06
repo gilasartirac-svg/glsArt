@@ -74,6 +74,20 @@ jobs:
           for(const raw of ['جستجو، فیلتر و انتخاب آثار گیلاس آرت','انتخاب چند دسته','محدوده قیمت','امتیاز خریداران','پاک کردن همه','نمایش آثار بیشتر','در حال آماده‌سازی گالری…','نتیجه‌ای پیدا نشد.'])if(s.includes(raw))throw new Error('hard-coded Shop UI text remains: '+raw);
           console.log('Shop i18n contract: PASS');
           NODE
+      - name: Validate Product Detail contract
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const app=fs.readFileSync('frontend/src/app.js','utf8');
+          const i=app.indexOf('async function product(slug)'),j=app.indexOf('async function ensureLogin()',i);
+          if(i<0||j<0)throw new Error('product function boundaries missing');
+          const p=app.slice(i,j);
+          for(const token of ['const attributes=d.attributes||[]','product-option-input','selections=()=>','options:selections()','product-live-price','recalc=','product-qty-minus','product-qty-plus','quantityDiscountTiers','review-form'])if(!p.includes(token))throw new Error('Product Detail contract missing: '+token);
+          if(!app.includes('translateRenderedContent(app)'))throw new Error('Product Detail render translation hook missing');
+          const required=['product.videoUnsupported','product.selectAttributes','product.saved','product.cartQuantity','product.decrease','product.increase','product.selectedQuantity','product.bulkSave','product.bulkText','product.units','product.bulkAuto','product.noReviews','product.yourReview','product.reviewPlaceholder','product.submitReview','product.reviewPending','product.reactionError','product.sessionExpired','product.added','product.addError','product.addErrorShort','product.quantityError','product.optionUpdateError','product.gallery'];
+          for(const l of ['fa','ar','en','tr']){const d=JSON.parse(fs.readFileSync('frontend/public/i18n/'+l+'.json','utf8'));for(const key of required)if(typeof d.strings?.[key]!=='string'||!d.strings[key].trim())throw new Error('missing Product Detail i18n key '+key+' in '+l)}
+          console.log('Product Detail contract: PASS');
+          NODE
       - name: Validate Home i18n contract
         run: |
           node <<'NODE'
