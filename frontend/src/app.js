@@ -310,7 +310,7 @@ function updateSeoLinks(){
  const canonical=location.origin+localePath(p,currentLocale);
  document.querySelectorAll('link[data-gilasart-seo-link]').forEach(x=>x.remove());
  for(const l of SUPPORTED_LOCALES){const a=document.createElement('link');a.rel='alternate';a.hreflang=l;a.href=location.origin+localePath(p,l);a.dataset.gilasartSeoLink='1';document.head.appendChild(a)}
- const xd=document.createElement('link');xd.rel='alternate';xd.hreflang='x-default';xd.href=location.origin+localePath(p,'fa');xd.dataset.gilasartSeoLink='1';document.head.appendChild(xd);
+ const xd=document.createElement('link');xd.rel='alternate';xd.hreflang='x-default';xd.href=location.origin+base+(p==='/'?'':p);xd.dataset.gilasartSeoLink='1';document.head.appendChild(xd);
  let canonicalEl=document.querySelector('link[rel="canonical"]');if(!canonicalEl){canonicalEl=document.createElement('link');canonicalEl.rel='canonical';document.head.appendChild(canonicalEl)}canonicalEl.href=canonical;
  return canonical;
 }
