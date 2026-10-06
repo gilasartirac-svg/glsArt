@@ -66,7 +66,7 @@ export default function Orders(){
       <td><strong>${money(o.total_irt)}</strong><small>تومان</small></td>
       <td><select class="order-status" data-id="${esc(o.id)}" aria-label="وضعیت سفارش">${optionHtml(o.status)}</select></td>
       <td><span class="order-date">${dateFa(o.created_at)}</span></td>
-      <td><button type="button" class="btn ghost order-invoice-btn" data-id="${esc(o.id)}" ${String(o.status)==='PENDING'?'disabled aria-disabled="true"':''}>${String(o.status)==='PENDING'?'غیرفعال':'فاکتور'}</button></td>
+      <td><button type="button" class="btn ghost order-invoice-btn" data-id="${esc(o.id)}">${String(o.status)==='PENDING'?'پیش‌فاکتور':'فاکتور'}</button></td>
      </tr>`).join('')||'<tr><td colspan="6">سفارشی وجود ندارد.</td></tr>';
     if(!grid.closest('table').dataset.gridReady)setupDataGrid(grid.closest('table').querySelector('tbody').id,{dateColumns:[]});
     bindRows();
@@ -78,7 +78,7 @@ export default function Orders(){
     if(e.target.closest('select,button,a'))return;
     await showDetail(row.dataset.id);
    });
-   grid.querySelectorAll('.order-invoice-btn').forEach(btn=>btn.onclick=async e=>{e.stopPropagation();try{const d=await admin.order(btn.dataset.id);openInvoice({...d.order,items:d.items||[]},d.invoice||{});}catch(err){error.textContent=err.message||'فاکتور دریافت نشد.';}});
+   grid.querySelectorAll('.order-invoice-btn').forEach(btn=>btn.onclick=async e=>{e.stopPropagation();const w=window.open('about:blank','_blank','width=1000,height=900');try{const d=await admin.order(btn.dataset.id);openInvoice({...d.order,items:d.items||[]},d.invoice||{},w);}catch(err){try{w?.close()}catch{}error.textContent=err.message||'فاکتور دریافت نشد.';}});
    grid.querySelectorAll('.order-status').forEach(sel=>sel.onchange=async e=>{
     e.stopPropagation();
     const id=sel.dataset.id,old=rows.find(x=>x.id===id)?.status,next=sel.value;
@@ -98,7 +98,7 @@ export default function Orders(){
    detail.innerHTML='<div class="order-detail-loading">در حال دریافت جزئیات سفارش…</div>';
    try{
     const d=await admin.order(id),o=d.order||{},items=d.items||[],history=d.history||[],p=d.payment;
-    const receiptHtml=(p?.provider==='card_transfer'&&p?.receipt_status&&p.receipt_status!=='NONE')?'<section class="order-detail-section card-transfer-receipt-admin"><h4>فیش واریزی کارت به کارت</h4><div class="receipt-review-box"><div class="receipt-review-preview"><img src="'+ADMIN_API+'/api/admin/orders/'+encodeURIComponent(o.id)+'/payment-receipt" alt="فیش واریزی سفارش" loading="lazy"></div><div class="receipt-review-meta"><span>وضعیت: <b>'+esc(p.receipt_status)+'</b></span><span>حجم: '+money(p.receipt_size)+' بایت</span><span>ارسال: '+dateFa(p.receipt_uploaded_at)+'</span>'+(p.receipt_status==='PENDING_REVIEW'?'<button id="approve-card-receipt" class="btn primary" type="button">تأیید و ثبت پرداخت</button>':'<span class="ok">پرداخت تأیید شده است.</span>')+'</div></div></section>':'';
+    const receiptHtml=(p?.provider==='card_transfer'&&p?.receipt_status&&p.receipt_status!=='NONE')?'<section class="order-detail-section card-transfer-receipt-admin"><h4>فیش واریزی کارت به کارت</h4><div class="receipt-review-box"><div class="receipt-review-preview"><img src="'+ADMIN_API+'/api/admin/orders/'+encodeURIComponent(o.id)+'/payment-receipt" alt="فیش واریزی سفارش" loading="lazy"></div><div class="receipt-review-meta"><span>وضعیت: <b>'+esc(p.receipt_status)+'</b></span><span>حجم: '+money(p.receipt_size)+' بایت</span><span>ارسال: '+dateFa(p.receipt_uploaded_at)+'</span>'+(p.receipt_status==='PENDING_REVIEW'?'<div class="receipt-review-actions"><span class="receipt-review-pending">فیش آماده بررسی مدیر است.</span><button id="approve-card-receipt" class="btn primary" type="button">تأیید و ثبت پرداخت</button></div>':p.receipt_status==='APPROVED'?'<span class="ok">پرداخت تأیید شده است.</span>':'<span>فیش در وضعیت '+esc(p.receipt_status)+'</span>')+'</div></div></section>':'';
     detail.innerHTML=`
      <div class="order-detail-head">
       <div><span class="order-detail-kicker">سفارش</span><h3>#${esc(String(o.id||'').slice(-8))}</h3><small>${esc(o.id||'')}</small></div>
@@ -118,7 +118,7 @@ export default function Orders(){
   }
   refresh.onclick=load;
   document.addEventListener('click',async e=>{
-   if(e.target?.id==='order-detail-invoice'){admin.order(selectedId).then(d=>{if(['PAID','PROCESSING','SHIPPED','DELIVERED'].includes(String(d.order?.status||'').toUpperCase()))openInvoice({...d.order,items:d.items||[]},d.invoice||{})}).catch(err=>{error.textContent=err.message||'فاکتور دریافت نشد.'})}
+   if(e.target?.id==='order-detail-invoice'){const w=window.open('about:blank','_blank','width=1000,height=900');admin.order(selectedId).then(d=>{if(['PENDING','PAID','PROCESSING','SHIPPED','DELIVERED'].includes(String(d.order?.status||'').toUpperCase()))openInvoice({...d.order,items:d.items||[]},d.invoice||{},w);else{try{w?.close()}catch{}}}).catch(err=>{try{w?.close()}catch{}error.textContent=err.message||'فاکتور دریافت نشد.'})}
    if(e.target?.id==='approve-card-receipt'){
     const b=e.target;b.disabled=true;b.textContent='در حال تأیید…';
     try{await api('/api/admin/orders/'+encodeURIComponent(selectedId)+'/payment-receipt/approve',{method:'POST'});await load();await showDetail(selectedId);}
