@@ -23,7 +23,7 @@ test('phase 6 OTP policy is bounded, expiring and rate limited',()=>{
   assert.match(worker,/rate\(env,ip,12,10,'request_ip'\)/);
   assert.match(worker,/expiresAt/);
   assert.match(worker,/attempts>=5/);
-  assert.match(worker,/used_at/);
+  assert.match(worker,/consumed_at/);
 });
 
 test('phase 6 authenticated mutations enforce CSRF',()=>{
