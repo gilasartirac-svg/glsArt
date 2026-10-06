@@ -21,7 +21,7 @@ test('Admin API centralizes credentials, CSRF and no bearer token storage',()=>{
 
 test('Admin dashboard and mutations are session/permission protected',()=>{
  for(const p of ['products.read','products.write','orders.read','orders.write','payments.read','reviews.read','reviews.write','inventory.read','inventory.write','settings.read','settings.write','reports.read','support.read','support.write','content.read','content.write','roles.manage','users.manage']) assert.ok(worker.includes("requirePermission(me,env,'"+p+"')"),p);
- assert.ok(worker.includes('async function audit('));
+ for(const x of ['requireCsrf(req)','self_role_change_forbidden','self_deactivation_forbidden','role_exceeds_actor_permissions']) assert.ok(worker.includes(x),x);
 });
 
 test('Admin audit records sensitive mutations and audit endpoint is protected',()=>{
@@ -31,14 +31,15 @@ test('Admin audit records sensitive mutations and audit endpoint is protected',(
 
 test('Rewards/referral admin area is read-safe and adjustments are bounded/audited',()=>{
  for(const x of ['loyalty_points','referral_codes','referrals']) assert.ok(schema.includes(x),x);
- assert.ok(worker.includes('async function audit('));
+ for(const x of ['admin.settings.update','admin.rewards.adjust','admin.notifications.create','INSERT INTO audit_logs']) assert.ok(worker.includes(x),x);
+ assert.ok(worker.includes("u.pathname==='/api/admin/audit'")&&worker.includes('reports.read'));
 });
 
 test('Admin notification management is user-scoped, bounded and CSRF protected',()=>{
- assert.ok(worker.includes('async function audit('));
+ for(const x of ['/api/admin/rewards','invalid_reward_adjustment','Math.abs(points)>100000','admin_adjustment']) assert.ok(worker.includes(x),x);
 });
 
-test('Admin runtime fails closed instead of silently rendering incomplete data',()=>{
+test('Admin notification fails closed instead of silently rendering incomplete data',()=>{
  assert.match(adminApp,/خطا در بارگذاری کنترل پنل/); assert.match(adminApp,/result\\?\\.html/); assert.match(adminApp,/renderAdminPage/);
 });
 
