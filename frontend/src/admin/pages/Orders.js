@@ -98,7 +98,7 @@ export default function Orders(){
    detail.innerHTML='<div class="order-detail-loading">در حال دریافت جزئیات سفارش…</div>';
    try{
     const d=await admin.order(id),o=d.order||{},items=d.items||[],history=d.history||[],p=d.payment;
-    const receiptHtml=(p?.provider==='card_transfer'&&p?.receipt_status&&p.receipt_status!=='NONE')?'<section class="order-detail-section card-transfer-receipt-admin"><h4>فیش واریزی کارت به کارت</h4><div class="receipt-review-box"><div class="receipt-review-preview"><img src="'+ADMIN_API+'/api/admin/orders/'+encodeURIComponent(o.id)+'/payment-receipt" alt="فیش واریزی سفارش" loading="lazy"></div><div class="receipt-review-meta"><span>وضعیت: <b>'+esc(p.receipt_status)+'</b></span><span>حجم: '+money(p.receipt_size)+' بایت</span><span>ارسال: '+dateFa(p.receipt_uploaded_at)+'</span>'+(p.receipt_status==='PENDING_REVIEW'?'<div class="receipt-review-actions"><span class="receipt-review-pending">فیش آماده بررسی مدیر است.</span><button id="approve-card-receipt" class="btn primary" type="button">تأیید و ثبت پرداخت</button></div>':p.receipt_status==='APPROVED'?'<span class="ok">پرداخت تأیید شده است.</span>':'<span>فیش در وضعیت '+esc(p.receipt_status)+'</span>')+'</div></div></section>':'';
+    const receiptHtml=(p?.provider==='card_transfer'&&p?.receipt_status&&p.receipt_status!=='NONE')?'<section class="order-detail-section card-transfer-receipt-admin"><h4>فیش واریزی کارت به کارت</h4><div class="receipt-review-box"><div class="receipt-review-preview"><img src="'+ADMIN_API+'/api/admin/orders/'+encodeURIComponent(o.id)+'/payment-receipt" alt="فیش واریزی سفارش" loading="lazy"></div><div class="receipt-review-meta"><span>وضعیت: <b>'+esc(p.receipt_status)+'</b></span><span>حجم: '+money(p.receipt_size)+' بایت</span><span>ارسال: '+dateFa(p.receipt_uploaded_at)+'</span>'+(p.receipt_status==='PENDING_REVIEW'?'<div class="receipt-review-actions"><span class="receipt-review-pending">فیش آماده بررسی مدیر است.</span><button id="approve-card-receipt" class="btn primary" type="button">تأیید و ثبت پرداخت</button><button id="reject-card-receipt" class="btn ghost danger" type="button">رد فیش</button></div>':p.receipt_status==='APPROVED'?'<span class="ok">پرداخت تأیید شده است.</span>':p.receipt_status==='REJECTED'?'<div class="receipt-rejected"><span class="error">فیش رد شده است.</span><small>دلیل: '+esc(p.receipt_rejection_reason||'بدون توضیح')+'</small></div>':'<span>فیش در وضعیت '+esc(p.receipt_status)+'</span>')+'</div></div></section>':'';
     detail.innerHTML=`
      <div class="order-detail-head">
       <div><span class="order-detail-kicker">سفارش</span><h3>#${esc(String(o.id||'').slice(-8))}</h3><small>${esc(o.id||'')}</small></div>
@@ -119,6 +119,13 @@ export default function Orders(){
   refresh.onclick=load;
   document.addEventListener('click',async e=>{
    if(e.target?.id==='order-detail-invoice'){const w=window.open('about:blank','_blank','width=1000,height=900');admin.order(selectedId).then(d=>{if(['PENDING','PAID','PROCESSING','SHIPPED','DELIVERED'].includes(String(d.order?.status||'').toUpperCase()))openInvoice({...d.order,items:d.items||[]},d.invoice||{},w);else{try{w?.close()}catch{}}}).catch(err=>{try{w?.close()}catch{}error.textContent=err.message||'فاکتور دریافت نشد.'})}
+   if(e.target?.id==='reject-card-receipt'){
+    const b=e.target,reason=window.prompt('دلیل رد فیش را وارد کنید:','تصویر فیش قابل تأیید نیست. لطفاً فیش صحیح و خوانا را دوباره ارسال کنید.');
+    if(!reason?.trim())return;
+    b.disabled=true;b.textContent='در حال ثبت رد…';
+    try{await api('/api/admin/orders/'+encodeURIComponent(selectedId)+'/payment-receipt/reject',{method:'POST',body:JSON.stringify({reason:reason.trim()}),headers:{'x-csrf-token':document.cookie.match(/(?:^|; )gs_csrf=([^;]+)/)?.[1]||''}});await load();await showDetail(selectedId);}
+    catch(err){error.textContent=err.message||'رد فیش انجام نشد.';b.disabled=false;b.textContent='رد فیش';}
+   }
    if(e.target?.id==='approve-card-receipt'){
     const b=e.target;b.disabled=true;b.textContent='در حال تأیید…';
     try{await api('/api/admin/orders/'+encodeURIComponent(selectedId)+'/payment-receipt/approve',{method:'POST'});await load();await showDetail(selectedId);}
