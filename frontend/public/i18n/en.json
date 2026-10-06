@@ -163,6 +163,10 @@
     "header.languageLabel": "Choose language",
     "update.close": "Close",
     "update.nativeAndroid": "Android",
-    "update.nativeIos": "iOS"
+    "update.nativeIos": "iOS",
+    "common.loading": "Loading…",
+    "common.error": "Something went wrong. Please try again.",
+    "common.empty": "Nothing to display.",
+    "common.success": "The operation was completed successfully."
   }
 }
