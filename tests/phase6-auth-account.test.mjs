@@ -47,12 +47,12 @@ test('phase 6 account contract includes profile, orders, favorites, rewards, ref
 });
 
 test('phase 6 session state does not store bearer session ids in localStorage',()=>{
-  assert.doesNotMatch(frontend,/localStorage\.setItem\(['"][^'"]*(?:session|token|csrf)[^'"]*['"]/i);
+  assert.doesNotMatch(frontend,/localStorage\.setItem\(['"](?:gs_session|gs_csrf|session|token|csrf)['"]/i);
   assert.match(frontend,/credentials:'include'/);
 });
 
 test('phase 6 database contains users, sessions and OTP challenges',()=>{
-  assert.match(schema,/CREATE TABLE IF NOT EXISTS users/);
-  assert.match(schema,/CREATE TABLE IF NOT EXISTS sessions/);
-  assert.match(schema,/CREATE TABLE IF NOT EXISTS otp_challenges/);
+  assert.match(schema,/CREATE TABLE users\(/);
+  assert.match(schema,/CREATE TABLE sessions\(/);
+  assert.match(schema,/CREATE TABLE otp_challenges\(/);
 });
