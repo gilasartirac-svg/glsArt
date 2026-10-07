@@ -300,3 +300,89 @@
  .admin-layout .stats-grid{grid-template-columns:1fr}
  .admin-layout .admin-snapshot-hero .btn{width:100%}
 }
+
+
+/* Remaining admin pages — DOM-specific responsive audit (Categories → SupportTickets). */
+.admin-layout #cat-form,.admin-layout #discount-form,.admin-layout #coupon-form{min-width:0}
+.admin-layout #cat-form .form-grid,.admin-layout #discount-form .form-grid,.admin-layout #coupon-form .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.admin-layout #cat-grid,.admin-layout #customers-grid,.admin-layout #inventory-grid,.admin-layout #payments-grid,.admin-layout #rewards-admin-grid,.admin-layout #notifications-admin-grid,.admin-layout #roles-grid,.admin-layout #audit-grid{width:100%;min-width:0}
+.admin-layout #cat-grid .admin-table,.admin-layout #customers-grid .admin-table,.admin-layout #inventory-grid .admin-table,.admin-layout #payments-grid .admin-table,.admin-layout #rewards-admin-grid .admin-table,.admin-layout #notifications-admin-grid .admin-table,.admin-layout #roles-grid .admin-table,.admin-layout #audit-grid .admin-table{min-width:760px}
+.admin-layout #cat-grid .table-wrap,.admin-layout #cat-grid .table-scroll,.admin-layout #customers-grid,.admin-layout #inventory-grid,.admin-layout #payments-grid,.admin-layout #rewards-admin-grid .table-scroll,.admin-layout #notifications-admin-grid,.admin-layout #roles-grid,.admin-layout #audit-grid{overflow-x:auto;max-width:100%;overscroll-behavior-inline:contain}
+.admin-layout #inventory-grid .stock-input{width:min(110px,100%);min-height:40px}
+.admin-layout #inventory-grid .save-stock{min-height:40px;white-space:nowrap}
+.admin-layout #payments-grid .pill{white-space:nowrap}
+.admin-layout #discount-grid,.admin-layout #coupon-grid{overflow-x:auto;max-width:100%;overscroll-behavior-inline:contain}
+.admin-layout #discount-grid .admin-table,.admin-layout #coupon-grid .admin-table{min-width:920px}
+.admin-layout #discount-form .check,.admin-layout #coupon-form .check{display:flex;align-items:center;gap:8px;min-height:42px}
+.admin-layout #reviews-admin-root{min-width:0}
+.admin-layout .reviews-manager{min-width:0}
+.admin-layout .reviews-toolbar{display:grid;grid-template-columns:minmax(220px,1fr) minmax(170px,220px) auto;gap:10px;align-items:end}
+.admin-layout .review-search{min-width:0}
+.admin-layout #reviews-grid{width:100%;overflow-x:auto;max-width:100%;overscroll-behavior-inline:contain}
+.admin-layout #reviews-table{min-width:980px}
+.admin-layout .review-body{max-width:420px;overflow-wrap:anywhere;line-height:1.8}
+.admin-layout .review-actions{display:flex;gap:7px;flex-wrap:wrap}
+.admin-layout .review-stars{white-space:nowrap;letter-spacing:.04em}
+.admin-layout .invoice-settings,.admin-layout #sms-settings,.admin-layout #payment-settings{min-width:0}
+.admin-layout #invoice-settings-form,.admin-layout #sms-settings form,.admin-layout #payment-settings form{min-width:0}
+.admin-layout #invoice-settings-form .form-grid,.admin-layout #sms-settings .form-grid,.admin-layout #payment-settings .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.admin-layout #invoice-settings-form textarea,.admin-layout #sms-settings textarea,.admin-layout #payment-settings textarea{min-height:110px;resize:vertical}
+.admin-layout .cms-editor{min-width:0}
+.admin-layout .cms-editor .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.admin-layout .cms-editor textarea{min-height:220px;resize:vertical;line-height:1.9}
+.admin-layout .cms-editor .toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.admin-layout .cms-editor .toolbar>*{min-width:0}
+.admin-layout .cms-editor .table-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.admin-layout .cms-editor .checkline{display:flex;align-items:center;gap:8px;min-height:42px;flex-wrap:wrap}
+.admin-layout #cms-grid{width:100%;overflow-x:auto;max-width:100%;overscroll-behavior-inline:contain}
+.admin-layout #cms-grid .admin-table{min-width:920px}
+.admin-layout .cms-grid-address{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.admin-layout .cms-contact-grid-wrap{width:100%;overflow-x:auto;max-width:100%;overscroll-behavior-inline:contain}
+.admin-layout .cms-contact-grid{min-width:980px}
+.admin-layout .cms-feedback-modal,.admin-layout .faq-manager-modal{width:min(96vw,900px);max-height:92vh;overflow:auto}
+.admin-layout .cms-feedback-modal .toolbar,.admin-layout .faq-manager-modal .admin-modal-head{position:sticky;top:0;z-index:3;background:var(--admin-surface)}
+.admin-layout .ticket-thread{min-width:0;max-height:min(62vh,720px);overflow:auto;overscroll-behavior:contain}
+.admin-layout .ticket-message{min-width:0;overflow-wrap:anywhere}
+.admin-layout .message-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.admin-layout .admin-ticket-reply-form .form-grid{grid-template-columns:1fr}
+.admin-layout .ticket-sms-toggle{display:flex;align-items:center;gap:8px;min-height:42px;flex-wrap:wrap}
+.admin-layout #support-tickets-grid{width:100%;overflow-x:auto;max-width:100%;overscroll-behavior-inline:contain}
+.admin-layout #support-tickets-grid .admin-table{min-width:920px}
+.admin-layout .support-admin-detail{min-width:0}
+.admin-layout .support-admin-detail .sectionhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.admin-layout .faq-manager-body{min-width:0;overflow:auto}
+.admin-layout .faq-manager-list{display:grid;gap:10px;min-width:0}
+.admin-layout .faq-manager-item{min-width:0}
+.admin-layout .faq-manager-item-head,.admin-layout .faq-manager-item-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.admin-layout .faq-manager-form{min-width:0}
+.admin-layout .faq-form-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:1100px){
+ .admin-layout .reviews-toolbar{grid-template-columns:minmax(0,1fr) minmax(160px,220px)}
+ .admin-layout .reviews-toolbar>*:last-child{grid-column:1/-1;justify-self:start}
+ .admin-layout #cat-form .form-grid,.admin-layout #discount-form .form-grid,.admin-layout #coupon-form .form-grid,.admin-layout #invoice-settings-form .form-grid,.admin-layout #sms-settings .form-grid,.admin-layout #payment-settings .form-grid,.admin-layout .cms-editor .form-grid{grid-template-columns:1fr}
+ .admin-layout .cms-grid-address{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+ .admin-layout #cat-grid .admin-table,.admin-layout #customers-grid .admin-table,.admin-layout #inventory-grid .admin-table,.admin-layout #payments-grid .admin-table,.admin-layout #rewards-admin-grid .admin-table,.admin-layout #notifications-admin-grid .admin-table,.admin-layout #roles-grid .admin-table,.admin-layout #audit-grid .admin-table{min-width:680px}
+ .admin-layout #discount-grid .admin-table,.admin-layout #coupon-grid .admin-table,.admin-layout #cms-grid .admin-table,.admin-layout #support-tickets-grid .admin-table{min-width:760px}
+ .admin-layout #reviews-table,.admin-layout .cms-contact-grid{min-width:760px}
+ .admin-layout .reviews-toolbar{grid-template-columns:1fr}
+ .admin-layout .reviews-toolbar>*:last-child{grid-column:auto;justify-self:stretch}
+ .admin-layout .reviews-toolbar .btn{width:100%}
+ .admin-layout .review-body{max-width:300px}
+ .admin-layout .cms-editor textarea{min-height:180px}
+ .admin-layout .cms-feedback-modal,.admin-layout .faq-manager-modal{width:100%;max-height:96vh;border-radius:14px}
+ .admin-layout .ticket-thread{max-height:55vh}
+ .admin-layout .faq-manager-item-head,.admin-layout .faq-manager-item-actions{align-items:stretch}
+ .admin-layout .faq-manager-item-actions .btn{flex:1 1 auto}
+}
+@media(max-width:520px){
+ .admin-layout #cat-form .form-grid,.admin-layout #discount-form .form-grid,.admin-layout #coupon-form .form-grid{gap:10px}
+ .admin-layout #inventory-grid .stock-input{width:100%}
+ .admin-layout .review-actions,.admin-layout .cms-editor .table-actions,.admin-layout .faq-form-actions{display:grid;grid-template-columns:1fr}
+ .admin-layout .review-actions .btn,.admin-layout .cms-editor .table-actions .btn,.admin-layout .faq-form-actions .btn{width:100%}
+ .admin-layout .cms-editor .toolbar{align-items:stretch}
+ .admin-layout .cms-editor .toolbar>*{width:100%}
+ .admin-layout .message-meta{align-items:flex-start;flex-direction:column}
+ .admin-layout .ticket-sms-toggle{align-items:flex-start}
+}
