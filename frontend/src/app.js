@@ -123,6 +123,11 @@ function mountLanguageSwitcher(){
  document.addEventListener('click',e=>{if(!wrap.contains(e.target)){wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false')}});
 }
 let routeInFlightTarget='';
+let routeAbortController=null;
+function showRouteSkeleton(){
+ const main=document.querySelector('#main-content');
+ if(main)main.innerHTML='<section class="wrap page route-skeleton" aria-busy="true"><div class="skeleton-block skeleton-title"></div><div class="skeleton-block skeleton-line"></div><div class="skeleton-grid"><span></span><span></span><span></span><span></span></div></section>';
+}
 const icon=n=>({cart:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 1.9-1.4L21 7H7"/><circle cx="10" cy="20" r="1.2"/><circle cx="18" cy="20" r="1.2"/> </svg>',user:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>',search:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>',send:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 4 18 8-18 8 3-8-3-8Z"/><path d="M6 12h9"/></svg>',check:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>',support:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-5.5 5V15A2.5 2.5 0 0 1 3 12.5v-7Z"/><path d="M7 8h10M7 11h6"/></svg>',plus:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',close:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>',clock:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>',copy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M5 16H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"/></svg>'}[n]||'');
 const fa=n=>new Intl.NumberFormat(currentLocale==='fa'?'fa-IR':currentLocale==='ar'?'ar':'tr-TR').format(Number(n||0));const normalizeIranMobile=value=>{let m=String(value||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'');if(m.startsWith('0098'))m='0'+m.slice(4);else if(m.startsWith('98')&&m.length===12)m='0'+m.slice(2);else if(m.startsWith('9')&&m.length===10)m='0'+m;return m};
 const escapeHtml=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));
@@ -171,27 +176,37 @@ registerGilasArtServiceWorker();
 setTimeout(()=>window.GilasArtMobile?.checkRelease(),1800);
 setInterval(()=>{if(navigator.onLine)window.GilasArtMobile?.checkRelease()},15*60*1000);
 
-let storefrontSnapshotPromise=null;
-const storefrontSnapshotUrl=()=>((location.pathname.includes('/glsArt')?'/glsArt':'')+'/data/storefront-manifest.json');
-
-async function loadStorefrontSnapshot(){
- if(storefrontSnapshotPromise)return storefrontSnapshotPromise;
- storefrontSnapshotPromise=(async()=>{
+let storefrontIndexPromise=null;
+let storefrontManifestPromise=null;
+const dataRoot=()=>((location.pathname.includes('/glsArt')?'/glsArt':'')+'/data/');
+async function loadStorefrontManifest(){
+ if(storefrontManifestPromise)return storefrontManifestPromise;
+ storefrontManifestPromise=(async()=>{
   try{
-   const mr=await fetch(storefrontSnapshotUrl(),{cache:'no-store',credentials:'same-origin'});
-   if(!mr.ok)return null;
-   const manifest=await mr.json();
-   if(Number(manifest?.schemaVersion)!==1||!manifest?.generatedAt)return null;
-   const base=(location.pathname.includes('/glsArt')?'/glsArt':'')+'/data/storefront.json';
-   const sr=await fetch(base+'?v='+encodeURIComponent(manifest.generatedAt),{cache:'no-store',credentials:'same-origin'});
-   if(!sr.ok)return null;
-   const d=await sr.json();
-   if(Number(d?.meta?.schemaVersion)!==1||!Array.isArray(d.products)||!Array.isArray(d.categories)||!d.settings)return null;
+   const r=await fetch(dataRoot()+'storefront-manifest.json',{cache:'default',credentials:'same-origin'});
+   if(!r.ok)return null;
+   const d=await r.json();
+   return Number(d?.schemaVersion)===2&&d?.generatedAt?d:null;
+  }catch{return null}
+ })();
+ return storefrontManifestPromise;
+}
+async function loadStorefrontIndex(){
+ if(storefrontIndexPromise)return storefrontIndexPromise;
+ storefrontIndexPromise=(async()=>{
+  try{
+   const manifest=await loadStorefrontManifest();
+   if(!manifest)return null;
+   const version=encodeURIComponent(manifest.version||manifest.generatedAt);
+   const r=await fetch(dataRoot()+'storefront-index.json?v='+version,{cache:'default',credentials:'same-origin'});
+   if(!r.ok)return null;
+   const d=await r.json();
+   if(Number(d?.schemaVersion)!==2||!Array.isArray(d.products)||!Array.isArray(d.categories))return null;
    return d;
   }catch{return null}
  })();
- const d=await storefrontSnapshotPromise;
- if(!d)storefrontSnapshotPromise=null;
+ const d=await storefrontIndexPromise;
+ if(!d)storefrontIndexPromise=null;
  return d;
 }
 function snapshotCore(p){
@@ -237,7 +252,7 @@ async function loadHomeSnapshot(){
 }
 async function snapshotApi(path){
  if(!/^\/api\/(home|products|categories|flash-sales|site-rules)(?:[/?]|$)/.test(path))return null;
- const d=await loadStorefrontSnapshot();if(!d)return null;
+ const d=await loadStorefrontIndex();if(!d)return null;
  const u=new URL(path,'https://snapshot.local');
  if(u.pathname==='/api/home'){
   const items=snapshotSort(d.products,'newest').slice(0,8).map(snapshotCore);
@@ -291,7 +306,10 @@ async function api(path,opt={}){
    const local=await snapshotApi(localizedPath);
    if(local)return local;
   }
-  const r=await fetch(API+localizedPath,{credentials:'include',cache:'no-store',headers,...opt});
+  const requestHeaders={...headers};
+  const fetchOptions={credentials:'include',cache:'no-store',headers:requestHeaders,...opt};
+  if((opt.method||'GET').toUpperCase()==='GET'&&routeAbortController?.signal&&!opt.signal)fetchOptions.signal=routeAbortController.signal;
+  const r=await fetch(API+localizedPath,fetchOptions);
   const raw=await r.text();
   let d={};try{d=raw?JSON.parse(raw):{}}catch{}
   if(!r.ok){if(r.status===401||r.status===403)clearAuthState();const e=new Error(d.error||d.message||(r.status===404?t('error.notFound'):t('error.service')));e.status=r.status;throw e}
@@ -419,6 +437,12 @@ function renderFooter(){
 function updateCartBadge(count){const n=Math.max(0,Number(count)||0);state.cartCount=n;document.querySelectorAll('.cart-count-badge').forEach(el=>{el.textContent=n>99?'۹۹+':fa(n);el.hidden=n<=0;el.setAttribute('aria-label',t('cart.count',{count:fa(n)}))})}
 async function syncCartBadge(){if(!state.user){updateCartBadge(0);return}try{const d=await api('/api/cart');state.cart=d;const count=(d.items||[]).reduce((sum,x)=>sum+Math.max(0,Number(x.quantity)||0),0);updateCartBadge(count)}catch{updateCartBadge(0)}}
 function layout(content){
+ const existingMain=document.querySelector('#main-content'),existingHeader=document.querySelector('.top'),existingFooter=document.querySelector('.footer');
+ if(existingMain&&existingHeader&&existingFooter){
+  existingMain.innerHTML=content;
+  translateRenderedContent(existingMain);
+  return;
+ }
  const adminLink=isAdminUser()?'<a class="admin-link" href="'+routeUrl('/admin')+'">'+t('nav.admin')+'</a>':'';
  const userPoints=state.user?'<a class="points-badge" href="'+routeUrl('/rewards')+'" title="'+t('header.pointsTitle')+'">★ '+fa(state.points)+' '+t('header.pointsSuffix')+'</a>':'';
  app.innerHTML='<header class="top"><div class="wrap nav"><a class="brand" href="'+routeUrl('/')+'" aria-label="'+t('header.logoAria')+'">'+t('app.name')+'<small>GILAS ART</small></a><nav class="links" id="main-menu" aria-label="'+t('header.menu')+'"><a href="'+routeUrl('/shop')+'">'+t('nav.shop')+'</a><a href="'+routeUrl('/about')+'">'+t('nav.about')+'</a><a href="'+routeUrl('/contact')+'">'+t('nav.contact')+'</a><a href="'+routeUrl('/news')+'">'+t('nav.news')+'</a><a href="'+routeUrl('/articles')+'">'+t('nav.articles')+'</a><a href="'+routeUrl('/rewards')+'" class="rewards-nav-link">'+t('nav.rewards')+'</a>'+adminLink+'</nav><div class="spacer"></div><div class="header-actions"><button class="theme-toggle" type="button" aria-label="'+t('header.theme')+'" title="'+t('header.themeTitle')+'" onclick="window.GilasArtTheme&&window.GilasArtTheme.toggle()">◐ <span>'+t('nav.dayNight')+'</span></button><a class="iconbtn cart-link" href="'+routeUrl('/cart')+'" aria-label="'+t('header.cartAria')+'"><div class="cart-icon-wrap">'+icon('cart')+'<b class="cart-count-badge" aria-label="'+t('header.cartCount',{count:fa(state.cartCount)})+'"'+(state.cartCount>0?'':' hidden')+'>'+ (state.cartCount>99?'۹۹+':fa(state.cartCount))+'</b></div><span>'+t('nav.cart')+'</span></a>'+userPoints+accountLink()+'</div><button class="mobile-menu-toggle" type="button" aria-label="'+t('header.openMenu')+'" aria-expanded="false" aria-controls="main-menu" onclick="window.GilasArtMobileMenu&&window.GilasArtMobileMenu.toggle(this)"><span></span><span></span><span></span></button></div></header><div class="rewards-promo"><div class="wrap rewards-promo-inner">'+(state.user?'<span>'+t('promo.points')+' <b>'+fa(state.points)+'</b></span><span>'+t('promo.coupon')+'</span><a href="'+routeUrl('/rewards')+'">'+t('promo.convert')+'</a>':'<span>'+t('promo.join')+'</span><a href="'+routeUrl('/account')+'">'+t('promo.joinAction')+'</a>')+'</div></div><main id="main-content" tabindex="-1">'+content+'</main>'+renderFooter();
@@ -428,7 +452,14 @@ function layout(content){
 function routeBase(){return location.pathname.startsWith('/glsArt/')||location.pathname==='/glsArt'?'/glsArt':''}
 function routeUrl(path){return localePath(path)}
 function scrollRouteTop(){try{window.scrollTo({top:0,left:0,behavior:'auto'});document.documentElement.scrollTop=0;document.body.scrollTop=0}catch{try{window.scrollTo(0,0)}catch{}}}
-function navigate(path,{replace=false}={}){const raw=String(path||'/');const target=raw.startsWith('#/')?raw.slice(1):raw;const url=routeUrl(target||'/');if(url===location.pathname+location.search&&!routeInFlight)return;if(replace)history.replaceState({},'',url);else history.pushState({},'',url);scrollRouteTop();if(routeInFlight&&routeInFlightTarget===url)return;routeInFlightTarget=url;routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget='';scrollRouteTop()});}
+function navigate(path,{replace=false}={}){
+ const raw=String(path||'/'),target=raw.startsWith('#/')?raw.slice(1):raw,url=routeUrl(target||'/');
+ if(url===location.pathname+location.search&&!routeInFlight)return;
+ if(replace)history.replaceState({},'',url);else history.pushState({},'',url);
+ scrollRouteTop();showRouteSkeleton();
+ if(routeInFlight&&routeInFlightTarget===url)return;
+ routeInFlightTarget=url;routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget='';scrollRouteTop()});
+}
 window.GilasArtRouter={navigate};
 function productUrl(slug){const s=String(slug||'').trim();if(!s)return routeUrl('/shop');return routeUrl('/'+encodeURIComponent(s))}
 function productCard(p){
@@ -1187,9 +1218,11 @@ async function checkout(){navigate('/cart')}
 
 async function router(){
  scrollRouteTop();
+ routeAbortController?.abort();
+ routeAbortController=new AbortController();
+ showRouteSkeleton();
  // Authentication is a global application concern, not an account-page concern.
- // Hydrate the server session before ANY page renders so the header, admin link,
- // roles and permissions are identical on home/shop/product/account/admin routes.
+ // Cache the session briefly so normal SPA navigation does not repeat /api/me.
  await loadMe();
  const base=routeBase();
  let cleanPath=location.pathname.startsWith(base)?location.pathname.slice(base.length):location.pathname;
