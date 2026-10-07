@@ -23,6 +23,8 @@ authSyncTimer=setInterval(()=>{if(document.visibilityState==='visible')loadMe({f
 // GilasArt storefront is intentionally Persian-only for the current production release.
 // No customer-facing language switch, locale detection, locale cookie, or locale-prefixed routing.
 const SUPPORTED_LOCALES=['fa'];
+let i18nData=null;
+let i18nLocaleLoaded='';
 let currentLocale='fa';
 const LOCALE_META={fa:{label:'فارسی',dir:'rtl'}};
 function loadLocale(){
