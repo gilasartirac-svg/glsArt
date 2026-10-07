@@ -94,6 +94,10 @@ jobs:
           const browser = await chromium.launch({headless:true});
           const context = await browser.newContext({viewport:{width:1440,height:1000},locale:'fa-IR',serviceWorkers:'block'});
           const page = await context.newPage();
+          await context.addInitScript(() => {
+            const originalFetch=window.fetch;
+            window.fetch=(...args)=>{try{console.log('FETCH_CALL='+String(args[0]))}catch{};return originalFetch(...args)};
+          });
           const errors=[];
           page.on('pageerror',e=>errors.push('pageerror: '+e.message));
           page.on('console',m=>{if(m.type()==='error')errors.push('console: '+m.text())});
