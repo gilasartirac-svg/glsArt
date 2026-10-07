@@ -5165,6 +5165,30 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
   display:none!important;
   content:none!important;
 }
+.shop-page .shop-search-control>summary,
+.shop-page .shop-search-control>summary.shop-control-trigger{
+  background-image:none!important;
+}
 .shop-page .shop-search-control .shop-control-trigger-main{
   gap:0;
+  background-image:none!important;
+}
+.shop-page .shop-search-control .shop-control-trigger-main *,
+.shop-page .shop-search-control .shop-control-trigger-main svg,
+.shop-page .shop-search-control .shop-control-trigger-main i,
+.shop-page .shop-search-control .shop-control-trigger-main .fa,
+.shop-page .shop-search-control .shop-control-trigger-main .fas,
+.shop-page .shop-search-control .shop-control-trigger-main .far{
+  background-image:none!important;
+}
+.shop-page .shop-search-control .shop-control-trigger-main svg,
+.shop-page .shop-search-control .shop-control-trigger-main i,
+.shop-page .shop-search-control .shop-control-trigger-main .fa,
+.shop-page .shop-search-control .shop-control-trigger-main .fas,
+.shop-page .shop-search-control .shop-control-trigger-main .far{
+  display:none!important;
+  width:0!important;
+  height:0!important;
+  margin:0!important;
+  padding:0!important;
 }
