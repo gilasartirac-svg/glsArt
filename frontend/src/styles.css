@@ -5313,3 +5313,224 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
     font-size:17px;
   }
 }
+
+
+/* =========================================================
+   Product cards — final readability standard
+   Applies to Shop and shared product-card/product-showcase
+   components used on the home page and storefront.
+   No customer-facing card text below 11px.
+   ========================================================= */
+.product-card,
+.product-showcase{
+  min-width:0;
+}
+
+.product-card .product-card-media,
+.product-showcase .product-card-media{
+  width:100%;
+  aspect-ratio:1/1;
+  padding:8px;
+}
+
+.product-card .product-art-frame,
+.product-showcase .product-art-frame{
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+}
+
+.product-card .product-art-frame img,
+.product-showcase .product-art-frame img{
+  width:100%;
+  height:100%;
+  object-fit:contain!important;
+  padding:8px;
+}
+
+.product-card .product-card-body,
+.product-showcase .product-card-body{
+  padding:18px 18px 20px;
+}
+
+.product-card .product-title-wrap,
+.product-showcase .product-title-wrap{
+  min-width:0;
+  display:grid;
+  gap:4px;
+}
+
+.product-card .product-card-kicker,
+.product-showcase .product-card-kicker{
+  font-size:clamp(11px,0.9vw,12px);
+  line-height:1.35;
+  letter-spacing:.08em;
+}
+
+.product-card .product-card-heading h3,
+.product-showcase .product-card-heading h3{
+  min-width:0;
+  margin:0;
+  font-size:clamp(20px,1.55vw,22px)!important;
+  font-weight:700;
+  line-height:1.45;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.product-card .product-sku,
+.product-showcase .product-sku{
+  font-size:13px!important;
+  line-height:1.5;
+  max-width:42%;
+}
+
+.product-card .product-card-badge,
+.product-showcase .product-card-badge,
+.product-card .product-card-corner,
+.product-showcase .product-card-corner{
+  font-size:11px!important;
+  line-height:1.4;
+}
+
+.product-card .product-price-label,
+.product-showcase .product-price-label{
+  font-size:clamp(12px,0.95vw,13px)!important;
+  line-height:1.5;
+}
+
+.product-card .product-card-price,
+.product-showcase .product-card-price{
+  font-size:clamp(18px,1.45vw,20px)!important;
+  font-weight:700;
+  line-height:1.45;
+}
+
+.product-card .product-card-price small,
+.product-showcase .product-card-price small,
+.product-card .product-price-unit,
+.product-showcase .product-price-unit{
+  font-size:12px!important;
+  font-weight:500;
+  line-height:1.5;
+}
+
+.product-card .product-social-proof,
+.product-showcase .product-social-proof{
+  font-size:11px!important;
+  line-height:1.6;
+}
+
+.product-card .product-card-timer,
+.product-showcase .product-card-timer{
+  font-size:11px!important;
+  line-height:1.5;
+}
+
+.product-card .product-showcase-hover,
+.product-showcase .product-showcase-hover,
+.product-card .product-card-hover,
+.product-showcase .product-card-hover{
+  font-size:13px!important;
+}
+
+.product-card .product-card-footer,
+.product-showcase .product-card-footer{
+  margin-top:15px;
+  padding-top:13px;
+  gap:12px;
+}
+
+.product-card .product-card-footer .btn,
+.product-showcase .product-card-footer .btn,
+.product-card .product-card-arrow,
+.product-showcase .product-card-arrow{
+  min-height:44px;
+  font-size:13px!important;
+}
+
+/* Responsive gallery standard: 1 / 2 / 3 columns, never cramped. */
+.product-stream{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(280px,1fr));
+  gap:clamp(20px,2vw,28px);
+  align-items:start;
+}
+
+@media (min-width:1101px){
+  .product-stream{
+    grid-template-columns:repeat(3,minmax(300px,1fr));
+  }
+  .product-card .product-card-media,
+  .product-showcase .product-card-media{
+    min-height:320px;
+  }
+}
+
+@media (min-width:681px) and (max-width:1100px){
+  .product-stream{
+    grid-template-columns:repeat(2,minmax(280px,1fr));
+    gap:22px;
+  }
+  .product-card .product-card-body,
+  .product-showcase .product-card-body{
+    padding:17px 17px 19px;
+  }
+  .product-card .product-card-heading h3,
+  .product-showcase .product-card-heading h3{
+    font-size:20px!important;
+  }
+}
+
+@media (max-width:680px){
+  .product-stream{
+    grid-template-columns:1fr;
+    gap:20px;
+  }
+  .product-card .product-card-media,
+  .product-showcase .product-card-media{
+    aspect-ratio:1/1;
+    min-height:0;
+    padding:6px;
+  }
+  .product-card .product-art-frame img,
+  .product-showcase .product-art-frame img{
+    padding:7px;
+  }
+  .product-card .product-card-body,
+  .product-showcase .product-card-body{
+    padding:16px 16px 18px;
+  }
+  .product-card .product-card-heading h3,
+  .product-showcase .product-card-heading h3{
+    font-size:20px!important;
+  }
+  .product-card .product-sku,
+  .product-showcase .product-sku{
+    font-size:13px!important;
+  }
+}
+
+@media (max-width:380px){
+  .product-card .product-card-media,
+  .product-showcase .product-card-media{
+    padding:5px;
+  }
+  .product-card .product-card-body,
+  .product-showcase .product-card-body{
+    padding:15px 15px 17px;
+  }
+  .product-card .product-card-heading h3,
+  .product-showcase .product-card-heading h3{
+    font-size:20px!important;
+  }
+}
+
+@media (min-width:1200px){
+  .product-stream{
+    gap:24px;
+  }
+}
