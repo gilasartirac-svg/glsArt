@@ -3140,6 +3140,19 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
   min-height:46px;
   border:0;
   outline:0;
+}
+.shop-page .shop-search-input-wrap input[type="search"]::-webkit-search-decoration,
+.shop-page .shop-search-input-wrap input[type="search"]::-webkit-search-cancel-button,
+.shop-page .shop-search-input-wrap input[type="search"]::-webkit-search-results-button,
+.shop-page .shop-search-input-wrap input[type="search"]::-webkit-search-results-decoration{
+  -webkit-appearance:none;
+  appearance:none;
+  display:none;
+}
+.shop-page .shop-search-input-wrap input[type="search"]{
+  appearance:none;
+  -webkit-appearance:none;
+}
   background:transparent;
   color:var(--ui-text);
   font:inherit;
