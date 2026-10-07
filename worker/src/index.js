@@ -643,7 +643,7 @@ async function route(req,env){const u=new URL(req.url); if(u.pathname==='/api/lo
 }
 
 if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
-  const parts=u.pathname.split('/').filter(Boolean);const section=String(parts[2]||'').toLowerCase(),slug=decodeURIComponent(parts.slice(3).join('/'));if(!['news','articles'].includes(section)||!slug)return json({error:'invalid_content'},400);const x=await env.DB.prepare('SELECT id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE section=? AND slug=? AND active=1').bind(section,slug).first();if(!x)return json({error:'not_found'},404);return json({item:x});
+  const parts=u.pathname.split('/').filter(Boolean);const section=String(parts[2]||'').toLowerCase();let slug=parts.slice(3).join('/');for(let i=0;i<2;i++){try{const next=decodeURIComponent(slug);if(next===slug)break;slug=next}catch{break}}slug=String(slug||'').normalize('NFC');if(!['news','articles'].includes(section)||!slug)return json({error:'invalid_content'},400);const x=await env.DB.prepare('SELECT id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE section=? AND active=1 AND (slug=? OR slug=? ) LIMIT 1').bind(section,slug,String(slug).normalize('NFD')).first();if(!x)return json({error:'not_found'},404);return json({item:x},200,{'cache-control':'no-store, max-age=0'});
  }
  if(u.pathname.startsWith('/api/content')&&req.method==='GET'){
   const section=String(u.searchParams.get('section')||'').trim().toLowerCase();
