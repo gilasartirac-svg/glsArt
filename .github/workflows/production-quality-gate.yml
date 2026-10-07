@@ -43,7 +43,7 @@ jobs:
           const ranges=[
             ['layout','function layout(content){','function routeBase()'],
             ['footer','function renderFooter(){','function updateCartBadge'],
-            ['language switcher','function mountLanguageSwitcher(){','let routeInFlight=']
+            ['language switcher','function mountLanguageSwitcher(){','let routeInFlightTarget=']
           ];
           for(const [name,a,b] of ranges){
             const i=c.indexOf(a),j=c.indexOf(b,i+1);
