@@ -69,7 +69,7 @@ export default function Settings(){
     <div class="enamad-code-label">لینک رسمی اینماد</div>
     <a class="btn secondary" href="https://trustseal.enamad.ir/?id=22286&amp;Code=u04bawyWrXOcWNwCSK6B" target="_blank" rel="noopener noreferrer" referrerpolicy="origin">مشاهده صفحه رسمی استعلام اینماد</a>
     <div class="enamad-code-label">کد کامل نشان</div>
-    <textarea dir="ltr" readonly rows="4" aria-label="کد کامل نشان اینماد">&lt;a referrerpolicy='origin' target='_blank' href='https://trustseal.enamad.ir/?id=22286&amp;Code=u04bawyWrXOcWNwCSK6B'&gt;&lt;img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=22286&amp;Code=u04bawyWrXOcWNwCSK6B' alt='' style='cursor:pointer' code='u04bawyWrXOcWNwCSK6B'&gt;&lt;/a&gt;</textarea>
+    <textarea dir="ltr" readonly rows="6" aria-label="کد کامل نشان اینماد"><a referrerpolicy='origin' target='_blank' href='https://trustseal.enamad.ir/?id=22286&Code=u04bawyWrXOcWNwCSK6B'><img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=22286&Code=u04bawyWrXOcWNwCSK6B' alt='' style='cursor:pointer' code='u04bawyWrXOcWNwCSK6B'></a></textarea>
    </div>
   </div>
 
