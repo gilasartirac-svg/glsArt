@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "web": {
-    "version": "2026.10.07.1",
+    "version": "2026.10.07.2",
     "minimumVersion": "2026.10.07.1"
   },
   "android": {
