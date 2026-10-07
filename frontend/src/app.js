@@ -21,18 +21,18 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('focus',()=>loadMe().catch(()=>{}));
 authSyncTimer=setInterval(()=>{if(document.visibilityState==='visible')loadMe({force:true}).catch(()=>{})},60000);
 const SUPPORTED_LOCALES=['fa','en','tr','ar'];
-let i18nData=null,i18nLocaleLoaded='',i18nReverse=null,i18nCatalogs=new Map();
+let i18nData=null,i18nLocaleLoaded='',i18nReverse=null,i18nCatalogs=new Map(),i18nReverseCatalogs=new Map();
 const I18N_VERSION=1;
 function i18nRoot(){return location.pathname.startsWith('/glsArt')?'/glsArt/i18n/':'/i18n/'}
 async function loadLocale(locale){
  const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';
  if(i18nData&&i18nLocaleLoaded===l)return i18nData;
- try{const r=await fetch(i18nRoot()+encodeURIComponent(l)+'.json?v='+I18N_VERSION,{cache:'no-store',credentials:'same-origin'});if(!r.ok)throw new Error('i18n_http_'+r.status);const d=await r.json();if(Number(d?.version)!==I18N_VERSION||d?.locale!==l||!d?.strings||typeof d.strings!=='object')throw new Error('i18n_invalid');i18nData=d;i18nLocaleLoaded=l;i18nCatalogs.set(l,d);i18nReverse=new Map(Object.entries(d.strings).map(([k,v])=>[String(v),k]));return d}catch(e){if(l!=='fa')return loadLocale('fa');console.warn('i18n_load_failed',e);i18nData={version:1,locale:'fa',direction:'rtl',defaultLocale:'fa',strings:{}};i18nLocaleLoaded='fa';i18nReverse=new Map();return i18nData}
+ try{const r=await fetch(i18nRoot()+encodeURIComponent(l)+'.json?v='+I18N_VERSION,{cache:'no-store',credentials:'same-origin'});if(!r.ok)throw new Error('i18n_http_'+r.status);const d=await r.json();if(Number(d?.version)!==I18N_VERSION||d?.locale!==l||!d?.strings||typeof d.strings!=='object')throw new Error('i18n_invalid');i18nData=d;i18nLocaleLoaded=l;i18nCatalogs.set(l,d);i18nReverse=new Map(Object.entries(d.strings).map(([k,v])=>[String(v),k]));i18nReverseCatalogs.set(l,i18nReverse);return d}catch(e){if(l!=='fa')return loadLocale('fa');console.warn('i18n_load_failed',e);i18nData={version:1,locale:'fa',direction:'rtl',defaultLocale:'fa',strings:{}};i18nLocaleLoaded='fa';i18nReverse=new Map();return i18nData}
 }
 function t(key,vars={}){const value=i18nData?.strings?.[key]??key;return String(value).replace(/\{\{(\w+)\}\}/g,(_,name)=>String(vars?.[name]??''))}
 function translateRenderedContent(root=document){
  if(!i18nCatalogs.size)return;
- const trv=v=>{const raw=String(v??''),trim=raw.trim();let key='';for(const d of i18nCatalogs.values()){const found=Object.entries(d?.strings||{}).find(([,value])=>String(value).trim()===trim);if(found){key=found[0];break}}return key?t(key):raw};
+ const trv=v=>{const raw=String(v??''),trim=raw.trim();let key='';for(const reverse of i18nReverseCatalogs.values()){const found=reverse.get(trim);if(found){key=found;break}}return key?t(key):raw};
  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];let n;while((n=w.nextNode()))nodes.push(n);
  for(const node of nodes){if(!node.parentElement||/^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA)$/i.test(node.parentElement.tagName))continue;const raw=node.nodeValue||'',trim=raw.trim();if(!trim)continue;const v=trv(trim);if(v!==trim)node.nodeValue=raw.replace(trim,v)}
  root.querySelectorAll?.('*').forEach(el=>['aria-label','title','placeholder','alt'].forEach(a=>{if(!el.hasAttribute(a))return;const raw=el.getAttribute(a)||'',v=trv(raw);if(v!==raw)el.setAttribute(a,v)}));
