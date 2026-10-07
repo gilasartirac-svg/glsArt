@@ -5559,3 +5559,9 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
 @keyframes gilasartSkeleton{to{background-position:-200% 0}}
 @media(max-width:900px){.skeleton-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.skeleton-grid span{height:190px}}
 @media(max-width:560px){.skeleton-grid{grid-template-columns:1fr}.skeleton-grid span{height:150px}}
+
+
+/* Production-wide font contract — Vazirmatn is the single site UI font. */
+html,body,#app,.admin-layout,.admin-layout *,button,input,select,textarea{font-family:"Vazirmatn"!important}
+html{font-family:"Vazirmatn"!important}
+body{font-family:"Vazirmatn"!important}
