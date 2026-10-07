@@ -1,6 +1,6 @@
 const VERSION='gilasart-shell-__GILASART_VERSION__';
 const CACHE=VERSION;
-const STATIC=['./','./index.html','./styles.css','./app.js','./site.webmanifest','./mobile-release.json','./i18n/fa.json','./i18n/en.json','./i18n/ar.json','./i18n/tr.json','./data/storefront-manifest.json','./data/home.json','./fa/','./fa/index.html','./en/','./en/index.html','./tr/','./tr/index.html','./ar/','./ar/index.html'];
+const STATIC=['./','./index.html','./styles.css','./app.js','./site.webmanifest','./mobile-release.json','./i18n/fa.json','./i18n/en.json','./i18n/ar.json','./i18n/tr.json','./data/storefront-manifest.json','./data/storefront.json','./data/home.json','./fa/','./fa/index.html','./en/','./en/index.html','./tr/','./tr/index.html','./ar/','./ar/index.html'];
 const NETWORK_FIRST=new Set(['json']);
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(STATIC).catch(()=>{})).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('gilasart-shell-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
