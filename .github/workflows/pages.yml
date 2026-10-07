@@ -113,6 +113,7 @@ jobs:
           await page.waitForTimeout(5000);
           const runtime=await page.evaluate(async()=>{const t=await fetch('/app.js?runtime_probe='+Date.now(),{cache:'no-store'}).then(r=>r.text());return {url:location.href,app:document.querySelector('#app')?.innerHTML||'',hasPublicAuthFix:t.includes('else loadMe().catch(()=>{})'),hasOldAwait:t.includes('// Cache the session briefly so normal SPA navigation does not repeat /api/me.\\n await loadMe();'),router:typeof window.GilasArtRouter}});
           console.log('RUNTIME_PROBE='+JSON.stringify(runtime));
+          console.log('BROWSER_ERRORS='+JSON.stringify(errors));
           await page.locator('#results .product-card').first().waitFor({state:'visible',timeout:10000});
           const cards=await page.locator('#results .product-card').count();
           if(cards<1)fail('Shop runtime rendered zero product cards');
