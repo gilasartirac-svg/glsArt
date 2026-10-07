@@ -98,7 +98,7 @@ jobs:
           page.on('pageerror',e=>errors.push('pageerror: '+e.message));
           page.on('console',m=>{if(m.type()==='error')errors.push('console: '+m.text())});
           page.on('requestfailed',r=>errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||'')));
-          page.on('response',r=>{if(/\\/(?:app|config)\\.js/.test(new URL(r.url()).pathname))console.log('ASSET_RESPONSE='+r.status()+' '+r.url())});
+          page.on('response',r=>{const p=new URL(r.url()).pathname;if(p.endsWith('/app.js')||p.endsWith('/config.js'))console.log('ASSET_RESPONSE='+r.status()+' '+r.url())});
           const fail=(m)=>{throw new Error(m)};
           await page.goto('https://gilasart.ir/shop?runtime_verify='+Date.now(),{waitUntil:'networkidle',timeout:60000});
           await page.waitForTimeout(5000);
