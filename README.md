@@ -1453,50 +1453,16 @@ Worker source و Tests مرجع نهایی Contract دقیق هر endpoint هس�
 
 **هدف این فایل این است که مهندس بعدی بتواند بدون حدس زدن بفهمد GilasArt امروز دقیقاً چه معماری و چه امکاناتی دارد.**
 
-## 49. Production Internationalization (i18n) — Four Locale Architecture
+## 49. Production Language Policy — Persian Storefront
 
-The public GilasArt storefront uses four explicit locale prefixes. **Persian is the default locale** and browser-language detection must not silently replace it.
+The current public GilasArt storefront is **Persian-only**.
 
-| Language | Direction | Production path |
-|---|---|---|
-| فارسی | RTL | `https://gilasart.ir/fa/` |
-| العربية | RTL | `https://gilasart.ir/ar/` |
-| English | LTR | `https://gilasart.ir/en/` |
-| Türkçe | LTR | `https://gilasart.ir/tr/` |
+- Public customer routes use the canonical routes documented in section 4, without locale prefixes.
+- The public header must not display a language selector or language flags.
+- The public storefront must remain RTL and Persian.
+- Browser language detection must not redirect customers to another language.
+- Legacy locale-prefixed public URLs such as `/fa/*`, `/en/*`, `/tr/*`, and `/ar/*` are normalized back to the canonical Persian route.
+- Internal translation compatibility code may remain where required by the existing application, but it must not expose or activate a customer-facing multilingual storefront.
 
-### Locale source files
-
-Translation data is stored in GitHub as four JSON dictionaries under:
-
-- `frontend/public/i18n/fa.json`
-- `frontend/public/i18n/ar.json`
-- `frontend/public/i18n/en.json`
-- `frontend/public/i18n/tr.json`
-
-All four files must contain the **same variable/key set**. Only the values change by language. Each file also declares `locale`, `direction`, `defaultLocale: "fa"`, and `version`.
-
-### Runtime handling
-
-> **وضعیت تکمیل زیرپروژه:** Phase 12 audit تکمیل شده است: چهار dictionary هم‌کلید `fa/en/tr/ar` هستند، متن‌های User-facing عمومی و Admin تحت audit استاتیک قرار گرفته‌اند، زبان دستی مشتری با پرچم و انتخاب چهارگانه فعال شده، و Security Regression/Production Quality Gate/Deployهای Production باید قبل از اعلام Done موفق باشند.
-
-The public application loads the dictionary for the locale in the URL, sets `document.documentElement.lang` and `dir`, and applies the dictionary to rendered UI text/ARIA/placeholder/title/alt values. The locale path is authoritative:
-
-- `/fa/*` → Persian / RTL
-- `/ar/*` → Arabic / RTL
-- `/en/*` → English / LTR
-- `/tr/*` → Turkish / LTR
-
-A bare public route such as `/` is eligible for conservative automatic locale selection only when there is no saved language Cookie and the Worker has explicit non-Iran country + compatible non-Persian browser-language evidence; otherwise it resolves to Persian. An explicit locale path such as `/fa/`, `/ar/`, `/en/`, or `/tr/` is authoritative. Admin remains Persian-only unless explicitly internationalized later.
-
-### Translation contract
-
-The Production Quality Gate validates that all four JSON files are valid, version-compatible, use the correct direction, and have identical translation keys. Adding a new user-facing translatable string requires adding the same key to all four locale files.
-
-### SEO and routing
-
-The locale system keeps locale-aware canonical/hreflang routing in the frontend. Locale changes preserve the current public route while replacing only its locale prefix. Product slugs and existing application routing rules remain unchanged.
-
-### Service worker / cache
-
-The PWA service worker caches all four locale dictionaries and uses a new shell cache version whenever the frontend i18n bundle changes, preventing stale locale assets from masking a deployment.
+This is the current product requirement and overrides any older multilingual storefront experiment.
 
