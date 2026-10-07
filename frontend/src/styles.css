@@ -5534,3 +5534,15 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
     gap:24px;
   }
 }
+
+
+/* Fast SPA route feedback */
+.route-skeleton{min-height:42vh;padding:40px 0}
+.skeleton-block,.skeleton-grid span{display:block;background:linear-gradient(90deg,rgba(155,116,45,.08),rgba(155,116,45,.18),rgba(155,116,45,.08));background-size:200% 100%;animation:gilasartSkeleton 1.1s linear infinite;border-radius:14px}
+.skeleton-title{height:38px;width:min(420px,72%);margin-bottom:18px}
+.skeleton-line{height:18px;width:min(680px,92%);margin-bottom:30px}
+.skeleton-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.skeleton-grid span{height:240px}
+@keyframes gilasartSkeleton{to{background-position:-200% 0}}
+@media(max-width:900px){.skeleton-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.skeleton-grid span{height:190px}}
+@media(max-width:560px){.skeleton-grid{grid-template-columns:1fr}.skeleton-grid span{height:150px}}
