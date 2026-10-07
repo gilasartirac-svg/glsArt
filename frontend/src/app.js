@@ -231,28 +231,50 @@ async function api(path,opt={}){
    const local=await snapshotApi(path);
    if(local)return local;
   }
-  const requestHeaders={...headers};
-  const fetchOptions={credentials:'include',cache:'no-store',headers:requestHeaders,...opt};
-  if((opt.method||'GET').toUpperCase()==='GET'&&routeAbortController?.signal&&!opt.signal)fetchOptions.signal=routeAbortController.signal;
-  const r=await fetch(API+path,fetchOptions);
-  const raw=await r.text();
-  let d={};try{d=raw?JSON.parse(raw):{}}catch{}
-  if(!r.ok){if(r.status===401||r.status===403)clearAuthState();const code=String(d.error||d.message||'');const e=new Error(code==='d1_limit_exceeded'?'سرویس داده فروشگاه موقتاً به سقف روزانه رسیده است. لطفاً چند دقیقه بعد دوباره تلاش کنید.':(r.status===404?t('error.notFound'):r.status===401||r.status===403?t('error.unauthorized'):t('error.service')));e.status=r.status;e.code=code||('http_'+r.status);e.path=path;throw e}
-  const requiredShape=path=>{
-   if(path==='/api/health')return d&&d.ok===true&&d.db===true;
-   if(/^\/api\/products\?/.test(path)||path==='/api/products')return Array.isArray(d?.items);
-   if(path==='/api/categories'||path==='/api/flash-sales')return Array.isArray(d?.items);
-   if(path.startsWith('/api/products/')&&path.endsWith('/view'))return d?.ok===true;
-   if(path.startsWith('/api/products/')&&!path.includes('/reviews'))return d?.product&&Array.isArray(d.images)&&Array.isArray(d.attributes)&&Array.isArray(d.categories)&&Array.isArray(d.reviews);
-   if(path.startsWith('/api/content?'))return Array.isArray(d?.items);
-   if(path.startsWith('/api/content/'))return d?.item&&typeof d.item==='object';
-   if(path==='/api/settings')return d?.settings&&typeof d.settings==='object';
-   if(path==='/api/site-rules')return d?.item&&typeof d.item==='object';
-   if(path==='/api/notifications')return Array.isArray(d?.items);
-   return true;
-  };
-  if(!requiredShape(path))throw new Error(t('error.incomplete'));
-  return d;
+  const method=(opt.method||'GET').toUpperCase();
+  const endpoints=[API,'https://gilasartworker.gilasart-ir-ac.workers.dev'].filter((x,i,a)=>x&&a.indexOf(x)===i);
+  let lastError=null;
+  for(let i=0;i<endpoints.length;i++){
+   const endpoint=endpoints[i];
+   const requestHeaders={...headers};
+   const fetchOptions={credentials:'include',cache:'no-store',headers:requestHeaders,...opt};
+   if(method==='GET'&&routeAbortController?.signal&&!opt.signal)fetchOptions.signal=routeAbortController.signal;
+   try{
+    const r=await fetch(endpoint+path,fetchOptions);
+    const raw=await r.text();
+    let d={};try{d=raw?JSON.parse(raw):{}}catch{}
+    const retryable=(r.status===502||r.status===503||r.status===504);
+    if(!r.ok){
+     if(retryable&&i<endpoints.length-1){lastError=Object.assign(new Error('http_'+r.status),{status:r.status,code:String(d.error||d.message||'http_'+r.status),path});continue}
+     if(r.status===401||r.status===403)clearAuthState();
+     const code=String(d.error||d.message||'');
+     const e=new Error(code==='d1_limit_exceeded'?'سرویس داده فروشگاه موقتاً به سقف روزانه رسیده است. لطفاً چند دقیقه بعد دوباره تلاش کنید.':(r.status===404?t('error.notFound'):r.status===401||r.status===403?t('error.unauthorized'):t('error.service')));
+     e.status=r.status;e.code=code||('http_'+r.status);e.path=path;throw e;
+    }
+    const requiredShape=path=>{
+     if(path==='/api/health')return d&&d.ok===true&&d.db===true;
+     if(/^\/api\/products\?/.test(path)||path==='/api/products')return Array.isArray(d?.items);
+     if(path==='/api/categories'||path==='/api/flash-sales')return Array.isArray(d?.items);
+     if(path.startsWith('/api/products/')&&path.endsWith('/view'))return d?.ok===true;
+     if(path.startsWith('/api/products/')&&!path.includes('/reviews'))return d?.product&&Array.isArray(d.images)&&Array.isArray(d.attributes)&&Array.isArray(d.categories)&&Array.isArray(d.reviews);
+     if(path.startsWith('/api/content?'))return Array.isArray(d?.items);
+     if(path.startsWith('/api/content/'))return d?.item&&typeof d.item==='object';
+     if(path==='/api/settings')return d?.settings&&typeof d.settings==='object';
+     if(path==='/api/site-rules')return d?.item&&typeof d.item==='object';
+     if(path==='/api/notifications')return Array.isArray(d?.items);
+     return true;
+    };
+    if(!requiredShape(path))throw new Error(t('error.incomplete'));
+    return d;
+   }catch(e){
+    lastError=e;
+    const networkFailure=!e?.status&&(e?.name==='TypeError'||e?.name==='AbortError');
+    if(e?.name==='AbortError')throw e;
+    if(networkFailure&&i<endpoints.length-1)continue;
+    throw e;
+   }
+  }
+  throw lastError||new Error(t('error.service'));
  }catch(e){console.error('[GilasArt][api]',{path:path,status:e?.status||0,code:e?.code||'',message:e?.message||String(e)});throw e}
 }
 function csrf(){return csrfToken||''}
