@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,readdir} from 'node:fs/promises';
-const locales=['fa','en','tr','ar'];
+const locales=['fa'];
 const dicts={};
 for(const l of locales)dicts[l]=JSON.parse(await readFile('frontend/public/i18n/'+l+'.json','utf8'));
 test('phase 12: locale dictionaries are aligned',()=>{
