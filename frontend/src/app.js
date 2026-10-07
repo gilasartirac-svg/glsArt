@@ -82,7 +82,9 @@ function localePath(path,locale=currentLocale){
  let clean=p.startsWith('/')?p:'/'+p;
  if(base&&clean.startsWith(base))clean=clean.slice(base.length)||'/';
  const parts=clean.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();clean='/'+parts.join('/');
- return base+'/'+locale+(clean==='/'?'':clean);
+ // The public customer storefront is Persian-only. Internal i18n remains available,
+ // but public navigation must never manufacture /fa, /en, /tr or /ar URLs.
+ return base+(clean==='/'?'':clean);
 }
 async function bootstrapLocale(){
  // GilasArt customer storefront is Persian-only. Keep the existing i18n engine
@@ -251,7 +253,7 @@ async function loadHomeSnapshot(){
  }catch{return null}
 }
 async function snapshotApi(path){
- if(!/^\/api\/(home|products|categories|flash-sales|site-rules)(?:[/?]|$)/.test(path))return null;
+ if(!/^\/api\/(home|products|categories|flash-sales|site-rules|content)(?:[/?]|$)/.test(path))return null;
  const d=await loadStorefrontIndex();if(!d)return null;
  const u=new URL(path,'https://snapshot.local');
  if(u.pathname==='/api/home'){
@@ -284,7 +286,7 @@ async function snapshotApi(path){
  }
  const parts=u.pathname.split('/').filter(Boolean);
  if(u.pathname.startsWith('/api/content/')){
-  const parts2=u.pathname.split('/').filter(Boolean),section=parts2[2],slug=decodeURIComponent(parts2.slice(3).join('/'));const item=(d[section]||[]).find(x=>x.slug===slug);return item?{item}:null;
+  const parts2=u.pathname.split('/').filter(Boolean),section=String(parts2[2]||'').toLowerCase();let slug=parts2.slice(3).join('/');for(let i=0;i<2;i++){try{const next=decodeURIComponent(slug);if(next===slug)break;slug=next}catch{break}}slug=String(slug||'').normalize('NFC');const item=(d[section]||[]).find(x=>String(x.slug||'').normalize('NFC')===slug);return item?{item}:null;
  }
  if(u.pathname==='/api/content'){
   const section=(u.searchParams.get('section')||'').trim().toLowerCase();if(!['about','contact','news','articles'].includes(section))return null;
@@ -312,7 +314,7 @@ async function api(path,opt={}){
   const r=await fetch(API+localizedPath,fetchOptions);
   const raw=await r.text();
   let d={};try{d=raw?JSON.parse(raw):{}}catch{}
-  if(!r.ok){if(r.status===401||r.status===403)clearAuthState();const e=new Error(d.error||d.message||(r.status===404?t('error.notFound'):t('error.service')));e.status=r.status;throw e}
+  if(!r.ok){if(r.status===401||r.status===403)clearAuthState();const code=String(d.error||d.message||'');const e=new Error(code==='d1_limit_exceeded'?'سرویس داده فروشگاه موقتاً به سقف روزانه رسیده است. لطفاً چند دقیقه بعد دوباره تلاش کنید.':(r.status===404?t('error.notFound'):r.status===401||r.status===403?t('error.unauthorized'):t('error.service')));e.status=r.status;e.code=code||('http_'+r.status);e.path=localizedPath;throw e}
   const requiredShape=path=>{
    if(localizedPath==='/api/health')return d&&d.ok===true&&d.db===true;
    if(/^\/api\/products\?/.test(localizedPath)||localizedPath==='/api/products')return Array.isArray(d?.items);
@@ -328,7 +330,7 @@ async function api(path,opt={}){
   };
   if(!requiredShape(path))throw new Error(t('error.incomplete'));
   return d;
- }catch(e){throw e}
+ }catch(e){console.error('[GilasArt][api]',{path:localizedPath,status:e?.status||0,code:e?.code||'',message:e?.message||String(e)});throw e}
 }
 function csrf(){return csrfToken||''}
 function seoUrl(value){try{const u=new URL(String(value||''),location.href);return u.href}catch{return ''}}
@@ -700,8 +702,13 @@ async function product(slug){
   // Never fall back to the public snapshot for product detail.
   // A stale snapshot can contain global options and would produce an incorrect
   // product configuration. Product detail requires a complete backend response.
-  console.error('product_detail_backend_failed',primaryError);
-  layout('<section class="wrap page"><div class="panel"><h1>جزئیات اثر در دسترس نیست</h1><p class="error">اطلاعات کامل این اثر در حال حاضر از سرویس اصلی دریافت نشد. لطفاً چند لحظه بعد دوباره تلاش کنید.</p><a class="btn primary" href="'+routeUrl('/shop')+'">بازگشت به فروشگاه</a></div></section>');
+  console.error('product_detail_backend_failed',{route:'/product/'+String(slug||''),status:primaryError?.status||0,code:primaryError?.code||'',message:primaryError?.message||String(primaryError)});
+  if(Number(primaryError?.status)===404){
+   layout('<section class="wrap page"><div class="panel"><h1>اثر پیدا نشد</h1><p class="muted">اثری با این شناسه یا نشانی در گالری گیلاس آرت پیدا نشد.</p><div class="cart-checkout-bar" style="justify-content:center"><a class="btn primary" href="'+routeUrl('/shop')+'">بازگشت به فروشگاه</a></div></div></section>');
+  }else{
+   layout('<section class="wrap page"><div class="panel"><h1>جزئیات اثر موقتاً در دسترس نیست</h1><p class="error">ارتباط با سرویس اطلاعات این اثر کامل نشد. اطلاعات محصول حذف نشده است؛ لطفاً دوباره تلاش کنید.</p><div class="cart-checkout-bar" style="justify-content:center"><button class="btn primary" id="product-retry" type="button">تلاش دوباره</button><a class="btn ghost" href="'+routeUrl('/shop')+'">بازگشت به فروشگاه</a></div></div></section>');
+   document.querySelector('#product-retry')?.addEventListener('click',()=>router());
+  }
   return;
  }
  const p=d.product||{},images=d.images||[],attributes=d.attributes||[],categories=d.categories||[];
