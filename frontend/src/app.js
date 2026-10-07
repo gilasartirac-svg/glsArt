@@ -91,19 +91,22 @@ async function bootstrapLocale(){
  const manualPaymentPath=/\/payment\/manual(?:\/index\.html)?(?:\/)?$/.test(String(location.pathname||''));
  if(publicPathNeedsLocale(location.pathname)&&!manualPaymentPath){const target=localePath(location.pathname+location.search,locale);if(target!==location.pathname+location.search){history.replaceState({},'',target);scrollRouteTop()}}
 }
+function languageSelectorSvg(){
+ return '<svg class="language-selector-svg" viewBox="0 0 32 20" aria-hidden="true" focusable="false"><text x="1" y="15" font-family="Arial,sans-serif" font-size="14" font-weight="700">A</text><path d="M17 4h3.2c3.2 0 5.3 2.1 5.3 5.9s-2.1 5.9-5.3 5.9H17zM20 5.9v8c2.1 0 3.5-1.3 3.5-4s-1.4-4-3.5-4z" fill="currentColor"/><path d="M14 2v16" stroke="currentColor" stroke-width="1.4" opacity=".42"/></svg>';
+}
 function languageFlagSvg(locale){
  const flags={fa:['#239f40','#fff','#da0000'],en:['#012169','#fff','#c8102e'],tr:['#e30a17','#fff','#e30a17'],ar:['#111','#fff','#007a3d']};
  const c=flags[locale]||flags.fa;
- return '<svg viewBox="0 0 28 18" role="img" aria-hidden="true" focusable="false"><rect width="28" height="18" rx="2" fill="'+c[0]+'"/><rect y="6" width="28" height="6" fill="'+c[1]+'"/><rect y="12" width="28" height="6" fill="'+c[2]+'"/><path d="M14 2.7l.8 1.7 1.8.2-1.3 1.2.4 1.7L14 6.6l-1.7.9.4-1.7-1.3-1.2 1.8-.2z" fill="#fff"/></svg>';
+ return '<svg viewBox="0 0 28 18" role="img" aria-hidden="true" focusable="false"><rect width="28" height="18" rx="2" fill="'+c[0]+'"/><rect y="6" width="28" height="6" fill="'+c[1]+'"/><rect y="12" width="28" height="6" fill="'+c[2]+'"/></svg>';
 }
 function mountLanguageSwitcher(){
- const nav=document.querySelector('.nav');
+ const nav=document.querySelector('.nav'),anchor=nav?.querySelector('.theme-toggle');
  if(!nav||nav.querySelector('.language-switcher'))return;
  const wrap=document.createElement('div');wrap.className='language-switcher';
- wrap.innerHTML='<button type="button" class="language-switcher-toggle" id="gilasart-language-toggle" aria-haspopup="listbox" aria-expanded="false" aria-label="'+t('header.languageLabel')+'"><span class="language-current-flag">'+languageFlagSvg(currentLocale)+'</span><span class="language-current-label"></span><span class="language-chevron" aria-hidden="true">⌄</span></button><div class="language-switcher-menu" role="listbox" aria-label="'+t('header.languageMenu')+'">'+SUPPORTED_LOCALES.map(l=>'<button type="button" class="language-option" role="option" data-locale="'+l+'" aria-selected="false"><span class="language-flag">'+languageFlagSvg(l)+'</span><span class="language-option-label">'+LOCALE_META[l].label+'</span></button>').join('')+'</div>';
- nav.appendChild(wrap);
+ wrap.innerHTML='<button type="button" class="language-switcher-toggle" id="gilasart-language-toggle" aria-haspopup="listbox" aria-expanded="false" aria-label="'+t('header.languageLabel')+'"><span class="language-current-icon">'+languageSelectorSvg()+'</span><span class="language-current-label"></span><span class="language-chevron" aria-hidden="true">⌄</span></button><div class="language-switcher-menu" role="listbox" aria-label="'+t('header.languageMenu')+'">'+SUPPORTED_LOCALES.map(l=>'<button type="button" class="language-option" role="option" data-locale="'+l+'" aria-selected="false"><span class="language-flag">'+languageFlagSvg(l)+'</span><span class="language-option-label">'+LOCALE_META[l].label+'</span><span class="language-option-code">'+l.toUpperCase()+'</span></button>').join('')+'</div>';
+ if(anchor)nav.insertBefore(wrap,anchor);else nav.appendChild(wrap);
  const toggle=wrap.querySelector('#gilasart-language-toggle');
- const refresh=()=>{const l=currentLocale||'fa',meta=LOCALE_META[l]||LOCALE_META.fa;wrap.querySelector('.language-current-flag').innerHTML=languageFlagSvg(l);wrap.querySelector('.language-current-label').textContent=meta.label;wrap.querySelectorAll('.language-option').forEach(b=>{const active=b.dataset.locale===l;b.setAttribute('aria-selected',String(active));b.classList.toggle('is-active',active)});toggle.setAttribute('aria-label',t('header.languageLabel')+': '+meta.label)};
+ const refresh=()=>{const l=currentLocale||'fa',meta=LOCALE_META[l]||LOCALE_META.fa;wrap.querySelector('.language-current-label').textContent=meta.label;wrap.querySelectorAll('.language-option').forEach(b=>{const active=b.dataset.locale===l;b.setAttribute('aria-selected',String(active));b.classList.toggle('is-active',active)});toggle.setAttribute('aria-label',t('header.languageLabel')+': '+meta.label)};
  refresh();
  toggle.addEventListener('click',()=>{const open=wrap.classList.toggle('is-open');toggle.setAttribute('aria-expanded',String(open));if(open)wrap.querySelector('.language-option.is-active')?.focus()});
  wrap.querySelectorAll('.language-option').forEach(button=>button.addEventListener('click',async()=>{const next=button.dataset.locale;if(!SUPPORTED_LOCALES.includes(next)||next===currentLocale){wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');return}await loadLocale(next);setLocale(next);refresh();const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';let p=location.pathname;if(base&&p.startsWith(base))p=p.slice(base.length)||'/';const parts=p.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();p='/'+parts.join('/');const target=localePath(p,next);history.pushState({},'',target);scrollRouteTop();routeInFlightTarget=target;wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget='';scrollRouteTop()})}));
@@ -269,28 +272,30 @@ async function snapshotApi(path){
 }
 
 async function api(path,opt={}){
+ const localePathKey=String(path||'');
+ const localizedPath=(()=>{try{const u=new URL(localePathKey,'https://local.invalid');if(!u.pathname.startsWith('/api/'))return localePathKey;if(!u.searchParams.has('locale'))u.searchParams.set('locale',currentLocale||'fa');return u.pathname+(u.search||'')}catch{return localePathKey}})();
  const headers={...(opt.headers||{})};
  if(opt.body&&!(typeof FormData!=='undefined'&&opt.body instanceof FormData))headers['content-type']='application/json';
  try{
-  if((opt.method||'GET').toUpperCase()==='GET'){
-   const local=await snapshotApi(path);
+  if((opt.method||'GET').toUpperCase()==='GET'&&currentLocale==='fa'){
+   const local=await snapshotApi(localizedPath);
    if(local)return local;
   }
-  const r=await fetch(API+path,{credentials:'include',cache:'no-store',headers,...opt});
+  const r=await fetch(API+localizedPath,{credentials:'include',cache:'no-store',headers,...opt});
   const raw=await r.text();
   let d={};try{d=raw?JSON.parse(raw):{}}catch{}
   if(!r.ok){if(r.status===401||r.status===403)clearAuthState();const e=new Error(d.error||d.message||(r.status===404?t('error.notFound'):t('error.service')));e.status=r.status;throw e}
   const requiredShape=path=>{
-   if(path==='/api/health')return d&&d.ok===true&&d.db===true;
-   if(/^\/api\/products\?/.test(path)||path==='/api/products')return Array.isArray(d?.items);
-   if(path==='/api/categories'||path==='/api/flash-sales')return Array.isArray(d?.items);
-   if(path.startsWith('/api/products/')&&path.endsWith('/view'))return d?.ok===true;
+   if(localizedPath==='/api/health')return d&&d.ok===true&&d.db===true;
+   if(/^\/api\/products\?/.test(localizedPath)||localizedPath==='/api/products')return Array.isArray(d?.items);
+   if(localizedPath==='/api/categories'||localizedPath==='/api/flash-sales')return Array.isArray(d?.items);
+   if(localizedPath.startsWith('/api/products/')&&path.endsWith('/view'))return d?.ok===true;
    if(path.startsWith('/api/products/')&&!path.includes('/reviews'))return d?.product&&Array.isArray(d.images)&&Array.isArray(d.attributes)&&Array.isArray(d.categories)&&Array.isArray(d.reviews);
-   if(path.startsWith('/api/content?'))return Array.isArray(d?.items);
-   if(path.startsWith('/api/content/'))return d?.item&&typeof d.item==='object';
-   if(path==='/api/settings')return d?.settings&&typeof d.settings==='object';
-   if(path==='/api/site-rules')return d?.item&&typeof d.item==='object';
-   if(path==='/api/notifications')return Array.isArray(d?.items);
+   if(localizedPath.startsWith('/api/content?'))return Array.isArray(d?.items);
+   if(localizedPath.startsWith('/api/content/'))return d?.item&&typeof d.item==='object';
+   if(localizedPath==='/api/settings')return d?.settings&&typeof d.settings==='object';
+   if(localizedPath==='/api/site-rules')return d?.item&&typeof d.item==='object';
+   if(localizedPath==='/api/notifications')return Array.isArray(d?.items);
    return true;
   };
   if(!requiredShape(path))throw new Error(t('error.incomplete'));
@@ -406,7 +411,7 @@ async function syncCartBadge(){if(!state.user){updateCartBadge(0);return}try{con
 function layout(content){
  const adminLink=isAdminUser()?'<a class="admin-link" href="'+routeUrl('/admin')+'">'+t('nav.admin')+'</a>':'';
  const userPoints=state.user?'<a class="points-badge" href="'+routeUrl('/rewards')+'" title="'+t('header.pointsTitle')+'">★ '+fa(state.points)+' '+t('header.pointsSuffix')+'</a>':'';
- app.innerHTML='<header class="top"><div class="wrap nav"><a class="brand" href="'+routeUrl('/')+'" aria-label="'+t('header.logoAria')+'">'+t('app.name')+'<small>GILAS ART</small></a><nav class="links" id="main-menu" aria-label="'+t('header.menu')+'"><a href="'+routeUrl('/shop')+'">'+t('nav.shop')+'</a><a href="'+routeUrl('/about')+'">'+t('nav.about')+'</a><a href="'+routeUrl('/contact')+'">'+t('nav.contact')+'</a><a href="'+routeUrl('/news')+'">'+t('nav.news')+'</a><a href="'+routeUrl('/articles')+'">'+t('nav.articles')+'</a><a href="'+routeUrl('/rewards')+'" class="rewards-nav-link">'+t('nav.rewards')+'</a>'+adminLink+'</nav><div class="spacer"></div><button class="theme-toggle" type="button" aria-label="'+t('header.theme')+'" title="'+t('header.themeTitle')+'" onclick="window.GilasArtTheme&&window.GilasArtTheme.toggle()">◐ <span>'+t('nav.dayNight')+'</span></button><a class="iconbtn cart-link" href="'+routeUrl('/cart')+'" aria-label="'+t('header.cartAria')+'"><div class="cart-icon-wrap">'+icon('cart')+'<b class="cart-count-badge" aria-label="'+t('header.cartCount',{count:fa(state.cartCount)})+'"'+(state.cartCount>0?'':' hidden')+'>'+ (state.cartCount>99?'۹۹+':fa(state.cartCount))+'</b></div><span>'+t('nav.cart')+'</span></a>'+userPoints+accountLink()+'<button class="mobile-menu-toggle" type="button" aria-label="'+t('header.openMenu')+'" aria-expanded="false" aria-controls="main-menu" onclick="window.GilasArtMobileMenu&&window.GilasArtMobileMenu.toggle(this)"><span></span><span></span><span></span></button></div></header><div class="rewards-promo"><div class="wrap rewards-promo-inner">'+(state.user?'<span>'+t('promo.points')+' <b>'+fa(state.points)+'</b></span><span>'+t('promo.coupon')+'</span><a href="'+routeUrl('/rewards')+'">'+t('promo.convert')+'</a>':'<span>'+t('promo.join')+'</span><a href="'+routeUrl('/account')+'">'+t('promo.joinAction')+'</a>')+'</div></div><main id="main-content" tabindex="-1">'+content+'</main>'+renderFooter();
+ app.innerHTML='<header class="top"><div class="wrap nav"><a class="brand" href="'+routeUrl('/')+'" aria-label="'+t('header.logoAria')+'">'+t('app.name')+'<small>GILAS ART</small></a><nav class="links" id="main-menu" aria-label="'+t('header.menu')+'"><a href="'+routeUrl('/shop')+'">'+t('nav.shop')+'</a><a href="'+routeUrl('/about')+'">'+t('nav.about')+'</a><a href="'+routeUrl('/contact')+'">'+t('nav.contact')+'</a><a href="'+routeUrl('/news')+'">'+t('nav.news')+'</a><a href="'+routeUrl('/articles')+'">'+t('nav.articles')+'</a><a href="'+routeUrl('/rewards')+'" class="rewards-nav-link">'+t('nav.rewards')+'</a>'+adminLink+'</nav><div class="spacer"></div><div class="header-actions"><button class="theme-toggle" type="button" aria-label="'+t('header.theme')+'" title="'+t('header.themeTitle')+'" onclick="window.GilasArtTheme&&window.GilasArtTheme.toggle()">◐ <span>'+t('nav.dayNight')+'</span></button><a class="iconbtn cart-link" href="'+routeUrl('/cart')+'" aria-label="'+t('header.cartAria')+'"><div class="cart-icon-wrap">'+icon('cart')+'<b class="cart-count-badge" aria-label="'+t('header.cartCount',{count:fa(state.cartCount)})+'"'+(state.cartCount>0?'':' hidden')+'>'+ (state.cartCount>99?'۹۹+':fa(state.cartCount))+'</b></div><span>'+t('nav.cart')+'</span></a>'+userPoints+accountLink()+'</div><button class="mobile-menu-toggle" type="button" aria-label="'+t('header.openMenu')+'" aria-expanded="false" aria-controls="main-menu" onclick="window.GilasArtMobileMenu&&window.GilasArtMobileMenu.toggle(this)"><span></span><span></span><span></span></button></div></header><div class="rewards-promo"><div class="wrap rewards-promo-inner">'+(state.user?'<span>'+t('promo.points')+' <b>'+fa(state.points)+'</b></span><span>'+t('promo.coupon')+'</span><a href="'+routeUrl('/rewards')+'">'+t('promo.convert')+'</a>':'<span>'+t('promo.join')+'</span><a href="'+routeUrl('/account')+'">'+t('promo.joinAction')+'</a>')+'</div></div><main id="main-content" tabindex="-1">'+content+'</main>'+renderFooter();
  mountLanguageSwitcher(); refreshFooterSocialLinks();
  translateRenderedContent(app);
 }
