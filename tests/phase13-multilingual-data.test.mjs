@@ -7,12 +7,12 @@ const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8')
 const css=readFileSync(new URL('../frontend/src/styles.css',import.meta.url),'utf8');
 const migration=readFileSync(new URL('../database/migrations/0024_content_translations.sql',import.meta.url),'utf8');
 
-test('phase 12 language selector uses inline Wikimedia-style language SVG and header placement',()=>{
- assert.match(app,/function languageSelectorSvg\(\)/);
- assert.match(app,/insertBefore\(wrap,anchor\)/);
- assert.doesNotMatch(app,/fi fi-/);
- assert.match(css,/\.language-selector-svg/);
- assert.match(css,/@media\(max-width:900px\)/);
+test('storefront language mode is Persian-only',()=>{
+ assert.match(app,/const SUPPORTED_LOCALES=\\['fa'\\]/);
+ assert.match(app,/currentLocale='fa'/);
+ assert.doesNotMatch(app,/language-switcher-toggle/);
+ assert.doesNotMatch(app,/api\\/locale/);
+ assert.doesNotMatch(app,/function browserLocale/);
 });
 
 test('translation storage is additive, four-locale, indexed and fallback-safe',()=>{
@@ -25,9 +25,10 @@ test('translation storage is additive, four-locale, indexed and fallback-safe',(
  assert.match(worker,/if\(locale==='fa'/);
 });
 
-test('frontend propagates the selected locale and bypasses Persian-only snapshot for translated locales',()=>{
- assert.match(app,/u\.searchParams\.set\('locale',currentLocale\|\|'fa'\)/);
+test('frontend API and routing remain Persian-only',()=>{
+ assert.doesNotMatch(app,/searchParams\\.set\\('locale'/);
  assert.match(app,/currentLocale==='fa'/);
- assert.match(worker,/applyTranslations\(env,r\.results\|\|\[\],'product'/);
- assert.match(worker,/applyTranslations\(env,r\.results\|\|\[\],'category'/);
+ assert.match(app,/if\\(currentLocale==='fa'\\)/);
+ assert.match(worker,/applyTranslations\\(env,r\\.results\\|\\|\\[\\],'product'/);
+ assert.match(worker,/applyTranslations\\(env,r\\.results\\|\\|\\[\\],'category'/);
 });
