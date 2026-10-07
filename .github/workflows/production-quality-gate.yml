@@ -15,8 +15,49 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Validate frontend JavaScript
-        run: node --check frontend/src/app.js
+      - name: Validate all production JavaScript and module links
+        run: |
+          set -euo pipefail
+          ruby -e 'require "yaml"; Dir[".github/workflows/*.{yml,yaml}"].each { |f| YAML.parse_file(f); puts "YAML PASS: #{f}" }'
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const roots=['frontend/src','frontend/public'];
+          const files=[];
+          function walk(dir){
+            for(const e of fs.readdirSync(dir,{withFileTypes:true})){
+              const p=path.join(dir,e.name);
+              if(e.isDirectory()) walk(p);
+              else if(e.isFile() && /\\.js$/i.test(e.name)) files.push(p);
+            }
+          }
+          roots.forEach(walk);
+          const active=files.filter(f=>!/\\.(?:backup|broken|corrupted)(?:\\.|$)/i.test(f)&&!/\\.before-[^/]+\\.js$/i.test(f));
+          for(const f of active){
+            const src=fs.readFileSync(f,'utf8');
+            if(/\\bimport\\s*\\(/.test(src)||/^\\s*import\\s/m.test(src)||/^\\s*export\\s/m.test(src)){
+              // Syntax is checked by node --check below; here we verify relative module targets.
+              const refs=[];
+              const re=/(?:import|export)\\s+(?:[\\s\\S]*?\\s+from\\s+)?['"](.\\/?[^'"]+)['"]/g;
+              let m;
+              while((m=re.exec(src))) refs.push(m[1]);
+              const dyn=/import\\(\\s*['"](.\\/?[^'"]+)['"]\\s*\\)/g;
+              while((m=dyn.exec(src))) refs.push(m[1]);
+              for(const ref of refs){
+                if(!ref.startsWith('.')) continue;
+                const clean=ref.split('?')[0].split('#')[0];
+                const candidates=[clean,path.extname(clean)?null:clean+'.js',clean+'/index.js'].filter(Boolean);
+                if(!candidates.some(x=>fs.existsSync(path.resolve(path.dirname(f),x)))){
+                  throw new Error('Missing relative module: '+f+' -> '+ref);
+                }
+              }
+            }
+          }
+          for(const f of active){
+            const r=require('child_process').spawnSync(process.execPath,['--check',f],{encoding:'utf8'});
+            if(r.status!==0){console.error(r.stderr||r.stdout);process.exit(r.status||1)}
+            console.log('JS PASS: '+f);
+          }
+          NODE
       - name: Validate Worker module
         run: cp worker/src/index.js /tmp/gilasart-worker.mjs && node --check /tmp/gilasart-worker.mjs
       - name: Validate locale preference and conservative detection contract
