@@ -55,7 +55,7 @@ jobs:
           const articles=(d.articles||[]).map(x=>({slug:x.slug,title:x.title,published_at:x.published_at||null,updated_at:x.updated_at||null}));
           const news=(d.news||[]).map(x=>({slug:x.slug,title:x.title,published_at:x.published_at||null,updated_at:x.updated_at||null}));
           const index={schemaVersion:2,generatedAt:d.meta.generatedAt,products,categories,articles,news,settings:d.settings||{}};
-          const homeProducts=products.slice(0,8).map(p=>{const src=(d.products||[]).find(x=>String(x.id)===String(p.id));return src||p});
+          const homeProducts=products.slice(0,8);
           const flash=products.filter(p=>p.flash_sale_active===1&&p.flash_sale_ends_at&&new Date(p.flash_sale_ends_at).getTime()>Date.now()).slice(0,20);
           const home={schemaVersion:2,generatedAt:d.meta.generatedAt,products:homeProducts,categories,settings:d.settings||{},flash};
           fs.writeFileSync('frontend/public/data/storefront-index.json',JSON.stringify(index,null,2)+'\n');
@@ -95,10 +95,8 @@ jobs:
             products:index.products.length
           }));
           NODE
+          rm -f frontend/public/data/storefront.json
           test ! -e frontend/public/data/storefront.json
-
-      - name: Remove legacy monolithic snapshot if present
-        run: rm -f frontend/public/data/storefront.json
 
       - name: Commit validated snapshot
         run: |
