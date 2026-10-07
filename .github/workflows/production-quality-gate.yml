@@ -27,11 +27,11 @@ jobs:
             for(const e of fs.readdirSync(dir,{withFileTypes:true})){
               const p=path.join(dir,e.name);
               if(e.isDirectory()) walk(p);
-              else if(e.isFile() && /\\.js$/i.test(e.name)) files.push(p);
+              else if(e.isFile() && /\.js$/i.test(e.name)) files.push(p);
             }
           }
           roots.forEach(walk);
-          const active=files.filter(f=>!/\\.(?:backup|broken|corrupted)(?:\\.|$)/i.test(f)&&!/\\.before-[^/]+\\.js$/i.test(f));
+          const active=files.filter(f=>!/\.(?:backup|broken|corrupted)(?:\.|$)/i.test(f)&&!/\.before-[^/]+\.js$/i.test(f));
           for(const f of active){
             const src=fs.readFileSync(f,'utf8');
             if(/\bimport\s*\(/.test(src)||/^\s*import\s/m.test(src)||/^\s*export\s/m.test(src)){
