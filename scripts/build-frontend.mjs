@@ -53,6 +53,16 @@ for(const [file,loader] of [['dist/app.js','js'],['dist/styles.css','css']]){
 console.log('frontend built');
 await cp('404.html','dist/404.html');
 await cp('CNAME','dist/CNAME');
+// Cache-bust the SPA shell assets on every Pages deployment. Clean client-side routes
+// are served through 404.html, so a fixed app.js query can otherwise leave an older
+// router cached at production even after a successful Pages deployment.
+for(const file of ['dist/index.html','dist/404.html','dist/admin/index.html',...['fa','en','tr','ar'].map(l=>'dist/'+l+'/index.html')]){
+  try{
+    let html=await readFile(file,'utf8');
+    html=html.replace(/(styles\.css|config\.js|app\.js)(?:\?v=[^"'\\s>]*)?/g,(_,asset)=>asset+'?v='+buildVersion);
+    await writeFile(file,html);
+  }catch{}
+}
 
 await mkdir('dist/admin',{recursive:true});
 await writeFile('dist/admin/index.html',`<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>کنترل پنل گیلاس آرت</title><link rel="stylesheet" href="../styles.css?v=20261005.1"></head><body><div id="app"></div><script src="../config.js?v=20260928.9"></script><script src="../app.js?v=20261005.1" defer></script></body></html>`);
