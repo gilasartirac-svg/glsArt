@@ -189,10 +189,11 @@ async function loadStorefrontManifest(){
  if(storefrontManifestPromise)return storefrontManifestPromise;
  storefrontManifestPromise=(async()=>{
   try{
-   const r=await fetch(dataRoot()+'storefront-manifest.json',{cache:'default',credentials:'same-origin'});
+   const r=await fetch(dataRoot()+'storefront-manifest.json?live=1',{cache:'no-store',credentials:'same-origin'});
    if(!r.ok)return null;
    const d=await r.json();
-   return Number(d?.schemaVersion)===2&&d?.generatedAt?d:null;
+   if(Number(d?.schemaVersion)!==2||!d?.generatedAt||Number(d?.productCount)<1)return null;
+   return d;
   }catch{return null}
  })();
  return storefrontManifestPromise;
@@ -202,12 +203,12 @@ async function loadStorefrontIndex(){
  storefrontIndexPromise=(async()=>{
   try{
    const manifest=await loadStorefrontManifest();
-   if(!manifest)return null;
-   const version=encodeURIComponent(manifest.version||manifest.generatedAt);
-   const r=await fetch(dataRoot()+'storefront-index.json?v='+version,{cache:'default',credentials:'same-origin'});
+   const version=encodeURIComponent(manifest?.version||manifest?.generatedAt||Date.now());
+   let r=await fetch(dataRoot()+'storefront-index.json?v='+version,{cache:'no-store',credentials:'same-origin'});
+   if(!r.ok)r=await fetch(dataRoot()+'storefront-index.json?live=1',{cache:'no-store',credentials:'same-origin'});
    if(!r.ok)return null;
    const d=await r.json();
-   if(Number(d?.schemaVersion)!==2||!Array.isArray(d.products)||!Array.isArray(d.categories))return null;
+   if(Number(d?.schemaVersion)!==2||!Array.isArray(d.products)||!Array.isArray(d.categories)||d.products.length<1)return null;
    return d;
   }catch{return null}
  })();
