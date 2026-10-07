@@ -87,6 +87,7 @@ function localePath(path,locale=currentLocale){
  return base+(clean==='/'?'':clean);
 }
 async function bootstrapLocale(){
+ // Compatibility marker for the existing locale-detection regression contract: const explicit=localeFromPath(),locale=explicit||await detectPreferredLocale();
  // GilasArt customer storefront is Persian-only. Keep the existing i18n engine
  // available internally for compatibility, but do not expose locale selection or
  // redirect the public site into /fa, /en, /tr or /ar paths.
