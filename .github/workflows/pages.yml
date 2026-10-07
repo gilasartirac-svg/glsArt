@@ -83,7 +83,12 @@ jobs:
       - name: Runtime browser verification of Shop and Product Detail
         run: |
           set -euo pipefail
-          npx --yes playwright@1.56.1 install --with-deps chromium
+          rm -rf /tmp/gilasart-playwright && mkdir -p /tmp/gilasart-playwright
+          cd /tmp/gilasart-playwright
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.56.1 >/dev/null 2>&1
+          npx playwright install --with-deps chromium
+          cd "$GITHUB_WORKSPACE"
           cat > /tmp/gilasart-runtime-verify.mjs <<'NODE'
           import { chromium } from 'playwright';
           const browser = await chromium.launch({headless:true});
