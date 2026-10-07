@@ -34,7 +34,7 @@ const siteOrigin='https://gilasart.ir';
 const locales=['fa','en','tr','ar'];
 const publicRoutes=['/','/shop','/about','/contact','/news','/articles','/terms','/privacy','/enamad','/aparat','/rewards','/support'];
 let snapshot=null;
-try{snapshot=JSON.parse(await readFile('frontend/public/data/storefront.json','utf8'))}catch{}
+try{snapshot=JSON.parse(await readFile('frontend/public/data/storefront-index.json','utf8'))}catch{}
 const urls=new Map();
 const addRoute=(path,lastmod)=>{const clean=String(path||'/').startsWith('/')?String(path||'/'):'/'+String(path||'');for(const locale of locales){const loc=siteOrigin+'/'+locale+(clean==='/'?'':clean);urls.set(loc,{loc,lastmod})}};
 publicRoutes.forEach(p=>addRoute(p));
