@@ -61,11 +61,15 @@ export default function Settings(){
   </div>
 
   <div class="panel">
-   <div class="sectionhead"><div><h3>نماد اعتماد الکترونیکی</h3><p class="muted">کد رسمی ارائه‌شده توسط شرکت به‌صورت ثابت در Footer سایت قرار می‌گیرد.</p></div></div>
+   <div class="sectionhead"><div><h3>نماد اعتماد الکترونیکی</h3><p class="muted">لینک رسمی استعلام اینماد و کد نشان در این بخش ثبت و قابل بررسی است.</p></div></div>
    <div class="enamad-admin-preview">
     <div class="enamad-code-label">کد نماد</div>
     <code dir="ltr">u04bawyWrXOcWNwCSK6B</code>
     <span class="pill">فعال در Footer</span>
+    <div class="enamad-code-label">لینک رسمی اینماد</div>
+    <a class="btn secondary" href="https://trustseal.enamad.ir/?id=22286&amp;Code=u04bawyWrXOcWNwCSK6B" target="_blank" rel="noopener noreferrer" referrerpolicy="origin">مشاهده صفحه رسمی استعلام اینماد</a>
+    <div class="enamad-code-label">کد کامل نشان</div>
+    <textarea dir="ltr" readonly rows="4" aria-label="کد کامل نشان اینماد">&lt;a referrerpolicy='origin' target='_blank' href='https://trustseal.enamad.ir/?id=22286&amp;Code=u04bawyWrXOcWNwCSK6B'&gt;&lt;img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=22286&amp;Code=u04bawyWrXOcWNwCSK6B' alt='' style='cursor:pointer' code='u04bawyWrXOcWNwCSK6B'&gt;&lt;/a&gt;</textarea>
    </div>
   </div>
 
