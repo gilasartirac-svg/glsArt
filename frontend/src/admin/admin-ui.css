@@ -1,0 +1,124 @@
+/* GilasArt Admin UI — shared production layout layer
+   Scope: #admin-page and .admin-layout only.
+   Purpose: normalize grids, tables, forms, cards and responsive behavior
+   across every control-panel page without changing business logic. */
+
+.admin-layout{--admin-bg:#0b0b0d;--admin-surface:#121216;--admin-surface-2:#18181d;--admin-line:rgba(255,255,255,.09);--admin-text:#f4efe7;--admin-muted:#a9a198;--admin-gold:#c9a86a;--admin-gold-strong:#e0c487;--admin-danger:#c75b5b;--admin-ok:#54b88a;--admin-radius:18px}
+.admin-layout #admin-page{min-width:0}
+.admin-page{width:min(100%,1540px)!important;margin-inline:auto!important}
+.admin-page>*{min-width:0}
+.admin-title{gap:16px;align-items:center}
+.admin-title h2{line-height:1.45}
+.admin-kicker,.eyebrow{color:var(--admin-gold);font-size:12px;font-weight:700;letter-spacing:.03em}
+
+.admin-layout .panel{background:linear-gradient(145deg,var(--admin-surface-2),var(--admin-surface));border:1px solid var(--admin-line);border-radius:var(--admin-radius);box-shadow:0 14px 42px rgba(0,0,0,.18)}
+.admin-layout .panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.admin-layout .sectionhead{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.admin-layout .sectionhead h3,.admin-layout .panel-head h3{margin:0}
+
+.admin-layout .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.admin-layout .form-grid>*{min-width:0}
+.admin-layout .form label{display:flex;flex-direction:column;gap:7px;margin:0;color:var(--admin-muted);font-size:13px}
+.admin-layout .form input,.admin-layout .form select,.admin-layout .form textarea,
+.admin-layout input,.admin-layout select,.admin-layout textarea{width:100%;max-width:100%;min-width:0;box-sizing:border-box;background:#0e0e12;color:var(--admin-text);border:1px solid var(--admin-line);border-radius:12px;padding:11px 12px}
+.admin-layout textarea{min-height:120px;resize:vertical}
+.admin-layout input:focus,.admin-layout select:focus,.admin-layout textarea:focus{border-color:rgba(201,168,106,.7);box-shadow:0 0 0 3px rgba(201,168,106,.09);outline:0}
+
+.admin-layout .btn{min-height:42px;white-space:nowrap}
+.admin-layout .btn.primary{background:linear-gradient(135deg,var(--admin-gold-strong),var(--admin-gold));color:#17130c;border-color:transparent;font-weight:800}
+.admin-layout .btn.danger{border-color:rgba(199,91,91,.38);color:#efb0b0}
+.admin-layout .btn.ghost{background:rgba(255,255,255,.025)}
+
+.admin-layout .table-wrap,.admin-layout .table-scroll,.admin-layout .orders-table-wrap{width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;border-radius:14px}
+.admin-layout .admin-table{width:100%;border-collapse:separate;border-spacing:0;min-width:720px}
+.admin-layout .admin-table th,.admin-layout .admin-table td{vertical-align:middle;border-bottom:1px solid var(--admin-line);padding:12px 11px}
+.admin-layout .admin-table th{position:sticky;top:0;background:#151519;color:var(--admin-muted);font-size:12px;font-weight:700;white-space:nowrap;z-index:1}
+.admin-layout .admin-table tbody tr:hover td{background:rgba(201,168,106,.035)}
+.admin-layout .admin-table tbody tr:last-child td{border-bottom:0}
+.admin-layout .admin-table td{line-height:1.65}
+.admin-layout .admin-table td .btn{margin-inline-end:5px;margin-block:2px}
+.admin-layout .admin-table .error-cell{color:#e7a4a4}
+
+.admin-layout .pill{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.admin-layout .muted{color:var(--admin-muted)}
+.admin-layout .notice{border-color:rgba(201,168,106,.18);background:rgba(201,168,106,.055);border-radius:14px}
+.admin-layout .check{display:flex!important;flex-direction:row!important;align-items:center;gap:9px!important;cursor:pointer}
+.admin-layout .check input{width:auto;accent-color:var(--admin-gold)}
+
+.admin-layout .cards{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.admin-layout .card{min-width:0}
+.admin-layout .cards .card,.admin-layout .stat-card{border-radius:16px;border:1px solid var(--admin-line);background:linear-gradient(145deg,#18181d,#121216);box-shadow:none}
+
+.admin-layout .stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.admin-layout .stat-card{padding:18px;min-width:0}
+.admin-layout .stat-card strong{display:block;margin-top:8px;color:var(--admin-gold-strong);font-size:25px}
+
+.admin-layout .product-admin-identity{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center;min-width:220px}
+.admin-layout .product-admin-thumb{width:64px;height:64px;border-radius:12px;overflow:hidden;background:#0d0d10;border:1px solid var(--admin-line);display:grid;place-items:center}
+.admin-layout .product-admin-thumb img{width:100%;height:100%;object-fit:cover}
+.admin-layout .product-admin-meta{min-width:0}
+.admin-layout .product-admin-image-file,.admin-layout .product-admin-slug{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-layout .attribute-choice-card,.admin-layout .attribute-card{border:1px solid var(--admin-line);background:rgba(255,255,255,.018);border-radius:14px;padding:14px}
+.admin-layout .attribute-choice-main,.admin-layout .attribute-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.admin-layout .attribute-options{display:grid;gap:8px;margin-top:10px}
+.admin-layout .attribute-option-row{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(80px,.7fr) auto auto auto;gap:8px;align-items:center;padding:9px;border:1px solid var(--admin-line);border-radius:10px;background:#101014}
+.admin-layout .inline-option-form{display:grid;grid-template-columns:minmax(0,1.5fr) repeat(2,minmax(90px,.7fr)) auto;gap:8px;align-items:end}
+
+.admin-layout .orders-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:18px;align-items:start}
+.admin-layout .orders-master,.admin-layout .order-detail{min-width:0}
+.admin-layout .orders-master-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.admin-layout .order-master-row{cursor:pointer}
+.admin-layout .order-master-row.is-selected td,.admin-layout .order-master-row:hover td{background:rgba(201,168,106,.06)}
+.admin-layout .order-detail{position:sticky;top:92px}
+.admin-layout .order-detail-section{margin-top:14px}
+.admin-layout .receipt-review-preview{max-width:100%;overflow:hidden;border-radius:12px}
+.admin-layout .receipt-review-preview img{display:block;max-width:100%;height:auto;margin:auto}
+
+.admin-layout .reviews-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.admin-layout .reviews-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center}
+.admin-layout .review-search{min-width:0}
+.admin-layout .review-body{max-width:480px;white-space:normal;overflow-wrap:anywhere}
+.admin-layout .review-actions{display:flex;gap:6px;flex-wrap:wrap}
+
+.admin-layout .social-links-editor,.admin-layout .footer-social-admin{min-width:0}
+.admin-layout .invoice-settings,.admin-layout .admin-snapshot-hero{min-width:0}
+.admin-layout .admin-snapshot-hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);gap:18px;align-items:stretch}
+.admin-layout .access-role{min-width:150px}
+.admin-layout .access-note{border-right:3px solid var(--admin-gold)}
+
+@media(max-width:1100px){
+ .admin-layout .cards,.admin-layout .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-layout .orders-layout{grid-template-columns:1fr}
+ .admin-layout .order-detail{position:static}
+ .admin-layout .admin-snapshot-hero{grid-template-columns:1fr}
+ .admin-layout .attribute-option-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-layout .attribute-option-row .btn{width:100%}
+ .admin-layout .inline-option-form{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:760px){
+ .admin-page{padding:16px 12px!important}
+ .admin-title{align-items:flex-start;flex-direction:column}
+ .admin-layout .form-grid{grid-template-columns:1fr}
+ .admin-layout .reviews-stats{grid-template-columns:1fr}
+ .admin-layout .reviews-toolbar{grid-template-columns:1fr}
+ .admin-layout .admin-table{min-width:680px}
+ .admin-layout .panel{border-radius:15px}
+ .admin-layout .attribute-option-row,.admin-layout .inline-option-form{grid-template-columns:1fr}
+ .admin-layout .product-admin-identity{min-width:190px;grid-template-columns:52px minmax(0,1fr)}
+ .admin-layout .product-admin-thumb{width:52px;height:52px}
+}
+
+@media(max-width:520px){
+ .admin-layout .cards,.admin-layout .stats-grid{grid-template-columns:1fr}
+ .admin-layout .admin-page{padding:14px 10px!important}
+ .admin-layout .panel{padding:15px}
+ .admin-layout .btn{min-height:44px}
+ .admin-layout .admin-table{font-size:12px}
+ .admin-layout .admin-table th,.admin-layout .admin-table td{padding:10px 9px}
+ .admin-layout .table-wrap,.admin-layout .table-scroll,.admin-layout .orders-table-wrap{margin-inline:0}
+}
+
+@media(prefers-reduced-motion:reduce){
+ .admin-layout *{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
