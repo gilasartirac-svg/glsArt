@@ -8,10 +8,10 @@ const css=readFileSync(new URL('../frontend/src/styles.css',import.meta.url),'ut
 const migration=readFileSync(new URL('../database/migrations/0024_content_translations.sql',import.meta.url),'utf8');
 
 test('storefront language mode is Persian-only',()=>{
- assert.match(app,/const SUPPORTED_LOCALES=\\['fa'\\]/);
+ assert.match(app,/const SUPPORTED_LOCALES=\['fa'\]/);
  assert.match(app,/currentLocale='fa'/);
  assert.doesNotMatch(app,/language-switcher-toggle/);
- assert.doesNotMatch(app,/api\\/locale/);
+ assert.doesNotMatch(app,/api\/locale/);
  assert.doesNotMatch(app,/function browserLocale/);
 });
 
@@ -26,9 +26,9 @@ test('translation storage is additive, four-locale, indexed and fallback-safe',(
 });
 
 test('frontend API and routing remain Persian-only',()=>{
- assert.doesNotMatch(app,/searchParams\\.set\\('locale'/);
+ assert.doesNotMatch(app,/searchParams\.set\('locale'/);
  assert.match(app,/currentLocale==='fa'/);
- assert.match(app,/if\\(currentLocale==='fa'\\)/);
- assert.match(worker,/applyTranslations\\(env,r\\.results\\|\\|\\[\\],'product'/);
- assert.match(worker,/applyTranslations\\(env,r\\.results\\|\\|\\[\\],'category'/);
+ assert.match(app,/if\(currentLocale==='fa'\)/);
+ assert.match(worker,/applyTranslations\(env,r\.results\|\|\[\],'product'/);
+ assert.match(worker,/applyTranslations\(env,r\.results\|\|\[\],'category'/);
 });
