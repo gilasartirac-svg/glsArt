@@ -277,7 +277,7 @@ async function api(path,opt={}){
  const headers={...(opt.headers||{})};
  if(opt.body&&!(typeof FormData!=='undefined'&&opt.body instanceof FormData))headers['content-type']='application/json';
  try{
-  if((opt.method||'GET').toUpperCase()==='GET'){
+  if((opt.method||'GET').toUpperCase()==='GET'&&currentLocale==='fa'){
    const local=await snapshotApi(localizedPath);
    if(local)return local;
   }
