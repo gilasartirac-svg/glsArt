@@ -99,12 +99,20 @@ function languageFlagSvg(locale){
  const c=flags[locale]||flags.fa;
  return '<svg viewBox="0 0 28 18" role="img" aria-hidden="true" focusable="false"><rect width="28" height="18" rx="2" fill="'+c[0]+'"/><rect y="6" width="28" height="6" fill="'+c[1]+'"/><rect y="12" width="28" height="6" fill="'+c[2]+'"/></svg>';
 }
+function languageSelectorSvg(){return '<svg class="language-selector-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.2 2.5 3.3 5.5 3.3 9S14.2 19.5 12 21M12 3c-2.2 2.5-3.3 5.5-3.3 9S9.8 18.5 12 21"></path></svg>'}
+function languageFlagSvg(locale){
+ const flags={fa:['#239f40','#fff','#da0000'],en:['#012169','#fff','#c8102e'],tr:['#e30a17','#fff','#e30a17'],ar:['#111','#fff','#007a3d']};
+ const c=flags[locale]||flags.fa;
+ return '<svg viewBox="0 0 28 18" role="img" aria-hidden="true" focusable="false"><rect width="28" height="18" rx="2" fill="'+c[0]+'"/><rect y="6" width="28" height="6" fill="'+c[1]+'"/><rect y="12" width="28" height="6" fill="'+c[2]+'"/></svg>';
+}
 function mountLanguageSwitcher(){
- const nav=document.querySelector('.nav'),anchor=nav?.querySelector('.theme-toggle');
+ const nav=document.querySelector('.nav');
  if(!nav||nav.querySelector('.language-switcher'))return;
+ const anchor=nav.querySelector('.theme-toggle')||nav.querySelector('.cart-link')||nav.lastElementChild;
+ if(!anchor)return;
  const wrap=document.createElement('div');wrap.className='language-switcher';
- wrap.innerHTML='<button type="button" class="language-switcher-toggle" id="gilasart-language-toggle" aria-haspopup="listbox" aria-expanded="false" aria-label="'+t('header.languageLabel')+'"><span class="language-current-icon">'+languageSelectorSvg()+'</span><span class="language-current-label"></span><span class="language-chevron" aria-hidden="true">⌄</span></button><div class="language-switcher-menu" role="listbox" aria-label="'+t('header.languageMenu')+'">'+SUPPORTED_LOCALES.map(l=>'<button type="button" class="language-option" role="option" data-locale="'+l+'" aria-selected="false"><span class="language-flag">'+languageFlagSvg(l)+'</span><span class="language-option-label">'+LOCALE_META[l].label+'</span><span class="language-option-code">'+l.toUpperCase()+'</span></button>').join('')+'</div>';
- if(anchor)nav.insertBefore(wrap,anchor);else nav.appendChild(wrap);
+ wrap.innerHTML='<button type="button" class="language-switcher-toggle" id="gilasart-language-toggle" aria-haspopup="listbox" aria-expanded="false" aria-label="'+t('header.languageLabel')+'">'+languageSelectorSvg()+'<span class="language-current-label"></span><span class="language-chevron" aria-hidden="true">⌄</span></button><div class="language-switcher-menu" role="listbox" aria-label="'+t('header.languageMenu')+'">'+SUPPORTED_LOCALES.map(l=>'<button type="button" class="language-option" role="option" data-locale="'+l+'" aria-selected="false"><span class="language-flag">'+languageFlagSvg(l)+'</span><span class="language-option-label">'+LOCALE_META[l].label+'</span></button>').join('')+'</div>';
+ nav.insertBefore(wrap,anchor);
  const toggle=wrap.querySelector('#gilasart-language-toggle');
  const refresh=()=>{const l=currentLocale||'fa',meta=LOCALE_META[l]||LOCALE_META.fa;wrap.querySelector('.language-current-label').textContent=meta.label;wrap.querySelectorAll('.language-option').forEach(b=>{const active=b.dataset.locale===l;b.setAttribute('aria-selected',String(active));b.classList.toggle('is-active',active)});toggle.setAttribute('aria-label',t('header.languageLabel')+': '+meta.label)};
  refresh();
