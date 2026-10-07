@@ -256,3 +256,47 @@
  .admin-layout .attribute-option-editor-row label{justify-self:start}
  .admin-layout .ticket-message{max-width:100%}
 }
+
+/* Targeted DOM/grid alignment audit: Products, Orders, Reports, Settings, Visitors, Snapshot. */
+.admin-layout .products-admin-table-wrap{width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
+.admin-layout .products-admin-table{min-width:980px}
+.admin-layout .admin-product-modal-dialog{width:min(96vw,1180px);max-height:92vh;overflow:auto}
+.admin-layout .admin-product-modal-head,.admin-product-modal-foot{position:sticky;z-index:3;background:var(--admin-surface)}
+.admin-layout .admin-product-modal-head{top:0}
+.admin-layout .admin-product-modal-foot{bottom:0}
+.admin-layout .admin-product-tabs{display:flex;gap:7px;flex-wrap:wrap}
+.admin-layout .admin-product-tab-panel{min-width:0}
+.admin-layout .attribute-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.admin-layout .attribute-choice-card{min-width:0}
+.admin-layout .attribute-option-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto auto;gap:8px;align-items:center}
+.admin-layout .orders-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:16px;align-items:start}
+.admin-layout .orders-master,.admin-layout .order-detail{min-width:0}
+.admin-layout .orders-table-wrap{overflow:auto;max-width:100%}
+.admin-layout .orders-table{min-width:780px}
+.admin-layout .order-detail-section{min-width:0;overflow-wrap:anywhere}
+.admin-layout .reports-table-wrap{width:100%;overflow-x:auto}
+.admin-layout .reports-table{min-width:620px}
+.admin-layout .settings-section-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.admin-layout .settings-section-grid>.panel,.admin-layout .settings-section-grid>.form{min-width:0}
+.admin-layout .stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.admin-layout .stat-card{min-width:0}
+.admin-layout .stat-card strong{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.admin-layout .visitors-admin .table-scroll{width:100%;overflow-x:auto}
+.admin-layout .visitors-admin .admin-table{min-width:760px}
+.admin-layout .admin-snapshot-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center}
+.admin-layout .admin-snapshot-hero .notice{min-width:0;overflow-wrap:anywhere}
+@media(max-width:1100px){
+ .admin-layout .orders-layout{grid-template-columns:1fr}
+ .admin-layout .order-detail{position:static}
+ .admin-layout .attribute-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-layout .settings-section-grid{grid-template-columns:1fr}
+ .admin-layout .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-layout .admin-snapshot-hero{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+ .admin-layout .admin-product-modal-dialog{width:100%;max-height:96vh;border-radius:14px}
+ .admin-layout .attribute-choice-grid{grid-template-columns:1fr}
+ .admin-layout .attribute-option-row{grid-template-columns:1fr}
+ .admin-layout .stats-grid{grid-template-columns:1fr}
+ .admin-layout .admin-snapshot-hero .btn{width:100%}
+}
