@@ -80,6 +80,38 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
+      - name: Runtime browser verification of Shop and Product Detail
+        run: |
+          set -euo pipefail
+          npx --yes playwright@1.56.1 install --with-deps chromium
+          cat > /tmp/gilasart-runtime-verify.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const browser = await chromium.launch({headless:true});
+          const page = await browser.newPage({viewport:{width:1440,height:1000},locale:'fa-IR'});
+          const errors=[];
+          page.on('pageerror',e=>errors.push('pageerror: '+e.message));
+          page.on('console',m=>{if(m.type()==='error')errors.push('console: '+m.text())});
+          const fail=(m)=>{throw new Error(m)};
+          await page.goto('https://gilasart.ir/shop?runtime_verify='+Date.now(),{waitUntil:'networkidle',timeout:60000});
+          await page.locator('#results .product-card').first().waitFor({state:'visible',timeout:30000});
+          const cards=await page.locator('#results .product-card').count();
+          if(cards<1)fail('Shop runtime rendered zero product cards');
+          const href=await page.locator('#results .product-card a.product-card-link').first().getAttribute('href');
+          if(!href||!href.includes('/'))fail('Shop product link missing');
+          await page.goto(new URL(href,'https://gilasart.ir').href+'?runtime_verify='+Date.now(),{waitUntil:'networkidle',timeout:60000});
+          await page.locator('.product-info h1').waitFor({state:'visible',timeout:30000});
+          const title=(await page.locator('.product-info h1').innerText()).trim();
+          if(!title)fail('Product Detail title did not render');
+          const hasOptions=await page.locator('.product-option-input').count();
+          const hasPrice=await page.locator('#product-live-price').count();
+          const hasGallery=await page.locator('#product-media').count();
+          if(!hasPrice||!hasGallery)fail('Product Detail required runtime nodes missing');
+          if(errors.length)fail('Browser runtime errors: '+errors.join(' | '));
+          console.log(JSON.stringify({shopCards:cards,productHref:href,productTitle:title,optionInputs:hasOptions,hasPrice:!!hasPrice,hasGallery:!!hasGallery}));
+          await browser.close();
+          NODE
+          npx --yes --package=playwright@1.56.1 node /tmp/gilasart-runtime-verify.mjs
+
       - name: Verify published storefront routes
         run: |
           set -euo pipefail
