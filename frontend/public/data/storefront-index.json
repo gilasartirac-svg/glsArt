@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-06T20:40:24.681Z",
+  "generatedAt": "2026-10-07T09:34:40.944Z",
   "products": [
     {
       "id": "xls_0270",
@@ -15,7 +15,7 @@
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 16,
+      "view_count": 17,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 1,
@@ -36,7 +36,7 @@
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 5,
+      "view_count": 6,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 0,
@@ -246,7 +246,7 @@
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 0,
+      "view_count": 3,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 0,
@@ -4963,42 +4963,94 @@
   ],
   "articles": [
     {
+      "id": "cms_article_01",
       "slug": "choosing-art",
       "title": "راهنمای انتخاب تابلو برای فضای خانه",
+      "summary": "چطور اثر مناسب با ابعاد، نور و سبک فضای خود را انتخاب کنیم؟",
+      "body": "ابتدا ابعاد دیوار و فاصله دید را بررسی کنید، سپس به نور محیط و هماهنگی رنگ‌ها با مبلمان توجه کنید.",
+      "cover_image": "",
       "published_at": "2026-09-28 02:34:27",
       "updated_at": "2026-09-28 02:34:27"
     },
     {
+      "id": "cms_article_02",
       "slug": "copper-inlay",
       "title": "چرا معرق مس؟",
+      "summary": "نگاهی کوتاه به ویژگی‌های بصری و هنری معرق مس.",
+      "body": "ترکیب بافت، درخشش فلز و ظرافت کار دست باعث می‌شود هر اثر شخصیت بصری ویژه‌ای داشته باشد.",
+      "cover_image": "",
       "published_at": "2026-09-27 02:34:27",
       "updated_at": "2026-09-28 02:34:27"
     },
     {
+      "id": "cms_article_03",
       "slug": "art-care",
       "title": "نگهداری از آثار هنری",
+      "summary": "چند نکته برای حفظ زیبایی اثر در طول زمان.",
+      "body": "اثر را دور از رطوبت مستقیم، مواد شوینده و تابش شدید و طولانی‌مدت آفتاب نگهداری کنید.",
+      "cover_image": "",
       "published_at": "2026-09-26 02:34:27",
       "updated_at": "2026-09-28 02:34:27"
     }
   ],
   "news": [
     {
+      "id": "cms_news_01",
       "slug": "new-season",
       "title": "آغاز فصل تازه گیلاس آرت",
+      "summary": "مجموعه‌ای تازه از آثار معرق مس در راه است.",
+      "body": "به‌زودی مجموعه جدید آثار با جزئیات بیشتر در فروشگاه منتشر می‌شود.",
+      "cover_image": "",
       "published_at": "2026-09-28 02:34:27",
       "updated_at": "2026-09-28 02:34:27"
     },
     {
+      "id": "cms_news_02",
       "slug": "online-store",
       "title": "به‌روزرسانی فروشگاه آنلاین",
+      "summary": "امکانات جدید فروشگاه و پنل مدیریت در حال توسعه است.",
+      "body": "تجربه خرید، پرداخت و مدیریت محتوا در نسخه جدید با تمرکز بر سادگی و امنیت بهبود یافته است.",
+      "cover_image": "",
       "published_at": "2026-09-27 02:34:27",
       "updated_at": "2026-09-28 02:34:27"
     },
     {
+      "id": "cms_news_03",
       "slug": "custom-orders",
       "title": "پذیرش سفارش‌های سفارشی",
+      "summary": "امکان هماهنگی برای سفارش‌های خاص فراهم شده است.",
+      "body": "برای بررسی امکان ساخت اثر متناسب با فضای مورد نظر، با هنرکده تماس بگیرید.",
+      "cover_image": "",
       "published_at": "2026-09-26 02:34:27",
       "updated_at": "2026-09-28 02:34:27"
+    }
+  ],
+  "about": [
+    {
+      "id": "cms_about_01",
+      "slug": "about-main",
+      "title": "درباره گیلاس آرت",
+      "summary": "گیلاس آرت با تمرکز بر هنر دست‌ساز و تجربه‌ای شفاف برای خرید آثار هنری فعالیت می‌کند.",
+      "body": "گیلاس آرت تلاش می‌کند میان هنر اصیل، انتخاب آگاهانه و تجربه‌ای ساده برای مشتری ارتباطی زیبا ایجاد کند.",
+      "cover_image": "",
+      "published_at": "2026-09-28 02:34:27",
+      "updated_at": "2026-09-28 02:34:27"
+    }
+  ],
+  "contact": [
+    {
+      "id": "cms_contact_01",
+      "slug": "contact-main",
+      "title": "ارتباط با هنرکده گیلاس آرت",
+      "summary": "برای خرید، پیگیری سفارش و مشاوره با ما در ارتباط باشید.",
+      "body": "همکاران گیلاس آرت آماده پاسخ‌گویی به پرسش‌های شما هستند.",
+      "cover_image": "",
+      "phone": "05136624919",
+      "mobile": "09153090907",
+      "address": "مشهد میدان امام حسن شاهد شاهد ۲۵ هنرکده گیلاس آرت",
+      "map_url": "https://map.google.com/jo6L42sUBt1FZoFA6",
+      "published_at": "2026-09-28 02:34:27",
+      "updated_at": "2026-10-05 12:25:37"
     }
   ],
   "settings": {

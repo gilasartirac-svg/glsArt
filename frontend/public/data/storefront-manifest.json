@@ -1,9 +1,11 @@
 {
   "schemaVersion": 2,
-  "version": "2026-10-06T20-40-24.681Z",
-  "generatedAt": "2026-10-06T20:40:24.681Z",
+  "version": "63ce291723e66c87",
+  "generatedAt": "2026-10-07T09:34:40.944Z",
   "productCount": 230,
   "categoryCount": 5,
   "articleCount": 3,
-  "newsCount": 3
+  "newsCount": 3,
+  "aboutCount": 1,
+  "contactCount": 1
 }
