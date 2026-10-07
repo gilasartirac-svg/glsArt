@@ -12,6 +12,8 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       ADMIN_BOOTSTRAP_MOBILE: ${{ secrets.ADMIN_BOOTSTRAP_MOBILE }}
+      KAVENEGAR_API_KEY: ${{ secrets.KAVENEGAR_API_KEY }}
+      OTP_PEPPER: ${{ secrets.OTP_PEPPER }}
     steps:
       - uses: actions/checkout@v4
       - name: Read service deployment state
@@ -80,6 +82,14 @@ jobs:
       - name: Sync admin bootstrap secret
         if: steps.service.outputs.paused != 'true' && env.ADMIN_BOOTSTRAP_MOBILE != ''
         run: printf '%s' "$ADMIN_BOOTSTRAP_MOBILE" | npx wrangler secret put ADMIN_BOOTSTRAP_MOBILE --config wrangler.toml
+      - name: Verify and sync OTP secrets
+        if: steps.service.outputs.paused != 'true'
+        run: |
+          set -euo pipefail
+          test -n "$KAVENEGAR_API_KEY" || (echo "::error::KAVENEGAR_API_KEY GitHub secret is missing"; exit 1)
+          test -n "$OTP_PEPPER" || (echo "::error::OTP_PEPPER GitHub secret is missing"; exit 1)
+          printf '%s' "$KAVENEGAR_API_KEY" | npx wrangler secret put KAVENEGAR_API_KEY --config wrangler.toml
+          printf '%s' "$OTP_PEPPER" | npx wrangler secret put OTP_PEPPER --config wrangler.toml
 
       - name: Deploy Worker
         if: steps.service.outputs.paused != 'true'
