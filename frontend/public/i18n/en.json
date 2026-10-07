@@ -561,6 +561,11 @@
     "admin.78793700": "Logout",
     "admin.1081718737": "Toggle day/night mode",
     "admin.575516733": "Store management",
-    "admin.174052313": "Open admin menu"
+    "admin.174052313": "Open admin menu",
+    "enamad.adminDescription": "The official Enamad verification link and badge code are registered and reviewable here.",
+    "enamad.adminLinkLabel": "Official Enamad link",
+    "enamad.adminLinkButton": "View official Enamad verification page",
+    "enamad.adminCodeLabel": "Full badge code",
+    "enamad.adminCodeAria": "Full Enamad badge code"
   }
 }
