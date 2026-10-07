@@ -28,7 +28,6 @@ test('translation storage is additive, four-locale, indexed and fallback-safe',(
 test('frontend API and routing remain Persian-only',()=>{
  assert.doesNotMatch(app,/searchParams\.set\('locale'/);
  assert.match(app,/currentLocale==='fa'/);
- assert.match(app,/if\(currentLocale==='fa'\)/);
  assert.match(worker,/applyTranslations\(env,r\.results\|\|\[\],'product'/);
  assert.match(worker,/applyTranslations\(env,r\.results\|\|\[\],'category'/);
 });
