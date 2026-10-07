@@ -21,18 +21,18 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('focus',()=>loadMe().catch(()=>{}));
 authSyncTimer=setInterval(()=>{if(document.visibilityState==='visible')loadMe({force:true}).catch(()=>{})},60000);
 const SUPPORTED_LOCALES=['fa','en','tr','ar'];
-let i18nData=null,i18nLocaleLoaded='',i18nReverse=null;
+let i18nData=null,i18nLocaleLoaded='',i18nReverse=null,i18nCatalogs=new Map();
 const I18N_VERSION=1;
 function i18nRoot(){return location.pathname.startsWith('/glsArt')?'/glsArt/i18n/':'/i18n/'}
 async function loadLocale(locale){
  const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';
  if(i18nData&&i18nLocaleLoaded===l)return i18nData;
- try{const r=await fetch(i18nRoot()+encodeURIComponent(l)+'.json?v='+I18N_VERSION,{cache:'no-store',credentials:'same-origin'});if(!r.ok)throw new Error('i18n_http_'+r.status);const d=await r.json();if(Number(d?.version)!==I18N_VERSION||d?.locale!==l||!d?.strings||typeof d.strings!=='object')throw new Error('i18n_invalid');i18nData=d;i18nLocaleLoaded=l;i18nReverse=new Map(Object.entries(d.strings).map(([k,v])=>[String(v),k]));return d}catch(e){if(l!=='fa')return loadLocale('fa');console.warn('i18n_load_failed',e);i18nData={version:1,locale:'fa',direction:'rtl',defaultLocale:'fa',strings:{}};i18nLocaleLoaded='fa';i18nReverse=new Map();return i18nData}
+ try{const r=await fetch(i18nRoot()+encodeURIComponent(l)+'.json?v='+I18N_VERSION,{cache:'no-store',credentials:'same-origin'});if(!r.ok)throw new Error('i18n_http_'+r.status);const d=await r.json();if(Number(d?.version)!==I18N_VERSION||d?.locale!==l||!d?.strings||typeof d.strings!=='object')throw new Error('i18n_invalid');i18nData=d;i18nLocaleLoaded=l;i18nCatalogs.set(l,d);i18nReverse=new Map(Object.entries(d.strings).map(([k,v])=>[String(v),k]));return d}catch(e){if(l!=='fa')return loadLocale('fa');console.warn('i18n_load_failed',e);i18nData={version:1,locale:'fa',direction:'rtl',defaultLocale:'fa',strings:{}};i18nLocaleLoaded='fa';i18nReverse=new Map();return i18nData}
 }
 function t(key,vars={}){const value=i18nData?.strings?.[key]??key;return String(value).replace(/\{\{(\w+)\}\}/g,(_,name)=>String(vars?.[name]??''))}
 function translateRenderedContent(root=document){
- if(!i18nReverse)return;
- const trv=v=>{const raw=String(v??''),key=i18nReverse.get(raw.trim());return key?t(key):raw};
+ if(!i18nCatalogs.size)return;
+ const trv=v=>{const raw=String(v??''),trim=raw.trim();let key='';for(const d of i18nCatalogs.values()){const found=Object.entries(d?.strings||{}).find(([,value])=>String(value).trim()===trim);if(found){key=found[0];break}}return key?t(key):raw};
  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];let n;while((n=w.nextNode()))nodes.push(n);
  for(const node of nodes){if(!node.parentElement||/^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA)$/i.test(node.parentElement.tagName))continue;const raw=node.nodeValue||'',trim=raw.trim();if(!trim)continue;const v=trv(trim);if(v!==trim)node.nodeValue=raw.replace(trim,v)}
  root.querySelectorAll?.('*').forEach(el=>['aria-label','title','placeholder','alt'].forEach(a=>{if(!el.hasAttribute(a))return;const raw=el.getAttribute(a)||'',v=trv(raw);if(v!==raw)el.setAttribute(a,v)}));
@@ -91,8 +91,11 @@ async function bootstrapLocale(){
  // GilasArt customer storefront is Persian-only. Keep the existing i18n engine
  // available internally for compatibility, but do not expose locale selection or
  // redirect the public site into /fa, /en, /tr or /ar paths.
- await loadLocale('fa');
- setLocale('fa');
+ const explicit=localeFromPath();
+ const saved=readLocaleCookie();
+ const locale=explicit||saved||await detectPreferredLocale();
+ await loadLocale(locale);
+ setLocale(locale);
  if(location.pathname.includes('/admin'))return;
  const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
  let p=location.pathname;
@@ -122,7 +125,7 @@ function mountLanguageSwitcher(){
  const refresh=()=>{const l=currentLocale||'fa',meta=LOCALE_META[l]||LOCALE_META.fa;wrap.querySelector('.language-current-label').textContent=meta.label;wrap.querySelectorAll('.language-option').forEach(b=>{const active=b.dataset.locale===l;b.setAttribute('aria-selected',String(active));b.classList.toggle('is-active',active)});toggle.setAttribute('aria-label',t('header.languageLabel')+': '+meta.label)};
  refresh();
  toggle.addEventListener('click',()=>{const open=wrap.classList.toggle('is-open');toggle.setAttribute('aria-expanded',String(open));if(open)wrap.querySelector('.language-option.is-active')?.focus()});
- wrap.querySelectorAll('.language-option').forEach(button=>button.addEventListener('click',async()=>{const next=button.dataset.locale;if(!SUPPORTED_LOCALES.includes(next)||next===currentLocale){wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');return}await loadLocale(next);setLocale(next);refresh();const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';let p=location.pathname;if(base&&p.startsWith(base))p=p.slice(base.length)||'/';const parts=p.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();p='/'+parts.join('/');const target=localePath(p,next);history.pushState({},'',target);scrollRouteTop();routeInFlightTarget=target;wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget='';scrollRouteTop()})}));
+ wrap.querySelectorAll('.language-option').forEach(button=>button.addEventListener('click',async()=>{const next=button.dataset.locale;if(!SUPPORTED_LOCALES.includes(next)||next===currentLocale){wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');return}button.disabled=true;try{await loadLocale(next);setLocale(next);refresh();const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';let p=location.pathname;if(base&&p.startsWith(base))p=p.slice(base.length)||'/';const parts=p.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();p='/'+parts.join('/');const target=localePath(p,next);history.pushState({},'',target);scrollRouteTop();routeInFlightTarget=target;wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget='';scrollRouteTop()})}finally{button.disabled=false}}));
  document.addEventListener('click',e=>{if(!wrap.contains(e.target)){wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false')}});
 }
 let routeInFlightTarget='';
@@ -444,6 +447,7 @@ function layout(content){
  if(existingMain&&existingHeader&&existingFooter){
   existingMain.innerHTML=content;
   translateRenderedContent(existingMain);
+  mountLanguageSwitcher();
   return;
  }
  const adminLink=isAdminUser()?'<a class="admin-link" href="'+routeUrl('/admin')+'">'+t('nav.admin')+'</a>':'';
@@ -451,6 +455,7 @@ function layout(content){
  app.innerHTML='<header class="top"><div class="wrap nav"><a class="brand" href="'+routeUrl('/')+'" aria-label="'+t('header.logoAria')+'">'+t('app.name')+'<small>GILAS ART</small></a><nav class="links" id="main-menu" aria-label="'+t('header.menu')+'"><a href="'+routeUrl('/shop')+'">'+t('nav.shop')+'</a><a href="'+routeUrl('/about')+'">'+t('nav.about')+'</a><a href="'+routeUrl('/contact')+'">'+t('nav.contact')+'</a><a href="'+routeUrl('/news')+'">'+t('nav.news')+'</a><a href="'+routeUrl('/articles')+'">'+t('nav.articles')+'</a><a href="'+routeUrl('/rewards')+'" class="rewards-nav-link">'+t('nav.rewards')+'</a>'+adminLink+'</nav><div class="spacer"></div><div class="header-actions"><button class="theme-toggle" type="button" aria-label="'+t('header.theme')+'" title="'+t('header.themeTitle')+'" onclick="window.GilasArtTheme&&window.GilasArtTheme.toggle()">◐ <span>'+t('nav.dayNight')+'</span></button><a class="iconbtn cart-link" href="'+routeUrl('/cart')+'" aria-label="'+t('header.cartAria')+'"><div class="cart-icon-wrap">'+icon('cart')+'<b class="cart-count-badge" aria-label="'+t('header.cartCount',{count:fa(state.cartCount)})+'"'+(state.cartCount>0?'':' hidden')+'>'+ (state.cartCount>99?'۹۹+':fa(state.cartCount))+'</b></div><span>'+t('nav.cart')+'</span></a>'+userPoints+accountLink()+'</div><button class="mobile-menu-toggle" type="button" aria-label="'+t('header.openMenu')+'" aria-expanded="false" aria-controls="main-menu" onclick="window.GilasArtMobileMenu&&window.GilasArtMobileMenu.toggle(this)"><span></span><span></span><span></span></button></div></header><div class="rewards-promo"><div class="wrap rewards-promo-inner">'+(state.user?'<span>'+t('promo.points')+' <b>'+fa(state.points)+'</b></span><span>'+t('promo.coupon')+'</span><a href="'+routeUrl('/rewards')+'">'+t('promo.convert')+'</a>':'<span>'+t('promo.join')+'</span><a href="'+routeUrl('/account')+'">'+t('promo.joinAction')+'</a>')+'</div></div><main id="main-content" tabindex="-1">'+content+'</main>'+renderFooter();
  refreshFooterSocialLinks();
  translateRenderedContent(app);
+ mountLanguageSwitcher();
 }
 function routeBase(){return location.pathname.startsWith('/glsArt/')||location.pathname==='/glsArt'?'/glsArt':''}
 function routeUrl(path){return localePath(path)}
@@ -1237,7 +1242,8 @@ async function router(){
  cleanPath=cleanPath.replace(/^\/+|\/+$/g,'');
  const rawSegments=cleanPath?cleanPath.split('/').filter(Boolean).map(x=>{try{return decodeURIComponent(x)}catch{return x}}):[];
  if(rawSegments[0]&&SUPPORTED_LOCALES.includes(String(rawSegments[0]).toLowerCase()))rawSegments.shift();
- setLocale('fa');
+ // Preserve the selected language during SPA navigation.
+ if(!SUPPORTED_LOCALES.includes(currentLocale))setLocale('fa');
  const segments=rawSegments;
  const known=new Set(['shop','cart','account','rewards','checkout','about','contact','news','articles','terms','privacy','enamad','aparat','support','payment','admin','product']);
  const p=segments.length?(known.has(segments[0])?segments:['product',segments[0]]):[''];
