@@ -1,9 +1,9 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
+  "version": "2026-10-06T20-40-24.681Z",
   "generatedAt": "2026-10-06T20:40:24.681Z",
   "productCount": 230,
   "categoryCount": 5,
-  "reviewCount": 1060,
   "articleCount": 3,
   "newsCount": 3
 }
