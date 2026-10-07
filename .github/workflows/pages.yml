@@ -89,7 +89,7 @@ jobs:
           npm install --no-save playwright@1.56.1 >/dev/null 2>&1
           npx playwright install --with-deps chromium
           cd "$GITHUB_WORKSPACE"
-          cat > /tmp/gilasart-runtime-verify.mjs <<'NODE'
+          cat > /tmp/gilasart-playwright/gilasart-runtime-verify.mjs <<'NODE'
           import { chromium } from 'playwright';
           const browser = await chromium.launch({headless:true});
           const page = await browser.newPage({viewport:{width:1440,height:1000},locale:'fa-IR'});
@@ -115,7 +115,7 @@ jobs:
           console.log(JSON.stringify({shopCards:cards,productHref:href,productTitle:title,optionInputs:hasOptions,hasPrice:!!hasPrice,hasGallery:!!hasGallery}));
           await browser.close();
           NODE
-          npx --yes --package=playwright@1.56.1 node /tmp/gilasart-runtime-verify.mjs
+          node /tmp/gilasart-playwright/gilasart-runtime-verify.mjs
 
       - name: Verify published storefront routes
         run: |
