@@ -1301,6 +1301,7 @@ async function router(){
   }
   return renderNotFound();
  }catch(e){
+  if(e?.name==='AbortError')return;
   console.error('router_error',e);
   if(e?.status===404||e?.message==='صفحه پیدا نشد')return renderNotFound();
   // Never leave a customer-facing route blank after a runtime/API failure.
