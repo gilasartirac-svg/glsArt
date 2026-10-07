@@ -969,7 +969,7 @@ async function account(){
   let invoiceModule=null,invoiceSettings={},ordersData={items:[]};
   try{invoiceModule=await import('./invoice.js?v=20260929-invoice-2')}catch(e){console.warn('account_invoice_module_unavailable',e)}
   try{ordersData=await api('/api/account/orders')}catch(e){console.warn('account_orders_unavailable',e)}
-  const orders=Array.isArray(ordersData?.items)?ordersData.items:[],invoiceSettings=ordersData?.invoice||{};
+  const orders=Array.isArray(ordersData?.items)?ordersData.items:[];invoiceSettings=ordersData?.invoice||{};
   const statusLabels={PENDING:'در انتظار پرداخت',PAID:'پرداخت شد',PROCESSING:'در حال آماده‌سازی',SHIPPED:'ارسال شد',DELIVERED:'تحویل شد',CANCELLED:'لغو شد',FAILED:'ناموفق'};
   const steps=[['PENDING','ثبت سفارش'],['PAID','تأیید پرداخت'],['PROCESSING','آماده‌سازی اثر'],['SHIPPED','تحویل به پست / ارسال'],['DELIVERED','تحویل تابلو']];
   const rank={PENDING:0,PAID:1,PROCESSING:2,SHIPPED:3,DELIVERED:4};
