@@ -168,18 +168,26 @@ const storefrontSnapshotUrl=()=>((location.pathname.includes('/glsArt')?'/glsArt
 async function loadStorefrontSnapshot(){
  if(storefrontSnapshotPromise)return storefrontSnapshotPromise;
  storefrontSnapshotPromise=(async()=>{
+  const root=location.pathname.includes('/glsArt')?'/glsArt':'';
+  const base=root+'/data/storefront.json';
+  const valid=d=>Number(d?.meta?.schemaVersion)===1&&Array.isArray(d?.products)&&Array.isArray(d?.categories)&&d.settings&&typeof d.settings==='object';
   try{
-   const mr=await fetchWithTimeout(storefrontSnapshotUrl(),{cache:'no-store',credentials:'same-origin'},5000);
-   if(!mr.ok)return null;
-   const manifest=await mr.json();
-   if(Number(manifest?.schemaVersion)!==1||!manifest?.generatedAt)return null;
-   const base=(location.pathname.includes('/glsArt')?'/glsArt':'')+'/data/storefront.json';
-   const sr=await fetchWithTimeout(base+'?v='+encodeURIComponent(manifest.generatedAt),{cache:'no-store',credentials:'same-origin'},5000);
-   if(!sr.ok)return null;
-   const d=await sr.json();
-   if(Number(d?.meta?.schemaVersion)!==1||!Array.isArray(d.products)||!Array.isArray(d.categories)||!d.settings)return null;
-   return d;
-  }catch{return null}
+   const mr=await fetchWithTimeout(root+'/data/storefront-manifest.json',{cache:'no-store',credentials:'same-origin'},5000);
+   if(mr.ok){
+    const manifest=await mr.json();
+    if(Number(manifest?.schemaVersion)===1&&manifest?.generatedAt){
+     const sr=await fetchWithTimeout(base+'?v='+encodeURIComponent(manifest.generatedAt),{cache:'no-store',credentials:'same-origin'},5000);
+     if(sr.ok){const d=await sr.json();if(valid(d))return d}
+    }
+   }
+  }catch{}
+  // Static fallback: the storefront JSON itself is the source of truth for public/offline browsing.
+  // Do not make the entire shop disappear because a manifest or CDN cache is stale.
+  try{
+   const sr=await fetchWithTimeout(base+'?fallback='+Date.now(),{cache:'no-store',credentials:'same-origin'},7000);
+   if(sr.ok){const d=await sr.json();if(valid(d))return d}
+  }catch{}
+  return null;
  })();
  const d=await storefrontSnapshotPromise;
  if(!d)storefrontSnapshotPromise=null;
