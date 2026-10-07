@@ -892,7 +892,7 @@ function startNotificationPolling(){
  clearInterval(notificationTimer);notificationTimer=null;
  if(state.user){pollNotifications();notificationTimer=setInterval(()=>{pollNotifications()},10000)}
 }
-async function loadMe({force=false}={}){const now=Date.now();if(!force&&state.meLoadedAt&&now-state.meLoadedAt<30000)return {user:state.user,roles:state.roles,permissions:state.permissions};try{const d=await api('/api/me');syncAuthStateFromSession(d);if(state.user){if(!state.rewards){try{const rewardsResult=await api('/api/rewards');state.rewards=rewardsResult;state.points=Number(rewardsResult.balance||0)}catch{state.rewards=null;state.points=0}}syncCartBadge().catch(()=>{});}else{state.rewards=null;state.points=0;updateCartBadge(0)}startNotificationPolling();return d}catch(e){if(e?.name==='AbortError')throw e;return null}}
+async function loadMe({force=false}={}){if(!force&&state.meLoadedAt&&Date.now()-state.meLoadedAt<30000)return {user:state.user,roles:state.roles,permissions:state.permissions};try{const d=await api('/api/me');syncAuthStateFromSession(d);if(state.user){if(!state.rewards){try{const rewardsResult=await api('/api/rewards');state.rewards=rewardsResult;state.points=Number(rewardsResult.balance||0)}catch{state.rewards=null;state.points=0}}syncCartBadge().catch(()=>{});}else{state.rewards=null;state.points=0;updateCartBadge(0)}startNotificationPolling();return d}catch(e){if(e?.name==='AbortError')throw e;return null}}
 async function cart(){
  await loadMe();
  if(!state.user){
