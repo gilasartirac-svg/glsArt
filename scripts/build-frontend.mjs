@@ -59,7 +59,7 @@ await cp('CNAME','dist/CNAME');
 for(const file of ['dist/index.html','dist/404.html','dist/admin/index.html',...['fa','en','tr','ar'].map(l=>'dist/'+l+'/index.html')]){
   try{
     let html=await readFile(file,'utf8');
-    html=html.replace(/(styles\.css|config\.js|app\.js)(?:\?v=[^"'\\s>]*)?/g,(_,asset)=>asset+'?v='+buildVersion);
+    html=html.replace(/(styles\.css|responsive-production\.css|config\.js|app\.js)(?:\?v=[^"'\\s>]*)?/g,(_,asset)=>asset+'?v='+buildVersion);
     await writeFile(file,html);
   }catch{}
 }
