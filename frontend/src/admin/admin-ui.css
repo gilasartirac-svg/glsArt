@@ -180,3 +180,79 @@
 @media(max-width:1100px){.admin-layout .grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-layout .data-grid-toolbar{grid-template-columns:minmax(180px,1fr) auto}.admin-layout .data-grid-clear{grid-column:2}}
 @media(max-width:760px){.admin-layout .admin-title{margin-bottom:14px}.admin-layout .panel{padding:14px}.admin-layout .grid{grid-template-columns:1fr}.admin-layout .data-grid-toolbar{grid-template-columns:1fr}.admin-layout .data-grid-clear{grid-column:auto;width:100%}.admin-layout .data-grid-count{order:3}.admin-layout .order-detail-grid{grid-template-columns:1fr}.admin-layout .order-detail-head{flex-direction:column}.admin-layout .order-detail-actions{width:100%}.admin-layout .order-detail-actions .btn{flex:1}}
 @media(max-width:520px){.admin-layout .admin-page{padding-block:14px 26px!important}.admin-layout .admin-title h2{font-size:20px}.admin-layout .panel{padding:13px;border-radius:14px}.admin-layout .admin-table{min-width:720px}.admin-layout .products-admin .admin-table{min-width:900px}.admin-layout .orders-admin .admin-table{min-width:800px}.admin-layout .order-item{flex-direction:column}}
+
+/* Page-specific production polish — presentation only. */
+.admin-layout .social-links-editor{display:grid;gap:10px}
+.admin-layout .social-link-row{display:grid;grid-template-columns:48px minmax(150px,.7fr) minmax(160px,.8fr) minmax(240px,1.5fr) auto auto;gap:10px;align-items:end;padding:12px;border:1px solid var(--admin-line);border-radius:14px;background:rgba(255,255,255,.018)}
+.admin-layout .social-link-icon{width:48px;height:48px;border:1px solid var(--admin-line);border-radius:12px;display:grid;place-items:center;background:#0e0e12}
+.admin-layout .social-link-icon img{width:25px;height:25px;display:block}
+.admin-layout .social-link-row label{display:flex;flex-direction:column;gap:6px;color:var(--admin-muted);font-size:12px}
+.admin-layout .social-active-field{display:flex!important;flex-direction:row!important;align-items:center;gap:7px!important;white-space:nowrap;padding-bottom:10px}
+.admin-layout .social-active-field input{width:auto;accent-color:var(--admin-gold)}
+.admin-layout .social-links-empty{padding:18px;text-align:center;color:var(--admin-muted);border:1px dashed var(--admin-line);border-radius:12px}
+.admin-layout .enamad-admin-preview{display:grid;grid-template-columns:minmax(100px,.35fr) minmax(0,1fr);gap:10px 14px;align-items:center}
+.admin-layout .enamad-admin-preview textarea{width:100%;min-height:130px;grid-column:1/-1}
+.admin-layout .enamad-code-label{color:var(--admin-muted);font-size:12px}
+.admin-layout .admin-modal-backdrop{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.68);backdrop-filter:blur(5px)}
+.admin-layout .admin-modal{width:min(100%,980px);max-height:min(90vh,900px);overflow:auto;background:var(--admin-surface);border:1px solid var(--admin-line);border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+.admin-layout .admin-modal-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:18px;border-bottom:1px solid var(--admin-line)}
+.admin-layout .admin-modal-head h3{margin:4px 0}
+.admin-layout .faq-manager-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.9fr);gap:18px;padding:18px}
+.admin-layout .faq-manager-list{display:grid;gap:10px;min-width:0}
+.admin-layout .faq-manager-item{padding:13px;border:1px solid var(--admin-line);border-radius:12px;background:rgba(255,255,255,.018)}
+.admin-layout .faq-manager-item-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.admin-layout .faq-manager-item p{margin:8px 0;line-height:1.8;color:var(--admin-muted);white-space:pre-wrap;overflow-wrap:anywhere}
+.admin-layout .faq-manager-item-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.admin-layout .faq-form-actions{display:flex;gap:8px;flex-wrap:wrap}
+.admin-layout .ticket-thread{display:grid;gap:9px;margin:16px 0}
+.admin-layout .ticket-message{max-width:88%;padding:11px 13px;border:1px solid var(--admin-line);border-radius:13px;line-height:1.85;overflow-wrap:anywhere}
+.admin-layout .ticket-message.from-admin{justify-self:start;border-right:3px solid var(--admin-gold);background:rgba(201,168,106,.045)}
+.admin-layout .ticket-message.from-user{justify-self:end;background:rgba(255,255,255,.018)}
+.admin-layout .message-meta{font-size:11px;color:var(--admin-muted);margin-bottom:4px}
+.admin-layout .support-admin-detail{min-height:180px}
+.admin-layout .attribute-choice-card.is-selected{border-color:rgba(201,168,106,.5);background:rgba(201,168,106,.055)}
+.admin-layout .attribute-choice-main{cursor:pointer}
+.admin-layout .attribute-choice-main span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.admin-layout .attribute-choice-main small{color:var(--admin-muted);font-size:11px}
+.admin-layout .attribute-card{display:grid;gap:10px}
+.admin-layout .attribute-card-head>div{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.admin-layout .attribute-option-editor-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto minmax(150px,.6fr);gap:10px;align-items:center;padding:10px;border:1px solid var(--admin-line);border-radius:11px;background:#101014}
+.admin-layout .attribute-option-editor-row>div{min-width:0}
+.admin-layout .attribute-option-editor-row small{display:block;color:var(--admin-muted);margin-top:3px}
+.admin-layout .product-option-price{display:flex;flex-direction:column;gap:5px;color:var(--admin-muted);font-size:11px}
+.admin-layout .product-option-price input{min-height:38px}
+.admin-layout .review-stars{letter-spacing:2px;color:var(--admin-gold-strong);white-space:nowrap}
+.admin-layout .review-status{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:11px;white-space:nowrap}
+.admin-layout .review-status.is-approved{color:var(--admin-ok);background:rgba(84,184,138,.09)}
+.admin-layout .review-status.is-pending{color:#e0c487;background:rgba(201,168,106,.09)}
+.admin-layout .reviews-manager>.data-grid-toolbar{display:none}
+.admin-layout .visitors-admin .data-grid-toolbar,.admin-layout .tickets-admin .data-grid-toolbar{position:sticky;top:0;z-index:4}
+.admin-layout .admin-snapshot-hero>div{min-width:0}
+.admin-layout .admin-snapshot-hero p{line-height:1.9;color:var(--admin-muted)}
+.admin-layout .admin-snapshot-hero .btn{align-self:center}
+.admin-layout .dashboard-kpis,.admin-layout .dashboard-main-grid,.admin-layout .dashboard-secondary-grid{min-width:0}
+.admin-layout .dashboard-panel{overflow:hidden}
+.admin-layout .dashboard-chart{min-width:0}
+.admin-layout .dashboard-chart-value{font-variant-numeric:tabular-nums}
+@media(max-width:1100px){
+ .admin-layout .social-link-row{grid-template-columns:48px repeat(2,minmax(0,1fr))}
+ .admin-layout .social-url-field{grid-column:span 2}
+ .admin-layout .social-active-field{grid-column:auto}
+ .admin-layout .faq-manager-body{grid-template-columns:1fr}
+ .admin-layout .attribute-option-editor-row{grid-template-columns:minmax(0,1fr) repeat(2,auto)}
+ .admin-layout .product-option-price{grid-column:1/-1}
+}
+@media(max-width:760px){
+ .admin-layout .social-link-row{grid-template-columns:48px 1fr}
+ .admin-layout .social-url-field{grid-column:1/-1}
+ .admin-layout .social-active-field{grid-column:1}
+ .admin-layout .social-remove{grid-column:2}
+ .admin-layout .enamad-admin-preview{grid-template-columns:1fr}
+ .admin-layout .enamad-admin-preview textarea{grid-column:1}
+ .admin-layout .admin-modal-backdrop{padding:8px}
+ .admin-layout .admin-modal{max-height:94vh;border-radius:15px}
+ .admin-layout .admin-modal-head,.admin-layout .faq-manager-body{padding:14px}
+ .admin-layout .attribute-option-editor-row{grid-template-columns:1fr}
+ .admin-layout .attribute-option-editor-row label{justify-self:start}
+ .admin-layout .ticket-message{max-width:100%}
+}
