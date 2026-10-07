@@ -97,10 +97,12 @@ jobs:
           const errors=[];
           page.on('pageerror',e=>errors.push('pageerror: '+e.message));
           page.on('console',m=>{if(m.type()==='error')errors.push('console: '+m.text())});
+          page.on('requestfailed',r=>errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||'')));
+          page.on('response',r=>{if(/\\/(?:app|config)\\.js/.test(new URL(r.url()).pathname))console.log('ASSET_RESPONSE='+r.status()+' '+r.url())});
           const fail=(m)=>{throw new Error(m)};
           await page.goto('https://gilasart.ir/shop?runtime_verify='+Date.now(),{waitUntil:'networkidle',timeout:60000});
           await page.waitForTimeout(5000);
-          const shopDiagnostics=await page.evaluate(()=>({url:location.href,main:document.querySelector('#main-content')?.innerText?.slice(0,2000)||'',results:document.querySelector('#results')?.innerHTML?.slice(0,2000)||'',cards:document.querySelectorAll('#results .product-card').length,app:document.querySelector('#app')?.innerHTML?.slice(0,3000)||''}));
+          const shopDiagnostics=await page.evaluate(()=>({url:location.href,scripts:[...document.scripts].map(s=>s.src||'inline'),readyState:document.readyState,main:document.querySelector('#main-content')?.innerText?.slice(0,2000)||'',results:document.querySelector('#results')?.innerHTML?.slice(0,2000)||'',cards:document.querySelectorAll('#results .product-card').length,app:document.querySelector('#app')?.innerHTML?.slice(0,3000)||''}));
           if(!shopDiagnostics.cards) console.log('SHOP_RUNTIME_DIAGNOSTICS='+JSON.stringify(shopDiagnostics));
           await page.locator('#results .product-card').first().waitFor({state:'visible',timeout:5000});
           const cards=await page.locator('#results .product-card').count();
