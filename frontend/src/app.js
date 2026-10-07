@@ -226,32 +226,32 @@ async function api(path,opt={}){
  if(opt.body&&!(typeof FormData!=='undefined'&&opt.body instanceof FormData))headers['content-type']='application/json';
  try{
   if((opt.method||'GET').toUpperCase()==='GET'&&currentLocale==='fa'){
-   const local=await snapshotApi(localizedPath);
+   const local=await snapshotApi(path);
    if(local)return local;
   }
   const requestHeaders={...headers};
   const fetchOptions={credentials:'include',cache:'no-store',headers:requestHeaders,...opt};
   if((opt.method||'GET').toUpperCase()==='GET'&&routeAbortController?.signal&&!opt.signal)fetchOptions.signal=routeAbortController.signal;
-  const r=await fetch(API+localizedPath,fetchOptions);
+  const r=await fetch(API+path,fetchOptions);
   const raw=await r.text();
   let d={};try{d=raw?JSON.parse(raw):{}}catch{}
-  if(!r.ok){if(r.status===401||r.status===403)clearAuthState();const code=String(d.error||d.message||'');const e=new Error(code==='d1_limit_exceeded'?'سرویس داده فروشگاه موقتاً به سقف روزانه رسیده است. لطفاً چند دقیقه بعد دوباره تلاش کنید.':(r.status===404?t('error.notFound'):r.status===401||r.status===403?t('error.unauthorized'):t('error.service')));e.status=r.status;e.code=code||('http_'+r.status);e.path=localizedPath;throw e}
+  if(!r.ok){if(r.status===401||r.status===403)clearAuthState();const code=String(d.error||d.message||'');const e=new Error(code==='d1_limit_exceeded'?'سرویس داده فروشگاه موقتاً به سقف روزانه رسیده است. لطفاً چند دقیقه بعد دوباره تلاش کنید.':(r.status===404?t('error.notFound'):r.status===401||r.status===403?t('error.unauthorized'):t('error.service')));e.status=r.status;e.code=code||('http_'+r.status);e.path=path;throw e}
   const requiredShape=path=>{
-   if(localizedPath==='/api/health')return d&&d.ok===true&&d.db===true;
-   if(/^\/api\/products\?/.test(localizedPath)||localizedPath==='/api/products')return Array.isArray(d?.items);
-   if(localizedPath==='/api/categories'||localizedPath==='/api/flash-sales')return Array.isArray(d?.items);
-   if(localizedPath.startsWith('/api/products/')&&path.endsWith('/view'))return d?.ok===true;
+   if(path==='/api/health')return d&&d.ok===true&&d.db===true;
+   if(/^\/api\/products\?/.test(path)||path==='/api/products')return Array.isArray(d?.items);
+   if(path==='/api/categories'||path==='/api/flash-sales')return Array.isArray(d?.items);
+   if(path.startsWith('/api/products/')&&path.endsWith('/view'))return d?.ok===true;
    if(path.startsWith('/api/products/')&&!path.includes('/reviews'))return d?.product&&Array.isArray(d.images)&&Array.isArray(d.attributes)&&Array.isArray(d.categories)&&Array.isArray(d.reviews);
-   if(localizedPath.startsWith('/api/content?'))return Array.isArray(d?.items);
-   if(localizedPath.startsWith('/api/content/'))return d?.item&&typeof d.item==='object';
-   if(localizedPath==='/api/settings')return d?.settings&&typeof d.settings==='object';
-   if(localizedPath==='/api/site-rules')return d?.item&&typeof d.item==='object';
-   if(localizedPath==='/api/notifications')return Array.isArray(d?.items);
+   if(path.startsWith('/api/content?'))return Array.isArray(d?.items);
+   if(path.startsWith('/api/content/'))return d?.item&&typeof d.item==='object';
+   if(path==='/api/settings')return d?.settings&&typeof d.settings==='object';
+   if(path==='/api/site-rules')return d?.item&&typeof d.item==='object';
+   if(path==='/api/notifications')return Array.isArray(d?.items);
    return true;
   };
   if(!requiredShape(path))throw new Error(t('error.incomplete'));
   return d;
- }catch(e){console.error('[GilasArt][api]',{path:localizedPath,status:e?.status||0,code:e?.code||'',message:e?.message||String(e)});throw e}
+ }catch(e){console.error('[GilasArt][api]',{path:path,status:e?.status||0,code:e?.code||'',message:e?.message||String(e)});throw e}
 }
 function csrf(){return csrfToken||''}
 function seoUrl(value){try{const u=new URL(String(value||''),location.href);return u.href}catch{return ''}}
