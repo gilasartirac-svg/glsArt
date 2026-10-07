@@ -7,8 +7,17 @@ self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()});
 function isApi(url){return url.pathname.includes('/api/')||url.hostname.includes('workers.dev')}
 function cachePut(req,res){if(res?.ok)caches.open(CACHE).then(c=>c.put(req,res.clone())).catch(()=>{})}
-function networkFirst(req,cachedFallback=true){
- return fetch(req,{cache:'no-store'}).then(r=>{cachePut(req,r);return r}).catch(()=>cachedFallback?caches.match(req):Response.error());
+async function networkFirst(req,cachedFallback=true){
+ try{
+  const r=await fetch(req,{cache:'no-store'});
+  cachePut(req,r);
+  return r;
+ }catch{
+  if(!cachedFallback)return Response.error();
+  // JSON requests are frequently versioned with query strings. The cached
+  // snapshot is authoritative, so ignore the query string when falling back.
+  return (await caches.match(req,{ignoreSearch:true}))||Response.error();
+ }
 }
 self.addEventListener('fetch',event=>{
  const req=event.request,url=new URL(req.url);
@@ -22,7 +31,7 @@ self.addEventListener('fetch',event=>{
    return;
  }
  if(/\.(?:js|css|svg|png|jpg|jpeg|webp|woff2?)$/i.test(url.pathname)){
-   event.respondWith(caches.match(req).then(cached=>cached||fetch(req,{cache:'no-store'}).then(r=>{cachePut(req,r);return r})));
+   event.respondWith(caches.match(req).then(cached=>cached||fetch(req,{cache:'no-store'}).then(r=>{cachePut(req,r);return r}).catch(()=>caches.match(req,{ignoreSearch:true}))));
    return;
  }
  event.respondWith(fetch(req).catch(()=>caches.match(req)));
