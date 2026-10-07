@@ -20,114 +20,32 @@ try{authChannel?.addEventListener('message',e=>{if(e?.data?.type==='logout'){cle
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadMe().catch(()=>{})});
 window.addEventListener('focus',()=>loadMe().catch(()=>{}));
 authSyncTimer=setInterval(()=>{if(document.visibilityState==='visible')loadMe({force:true}).catch(()=>{})},60000);
-const SUPPORTED_LOCALES=['fa','en','tr','ar'];
-let i18nData=null,i18nLocaleLoaded='',i18nReverse=null,i18nCatalogs=new Map(),i18nReverseCatalogs=new Map();
-const I18N_VERSION=1;
-function i18nRoot(){return location.pathname.startsWith('/glsArt')?'/glsArt/i18n/':'/i18n/'}
-async function loadLocale(locale){
- const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';
- if(i18nData&&i18nLocaleLoaded===l)return i18nData;
- try{const r=await fetch(i18nRoot()+encodeURIComponent(l)+'.json?v='+I18N_VERSION,{cache:'no-store',credentials:'same-origin'});if(!r.ok)throw new Error('i18n_http_'+r.status);const d=await r.json();if(Number(d?.version)!==I18N_VERSION||d?.locale!==l||!d?.strings||typeof d.strings!=='object')throw new Error('i18n_invalid');i18nData=d;i18nLocaleLoaded=l;i18nCatalogs.set(l,d);i18nReverse=new Map(Object.entries(d.strings).map(([k,v])=>[String(v),k]));i18nReverseCatalogs.set(l,i18nReverse);return d}catch(e){if(l!=='fa')return loadLocale('fa');console.warn('i18n_load_failed',e);i18nData={version:1,locale:'fa',direction:'rtl',defaultLocale:'fa',strings:{}};i18nLocaleLoaded='fa';i18nReverse=new Map();return i18nData}
-}
-function t(key,vars={}){const value=i18nData?.strings?.[key]??key;return String(value).replace(/\{\{(\w+)\}\}/g,(_,name)=>String(vars?.[name]??''))}
-function translateRenderedContent(root=document){
- if(!i18nCatalogs.size)return;
- const trv=v=>{const raw=String(v??''),trim=raw.trim();let key='';for(const reverse of i18nReverseCatalogs.values()){const found=reverse.get(trim);if(found){key=found;break}}return key?t(key):raw};
- const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];let n;while((n=w.nextNode()))nodes.push(n);
- for(const node of nodes){if(!node.parentElement||/^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA)$/i.test(node.parentElement.tagName))continue;const raw=node.nodeValue||'',trim=raw.trim();if(!trim)continue;const v=trv(trim);if(v!==trim)node.nodeValue=raw.replace(trim,v)}
- root.querySelectorAll?.('*').forEach(el=>['aria-label','title','placeholder','alt'].forEach(a=>{if(!el.hasAttribute(a))return;const raw=el.getAttribute(a)||'',v=trv(raw);if(v!==raw)el.setAttribute(a,v)}));
-}
-window.GilasArtI18n={t,get locale(){return currentLocale},supported:[...SUPPORTED_LOCALES]};
-
-const LOCALE_META={fa:{label:'فارسی',dir:'rtl'},en:{label:'English',dir:'ltr'},tr:{label:'Türkçe',dir:'ltr'},ar:{label:'العربية',dir:'rtl'}};
-const COUNTRY_LOCALE={IR:'fa',TR:'tr',IQ:'ar',AE:'ar',SA:'ar',QA:'ar',KW:'ar',BH:'ar',OM:'ar',JO:'ar',EG:'ar',SY:'ar',LB:'ar',YE:'ar',PS:'ar'};
-const BROWSER_LOCALE={fa:'fa',ar:'ar',tr:'tr',en:'en'};
+// GilasArt storefront is intentionally Persian-only for the current production release.
+// No customer-facing language switch, locale detection, locale cookie, or locale-prefixed routing.
+const SUPPORTED_LOCALES=['fa'];
 let currentLocale='fa';
-function localeFromPath(pathname=location.pathname){
- let p=String(pathname||'/');const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
- if(base&&p.startsWith(base))p=p.slice(base.length)||'/';
- const first=p.split('/').filter(Boolean)[0]||'';return SUPPORTED_LOCALES.includes(first.toLowerCase())?first.toLowerCase():'';
+const LOCALE_META={fa:{label:'فارسی',dir:'rtl'}};
+function loadLocale(){
+  if(i18nData&&i18nLocaleLoaded==='fa')return Promise.resolve(i18nData);
+  return fetch((location.pathname.startsWith('/glsArt')?'/glsArt/i18n/':'/i18n/')+'fa.json?v=1',{cache:'no-store',credentials:'same-origin'})
+    .then(r=>{if(!r.ok)throw new Error('i18n_http_'+r.status);return r.json()})
+    .then(d=>{i18nData=d;i18nLocaleLoaded='fa';return d})
+    .catch(()=>{i18nData={version:1,locale:'fa',direction:'rtl',defaultLocale:'fa',strings:{}};i18nLocaleLoaded='fa';return i18nData});
 }
-function updateLocaleSeo(){try{updateSeoLinks()}catch{}}
-function setLocale(locale){const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';currentLocale=l;document.documentElement.lang=l;document.documentElement.dir=LOCALE_META[l].dir;document.documentElement.dataset.locale=l;writeLocaleCookie(l);updateLocaleSeo();translateRenderedContent(document)}
-function browserLocale(){const langs=navigator.languages?.length?navigator.languages:[navigator.language||''];for(const x of langs){const k=String(x).toLowerCase().split('-')[0];if(BROWSER_LOCALE[k])return BROWSER_LOCALE[k]}return'en'}
-function readLocaleCookie(){
- try{
-  const m=document.cookie.split(';').map(x=>x.trim()).find(x=>x.startsWith('gilasart_locale='));
-  const v=decodeURIComponent((m||'').split('=').slice(1).join('='));
-  return SUPPORTED_LOCALES.includes(v)?v:'';
- }catch{return ''}
+function t(key,vars={}){const value=i18nData?.strings?.[key]??key;return String(value).replace(/\\{\\{(\\w+)\\}\\}/g,(_,name)=>String(vars?.[name]??''));}
+function translateRenderedContent(){/* Persian-only: rendered text is already canonical. */}
+window.GilasArtI18n={t,get locale(){return 'fa'},supported:['fa']};
+function setLocale(){currentLocale='fa';document.documentElement.lang='fa';document.documentElement.dir='rtl';document.documentElement.dataset.locale='fa';}
+function localePath(path){
+  const p=String(path||'/');if(p.startsWith('http://')||p.startsWith('https://')||p.startsWith('//')||p.startsWith('/api/'))return p;
+  const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
+  let clean=p.startsWith('/')?p:'/'+p;
+  if(base&&clean.startsWith(base))clean=clean.slice(base.length)||'/';
+  const parts=clean.split('/').filter(Boolean);if(parts[0]==='fa')parts.shift();
+  return base+(parts.length?'/'+parts.join('/'):'');
 }
-function writeLocaleCookie(locale){
- const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';
- try{document.cookie='gilasart_locale='+encodeURIComponent(l)+'; Max-Age=31536000; Path=/; SameSite=Lax; Secure'}catch{}
-}
-async function detectPreferredLocale(){
- const saved=readLocaleCookie();if(saved)return saved;
- try{
-  const r=await fetch(API+'/api/locale',{credentials:'omit',cache:'no-store'});
-  if(r.ok){const d=await r.json();if(SUPPORTED_LOCALES.includes(d?.locale))return d.locale}
- }catch{}
- return 'fa';
-}
-function publicPathNeedsLocale(pathname){
- let p=String(pathname||'/');const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
- if(base&&p.startsWith(base))p=p.slice(base.length)||'/';
- const first=p.split('/').filter(Boolean)[0]||'';
- return !first||['shop','cart','account','rewards','checkout','about','contact','news','articles','article','terms','privacy','enamad','aparat','support','payment','product'].includes(first);
-}
-function localePath(path,locale=currentLocale){
- const p=String(path||'/');if(p.startsWith('http://')||p.startsWith('https://')||p.startsWith('//')||p.startsWith('/api/'))return p;
- const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
- let clean=p.startsWith('/')?p:'/'+p;
- if(base&&clean.startsWith(base))clean=clean.slice(base.length)||'/';
- const parts=clean.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();clean='/'+parts.join('/');
- // The public customer storefront is Persian-only. Internal i18n remains available,
- // but public navigation must never manufacture /fa, /en, /tr or /ar URLs.
- return base+(clean==='/'?'':clean);
-}
-async function bootstrapLocale(){
- // Compatibility marker for the existing locale-detection regression contract: const explicit=localeFromPath(),locale=explicit||await detectPreferredLocale();
- // GilasArt customer storefront is Persian-only. Keep the existing i18n engine
- // available internally for compatibility, but do not expose locale selection or
- // redirect the public site into /fa, /en, /tr or /ar paths.
- const explicit=localeFromPath();
- const saved=readLocaleCookie();
- const locale=explicit||saved||await detectPreferredLocale();
- await loadLocale(locale);
- setLocale(locale);
- if(location.pathname.includes('/admin'))return;
- const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
- let p=location.pathname;
- if(base&&p.startsWith(base))p=p.slice(base.length)||'/';
- const parts=p.split('/').filter(Boolean);
- if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase())){
-   parts.shift();
-   const target=base+'/'+parts.join('/')+(location.search||'')+(location.hash||'');
-   history.replaceState({},'',target==='/'?base+'/' : target);
- }
-}
-function languageSelectorSvg(){
- return '<svg class="language-selector-svg" viewBox="0 0 32 20" aria-hidden="true" focusable="false"><text x="1" y="15" font-family="Arial,sans-serif" font-size="14" font-weight="700">A</text><path d="M17 4h3.2c3.2 0 5.3 2.1 5.3 5.9s-2.1 5.9-5.3 5.9H17zM20 5.9v8c2.1 0 3.5-1.3 3.5-4s-1.4-4-3.5-4z" fill="currentColor"/><path d="M14 2v16" stroke="currentColor" stroke-width="1.4" opacity=".42"/></svg>';
-}
-function languageFlagSvg(locale){
- const flags={fa:['#239f40','#fff','#da0000'],en:['#012169','#fff','#c8102e'],tr:['#e30a17','#fff','#e30a17'],ar:['#111','#fff','#007a3d']};
- const c=flags[locale]||flags.fa;
- return '<svg viewBox="0 0 28 18" role="img" aria-hidden="true" focusable="false"><rect width="28" height="18" rx="2" fill="'+c[0]+'"/><rect y="6" width="28" height="6" fill="'+c[1]+'"/><rect y="12" width="28" height="6" fill="'+c[2]+'"/></svg>';
-}
-function mountLanguageSwitcher(){
- const nav=document.querySelector('.nav'),anchor=nav?.querySelector('.theme-toggle');
- if(!nav||nav.querySelector('.language-switcher'))return;
- const wrap=document.createElement('div');wrap.className='language-switcher';
- wrap.innerHTML='<button type="button" class="language-switcher-toggle" id="gilasart-language-toggle" aria-haspopup="listbox" aria-expanded="false" aria-label="'+t('header.languageLabel')+'"><span class="language-current-icon">'+languageSelectorSvg()+'</span><span class="language-current-label"></span><span class="language-chevron" aria-hidden="true">⌄</span></button><div class="language-switcher-menu" role="listbox" aria-label="'+t('header.languageMenu')+'">'+SUPPORTED_LOCALES.map(l=>'<button type="button" class="language-option" role="option" data-locale="'+l+'" aria-selected="false"><span class="language-flag">'+languageFlagSvg(l)+'</span><span class="language-option-label">'+LOCALE_META[l].label+'</span><span class="language-option-code">'+l.toUpperCase()+'</span></button>').join('')+'</div>';
- if(anchor)nav.insertBefore(wrap,anchor);else nav.appendChild(wrap);
- const toggle=wrap.querySelector('#gilasart-language-toggle');
- const refresh=()=>{const l=currentLocale||'fa',meta=LOCALE_META[l]||LOCALE_META.fa;wrap.querySelector('.language-current-label').textContent=meta.label;wrap.querySelectorAll('.language-option').forEach(b=>{const active=b.dataset.locale===l;b.setAttribute('aria-selected',String(active));b.classList.toggle('is-active',active)});toggle.setAttribute('aria-label',t('header.languageLabel')+': '+meta.label)};
- refresh();
- toggle.addEventListener('click',()=>{const open=wrap.classList.toggle('is-open');toggle.setAttribute('aria-expanded',String(open));if(open)wrap.querySelector('.language-option.is-active')?.focus()});
- wrap.querySelectorAll('.language-option').forEach(button=>button.addEventListener('click',async()=>{const next=button.dataset.locale;if(!SUPPORTED_LOCALES.includes(next)||next===currentLocale){wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');return}button.disabled=true;try{await loadLocale(next);setLocale(next);refresh();const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';let p=location.pathname;if(base&&p.startsWith(base))p=p.slice(base.length)||'/';const parts=p.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();p='/'+parts.join('/');const target=localePath(p,next);history.pushState({},'',target);scrollRouteTop();routeInFlightTarget=target;wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget='';scrollRouteTop()})}finally{button.disabled=false}}));
- document.addEventListener('click',e=>{if(!wrap.contains(e.target)){wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false')}});
-}
+async function bootstrapLocale(){await loadLocale();setLocale();}
+function mountLanguageSwitcher(){/* Removed: storefront is Persian-only. */}
 let routeInFlightTarget='';
 let routeAbortController=null;
 function showRouteSkeleton(){
@@ -304,8 +222,6 @@ async function snapshotApi(path){
 }
 
 async function api(path,opt={}){
- const localePathKey=String(path||'');
- const localizedPath=(()=>{try{const u=new URL(localePathKey,'https://local.invalid');if(!u.pathname.startsWith('/api/'))return localePathKey;if(!u.searchParams.has('locale'))u.searchParams.set('locale',currentLocale||'fa');return u.pathname+(u.search||'')}catch{return localePathKey}})();
  const headers={...(opt.headers||{})};
  if(opt.body&&!(typeof FormData!=='undefined'&&opt.body instanceof FormData))headers['content-type']='application/json';
  try{
