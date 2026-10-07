@@ -272,28 +272,30 @@ async function snapshotApi(path){
 }
 
 async function api(path,opt={}){
+ const localePathKey=String(path||'');
+ const localizedPath=(()=>{try{const u=new URL(localePathKey,'https://local.invalid');if(!u.pathname.startsWith('/api/'))return localePathKey;if(!u.searchParams.has('locale'))u.searchParams.set('locale',currentLocale||'fa');return u.pathname+(u.search||'')}catch{return localePathKey}})();
  const headers={...(opt.headers||{})};
  if(opt.body&&!(typeof FormData!=='undefined'&&opt.body instanceof FormData))headers['content-type']='application/json';
  try{
   if((opt.method||'GET').toUpperCase()==='GET'){
-   const local=await snapshotApi(path);
+   const local=await snapshotApi(localizedPath);
    if(local)return local;
   }
-  const r=await fetch(API+path,{credentials:'include',cache:'no-store',headers,...opt});
+  const r=await fetch(API+localizedPath,{credentials:'include',cache:'no-store',headers,...opt});
   const raw=await r.text();
   let d={};try{d=raw?JSON.parse(raw):{}}catch{}
   if(!r.ok){if(r.status===401||r.status===403)clearAuthState();const e=new Error(d.error||d.message||(r.status===404?t('error.notFound'):t('error.service')));e.status=r.status;throw e}
   const requiredShape=path=>{
-   if(path==='/api/health')return d&&d.ok===true&&d.db===true;
-   if(/^\/api\/products\?/.test(path)||path==='/api/products')return Array.isArray(d?.items);
-   if(path==='/api/categories'||path==='/api/flash-sales')return Array.isArray(d?.items);
-   if(path.startsWith('/api/products/')&&path.endsWith('/view'))return d?.ok===true;
+   if(localizedPath==='/api/health')return d&&d.ok===true&&d.db===true;
+   if(/^\/api\/products\?/.test(localizedPath)||localizedPath==='/api/products')return Array.isArray(d?.items);
+   if(localizedPath==='/api/categories'||localizedPath==='/api/flash-sales')return Array.isArray(d?.items);
+   if(localizedPath.startsWith('/api/products/')&&path.endsWith('/view'))return d?.ok===true;
    if(path.startsWith('/api/products/')&&!path.includes('/reviews'))return d?.product&&Array.isArray(d.images)&&Array.isArray(d.attributes)&&Array.isArray(d.categories)&&Array.isArray(d.reviews);
-   if(path.startsWith('/api/content?'))return Array.isArray(d?.items);
-   if(path.startsWith('/api/content/'))return d?.item&&typeof d.item==='object';
-   if(path==='/api/settings')return d?.settings&&typeof d.settings==='object';
-   if(path==='/api/site-rules')return d?.item&&typeof d.item==='object';
-   if(path==='/api/notifications')return Array.isArray(d?.items);
+   if(localizedPath.startsWith('/api/content?'))return Array.isArray(d?.items);
+   if(localizedPath.startsWith('/api/content/'))return d?.item&&typeof d.item==='object';
+   if(localizedPath==='/api/settings')return d?.settings&&typeof d.settings==='object';
+   if(localizedPath==='/api/site-rules')return d?.item&&typeof d.item==='object';
+   if(localizedPath==='/api/notifications')return Array.isArray(d?.items);
    return true;
   };
   if(!requiredShape(path))throw new Error(t('error.incomplete'));
