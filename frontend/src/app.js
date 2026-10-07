@@ -231,7 +231,7 @@ async function loadHomeSnapshot(){
   const r=await fetch(root+'/data/home.json',{cache:'default',credentials:'same-origin'});
   if(!r.ok)return null;
   const d=await r.json();
-  if(Number(d?.schemaVersion)!==1||!Array.isArray(d?.products)||!Array.isArray(d?.categories)||!d?.settings)return null;
+  if(Number(d?.schemaVersion)!==2||!Array.isArray(d?.products)||!Array.isArray(d?.categories)||!d?.settings)return null;
   return d;
  }catch{return null}
 }
