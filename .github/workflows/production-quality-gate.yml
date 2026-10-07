@@ -129,8 +129,25 @@ jobs:
         run: |
           node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('frontend/public/service-status.json','utf8'));if(typeof d.paused!=='boolean'||!Number.isFinite(Number(d.requests))||!Number.isFinite(Number(d.limit))||!d.checkedAt)process.exit(1)"
           echo "paused=$(node -e "const d=require('./frontend/public/service-status.json');process.stdout.write(String(d.paused===true))")" >> "$GITHUB_OUTPUT"
-      - name: Wait for Worker deployment of this commit
+      - name: Detect whether this commit changes Worker/D1
+        id: worker
         if: steps.service.outputs.paused != 'true'
+        run: |
+          set -euo pipefail
+          changed=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" || true)
+          printf '%s\n' "$changed"
+          required=false
+          while IFS= read -r path; do
+            case "$path" in
+              worker/*|wrangler.toml|database/migrations/*|package.json|package-lock.json)
+                required=true
+                ;;
+            esac
+          done <<< "$changed"
+          echo "required=$required" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for Worker deployment of this commit
+        if: steps.service.outputs.paused != 'true' && steps.worker.outputs.required == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
