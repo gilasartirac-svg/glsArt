@@ -10,7 +10,7 @@ test('public route contract is complete and Persian-only URLs stay unprefixed',(
   for(const route of ['shop','cart','account','rewards','checkout','about','contact','news','articles','terms','support','payment','admin']){
     assert.ok(app.includes("p[0]==='"+route+"'"),route);
   }
-  assert.match(app,/return base\+\(clean==='\/'\?'':clean\);/);
+  assert.ok(app.includes("return base+(parts.length?'/'+parts.join('/'):'');"));
 });
 
 test('content snapshot is eligible for API fallback and detail slugs are decoded safely',()=>{
