@@ -3,6 +3,13 @@ name: Deploy Worker + D1 (Production)
 on:
   push:
     branches: [main]
+    paths:
+      - 'worker/**'
+      - 'wrangler.toml'
+      - 'database/migrations/**'
+      - '.github/workflows/worker-deploy.yml'
+      - 'package.json'
+      - 'package-lock.json'
 
 jobs:
   deploy:
