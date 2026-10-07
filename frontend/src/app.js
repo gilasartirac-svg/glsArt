@@ -1151,9 +1151,6 @@ async function router(){
  routeAbortController?.abort();
  routeAbortController=new AbortController();
  showRouteSkeleton();
- // Authentication is a global application concern, not an account-page concern.
- // Cache the session briefly so normal SPA navigation does not repeat /api/me.
- await loadMe();
  const base=routeBase();
  let cleanPath=location.pathname.startsWith(base)?location.pathname.slice(base.length):location.pathname;
  cleanPath=cleanPath.replace(/^\/+|\/+$/g,'');
@@ -1164,6 +1161,9 @@ async function router(){
  const segments=rawSegments;
  const known=new Set(['shop','cart','account','rewards','checkout','about','contact','news','articles','terms','privacy','enamad','aparat','support','payment','admin','product']);
  const p=segments.length?(known.has(segments[0])?segments:['product',segments[0]]):[''];
+ const authRequired=new Set(['account','cart','rewards','checkout','admin','payment']);
+ if(authRequired.has(String(p[0]||''))) await loadMe();
+ else loadMe().catch(()=>{});
  try{
   applyRouteSeoPolicy(p);
   if(!p[0])return home();
