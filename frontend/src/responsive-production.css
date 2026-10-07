@@ -1,0 +1,188 @@
+/* GilasArt Production Responsive Contract
+   Purpose: normalize the existing production UI without changing application logic.
+   This file is intentionally loaded after the legacy/global styles so the final
+   responsive rules are deterministic across desktop, tablet and mobile. */
+:root{
+  --font-family-base:"Vazirmatn";
+  --content-max:1240px;
+  --page-gutter:clamp(12px,2.4vw,32px);
+  --section-gap:clamp(28px,5vw,72px);
+  --control-min-height:44px;
+}
+
+html{
+  font-family:var(--font-family-base)!important;
+  overflow-x:clip;
+  -webkit-text-size-adjust:100%;
+}
+body,#app{
+  font-family:var(--font-family-base)!important;
+  min-width:0;
+  max-width:100%;
+  overflow-x:clip;
+}
+body,button,input,select,textarea,option{
+  font-family:var(--font-family-base)!important;
+}
+h1,h2,h3,h4,h5,h6,p,a,li,small,strong,label,summary,th,td{
+  font-family:var(--font-family-base)!important;
+}
+*,*::before,*::after{box-sizing:border-box}
+img,svg,video,canvas{max-width:100%}
+img{height:auto}
+iframe{max-width:100%;border:0}
+button,input,select,textarea{max-width:100%;min-width:0}
+button,input,select{min-height:var(--control-min-height)}
+textarea{min-height:110px}
+:where(.wrap,.container,.page,.section,.hero,.toolbar,.footer){
+  min-width:0;
+}
+.wrap{
+  width:min(calc(100% - (2 * var(--page-gutter))),var(--content-max));
+  margin-inline:auto;
+}
+.page,.section{min-width:0}
+:where(.hero,.product,.product-detail,.product-layout,.checkout-layout,.cart-layout){
+  min-width:0;
+}
+:where(.hero > *, .product > *, .product-detail > *, .product-layout > *,
+.checkout-layout > *, .cart-layout > *){min-width:0}
+:where(.hero h1,.page h1,.section h2){overflow-wrap:anywhere}
+:where(.price,.product-price,.total-price){overflow-wrap:anywhere;word-break:normal}
+:where(.btn,.iconbtn,button,[role="button"]){
+  touch-action:manipulation;
+  white-space:normal;
+}
+:where(.btn,.iconbtn){min-height:44px}
+:where(input,select,textarea){font-size:16px}
+:where(input[type="checkbox"],input[type="radio"]){
+  min-height:auto;
+  width:20px;
+  height:20px;
+  accent-color:var(--ui-gold,var(--gold));
+}
+:where(.modal,.modalbox,[role="dialog"]){min-width:0}
+:where(.modalbox,[role="dialog"]){max-width:100%;max-height:calc(100dvh - 32px);overflow:auto}
+:where(.table-scroll,.table-wrap,.orders-table-wrap,.reports-table-wrap){
+  max-width:100%;
+  overflow-x:auto;
+  overflow-y:visible;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-inline:contain;
+}
+:where(table){max-width:100%}
+:where(.admin-layout,.admin-layout main,.admin-page,.dashboard){min-width:0;max-width:100%}
+:where(.admin-layout .panel,.admin-layout .card,.admin-layout .form,.admin-layout .chart-box){
+  min-width:0;
+}
+.admin-layout{
+  overflow-x:clip;
+}
+.admin-layout .admin-page,.admin-layout .dashboard{
+  width:min(100%,1500px);
+  margin-inline:auto;
+}
+.admin-layout .admin-table{width:max-content;min-width:680px;max-width:none}
+.admin-layout .table-scroll,.admin-layout .table-wrap{max-width:100%}
+
+/* Desktop: stable reading width and balanced gallery grids. */
+@media (min-width:1024px){
+  .hero{grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:clamp(24px,3vw,42px)}
+  .product{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,3vw,42px)}
+  .admin-layout .cards{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .admin-layout .admin-page,.admin-layout .dashboard{padding-inline:clamp(22px,2.5vw,36px)}
+}
+
+/* Tablet: dedicated composition, not merely a shrunken desktop. */
+@media (min-width:768px) and (max-width:1023px){
+  .wrap{width:min(calc(100% - 32px),1100px)}
+  .nav{min-height:68px;gap:8px}
+  .links{gap:2px}
+  .links a{padding-inline:8px}
+  .hero{grid-template-columns:minmax(0,1fr);padding-block:52px 34px}
+  .hero-card{min-height:280px}
+  .product{grid-template-columns:minmax(0,1fr);gap:24px}
+  .product .visual{min-height:clamp(360px,55vw,520px)}
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .product-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .toolbar{align-items:stretch}
+  .search{min-width:0;flex:1 1 280px}
+  .sectionhead{gap:16px;flex-wrap:wrap}
+  .admin-layout .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .admin-layout .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .admin-layout .orders-layout{grid-template-columns:1fr}
+  .admin-layout .settings-section-grid{grid-template-columns:1fr}
+}
+
+/* Mobile: edge-safe, touch-first layout. */
+@media (max-width:767px){
+  .wrap{width:min(calc(100% - 22px),var(--content-max))}
+  .nav{min-height:64px;height:auto;padding-block:8px}
+  .brand{font-size:clamp(18px,5vw,21px);min-width:0}
+  .hero{grid-template-columns:1fr;padding-block:36px 28px;gap:20px}
+  .hero h1{font-size:clamp(32px,11vw,52px);line-height:1.18}
+  .hero p{font-size:16px}
+  .hero-card{min-height:220px;padding:20px;border-radius:20px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .card,.product-card,.product-item{min-width:0}
+  .cardbody{padding:12px}
+  .card h3,.product-card h3,.product-item h3{font-size:15px;line-height:1.65;overflow-wrap:anywhere}
+  .product{grid-template-columns:1fr;gap:18px}
+  .product .visual{min-height:0;aspect-ratio:1/1}
+  .panel{padding:18px;border-radius:18px}
+  .section{padding-block:24px 48px}
+  .page{padding-block:28px 52px}
+  .sectionhead{align-items:flex-start;flex-direction:column;gap:10px}
+  .toolbar{display:grid;grid-template-columns:1fr;gap:9px}
+  .search{min-width:0;width:100%}
+  .btn,.iconbtn{width:auto;max-width:100%}
+  .form-grid{grid-template-columns:1fr}
+  .modal{padding:12px}
+  .modalbox{width:min(100%,520px);padding:18px;border-radius:18px}
+  .cartline{align-items:flex-start;flex-wrap:wrap}
+  .cartline .grow{min-width:calc(100% - 14px)}
+  .footer{padding-block:24px}
+  .admin-layout .admin-page,.admin-layout .dashboard{padding:16px 12px 24px}
+  .admin-layout .cards{grid-template-columns:1fr}
+  .admin-layout .admin-header{padding-inline:12px}
+  .admin-layout .admin-table{font-size:13px}
+  .admin-layout .form-grid{grid-template-columns:1fr}
+  .admin-layout .orders-layout{grid-template-columns:1fr}
+  .admin-layout .stats-grid{grid-template-columns:1fr}
+  .admin-layout .settings-section-grid{grid-template-columns:1fr}
+  .admin-layout .reviews-toolbar{grid-template-columns:1fr}
+}
+
+/* Very narrow devices: prevent card/grid compression and clipped controls. */
+@media (max-width:359px){
+  .wrap{width:calc(100% - 16px)}
+  .grid,.product-grid{grid-template-columns:1fr}
+  .brand{font-size:17px}
+  .hero h1{font-size:30px}
+  .panel{padding:14px}
+  .btn,.iconbtn{min-width:0}
+}
+
+/* Wide desktop: never let the gallery become excessively stretched. */
+@media (min-width:1600px){
+  :where(.wrap,.container){max-width:1320px}
+  .grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .product-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+
+/* RTL-safe spacing helpers for the existing DOM. */
+:where(.toolbar,.sectionhead,.admin-title,.panel-head,.sectionhead,.message-meta){
+  margin-inline:0;
+}
+:where(.admin-layout .admin-table th,.admin-layout .admin-table td){
+  text-align:start;
+}
+:where([dir="rtl"] .admin-layout .admin-table th,[dir="rtl"] .admin-layout .admin-table td){
+  text-align:right;
+}
+
+/* Keep icon-font glyphs from inheriting the text contract when Font Awesome is present. */
+:where(.fa,.fas,.far,.fal,.fab,[class^="fa-"],[class*=" fa-"]){
+  font-family:"Font Awesome 6 Free","Font Awesome 6 Brands"!important;
+}
