@@ -1272,7 +1272,14 @@ function migrateLegacyHash(){
 }
 migrateLegacyHash();
 window.addEventListener('popstate',()=>{if(routeInFlight)return;routeInFlightTarget=location.pathname+location.search;routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget=''})});
-(async()=>{try{await bootstrapLocale()}catch(e){console.warn('locale_bootstrap_failed',e)}routeInFlightTarget=location.pathname+location.search;routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget=''}) .catch(e=>console.error('initial_router_error',e));})();
+(async()=>{
+ setLocale();
+ const localeReady=bootstrapLocale().catch(e=>{console.warn('locale_bootstrap_failed',e);return null});
+ const timeout=new Promise(resolve=>setTimeout(resolve,1500));
+ await Promise.race([localeReady,timeout]);
+ routeInFlightTarget=location.pathname+location.search;
+ routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget=''}).catch(e=>console.error('initial_router_error',e));
+})();
 
 /* GilasArt interaction guard */
 (()=>{
