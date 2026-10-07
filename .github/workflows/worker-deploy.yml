@@ -7,12 +7,18 @@ on:
       - 'worker/**'
       - 'wrangler.toml'
       - 'database/migrations/**'
-      - '.github/workflows/worker-deploy.yml'
       - 'package.json'
       - 'package-lock.json'
 
 jobs:
   deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      contains(join(github.event.head_commit.modified, ','), 'worker/') ||
+      contains(join(github.event.head_commit.modified, ','), 'wrangler.toml') ||
+      contains(join(github.event.head_commit.modified, ','), 'database/migrations/') ||
+      contains(join(github.event.head_commit.modified, ','), 'package.json') ||
+      contains(join(github.event.head_commit.modified, ','), 'package-lock.json')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
