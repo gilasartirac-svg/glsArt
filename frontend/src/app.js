@@ -1186,8 +1186,8 @@ async function router(){
  const segments=rawSegments;
  const known=new Set(['shop','cart','account','rewards','checkout','about','contact','news','articles','terms','privacy','enamad','aparat','support','payment','admin','product']);
  const p=segments.length?(known.has(segments[0])?segments:['product',segments[0]]):[''];
- applyRouteSeoPolicy(p);
  try{
+  applyRouteSeoPolicy(p);
   if(!p[0])return home();
   if(p[0]==='admin'){
    await loadMe();
@@ -1256,7 +1256,16 @@ async function router(){
  }catch(e){
   console.error('router_error',e);
   if(e?.status===404||e?.message==='صفحه پیدا نشد')return renderNotFound();
-  if(!p[0])console.warn('home_render_error',e);
+  // Never leave a customer-facing route blank after a runtime/API failure.
+  // Keep the recovery UI independent from the shared layout so a layout/i18n
+  // regression cannot recursively break the error handler itself.
+  const title=typeof t==='function'?(t('shop.error')||'خطا در بارگذاری صفحه'):'خطا در بارگذاری صفحه';
+  const homeLabel=typeof t==='function'?(t('home.viewWorks')||'مشاهده فروشگاه'):'مشاهده فروشگاه';
+  app.innerHTML='<main class="wrap page" dir="rtl"><section class="panel" style="text-align:center;padding:48px 20px"><h1>'+escapeHtml(title)+'</h1><p class="muted">صفحه در حال حاضر قابل نمایش نیست. لطفاً دوباره تلاش کنید.</p><div class="cart-checkout-bar" style="justify-content:center"><button class="btn primary" id="route-retry" type="button">تلاش دوباره</button><a class="btn ghost" href="'+routeUrl('/')+'">'+escapeHtml(homeLabel)+'</a></div></section></main>';
+  document.getElementById('route-retry')?.addEventListener('click',()=>{
+    routeInFlightTarget=location.pathname+location.search;
+    routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget=''});
+  });
  }
 }
 
