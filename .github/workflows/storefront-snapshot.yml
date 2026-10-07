@@ -21,50 +21,94 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Fetch current public storefront snapshot
+      - name: Fetch and split public storefront data
         env:
           SNAPSHOT_URL: https://gilasartworker.gilasart-ir-ac.workers.dev/api/storefront-snapshot
         run: |
           set -euo pipefail
           mkdir -p frontend/public/data
-          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 15 --max-time 120 "$SNAPSHOT_URL" -o frontend/public/data/storefront.json
-          test -s frontend/public/data/storefront.json
-          node -e "const fs=require('fs');const d=require('./frontend/public/data/storefront.json');fs.writeFileSync('./frontend/public/data/storefront-manifest.json',JSON.stringify({schemaVersion:d.meta.schemaVersion,generatedAt:d.meta.generatedAt,productCount:d.meta.productCount,categoryCount:d.meta.categoryCount,reviewCount:d.meta.reviewCount,articleCount:d.meta.articleCount,newsCount:d.meta.newsCount},null,2)+'\\n')"
-          node -e "const fs=require('fs');const d=require('./frontend/public/data/storefront.json');const products=[...(d.products||[])].sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))||String(b.id||'').localeCompare(String(a.id||'')));const flash=products.filter(p=>Number(p.flash_sale_active)===1&&p.flash_sale_ends_at&&new Date(p.flash_sale_ends_at).getTime()>Date.now()).slice(0,20);fs.writeFileSync('./frontend/public/data/home.json',JSON.stringify({schemaVersion:d.meta.schemaVersion,generatedAt:d.meta.generatedAt,products:products.slice(0,8),categories:d.categories||[],settings:d.settings||{},flash},null,2)+'\\n')"
+          tmp="$(mktemp)"
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 15 --max-time 120 "$SNAPSHOT_URL" -o "$tmp"
+          test -s "$tmp"
+          node - "$tmp" <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(d?.meta?.schemaVersion!==1) throw new Error('invalid source schemaVersion');
+          if(!Array.isArray(d.products)||!Array.isArray(d.categories)) throw new Error('source catalog missing');
+          const products=[...(d.products||[])]
+            .filter(p=>p&&p.active!==0)
+            .sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))||String(b.id||'').localeCompare(String(a.id||'')))
+            .map(p=>{
+              const image=(p.images||[]).find(x=>Number(x.is_primary)===1)?.path||(p.images||[0])?.path||'';
+              return {
+                id:p.id,slug:p.slug,sku:p.sku,name:p.name,price_irt:Number(p.price_irt||0),
+                image,category_id:p.category_id,category_ids:Array.isArray(p.category_ids)?p.category_ids:[],
+                active:Number(p.active??1),flash_sale_active:Number(p.flash_sale_active||0),
+                flash_sale_ends_at:p.flash_sale_ends_at||null,flash_sale_price_irt:p.flash_sale_price_irt||null,
+                view_count:Number(p.view_count||0),review_count:Number(p.review_count||0),
+                rating_avg:Number(p.rating_avg||0),favorite_count:Number(p.favorite_count||0),
+                sold_count:Number(p.sold_count||0),created_at:p.created_at||null,updated_at:p.updated_at||null
+              };
+            });
+          if(!products.length) throw new Error('empty product index');
+          const categories=(d.categories||[]).map(x=>({id:x.id,slug:x.slug,name:x.name,description:x.description||''}));
+          const articles=(d.articles||[]).map(x=>({slug:x.slug,title:x.title,published_at:x.published_at||null,updated_at:x.updated_at||null}));
+          const news=(d.news||[]).map(x=>({slug:x.slug,title:x.title,published_at:x.published_at||null,updated_at:x.updated_at||null}));
+          const index={schemaVersion:2,generatedAt:d.meta.generatedAt,products,categories,articles,news,settings:d.settings||{}};
+          const homeProducts=products.slice(0,8).map(p=>{const src=(d.products||[]).find(x=>String(x.id)===String(p.id));return src||p});
+          const flash=products.filter(p=>p.flash_sale_active===1&&p.flash_sale_ends_at&&new Date(p.flash_sale_ends_at).getTime()>Date.now()).slice(0,20);
+          const home={schemaVersion:2,generatedAt:d.meta.generatedAt,products:homeProducts,categories,settings:d.settings||{},flash};
+          fs.writeFileSync('frontend/public/data/storefront-index.json',JSON.stringify(index,null,2)+'\n');
+          fs.writeFileSync('frontend/public/data/home.json',JSON.stringify(home,null,2)+'\n');
+          const version=crypto.createHash('sha256').update(JSON.stringify(index)+JSON.stringify(home)).digest('hex').slice(0,16);
+          const manifest={
+            schemaVersion:2,version,generatedAt:d.meta.generatedAt,
+            productCount:products.length,categoryCount:categories.length,
+            articleCount:articles.length,newsCount:news.length
+          };
+          fs.writeFileSync('frontend/public/data/storefront-manifest.json',JSON.stringify(manifest,null,2)+'\n');
+          NODE
+          rm -f "$tmp"
 
-      - name: Validate snapshot schema and safety
+      - name: Validate split snapshot and privacy boundary
         run: |
           set -euo pipefail
           node <<'NODE'
           const fs=require('fs');
-          const d=JSON.parse(fs.readFileSync('frontend/public/data/storefront.json','utf8'));
-          if(d?.meta?.schemaVersion!==1) throw new Error('invalid schemaVersion');
-          for(const key of ['categories','products','reviews','articles','news','about','contact','faq']) if(!Array.isArray(d[key])) throw new Error('missing array: '+key);
-          if(!d.settings || typeof d.settings!=='object' || Array.isArray(d.settings)) throw new Error('invalid settings');
-          if(!d.indexes || typeof d.indexes!=='object') throw new Error('missing indexes');
-          if(d.products.length<1) throw new Error('empty product catalog');
-          if(d.products.some(p=>!p.id||!p.slug||!p.sku||!p.name||!Array.isArray(p.images)||!Array.isArray(p.attributes)||!Array.isArray(p.category_ids))) throw new Error('invalid product document');
-          if(d.products.some(p=>p.images.length===0)) throw new Error('product without image');
-          const forbidden=/admin_bootstrap|kavenegar|invoice_|national_id|postal_code|economic_code/i;
-          const raw=JSON.stringify(d);
-          if(forbidden.test(raw)) throw new Error('sensitive field leaked into snapshot');
-          if(Number(d.meta.productCount)!==d.products.length) throw new Error('product count mismatch');
-          if(Number(d.meta.categoryCount)!==d.categories.length) throw new Error('category count mismatch');
-          console.log(JSON.stringify({products:d.products.length,categories:d.categories.length,reviews:d.reviews.length,articles:d.articles.length,news:d.news.length,bytes:Buffer.byteLength(raw)}));
+          const index=JSON.parse(fs.readFileSync('frontend/public/data/storefront-index.json','utf8'));
+          const manifest=JSON.parse(fs.readFileSync('frontend/public/data/storefront-manifest.json','utf8'));
+          const home=JSON.parse(fs.readFileSync('frontend/public/data/home.json','utf8'));
+          if(index.schemaVersion!==2||manifest.schemaVersion!==2||home.schemaVersion!==2)throw new Error('invalid split schema');
+          if(!Array.isArray(index.products)||index.products.length<1)throw new Error('empty product index');
+          if(!Array.isArray(index.categories)||!index.settings)throw new Error('index missing catalog metadata');
+          const required=['id','slug','name','sku','price_irt','image','category_ids','flash_sale_active'];
+          for(const p of index.products)for(const k of required)if(p[k]===undefined||p[k]===null&&k!=='image')throw new Error('product index missing '+k);
+          if(index.products.some(p=>!p.image))throw new Error('product without image');
+          const forbidden=/admin_bootstrap|kavenegar|invoice_|national_id|postal_code|economic_code|customer/i;
+          if(forbidden.test(JSON.stringify(index))||forbidden.test(JSON.stringify(home)))throw new Error('sensitive field leaked into public snapshot');
+          if(Number(manifest.productCount)!==index.products.length)throw new Error('product count mismatch');
+          if(Number(manifest.categoryCount)!==index.categories.length)throw new Error('category count mismatch');
+          console.log(JSON.stringify({
+            indexBytes:fs.statSync('frontend/public/data/storefront-index.json').size,
+            homeBytes:fs.statSync('frontend/public/data/home.json').size,
+            manifestBytes:fs.statSync('frontend/public/data/storefront-manifest.json').size,
+            products:index.products.length
+          }));
           NODE
+          test ! -e frontend/public/data/storefront.json
 
-      - name: Show snapshot diff
-        run: git diff --stat -- frontend/public/data/storefront.json
+      - name: Remove legacy monolithic snapshot if present
+        run: rm -f frontend/public/data/storefront.json
 
       - name: Commit validated snapshot
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add frontend/public/data/storefront.json frontend/public/data/storefront-manifest.json frontend/public/data/home.json
+          git add -A frontend/public/data
           if git diff --cached --quiet; then
             echo "Snapshot unchanged; nothing to commit."
             exit 0
           fi
-          git commit -m "chore: refresh storefront snapshot"
+          git commit -m "chore: split storefront snapshot"
           git push origin HEAD:main
