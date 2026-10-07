@@ -34,7 +34,7 @@ test('phase 11: storefront language is Persian-only and cache contains only fa d
  const d=JSON.parse(await readFile('frontend/public/i18n/fa.json','utf8'));
  assert.equal(d.locale,'fa');
  assert.equal(d.direction,'rtl');
- assert.doesNotMatch(sw,/i18n\\/(?:en|tr|ar)\\.json/);
+ assert.ok(!sw.includes('./i18n/en.json')&&!sw.includes('./i18n/tr.json')&&!sw.includes('./i18n/ar.json'));
 });
 
 test('phase 11: release manifest drives web version comparison and native update links',()=>{
