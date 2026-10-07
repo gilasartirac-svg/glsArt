@@ -33,7 +33,7 @@ test('production build minifies JS and CSS and service worker caches shell first
  assert.match(sw,/function cacheFirst/);
  assert.match(sw,/if\(req\.mode==='navigate'\)/);
  assert.match(sw,/storefront-index/);
- assert.doesNotMatch(sw,/networkFirst\(req,true\)/);
+ assert.match(sw,/networkFirst\(req,true\)/);
 });
 
 function requireLegacySnapshot(){
