@@ -94,6 +94,25 @@ jobs:
             done
             if [ "$ok" != "true" ]; then echo "Production route verification failed: $path"; exit 1; fi
           done
+          echo "Checking published storefront snapshot"
+          curl -fsSL --retry 3 --retry-all-errors "https://gilasart.ir/data/storefront-manifest.json?verify=$GITHUB_SHA" -o /tmp/storefront-manifest.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const m=JSON.parse(fs.readFileSync('/tmp/storefront-manifest.json','utf8'));
+          if(m.schemaVersion!==1 || Number(m.productCount)<1) throw new Error('Published storefront manifest is missing/empty');
+          console.log('Published storefront productCount=',m.productCount,'generatedAt=',m.generatedAt);
+          NODE
+          curl -fsSL --retry 3 --retry-all-errors "https://gilasart.ir/data/storefront.json?verify=$GITHUB_SHA" -o /tmp/storefront.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const d=JSON.parse(fs.readFileSync('/tmp/storefront.json','utf8'));
+          if(d?.meta?.schemaVersion!==1 || !Array.isArray(d.products) || d.products.length<1) throw new Error('Published storefront JSON has no products');
+          console.log('Published storefront JSON products=',d.products.length);
+          NODE
+          echo "Checking localized shop route"
+          curl -L -sS --retry 3 --retry-all-errors "https://gilasart.ir/fa/shop" -o /tmp/fa-shop.html
+          if ! grep -qi '<div id="app"></div>' /tmp/fa-shop.html; then echo "Localized shop route shell verification failed"; exit 1; fi
+
           echo "Checking homepage product image asset"
           image_path=$(node -e "const d=require('./dist/data/home.json');process.stdout.write(String(d.products?.[0]?.images?.[0]?.path||''))")
           if [ -z "$image_path" ]; then echo "Homepage image path missing from snapshot"; exit 1; fi
