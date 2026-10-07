@@ -561,6 +561,11 @@
     "admin.78793700": "Çıkış",
     "admin.1081718737": "Gündüz/gece modunu değiştir",
     "admin.575516733": "Mağaza yönetimi",
-    "admin.174052313": "Yönetim menüsünü aç"
+    "admin.174052313": "Yönetim menüsünü aç",
+    "enamad.adminDescription": "Resmî Enamad doğrulama bağlantısı ve rozet kodu burada kayıtlı ve incelenebilir.",
+    "enamad.adminLinkLabel": "Resmî Enamad bağlantısı",
+    "enamad.adminLinkButton": "Resmî Enamad doğrulama sayfasını görüntüle",
+    "enamad.adminCodeLabel": "Tam rozet kodu",
+    "enamad.adminCodeAria": "Tam Enamad rozet kodu"
   }
 }
