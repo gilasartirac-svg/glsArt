@@ -18,7 +18,7 @@ test('phase 11: navigation and JSON use network-first with offline cached fallba
  assert.match(sw,/networkFirst\(req,true\)/);
  assert.ok(sw.includes("if(/\\.json$/i.test(url.pathname))"));
  assert.match(sw,/fetch\(req,\{cache:'no-store'\}\)/);
- assert.ok(sw.includes('catch(()=>cachedFallback?caches.match(req):Response.error())'));
+ assert.ok(sw.includes('caches.match(req,{ignoreSearch:true})'));
 });
 
 test('phase 11: service worker updates activate immediately and clients reload once',()=>{
