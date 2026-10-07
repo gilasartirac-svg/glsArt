@@ -94,6 +94,23 @@ jobs:
             done
             if [ "$ok" != "true" ]; then echo "Production route verification failed: $path"; exit 1; fi
           done
+          echo "Checking published offline storefront snapshot"
+          manifest_code=$(curl -L -sS -o /tmp/storefront-manifest.json -w '%{http_code}' --retry 3 --retry-all-errors "https://gilasart.ir/data/storefront-manifest.json?verify=$GITHUB_SHA" || true)
+          index_code=$(curl -L -sS -o /tmp/storefront-index.json -w '%{http_code}' --retry 3 --retry-all-errors "https://gilasart.ir/data/storefront-index.json?verify=$GITHUB_SHA" || true)
+          if [ "$manifest_code" != "200" ] || [ "$index_code" != "200" ]; then
+            echo "Published storefront snapshot is not reachable: manifest=$manifest_code index=$index_code"
+            exit 1
+          fi
+          node - <<'NODE'
+          const fs=require('fs');
+          const m=JSON.parse(fs.readFileSync('/tmp/storefront-manifest.json','utf8'));
+          const i=JSON.parse(fs.readFileSync('/tmp/storefront-index.json','utf8'));
+          if(Number(m.schemaVersion)!==2||Number(m.productCount)<1)throw new Error('invalid published storefront manifest');
+          if(Number(i.schemaVersion)!==2||!Array.isArray(i.products)||i.products.length<1)throw new Error('invalid published storefront index');
+          if(Number(m.productCount)!==i.products.length)throw new Error('published storefront product count mismatch');
+          console.log(JSON.stringify({productCount:i.products.length,generatedAt:m.generatedAt,version:m.version}));
+          NODE
+
           echo "Checking homepage product image asset"
           image_path=$(node -e "const d=require('./dist/data/home.json');process.stdout.write(String(d.products?.[0]?.image||''))")
           if [ -z "$image_path" ]; then echo "Homepage image path missing from snapshot"; exit 1; fi
