@@ -126,7 +126,7 @@ jobs:
           for(const token of ['attributes=d.attributes||[]','product-option-input','selections=()=>','options:selections()','product-live-price','product-stock-status','product-purchase-messages','product-related-panel','relatedProducts','recalc=','product-qty-minus','product-qty-plus','quantityDiscountTiers','review-form'])if(!p.includes(token))throw new Error('Product Detail contract missing: '+token);
           if(!app.includes('translateRenderedContent(app)'))throw new Error('Product Detail render translation hook missing');
           const required=['product.videoUnsupported','product.selectAttributes','product.saved','product.cartQuantity','product.decrease','product.increase','product.selectedQuantity','product.bulkSave','product.bulkText','product.units','product.bulkAuto','product.noReviews','product.yourReview','product.reviewPlaceholder','product.submitReview','product.reviewPending','product.reactionError','product.sessionExpired','product.added','product.addError','product.addErrorShort','product.quantityError','product.optionUpdateError','product.gallery','product.inStock','product.outOfStock','product.purchaseMessage','product.related'];
-          for(const l of ['fa','ar','en','tr']){const d=JSON.parse(fs.readFileSync('frontend/public/i18n/'+l+'.json','utf8'));for(const key of required)if(typeof d.strings?.[key]!=='string'||!d.strings[key].trim())throw new Error('missing Product Detail i18n key '+key+' in '+l)}
+          const d=JSON.parse(fs.readFileSync('frontend/public/i18n/fa.json','utf8'));for(const key of required)if(typeof d.strings?.[key]!=='string'||!d.strings[key].trim())throw new Error('missing Product Detail Persian key '+key)
           console.log('Product Detail contract: PASS');
           NODE
       - name: Validate Home i18n contract
@@ -139,24 +139,22 @@ jobs:
           const home=app.slice(i,j);
           const required=['home.title','home.heroEyebrow2','home.heroTitle','home.heroText','home.viewWorks','home.about','home.collectionsEyebrow','home.collections','home.collectionsText','home.viewAll','home.categoryView','home.limitedTime','home.flashTitle','home.flashText','home.previous','home.next','home.selected','home.galleryArt','home.artwork','home.heroView','home.heroNote','home.approachEyebrow','home.approach','home.approachText','home.enterGallery','home.latestEyebrow','home.latest','home.latestActive','home.allWorks','home.noActive','home.processEyebrow','home.processTitle','home.processText','home.processDiscover','home.processChoose','home.processOrder','home.discoverText','home.chooseText','home.orderText'];
           for(const key of required)if(!home.includes("t('"+key+"')"))throw new Error('Home UI is not localized: '+key);
-          for(const l of ['fa','en','tr','ar']){const d=JSON.parse(fs.readFileSync('frontend/public/i18n/'+l+'.json','utf8'));for(const key of required)if(typeof d.strings?.[key]!=='string'||!d.strings[key].trim())throw new Error('missing Home key '+key+' in '+l)}
+          const d=JSON.parse(fs.readFileSync('frontend/public/i18n/fa.json','utf8'));for(const key of required)if(typeof d.strings?.[key]!=='string'||!d.strings[key].trim())throw new Error('missing Home Persian key '+key)
           for(const raw of ['مجموعه‌های گالری','پیشنهاد شگفت‌انگیز','آثاری برای خانه‌هایی که داستان دارند.','انتخاب اثر، بخشی از زیبایی آن است.','آخرین آثار','هنرکده گیلاس آرت','کشف','انتخاب','سفارش','تولید کننده ی برتر تابلو های معرق مس در ایران'])if(home.includes(raw))throw new Error('hard-coded Home UI text remains: '+raw);
           console.log('Home i18n contract: PASS');
           NODE
-      - name: Validate four-locale JSON contract
+      - name: Validate Persian-only storefront language contract
         run: |
           set -euo pipefail
           node - <<'NODE'
           const fs=require('fs');
-          const locales=['fa','ar','en','tr'];
-          const docs=Object.fromEntries(locales.map(l=>[l,JSON.parse(fs.readFileSync(`frontend/public/i18n/${l}.json`,'utf8'))]));
-          const base=Object.keys(docs.fa.strings).sort().join('|');
-          for(const l of locales){
-            if(docs[l].version!==1||docs[l].locale!==l)throw new Error('invalid locale metadata: '+l);
-            if(!['fa','ar'].includes(l)&&docs[l].direction!=='ltr')throw new Error('invalid direction: '+l);
-            if(['fa','ar'].includes(l)&&docs[l].direction!=='rtl')throw new Error('invalid direction: '+l);
-            if(Object.keys(docs[l].strings).sort().join('|')!==base)throw new Error('i18n key mismatch: '+l);
-          }
+          const app=fs.readFileSync('frontend/src/app.js','utf8');
+          const d=JSON.parse(fs.readFileSync('frontend/public/i18n/fa.json','utf8'));
+          if(d.version!==1||d.locale!=='fa'||d.direction!=='rtl')throw new Error('invalid Persian locale metadata');
+          if(!/const SUPPORTED_LOCALES=\['fa'\]/.test(app))throw new Error('storefront is not Persian-only');
+          if(/function mountLanguageSwitcher\(\)[^{]*\{(?![^]*Removed: storefront is Persian-only)/.test(app))throw new Error('language switcher still exposed');
+          if(app.includes("/api/locale"))throw new Error('locale detection API must be disabled');
+          console.log('Persian-only storefront language contract: PASS');
           NODE
       - name: Validate mobile release and PWA assets
         run: |
