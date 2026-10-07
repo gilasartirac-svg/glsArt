@@ -7,8 +7,8 @@ const worker=readFileSync(new URL('../worker/src/index.js',import.meta.url),'utf
 const snapshotWorkflow=readFileSync(new URL('../.github/workflows/storefront-snapshot.yml',import.meta.url),'utf8');
 
 test('public route contract is complete and Persian-only URLs stay unprefixed',()=>{
-  for(const route of ['/','/shop','/cart','/account','/rewards','/checkout','/about','/contact','/news','/articles','/terms','/support','/payment','/admin']){
-    assert.ok(app.includes(route),route);
+  for(const route of ['shop','cart','account','rewards','checkout','about','contact','news','articles','terms','support','payment','admin']){
+    assert.ok(app.includes("p[0]==='"+route+"'"),route);
   }
   assert.match(app,/return base\+\(clean==='\/'\?'':clean\);/);
 });
