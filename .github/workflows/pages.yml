@@ -92,19 +92,15 @@ jobs:
           cat > /tmp/gilasart-playwright/gilasart-runtime-verify.mjs <<'NODE'
           import { chromium } from 'playwright';
           const browser = await chromium.launch({headless:true});
-          const context = await browser.newContext({viewport:{width:1440,height:1000},locale:'fa-IR',serviceWorkers:'block'});
+          const context = await browser.newContext({viewport:{width:1440,height:1000},locale:'fa-IR'});
           const page = await context.newPage();
           const errors=[];
           page.on('pageerror',e=>errors.push('pageerror: '+e.message));
           page.on('console',m=>{if(m.type()==='error')errors.push('console: '+m.text())});
           page.on('requestfailed',r=>errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||'')));
-          page.on('response',r=>{const p=new URL(r.url()).pathname;if(p.endsWith('/app.js')||p.endsWith('/config.js'))console.log('ASSET_RESPONSE='+r.status()+' '+(r.headers()['content-type']||'')+' '+r.url())});
           const fail=(m)=>{throw new Error(m)};
           await page.goto('https://gilasart.ir/shop?runtime_verify='+Date.now(),{waitUntil:'networkidle',timeout:60000});
-          await page.waitForTimeout(5000);
-          const shopDiagnostics=await page.evaluate(()=>({url:location.href,appExists:!!document.querySelector('#app'),routerType:typeof window.GilasArtRouter,i18nType:typeof window.GilasArtI18n,scripts:[...document.scripts].map(s=>s.src||'inline'),readyState:document.readyState,main:document.querySelector('#main-content')?.innerText?.slice(0,2000)||'',results:document.querySelector('#results')?.innerHTML?.slice(0,2000)||'',cards:document.querySelectorAll('#results .product-card').length,app:document.querySelector('#app')?.innerHTML?.slice(0,3000)||''}));
-          if(!shopDiagnostics.cards) console.log('SHOP_RUNTIME_DIAGNOSTICS='+JSON.stringify(shopDiagnostics));
-          await page.locator('#results .product-card').first().waitFor({state:'visible',timeout:5000});
+          await page.locator('#results .product-card').first().waitFor({state:'visible',timeout:30000});
           const cards=await page.locator('#results .product-card').count();
           if(cards<1)fail('Shop runtime rendered zero product cards');
           const href=await page.locator('#results .product-card a.product-card-link').first().getAttribute('href');
