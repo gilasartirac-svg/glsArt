@@ -85,11 +85,21 @@ function localePath(path,locale=currentLocale){
  return base+'/'+locale+(clean==='/'?'':clean);
 }
 async function bootstrapLocale(){
- const explicit=localeFromPath(),locale=explicit||await detectPreferredLocale();
- await loadLocale(locale);setLocale(locale);mountLanguageSwitcher();
+ // GilasArt customer storefront is Persian-only. Keep the existing i18n engine
+ // available internally for compatibility, but do not expose locale selection or
+ // redirect the public site into /fa, /en, /tr or /ar paths.
+ await loadLocale('fa');
+ setLocale('fa');
  if(location.pathname.includes('/admin'))return;
- const manualPaymentPath=/\/payment\/manual(?:\/index\.html)?(?:\/)?$/.test(String(location.pathname||''));
- if(publicPathNeedsLocale(location.pathname)&&!manualPaymentPath){const target=localePath(location.pathname+location.search,locale);if(target!==location.pathname+location.search){history.replaceState({},'',target);scrollRouteTop()}}
+ const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';
+ let p=location.pathname;
+ if(base&&p.startsWith(base))p=p.slice(base.length)||'/';
+ const parts=p.split('/').filter(Boolean);
+ if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase())){
+   parts.shift();
+   const target=base+'/'+parts.join('/')+(location.search||'')+(location.hash||'');
+   history.replaceState({},'',target==='/'?base+'/' : target);
+ }
 }
 function languageSelectorSvg(){
  return '<svg class="language-selector-svg" viewBox="0 0 32 20" aria-hidden="true" focusable="false"><text x="1" y="15" font-family="Arial,sans-serif" font-size="14" font-weight="700">A</text><path d="M17 4h3.2c3.2 0 5.3 2.1 5.3 5.9s-2.1 5.9-5.3 5.9H17zM20 5.9v8c2.1 0 3.5-1.3 3.5-4s-1.4-4-3.5-4z" fill="currentColor"/><path d="M14 2v16" stroke="currentColor" stroke-width="1.4" opacity=".42"/></svg>';
@@ -1185,8 +1195,8 @@ async function router(){
  let cleanPath=location.pathname.startsWith(base)?location.pathname.slice(base.length):location.pathname;
  cleanPath=cleanPath.replace(/^\/+|\/+$/g,'');
  const rawSegments=cleanPath?cleanPath.split('/').filter(Boolean).map(x=>{try{return decodeURIComponent(x)}catch{return x}}):[];
- const pathLocale=rawSegments[0]&&SUPPORTED_LOCALES.includes(String(rawSegments[0]).toLowerCase())?String(rawSegments.shift()).toLowerCase():'';
- if(pathLocale)setLocale(pathLocale);
+ if(rawSegments[0]&&SUPPORTED_LOCALES.includes(String(rawSegments[0]).toLowerCase()))rawSegments.shift();
+ setLocale('fa');
  const segments=rawSegments;
  const known=new Set(['shop','cart','account','rewards','checkout','about','contact','news','articles','terms','privacy','enamad','aparat','support','payment','admin','product']);
  const p=segments.length?(known.has(segments[0])?segments:['product',segments[0]]):[''];
