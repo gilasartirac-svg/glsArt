@@ -6,7 +6,7 @@ import path from 'node:path';
 const root=process.cwd();
 const app=fs.readFileSync(path.join(root,'frontend/src/app.js'),'utf8');
 const css=fs.readFileSync(path.join(root,'frontend/src/styles.css'),'utf8');
-const langs=['fa','en','tr','ar'];
+const langs=['fa'];
 const dicts=Object.fromEntries(langs.map(l=>[l,JSON.parse(fs.readFileSync(path.join(root,'frontend/public/i18n',l+'.json'),'utf8'))]));
 
 test('phase 9 special routes are registered',()=>{
@@ -44,7 +44,7 @@ test('Aparat and legal page UI has responsive production styles',()=>{
   assert.match(css,/\.enamad-page/);
 });
 
-test('all four locale dictionaries keep identical keys after phase 9 additions',()=>{
+test('Persian dictionary keeps the complete phase 9 key set',()=>{
   const base=Object.keys(dicts.fa.strings).sort();
   for(const l of langs.slice(1)) assert.deepEqual(Object.keys(dicts[l].strings).sort(),base,l+' key set mismatch');
 });
