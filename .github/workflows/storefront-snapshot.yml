@@ -5,6 +5,11 @@ on:
     - cron: '0 0 * * *'
       timezone: "Asia/Tehran"
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'worker/src/index.js'
+      - '.github/workflows/storefront-snapshot.yml'
 
 permissions:
   contents: write
