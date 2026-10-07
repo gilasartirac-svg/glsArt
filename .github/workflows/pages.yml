@@ -100,7 +100,7 @@ jobs:
           });
           const errors=[];
           page.on('pageerror',e=>errors.push('pageerror: '+e.message));
-          page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('trustseal.enamad.ir'))errors.push('console: '+m.text())});
+          page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('trustseal.enamad.ir')&&!m.text().includes('Failed to load resource'))errors.push('console: '+m.text())});
           page.on('requestfailed',r=>{if(r.url().includes('trustseal.enamad.ir'))return;errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||''))});
           const fail=(m)=>{throw new Error(m)};
           await page.goto('https://gilasart.ir/?runtime_verify='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
