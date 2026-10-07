@@ -52,9 +52,12 @@ jobs:
             });
           if(!products.length) throw new Error('empty product index');
           const categories=(d.categories||[]).map(x=>({id:x.id,slug:x.slug,name:x.name,description:x.description||''}));
-          const articles=(d.articles||[]).map(x=>({slug:x.slug,title:x.title,published_at:x.published_at||null,updated_at:x.updated_at||null}));
-          const news=(d.news||[]).map(x=>({slug:x.slug,title:x.title,published_at:x.published_at||null,updated_at:x.updated_at||null}));
-          const index={schemaVersion:2,generatedAt:d.meta.generatedAt,products,categories,articles,news,settings:d.settings||{}};
+          const publicContent=x=>({id:x.id,slug:x.slug,title:x.title,summary:x.summary||'',body:x.body||'',cover_image:x.cover_image||'',published_at:x.published_at||null,updated_at:x.updated_at||null});
+          const articles=(d.articles||[]).map(publicContent);
+          const news=(d.news||[]).map(publicContent);
+          const about=(d.about||[]).map(publicContent);
+          const contact=(d.contact||[]).map(x=>({id:x.id,slug:x.slug,title:x.title,summary:x.summary||'',body:x.body||'',cover_image:x.cover_image||'',phone:x.phone||'',mobile:x.mobile||'',address:x.address||'',map_url:x.map_url||'',published_at:x.published_at||null,updated_at:x.updated_at||null}));
+          const index={schemaVersion:2,generatedAt:d.meta.generatedAt,products,categories,articles,news,about,contact,settings:d.settings||{}};
           const homeProducts=products.slice(0,8);
           const flash=products.filter(p=>p.flash_sale_active===1&&p.flash_sale_ends_at&&new Date(p.flash_sale_ends_at).getTime()>Date.now()).slice(0,20);
           const home={schemaVersion:2,generatedAt:d.meta.generatedAt,products:homeProducts,categories,settings:d.settings||{},flash};
@@ -64,7 +67,7 @@ jobs:
           const manifest={
             schemaVersion:2,version,generatedAt:d.meta.generatedAt,
             productCount:products.length,categoryCount:categories.length,
-            articleCount:articles.length,newsCount:news.length
+            articleCount:articles.length,newsCount:news.length,aboutCount:about.length,contactCount:contact.length
           };
           fs.writeFileSync('frontend/public/data/storefront-manifest.json',JSON.stringify(manifest,null,2)+'\n');
           NODE
@@ -81,6 +84,8 @@ jobs:
           if(index.schemaVersion!==2||manifest.schemaVersion!==2||home.schemaVersion!==2)throw new Error('invalid split schema');
           if(!Array.isArray(index.products)||index.products.length<1)throw new Error('empty product index');
           if(!Array.isArray(index.categories)||!index.settings)throw new Error('index missing catalog metadata');
+          if(!Array.isArray(index.articles)||!Array.isArray(index.news)||!Array.isArray(index.about)||!Array.isArray(index.contact))throw new Error('index missing public content');
+          for(const x of [...index.articles,...index.news,...index.about,...index.contact])if(!x.slug||!x.title)throw new Error('public content missing slug/title');
           const required=['id','slug','name','sku','price_irt','image','category_ids','flash_sale_active'];
           for(const p of index.products)for(const k of required)if(p[k]===undefined||p[k]===null&&k!=='image')throw new Error('product index missing '+k);
           if(index.products.some(p=>!p.image))throw new Error('product without image');
