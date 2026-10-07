@@ -99,6 +99,9 @@ jobs:
           page.on('console',m=>{if(m.type()==='error')errors.push('console: '+m.text())});
           page.on('requestfailed',r=>errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||'')));
           const fail=(m)=>{throw new Error(m)};
+          await page.goto('https://gilasart.ir/?runtime_verify='+Date.now(),{waitUntil:'networkidle',timeout:60000});
+          await page.waitForTimeout(3000);
+          console.log('ROOT_RUNTIME='+JSON.stringify(await page.evaluate(()=>({url:location.href,app:document.querySelector('#app')?.innerHTML?.slice(0,1200)||'',cards:document.querySelectorAll('.product-card').length}))));
           await page.goto('https://gilasart.ir/shop?runtime_verify='+Date.now(),{waitUntil:'networkidle',timeout:60000});
           await page.waitForTimeout(4000);
           const runtime=await page.evaluate(async()=>{const t=await fetch('/app.js?runtime_probe='+Date.now(),{cache:'no-store'}).then(r=>r.text());return {url:location.href,app:document.querySelector('#app')?.innerHTML||'',hasPublicAuthFix:t.includes('else loadMe().catch(()=>{})'),hasOldAwait:t.includes('// Cache the session briefly so normal SPA navigation does not repeat /api/me.\\n await loadMe();'),router:typeof window.GilasArtRouter}});
