@@ -95,7 +95,7 @@ jobs:
             if [ "$ok" != "true" ]; then echo "Production route verification failed: $path"; exit 1; fi
           done
           echo "Checking homepage product image asset"
-          image_path=$(node -e "const d=require('./dist/data/home.json');process.stdout.write(String(d.products?.[0]?.images?.[0]?.path||''))")
+          image_path=$(node -e "const d=require('./dist/data/home.json');process.stdout.write(String(d.products?.[0]?.image||''))")
           if [ -z "$image_path" ]; then echo "Homepage image path missing from snapshot"; exit 1; fi
           image_code=$(curl -L -sS -o /tmp/home-image.bin -w '%{http_code}' --retry 2 --retry-all-errors "https://gilasart.ir$image_path" || true)
           image_type=$(curl -L -sS -I --retry 2 --retry-all-errors "https://gilasart.ir$image_path" 2>/dev/null | awk 'BEGIN{IGNORECASE=1}/^content-type:/{print $2; exit}' | tr -d '\\r' || true)
