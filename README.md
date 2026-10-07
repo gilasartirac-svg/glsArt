@@ -822,10 +822,10 @@ Admin:
 فایل‌های اصلی:
 
     frontend/public/data/home.json
-    frontend/public/data/storefront.json
+    frontend/public/data/storefront-index.json
     frontend/public/data/storefront-manifest.json
 
-Snapshot برای کاهش D1 Reads داده‌های عمومی مانند:
+Snapshot سبک برای کاهش D1 Reads؛ فهرست محصولات و داده خانه جدا شده‌اند و جزئیات محصول از API خوانده می‌شود:
 
 - Product Catalog
 - Categories
