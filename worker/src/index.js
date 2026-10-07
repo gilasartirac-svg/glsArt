@@ -643,7 +643,7 @@ async function route(req,env){const u=new URL(req.url); if(u.pathname==='/api/lo
 }
 
 if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
-  const parts=u.pathname.split('/').filter(Boolean);const section=String(parts[2]||'').toLowerCase(),slug=decodeURIComponent(parts.slice(3).join('/'));if(!['news','articles'].includes(section)||!slug)return json({error:'invalid_content'},400);const x=await env.DB.prepare('SELECT id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE section=? AND slug=? AND active=1').bind(section,slug).first();if(!x)return json({error:'not_found'},404);return json({item:x});
+  const parts=u.pathname.split('/').filter(Boolean);const section=String(parts[2]||'').toLowerCase(),slug=decodeURIComponent(parts.slice(3).join('/'));if(!['news','articles'].includes(section)||!slug)return json({error:'invalid_content'},400);const x=await env.DB.prepare('SELECT id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE section=? AND slug=? AND active=1').bind(section,slug).first();if(!x)return json({error:'not_found'},404);const locale=requestLocale(req);const item=(await applyTranslations(env,[x],'cms',['title','summary','body','phone','mobile','address'],locale))[0]||x;return json({item,locale});
  }
  if(u.pathname.startsWith('/api/content')&&req.method==='GET'){
   const section=String(u.searchParams.get('section')||'').trim().toLowerCase();
@@ -652,10 +652,10 @@ if(u.pathname.startsWith('/api/content/')&&req.method==='GET'){
   let sql='SELECT id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE section=? AND active=1';const args=[section];
   if(q){sql+=' AND (title LIKE ? OR summary LIKE ? OR body LIKE ?)';const like='%'+q+'%';args.push(like,like,like)}
   sql+=' ORDER BY published_at DESC,created_at DESC LIMIT ? OFFSET ?';args.push(limit,offset);
-  const r=await env.DB.prepare(sql).bind(...args).all();return json({items:r.results||[],limit,offset,hasMore:(r.results||[]).length===limit});
+  const r=await env.DB.prepare(sql).bind(...args).all();const locale=requestLocale(req);const items=await applyTranslations(env,r.results||[],'cms',['title','summary','body','phone','mobile','address'],locale);return json({items,limit,offset,hasMore:items.length===limit,locale});
  }
  
- if(u.pathname==='/api/faq'&&req.method==='GET'){const r=await env.DB.prepare('SELECT id,question,answer FROM faq_entries WHERE active=1 ORDER BY sort_order ASC,created_at ASC').all();return json({items:r.results||[]})}
+ if(u.pathname==='/api/faq'&&req.method==='GET'){const locale=requestLocale(req);const r=await env.DB.prepare('SELECT id,question,answer FROM faq_entries WHERE active=1 ORDER BY sort_order ASC,created_at ASC').all();const items=await applyTranslations(env,r.results||[],'faq',['question','answer'],locale);return json({items,locale})}
  if(u.pathname==='/api/support/tickets'&&req.method==='GET'){
   if(!me)return json({error:'unauthorized'},401);
   const limit=Math.min(50,Math.max(1,Number(u.searchParams.get('limit')||20))),offset=Math.max(0,Number(u.searchParams.get('offset')||0));
