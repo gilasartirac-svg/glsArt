@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "web": {
-    "version": "2026.10.07.2",
-    "minimumVersion": "2026.10.07.1"
+    "version": "2026.10.07.3",
+    "minimumVersion": "2026.10.07.3"
   },
   "android": {
     "available": false,
@@ -16,5 +16,5 @@
     "minimumVersion": "0.0.0",
     "url": ""
   },
-  "checkedAt": "2026-10-07T05:00:00Z"
+  "checkedAt": "2026-10-07T06:00:00Z"
 }
