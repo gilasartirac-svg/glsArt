@@ -1,4 +1,5 @@
 import {cp, mkdir, readFile, writeFile} from 'node:fs/promises';
+import {transform} from 'esbuild';
 await mkdir('dist',{recursive:true});await cp('frontend/src','dist',{recursive:true});await cp('frontend/public','dist',{recursive:true});
 // GitHub Pages does not automatically return HTTP 200 for clean locale routes such as /fa/.
 // Generate real entry documents for every supported locale so the production homepage is
@@ -43,7 +44,13 @@ for(const x of (snapshot?.articles||[])){if(x?.slug)addRoute('/articles/'+encode
 for(const x of (snapshot?.news||[])){if(x?.slug)addRoute('/news/'+encodeURIComponent(String(x.slug)),x.updated_at||x.published_at)}
 const sitemapBody=Array.from(urls.values()).map(x=>'<url><loc>'+x.loc+'</loc>'+(x.lastmod&&/^\\d{4}-\\d{2}-\\d{2}/.test(String(x.lastmod))?'<lastmod>'+String(x.lastmod).slice(0,10)+'</lastmod>':'')+'</url>').join('');
 await writeFile('dist/sitemap.xml','<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+sitemapBody+'</urlset>');
-const release=JSON.parse(await readFile('frontend/public/mobile-release.json','utf8'));const releaseVersion=String(release.web?.version||'dev').replace(/[^A-Za-z0-9._-]/g,'-');const buildVersion=String(process.env.GITHUB_SHA||releaseVersion).slice(0,12).replace(/[^A-Za-z0-9._-]/g,'-');const swSource=await readFile('dist/sw.js','utf8');await writeFile('dist/sw.js',swSource.replaceAll('__GILASART_VERSION__',buildVersion));await writeFile('dist/config.js',`window.GILASART_API=${JSON.stringify(process.env.GILASART_API||'https://api.gilasart.ir')};window.GILASART_APP_VERSION=${JSON.stringify(release.web?.version||'dev')};\n`);console.log('frontend built');
+const release=JSON.parse(await readFile('frontend/public/mobile-release.json','utf8'));const releaseVersion=String(release.web?.version||'dev').replace(/[^A-Za-z0-9._-]/g,'-');const buildVersion=String(process.env.GITHUB_SHA||releaseVersion).slice(0,12).replace(/[^A-Za-z0-9._-]/g,'-');const swSource=await readFile('dist/sw.js','utf8');await writeFile('dist/sw.js',swSource.replaceAll('__GILASART_VERSION__',buildVersion));await writeFile('dist/config.js',`window.GILASART_API=${JSON.stringify(process.env.GILASART_API||'https://api.gilasart.ir')};window.GILASART_APP_VERSION=${JSON.stringify(release.web?.version||'dev')};\n`);// Production asset optimization: minify JS/CSS only in dist so source files stay readable.
+for(const [file,loader] of [['dist/app.js','js'],['dist/styles.css','css']]){
+  const source=await readFile(file,'utf8');
+  const result=await transform(source,{loader,minify:true,sourcemap:false,target:['es2020']});
+  await writeFile(file,result.code);
+}
+console.log('frontend built');
 await cp('404.html','dist/404.html');
 await cp('CNAME','dist/CNAME');
 
