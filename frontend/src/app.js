@@ -24,10 +24,11 @@ const SUPPORTED_LOCALES=['fa','en','tr','ar'];
 let i18nData=null,i18nLocaleLoaded='',i18nReverse=null;
 const I18N_VERSION=1;
 function i18nRoot(){return location.pathname.startsWith('/glsArt')?'/glsArt/i18n/':'/i18n/'}
+async function fetchWithTimeout(input,init={},timeoutMs=5000){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeoutMs);try{return await fetch(input,{...init,signal:controller.signal})}finally{clearTimeout(timer)}}
 async function loadLocale(locale){
  const l=SUPPORTED_LOCALES.includes(String(locale||''))?String(locale):'fa';
  if(i18nData&&i18nLocaleLoaded===l)return i18nData;
- try{const r=await fetch(i18nRoot()+encodeURIComponent(l)+'.json?v='+I18N_VERSION,{cache:'no-store',credentials:'same-origin'});if(!r.ok)throw new Error('i18n_http_'+r.status);const d=await r.json();if(Number(d?.version)!==I18N_VERSION||d?.locale!==l||!d?.strings||typeof d.strings!=='object')throw new Error('i18n_invalid');i18nData=d;i18nLocaleLoaded=l;i18nReverse=new Map(Object.entries(d.strings).map(([k,v])=>[String(v),k]));return d}catch(e){if(l!=='fa')return loadLocale('fa');console.warn('i18n_load_failed',e);i18nData={version:1,locale:'fa',direction:'rtl',defaultLocale:'fa',strings:{}};i18nLocaleLoaded='fa';i18nReverse=new Map();return i18nData}
+ try{const r=await fetchWithTimeout(i18nRoot()+encodeURIComponent(l)+'.json?v='+I18N_VERSION,{cache:'no-store',credentials:'same-origin'});if(!r.ok)throw new Error('i18n_http_'+r.status);const d=await r.json();if(Number(d?.version)!==I18N_VERSION||d?.locale!==l||!d?.strings||typeof d.strings!=='object')throw new Error('i18n_invalid');i18nData=d;i18nLocaleLoaded=l;i18nReverse=new Map(Object.entries(d.strings).map(([k,v])=>[String(v),k]));return d}catch(e){if(l!=='fa')return loadLocale('fa');console.warn('i18n_load_failed',e);i18nData={version:1,locale:'fa',direction:'rtl',defaultLocale:'fa',strings:{}};i18nLocaleLoaded='fa';i18nReverse=new Map();return i18nData}
 }
 function t(key,vars={}){const value=i18nData?.strings?.[key]??key;return String(value).replace(/\{\{(\w+)\}\}/g,(_,name)=>String(vars?.[name]??''))}
 function translateRenderedContent(root=document){
@@ -65,7 +66,7 @@ function writeLocaleCookie(locale){
 async function detectPreferredLocale(){
  const saved=readLocaleCookie();if(saved)return saved;
  try{
-  const r=await fetch(API+'/api/locale',{credentials:'omit',cache:'no-store'});
+  const r=await fetchWithTimeout(API+'/api/locale',{credentials:'omit',cache:'no-store'},3000);
   if(r.ok){const d=await r.json();if(SUPPORTED_LOCALES.includes(d?.locale))return d.locale}
  }catch{}
  return 'fa';
@@ -112,7 +113,7 @@ function mountLanguageSwitcher(){
  wrap.querySelectorAll('.language-option').forEach(button=>button.addEventListener('click',async()=>{const next=button.dataset.locale;if(!SUPPORTED_LOCALES.includes(next)||next===currentLocale){wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');return}await loadLocale(next);setLocale(next);refresh();const base=location.pathname.startsWith('/glsArt')?'/glsArt':'';let p=location.pathname;if(base&&p.startsWith(base))p=p.slice(base.length)||'/';const parts=p.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();p='/'+parts.join('/');const target=localePath(p,next);history.pushState({},'',target);scrollRouteTop();routeInFlightTarget=target;wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget='';scrollRouteTop()})}));
  document.addEventListener('click',e=>{if(!wrap.contains(e.target)){wrap.classList.remove('is-open');toggle.setAttribute('aria-expanded','false')}});
 }
-let routeInFlightTarget='';
+let routeInFlight=null,routeInFlightTarget='';
 const icon=n=>({cart:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 1.9-1.4L21 7H7"/><circle cx="10" cy="20" r="1.2"/><circle cx="18" cy="20" r="1.2"/> </svg>',user:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>',search:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>',send:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 4 18 8-18 8 3-8-3-8Z"/><path d="M6 12h9"/></svg>',check:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>',support:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-5.5 5V15A2.5 2.5 0 0 1 3 12.5v-7Z"/><path d="M7 8h10M7 11h6"/></svg>',plus:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',close:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>',clock:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>',copy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M5 16H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"/></svg>'}[n]||'');
 const fa=n=>new Intl.NumberFormat(currentLocale==='fa'?'fa-IR':currentLocale==='ar'?'ar':'tr-TR').format(Number(n||0));const normalizeIranMobile=value=>{let m=String(value||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'');if(m.startsWith('0098'))m='0'+m.slice(4);else if(m.startsWith('98')&&m.length===12)m='0'+m.slice(2);else if(m.startsWith('9')&&m.length===10)m='0'+m;return m};
 const escapeHtml=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));
@@ -168,12 +169,12 @@ async function loadStorefrontSnapshot(){
  if(storefrontSnapshotPromise)return storefrontSnapshotPromise;
  storefrontSnapshotPromise=(async()=>{
   try{
-   const mr=await fetch(storefrontSnapshotUrl(),{cache:'no-store',credentials:'same-origin'});
+   const mr=await fetchWithTimeout(storefrontSnapshotUrl(),{cache:'no-store',credentials:'same-origin'},5000);
    if(!mr.ok)return null;
    const manifest=await mr.json();
    if(Number(manifest?.schemaVersion)!==1||!manifest?.generatedAt)return null;
    const base=(location.pathname.includes('/glsArt')?'/glsArt':'')+'/data/storefront.json';
-   const sr=await fetch(base+'?v='+encodeURIComponent(manifest.generatedAt),{cache:'no-store',credentials:'same-origin'});
+   const sr=await fetchWithTimeout(base+'?v='+encodeURIComponent(manifest.generatedAt),{cache:'no-store',credentials:'same-origin'},5000);
    if(!sr.ok)return null;
    const d=await sr.json();
    if(Number(d?.meta?.schemaVersion)!==1||!Array.isArray(d.products)||!Array.isArray(d.categories)||!d.settings)return null;
@@ -462,7 +463,7 @@ function startSkyAnimation(){
  }
  resize();addEventListener('resize',resize,{passive:true});draw();canvas._cancel=()=>cancelAnimationFrame(raf)
 }
-async function home(){layout('<section class="wrap home-loading" aria-busy="true"><div class="home-loading-mark">GILAS ART</div><div class="home-loading-copy"><strong>'+t('common.loading')+'</strong><span>'+t('home.latestText')+'</span></div></section>');let snapshot=await loadStorefrontSnapshot();let products,settings,flashData,categoryData,categoryProducts=[];if(snapshot){const normalized=(snapshot.products||[]).map(snapshotCore);categoryProducts=normalized;products={items:normalized.slice(0,8)};settings={settings:snapshot.settings||{}};flashData={items:normalized.filter(p=>Number(p.flash_sale_active)===1&&p.flash_sale_ends_at&&new Date(p.flash_sale_ends_at).getTime()>Date.now()).slice(0,20)};categoryData={items:Array.isArray(snapshot.categories)?snapshot.categories:[]};}else{try{const r=await fetch(API+'/api/home',{credentials:'omit',cache:'no-store'});const d=r.ok?await r.json():null;categoryProducts=(d?.products?.items||[]).map(p=>({...p,image:safeUrl(p.image)}));products={items:categoryProducts};settings={settings:d?.settings?.settings||{}};flashData={items:(d?.flash?.items||[]).map(p=>({...p,image:safeUrl(p.image)}))};categoryData={items:d?.categories?.items||[]};}catch{products={items:[]};settings={settings:{}};flashData={items:[]};categoryData={items:[]}}}state.products=products.items||[];state.categories=categoryData.items||[];const ss=settings.settings||{},flash=flashData.items||[];state.settings=ss;const featuredProduct=pickFeaturedProduct(state.products);const heroProduct=featuredProduct||state.products[0]||null,heroImage=heroProduct?safeUrl(heroProduct.image):'';setSeo({title:ss.seo_title||t('home.title'),description:ss.seo_description||ss.site_description,image:heroImage||undefined});const categoryThumbnail={
+async function home(){layout('<section class="wrap home-loading" aria-busy="true"><div class="home-loading-mark">GILAS ART</div><div class="home-loading-copy"><strong>'+t('common.loading')+'</strong><span>'+t('home.latestText')+'</span></div></section>');let snapshot=await loadStorefrontSnapshot();let products,settings,flashData,categoryData,categoryProducts=[];if(snapshot){const normalized=(snapshot.products||[]).map(snapshotCore);categoryProducts=normalized;products={items:normalized.slice(0,8)};settings={settings:snapshot.settings||{}};flashData={items:normalized.filter(p=>Number(p.flash_sale_active)===1&&p.flash_sale_ends_at&&new Date(p.flash_sale_ends_at).getTime()>Date.now()).slice(0,20)};categoryData={items:Array.isArray(snapshot.categories)?snapshot.categories:[]};}else{try{const r=await fetchWithTimeout(API+'/api/home',{credentials:'omit',cache:'no-store'},6000);const d=r.ok?await r.json():null;categoryProducts=(d?.products?.items||[]).map(p=>({...p,image:safeUrl(p.image)}));products={items:categoryProducts};settings={settings:d?.settings?.settings||{}};flashData={items:(d?.flash?.items||[]).map(p=>({...p,image:safeUrl(p.image)}))};categoryData={items:d?.categories?.items||[]};}catch{products={items:[]};settings={settings:{}};flashData={items:[]};categoryData={items:[]}}}state.products=products.items||[];state.categories=categoryData.items||[];const ss=settings.settings||{},flash=flashData.items||[];state.settings=ss;const featuredProduct=pickFeaturedProduct(state.products);const heroProduct=featuredProduct||state.products[0]||null,heroImage=heroProduct?safeUrl(heroProduct.image):'';setSeo({title:ss.seo_title||t('home.title'),description:ss.seo_description||ss.site_description,image:heroImage||undefined});const categoryThumbnail={
 cat_gilas_horizontal:'<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="30" y="24" width="100" height="52" rx="3" stroke-width="2.4"/><rect x="36" y="30" width="88" height="40" rx="1" stroke-width="1.1" opacity=".7"/><path d="M42 57c8-19 16 12 25-6 9-18 17 12 26-5 8-15 15 8 25-3" stroke-width="2.1"/><path d="M49 40q8-7 16 0t16 0 16 0 14 0" stroke-width="1.2" opacity=".65"/><circle cx="80" cy="50" r="2.5" fill="currentColor" stroke="none"/></g></svg>',
 cat_gilas_vertical:'<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="56" y="13" width="48" height="74" rx="3" stroke-width="2.4"/><rect x="62" y="19" width="36" height="62" rx="1" stroke-width="1.1" opacity=".7"/><path d="M80 25c-12 11-12 24 0 34 12-10 12-23 0-34Zm0 34c-9 8-9 15 0 21 9-6 9-13 0-21Z" stroke-width="2.1"/><path d="M71 47h18M80 31v38" stroke-width="1.2" opacity=".65"/></g></svg>',
 cat_gilas_square:'<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="42" y="13" width="76" height="74" rx="3" stroke-width="2.4"/><rect x="49" y="20" width="62" height="60" rx="1" stroke-width="1.1" opacity=".7"/><path d="M80 25c7 8 16 11 24 25-8 14-17 17-24 25-7-8-16-11-24-25 8-14 17-17 24-25Z" stroke-width="2.1"/><circle cx="80" cy="50" r="8" stroke-width="1.3"/><path d="M80 42v16M72 50h16" stroke-width="1" opacity=".6"/></g></svg>',
@@ -1173,10 +1174,6 @@ async function checkout(){navigate('/cart')}
 
 async function router(){
  scrollRouteTop();
- // Authentication is a global application concern, not an account-page concern.
- // Hydrate the server session before ANY page renders so the header, admin link,
- // roles and permissions are identical on home/shop/product/account/admin routes.
- await loadMe();
  const base=routeBase();
  let cleanPath=location.pathname.startsWith(base)?location.pathname.slice(base.length):location.pathname;
  cleanPath=cleanPath.replace(/^\/+|\/+$/g,'');
