@@ -17,8 +17,8 @@ try{authChannel='BroadcastChannel' in window?new BroadcastChannel('gilasart-auth
 function clearAuthState(){state.user=null;state.roles=[];state.permissions=[];state.rewards=null;state.points=0;state.meLoadedAt=0;authSession=null;csrfToken='';clearInterval(notificationTimer);notificationTimer=null}
 function syncAuthStateFromSession(d){state.user=d?.user||null;state.roles=d?.roles||[];state.permissions=d?.permissions||[];csrfToken=d?.csrfToken||'';authSession=d?.session||null;state.meLoadedAt=Date.now()}
 try{authChannel?.addEventListener('message',e=>{if(e?.data?.type==='logout'){clearAuthState();if(location.pathname.includes('/admin'))location.reload();else if(location.pathname.includes('/account'))router()}})}catch{}
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadMe({force:true}).catch(()=>{})});
-window.addEventListener('focus',()=>loadMe({force:true}).catch(()=>{}));
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadMe().catch(()=>{})});
+window.addEventListener('focus',()=>loadMe().catch(()=>{}));
 authSyncTimer=setInterval(()=>{if(document.visibilityState==='visible')loadMe({force:true}).catch(()=>{})},60000);
 const SUPPORTED_LOCALES=['fa','en','tr','ar'];
 let i18nData=null,i18nLocaleLoaded='',i18nReverse=null;
