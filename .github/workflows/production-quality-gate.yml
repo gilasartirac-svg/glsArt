@@ -34,13 +34,13 @@ jobs:
           const active=files.filter(f=>!/\\.(?:backup|broken|corrupted)(?:\\.|$)/i.test(f)&&!/\\.before-[^/]+\\.js$/i.test(f));
           for(const f of active){
             const src=fs.readFileSync(f,'utf8');
-            if(/\\bimport\\s*\\(/.test(src)||/^\\s*import\\s/m.test(src)||/^\\s*export\\s/m.test(src)){
+            if(/\bimport\s*\(/.test(src)||/^\s*import\s/m.test(src)||/^\s*export\s/m.test(src)){
               // Syntax is checked by node --check below; here we verify relative module targets.
               const refs=[];
-              const re=/(?:import|export)\\s+(?:[\\s\\S]*?\\s+from\\s+)?['"](.\\/?[^'"]+)['"]/g;
+              const re=/(?:import|export)\s+(?:[\s\S]*?\s+from\s+)?['"](\.\/?[^'"]+)['"]/g;
               let m;
               while((m=re.exec(src))) refs.push(m[1]);
-              const dyn=/import\\(\\s*['"](.\\/?[^'"]+)['"]\\s*\\)/g;
+              const dyn=/import\(\s*['"](\.\/?[^'"]+)['"]\s*\)/g;
               while((m=dyn.exec(src))) refs.push(m[1]);
               for(const ref of refs){
                 if(!ref.startsWith('.')) continue;
