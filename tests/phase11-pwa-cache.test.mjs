@@ -28,15 +28,13 @@ test('phase 11: service worker updates activate immediately and clients reload o
  assert.match(app,/location\.reload\(\)/);
 });
 
-test('phase 11: locale is persisted and all four locale dictionaries are versioned',async()=>{
- assert.match(app,/gilasart_locale=/);
- assert.match(app,/Max-Age=31536000/);
- for(const locale of ['fa','en','tr','ar']){
-  const d=JSON.parse(await readFile('frontend/public/i18n/'+locale+'.json','utf8'));
-  assert.equal(d.version,1);
-  assert.equal(d.locale,locale);
-  assert.ok(d.strings&&Object.keys(d.strings).length>0);
- }
+test('phase 11: storefront language is Persian-only and cache contains only fa dictionary',async()=>{
+ assert.doesNotMatch(app,/gilasart_locale=/);
+ assert.doesNotMatch(app,/language-switcher-toggle/);
+ const d=JSON.parse(await readFile('frontend/public/i18n/fa.json','utf8'));
+ assert.equal(d.locale,'fa');
+ assert.equal(d.direction,'rtl');
+ assert.doesNotMatch(sw,/i18n\\/(?:en|tr|ar)\\.json/);
 });
 
 test('phase 11: release manifest drives web version comparison and native update links',()=>{
