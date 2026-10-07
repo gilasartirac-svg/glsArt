@@ -963,11 +963,13 @@ function referralFromLocation(){try{const q=new URLSearchParams(location.search|
 async function account(){
  await loadMe();
  if(state.user){
-  const [invoiceModule,ordersData]=await Promise.all([
-   import('./invoice.js?v=20260929-invoice-2'),
-   api('/api/account/orders')
-  ]);
-  const orders=ordersData.items||[],invoiceSettings=ordersData.invoice||{};
+  // The profile itself must never be blocked by an optional invoice module
+  // or a transient orders API failure. Render the authenticated account first,
+  // then keep invoice/order data as independently recoverable pieces.
+  let invoiceModule=null,invoiceSettings={},ordersData={items:[]};
+  try{invoiceModule=await import('./invoice.js?v=20260929-invoice-2')}catch(e){console.warn('account_invoice_module_unavailable',e)}
+  try{ordersData=await api('/api/account/orders')}catch(e){console.warn('account_orders_unavailable',e)}
+  const orders=Array.isArray(ordersData?.items)?ordersData.items:[],invoiceSettings=ordersData?.invoice||{};
   const statusLabels={PENDING:'در انتظار پرداخت',PAID:'پرداخت شد',PROCESSING:'در حال آماده‌سازی',SHIPPED:'ارسال شد',DELIVERED:'تحویل شد',CANCELLED:'لغو شد',FAILED:'ناموفق'};
   const steps=[['PENDING','ثبت سفارش'],['PAID','تأیید پرداخت'],['PROCESSING','آماده‌سازی اثر'],['SHIPPED','تحویل به پست / ارسال'],['DELIVERED','تحویل تابلو']];
   const rank={PENDING:0,PAID:1,PROCESSING:2,SHIPPED:3,DELIVERED:4};
@@ -985,7 +987,9 @@ async function account(){
   document.querySelector('#logout').onclick=async()=>{try{await api('/api/auth/logout',{method:'POST',headers:{'x-csrf-token':csrf()}})}finally{clearAuthState();try{authChannel?.postMessage({type:'logout'})}catch{}navigate('/shop')}};
   document.querySelectorAll('.account-invoice').forEach(b=>b.onclick=()=>{if(b.disabled)return;const o=orders.find(x=>x.id===b.dataset.id);if(o)invoiceModule.openInvoice(o,invoiceSettings)});
   const invoiceFromLink=new URLSearchParams(location.search||'').get('invoice');
-  if(invoiceFromLink){const o=orders.find(x=>x.id===invoiceFromLink);if(o&&['PAID','PROCESSING','SHIPPED','DELIVERED'].includes(String(o.status||'').toUpperCase()))setTimeout(()=>invoiceModule.openInvoice(o,invoiceSettings),120);}
+  if(invoiceFromLink){const o=orders.find(x=>x.id===invoiceFromLink);if(o&&['PAID','PROCESSING','SHIPPED','DELIVERED'].includes(String(o.status||'').toUpperCase()))setTimeout(async()=>{
+  try{const mod=invoiceModule||await import('./invoice.js?v=20260929-invoice-2');mod.openInvoice(o,invoiceSettings)}catch(e){console.warn('account_invoice_query_failed',e)}
+},120);}
   return;
  }
  layout('<section class="wrap page auth-page"><div class="login-panel panel"><div class="login-aurora"></div><div class="auth-brand"><div class="profile-avatar">'+icon('user')+'</div><span class="eyebrow">GILAS ART ACCOUNT</span><h1>ورود امن به گیلاس آرت</h1><p class="muted">شماره موبایل خود را وارد کنید؛ کد یک‌بارمصرف برای شما ارسال می‌شود.</p></div><div class="form auth-form"><label id="mobile-label" class="auth-mobile-field"><span>شماره موبایل</span><input id="mobile" inputmode="numeric" autocomplete="tel" maxlength="11" placeholder="0912 345 6789" aria-label="شماره موبایل"></label><label id="referral-login-label" class="auth-referral-field"><span>کد دعوت <small>(اختیاری)</small></span><input id="login-referral-code" dir="ltr" inputmode="latin" maxlength="20" autocomplete="off" placeholder="مثلاً GA1A2B3C4D" aria-label="کد دعوت اختیاری"></label><button class="btn primary auth-send" id="send">'+icon('send')+' ارسال کد ورود</button><div id="step" aria-live="polite"></div></div><div class="auth-trust"><span>رمز عبور لازم نیست</span><span>ورود با کد یک‌بارمصرف</span><span>امن و سریع</span></div></div></section>');
