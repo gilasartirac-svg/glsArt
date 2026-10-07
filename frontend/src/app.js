@@ -483,11 +483,22 @@ cat_gilas_religious:'<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/sv
  (params.get('categories')||params.get('category')||'').split(',').map(x=>x.trim()).filter(Boolean).forEach(x=>selectedCategories.add(x));
  try{
   const snapshot=await loadStorefrontSnapshot();
-  if(!snapshot)throw new Error(t('shop.error'));
-  state.categories=Array.isArray(snapshot.categories)?snapshot.categories:[];
-  allItems=(snapshot.products||[]).map(snapshotCore);
+  if(snapshot){
+   state.categories=Array.isArray(snapshot.categories)?snapshot.categories:[];
+   allItems=(snapshot.products||[]).map(snapshotCore);
+  }else{
+   const [pd,cd]=await Promise.all([
+    fetchWithTimeout(API+'/api/products?limit=500',{credentials:'omit',cache:'no-store'},7000),
+    fetchWithTimeout(API+'/api/categories',{credentials:'omit',cache:'no-store'},5000)
+   ]);
+   if(!pd.ok||!cd.ok)throw new Error(t('shop.error'));
+   const productsData=await pd.json(),categoriesData=await cd.json();
+   if(!Array.isArray(productsData?.items)||!Array.isArray(categoriesData?.items))throw new Error(t('shop.error'));
+   state.categories=categoriesData.items;
+   allItems=productsData.items.map(p=>({...p,image:safeUrl(p.image)}));
+  }
  }catch(e){
-  layout('<section class="wrap page"><div class="panel"><h1>'+t('shop.title')+'</h1><p class="error">'+escapeHtml(e.message||t('shop.error'))+'</p></div></section>');
+  layout('<section class="wrap page"><div class="panel"><h1>'+t('shop.title')+'</h1><p class="error">'+escapeHtml(t('shop.error'))+'</p></div></section>');
   return;
  }
  const prices=allItems.map(x=>Number(x.price_irt||0)).filter(Number.isFinite);
