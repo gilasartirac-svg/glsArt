@@ -97,8 +97,8 @@
 }
 
 @media(max-width:760px){
- .admin-page{padding:16px 12px!important}
- .admin-title{align-items:flex-start;flex-direction:column}
+ .admin-layout .admin-page{padding:16px 12px!important}
+ .admin-layout .admin-title{align-items:flex-start;flex-direction:column}
  .admin-layout .form-grid{grid-template-columns:1fr}
  .admin-layout .reviews-stats{grid-template-columns:1fr}
  .admin-layout .reviews-toolbar{grid-template-columns:1fr}
