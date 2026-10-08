@@ -912,3 +912,254 @@ textarea{min-height:110px}
 @media (prefers-reduced-motion:reduce){
  .product .product-thumb,.product .product-option-card-ui{transition:none}.product .product-thumb:hover,.product .product-option-card:hover .product-option-card-ui{transform:none}
 }
+
+
+/* =========================================================
+   Final production UI contract — public storefront
+   Scope: visual/layout/responsive only. No business logic.
+   Last-write-wins layer to keep Desktop / Tablet / Mobile deterministic.
+   ========================================================= */
+:root{
+  --ga-page-gutter:clamp(12px,2.2vw,32px);
+  --ga-content-max:1320px;
+  --ga-header-height:72px;
+  --ga-header-height-mobile:64px;
+}
+html,body{
+  min-width:320px;
+  overflow-x:clip;
+}
+body{
+  background:var(--ui-bg);
+  color:var(--ui-text);
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+}
+#app{
+  min-height:100dvh;
+  overflow-x:clip;
+}
+.top{
+  width:100%;
+  min-height:var(--ga-header-height);
+}
+.top .wrap.nav{
+  width:min(calc(100% - 2 * var(--ga-page-gutter)),var(--ga-content-max));
+  min-height:var(--ga-header-height);
+  margin-inline:auto;
+}
+.top .brand{
+  min-width:0;
+  flex:0 1 auto;
+  white-space:nowrap;
+}
+.top .links{
+  min-width:0;
+}
+.top .links a{
+  white-space:nowrap;
+}
+.top .header-actions{
+  min-width:0;
+}
+main,
+main > *,
+.page,
+.section,
+.wrap{
+  min-width:0;
+  max-width:100%;
+}
+.page > *,
+.section > *{
+  min-width:0;
+}
+h1,h2,h3,h4,h5,h6{
+  text-wrap:balance;
+}
+p,li,td,th,.muted,.description,.summary{
+  overflow-wrap:anywhere;
+}
+button,.btn,a.iconbtn,.iconbtn{
+  -webkit-tap-highlight-color:transparent;
+}
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  outline:3px solid color-mix(in srgb,var(--ui-gold) 34%,transparent);
+  outline-offset:2px;
+}
+
+/* Desktop */
+@media (min-width:1024px){
+  .top .wrap.nav{
+    padding-block:8px;
+  }
+  .top .brand-wordmark{
+    font-size:clamp(24px,2vw,31px);
+  }
+  .page,.section{
+    width:min(calc(100% - 2 * var(--ga-page-gutter)),var(--ga-content-max));
+    margin-inline:auto;
+  }
+  .shop-page .gallery-workspace,
+  .shop-page .shop-page-masthead,
+  .shop-page .shop-control-shell{
+    width:min(calc(100% - 2 * var(--ga-page-gutter)),1280px);
+  }
+  .shop-page .product-stream{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:clamp(18px,1.8vw,26px);
+  }
+  .shop-page .product-card,
+  .shop-page .product-showcase{
+    min-width:0;
+  }
+}
+
+/* Tablet — independent composition, not a compressed desktop. */
+@media (min-width:768px) and (max-width:1023px){
+  .top .wrap.nav{
+    width:min(calc(100% - 24px),var(--ga-content-max));
+    min-height:68px;
+  }
+  .top .brand-wordmark{
+    font-size:clamp(22px,3vw,28px);
+  }
+  .top .links{
+    gap:2px;
+  }
+  .top .links a{
+    padding-inline:7px;
+    font-size:13px;
+  }
+  .page,.section{
+    width:min(calc(100% - 32px),var(--ga-content-max));
+    margin-inline:auto;
+  }
+  .shop-page .shop-control-bar{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .shop-page .product-stream{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px;
+  }
+  .shop-page .product-card .product-card-media,
+  .shop-page .product-showcase .product-card-media{
+    aspect-ratio:1/1;
+    min-height:0;
+  }
+}
+
+/* Mobile — app-like header, stable drawer, two-column catalog. */
+@media (max-width:767px){
+  :root{
+    --ga-header-height:var(--ga-header-height-mobile);
+  }
+  .top{
+    min-height:var(--ga-header-height-mobile);
+  }
+  .top .wrap.nav{
+    width:calc(100% - 16px);
+    min-height:var(--ga-header-height-mobile);
+    padding-block:7px;
+    gap:6px;
+  }
+  .top .brand{
+    max-width:48%;
+  }
+  .top .brand-wordmark{
+    font-size:clamp(21px,6vw,28px);
+    line-height:1.1;
+  }
+  .top .header-actions{
+    gap:1px;
+  }
+  .top .header-actions .iconbtn,
+  .top .header-actions .cart-link,
+  .top .theme-toggle,
+  .top .mobile-menu-toggle{
+    width:40px;
+    height:40px;
+    min-width:40px;
+    min-height:40px;
+  }
+  .top .mobile-menu-toggle{
+    margin-inline-start:0;
+  }
+  .top .links#main-menu{
+    top:calc(var(--ga-header-height-mobile) + env(safe-area-inset-top,0px));
+    height:calc(100dvh - var(--ga-header-height-mobile) - env(safe-area-inset-top,0px));
+    padding-bottom:max(24px,env(safe-area-inset-bottom,0px));
+  }
+  .top .links#main-menu a{
+    min-height:50px;
+  }
+  .page,.section{
+    width:calc(100% - 22px);
+    margin-inline:auto;
+  }
+  .shop-page .shop-control-bar{
+    grid-template-columns:1fr;
+  }
+  .shop-page .product-stream{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+  }
+  .shop-page .product-card .product-card-media,
+  .shop-page .product-showcase .product-card-media{
+    aspect-ratio:1/1;
+    min-height:0;
+  }
+  .shop-page .product-card .product-card-body,
+  .shop-page .product-showcase .product-card-body{
+    padding:13px;
+  }
+  .shop-page .product-card .product-card-heading h3,
+  .shop-page .product-showcase .product-card-heading h3{
+    font-size:15px!important;
+    line-height:1.6;
+  }
+  .shop-page .product-card .product-sku,
+  .shop-page .product-showcase .product-sku{
+    font-size:11px!important;
+  }
+}
+
+/* Narrow phones — single column only when two cards would become cramped. */
+@media (max-width:380px){
+  .top .wrap.nav{
+    width:calc(100% - 12px);
+  }
+  .top .brand{
+    max-width:42%;
+  }
+  .top .header-actions .iconbtn,
+  .top .header-actions .cart-link,
+  .top .theme-toggle,
+  .top .mobile-menu-toggle{
+    width:38px;
+    height:38px;
+    min-width:38px;
+    min-height:38px;
+  }
+  .shop-page .product-stream{
+    grid-template-columns:1fr;
+  }
+  .page,.section{
+    width:calc(100% - 16px);
+  }
+}
+
+/* Touch and reduced-motion quality. */
+@media (hover:none) and (pointer:coarse){
+  :where(.btn,.iconbtn,.top .links a,.shop-page .filter-chip,.shop-page .shop-control-trigger){
+    touch-action:manipulation;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
