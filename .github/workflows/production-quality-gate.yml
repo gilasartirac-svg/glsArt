@@ -131,10 +131,11 @@ jobs:
           const i=app.indexOf('async function home()'),j=app.indexOf('async function shop()',i);
           if(i<0||j<0)throw new Error('home function boundaries missing');
           const home=app.slice(i,j);
-          const required=['home.title','home.heroEyebrow2','home.heroTitle','home.heroText','home.viewWorks','home.about','home.collectionsEyebrow','home.collections','home.collectionsText','home.viewAll','home.categoryView','home.limitedTime','home.flashTitle','home.flashText','home.previous','home.next','home.selected','home.galleryArt','home.artwork','home.heroView','home.heroNote','home.approachEyebrow','home.approach','home.approachText','home.enterGallery','home.latestEyebrow','home.latest','home.latestActive','home.allWorks','home.noActive','home.processEyebrow','home.processTitle','home.processText','home.processDiscover','home.processChoose','home.processOrder','home.discoverText','home.chooseText','home.orderText'];
+          const required=['home.copperEyebrow','home.copperTitle','home.copperText','home.copperCta','home.copperAbout','home.collectionsEyebrow','home.collections','home.collectionsText','home.viewAll','home.categoryView','home.selected','home.galleryArt','home.artwork','home.heroView','home.latestEyebrow','home.latest','home.latestActive','home.allWorks','home.copperLatestText','home.noActive'];
           for(const key of required)if(!home.includes("t('"+key+"')"))throw new Error('Home UI is not localized: '+key);
-          const d=JSON.parse(fs.readFileSync('frontend/public/i18n/fa.json','utf8'));for(const key of required)if(typeof d.strings?.[key]!=='string'||!d.strings[key].trim())throw new Error('missing Home Persian key '+key)
-          for(const raw of ['مجموعه‌های گالری','پیشنهاد شگفت‌انگیز','آثاری برای خانه‌هایی که داستان دارند.','انتخاب اثر، بخشی از زیبایی آن است.','آخرین آثار','هنرکده گیلاس آرت','کشف','انتخاب','سفارش','تولید کننده ی برتر تابلو های معرق مس در ایران'])if(home.includes(raw))throw new Error('hard-coded Home UI text remains: '+raw);
+          const d=JSON.parse(fs.readFileSync('frontend/public/i18n/fa.json','utf8'));for(const key of required)if(typeof d.strings?.[key]!=='string'||!d.strings[key].trim())throw new Error('missing Home Persian key '+key);
+          for(const raw of ['مجموعه‌های گالری','پیشنهاد شگفت‌انگیز','آثاری برای خانه‌هایی که داستان دارند.','انتخاب اثر، بخشی از زیبایی آن است.','هنرکده گیلاس آرت','کشف','انتخاب','سفارش','تولید کننده ی برتر تابلو های معرق مس در ایران'])if(home.includes(raw))throw new Error('hard-coded obsolete Home UI text remains: '+raw);
+          for(const obsolete of ['home-trust-bar','home-intro','home-process','process-grid','flash-section'])if(home.includes(obsolete))throw new Error('obsolete Home section remains: '+obsolete);
           console.log('Home i18n contract: PASS');
           NODE
       - name: Validate Persian-only storefront language contract
