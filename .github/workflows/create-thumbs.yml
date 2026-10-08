@@ -1,0 +1,67 @@
+name: Create 50 Percent Thumbnail Copies
+
+on:
+  push:
+    paths:
+      - '.github/workflows/create-thumbs.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  create-thumbs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create thumbnails
+        env:
+          SOURCE: frontend/public/uploaded
+          DEST: frontend/public/uploaded/thumb
+        run: |
+          python -m pip install --disable-pip-version-check Pillow
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          src = Path("frontend/public/uploaded")
+          dst = src / "thumb"
+          dst.mkdir(parents=True, exist_ok=True)
+
+          files = sorted(
+              p for p in src.iterdir()
+              if p.is_file() and p.suffix.lower() in {".jpeg", ".jpg", ".png"}
+          )
+          expected = [p for p in files if p.suffix.lower() == ".jpeg"] + [p for p in files if p.suffix.lower() == ".png"]
+
+          if len(expected) != 233 or sum(p.suffix.lower()==".jpeg" for p in expected) != 226 or sum(p.suffix.lower()==".png" for p in expected) != 7:
+              raise SystemExit(f"Unexpected source image count: total={len(expected)} jpeg={sum(p.suffix.lower()=='.jpeg' for p in expected)} png={sum(p.suffix.lower()=='.png' for p in expected)}")
+
+          report = []
+          for p in expected:
+              with Image.open(p) as im:
+                  w, h = im.size
+                  nw, nh = max(1, w // 2), max(1, h // 2)
+                  out = dst / p.name
+                  if p.suffix.lower() == ".png":
+                      im.resize((nw, nh), Image.Resampling.LANCZOS).save(out, format="PNG", optimize=True)
+                  else:
+                      rgb = im.convert("RGB") if im.mode not in ("RGB", "L") else im
+                      rgb.resize((nw, nh), Image.Resampling.LANCZOS).save(out, format="JPEG", quality=90, optimize=True, progressive=True)
+                  report.append(f"{p.name}\t{w}x{h}\t{nw}x{nh}")
+
+          (dst / ".resize-verification.txt").write_text(
+              f"source_count={len(expected)}\njpeg_count={sum(p.suffix.lower()=='.jpeg' for p in expected)}\npng_count={sum(p.suffix.lower()=='.png' for p in expected)}\n" +
+              "\n".join(report) + "\n",
+              encoding="utf-8"
+          )
+          PY
+
+      - name: Commit generated thumbnails
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/uploaded/thumb
+          git commit -m "feat: add 50 percent product image thumbnails"
+          git push
