@@ -206,6 +206,7 @@ jobs:
           echo "PASS: categories"
           curl -fsS "$API/api/home" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{const d=JSON.parse(s);if(!Array.isArray(d?.products?.items)||!Array.isArray(d?.categories?.items)||!Array.isArray(d?.flash?.items)||!d?.settings?.settings)process.exit(1);if(d.products.items.length<1||d.categories.items.length<1)process.exit(1);if(!d.products.items.some(x=>String(x.name||'').trim()&&String(x.image||'').trim()))process.exit(1)})"
           echo "PASS: home"
+          echo "D1 product option contract smoke test follows"
           curl -fsS "$API/api/storefront-snapshot" -o /tmp/storefront-snapshot.json
           node - <<'NODE'
           const fs=require('fs');
