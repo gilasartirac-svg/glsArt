@@ -3,7 +3,7 @@
    Purpose: normalize grids, tables, forms, cards and responsive behavior
    across every control-panel page without changing business logic. */
 
-.admin-layout{--admin-bg:#0b0b0d;--admin-surface:#121216;--admin-surface-2:#18181d;--admin-line:rgba(255,255,255,.09);--admin-text:#f4efe7;--admin-muted:#a9a198;--admin-gold:#c9a86a;--admin-gold-strong:#e0c487;--admin-danger:#c75b5b;--admin-ok:#54b88a;--admin-radius:18px}
+.admin-layout{--admin-bg:var(--ui-bg);--admin-surface:var(--ui-surface);--admin-surface-2:var(--ui-surface-2);--admin-line:var(--ui-line);--admin-text:var(--ui-text);--admin-muted:var(--ui-muted);--admin-gold:var(--ui-gold);--admin-gold-strong:var(--ui-gold-strong);--admin-danger:var(--ui-danger);--admin-ok:var(--ui-success);--admin-radius:var(--ui-radius)}
 .admin-layout #admin-page{min-width:0}
 .admin-layout .admin-page{width:min(100%,1540px)!important;margin-inline:auto!important}
 .admin-layout .admin-page>*{min-width:0}
@@ -20,19 +20,19 @@
 .admin-layout .form-grid>*{min-width:0}
 .admin-layout .form label{display:flex;flex-direction:column;gap:7px;margin:0;color:var(--admin-muted);font-size:13px}
 .admin-layout .form input,.admin-layout .form select,.admin-layout .form textarea,
-.admin-layout input,.admin-layout select,.admin-layout textarea{width:100%;max-width:100%;min-width:0;box-sizing:border-box;background:#0e0e12;color:var(--admin-text);border:1px solid var(--admin-line);border-radius:12px;padding:11px 12px}
+.admin-layout input,.admin-layout select,.admin-layout textarea{width:100%;max-width:100%;min-width:0;box-sizing:border-box;background:var(--ui-control);color:var(--admin-text);border:1px solid var(--admin-line);border-radius:12px;padding:11px 12px}
 .admin-layout textarea{min-height:120px;resize:vertical}
-.admin-layout input:focus,.admin-layout select:focus,.admin-layout textarea:focus{border-color:rgba(201,168,106,.7);box-shadow:0 0 0 3px rgba(201,168,106,.09);outline:0}
+.admin-layout input:focus,.admin-layout select:focus,.admin-layout textarea:focus{border-color:rgba(201,168,106,.7);box-shadow:0 0 0 3px color-mix(in srgb,var(--ui-gold) 9%,transparent);outline:0}
 
 .admin-layout .btn{min-height:42px;white-space:nowrap}
-.admin-layout .btn.primary{background:linear-gradient(135deg,var(--admin-gold-strong),var(--admin-gold));color:#17130c;border-color:transparent;font-weight:800}
+.admin-layout .btn.primary{background:linear-gradient(135deg,var(--admin-gold-strong),var(--admin-gold));color:var(--ui-on-gold);border-color:transparent;font-weight:800}
 .admin-layout .btn.danger{border-color:rgba(199,91,91,.38);color:#efb0b0}
 .admin-layout .btn.ghost{background:rgba(255,255,255,.025)}
 
 .admin-layout .table-wrap,.admin-layout .table-scroll,.admin-layout .orders-table-wrap{width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;border-radius:14px}
 .admin-layout .admin-table{width:100%;border-collapse:separate;border-spacing:0;min-width:720px}
 .admin-layout .admin-table th,.admin-layout .admin-table td{vertical-align:middle;border-bottom:1px solid var(--admin-line);padding:12px 11px}
-.admin-layout .admin-table th{position:sticky;top:0;background:#151519;color:var(--admin-muted);font-size:12px;font-weight:700;white-space:nowrap;z-index:1}
+.admin-layout .admin-table th{position:sticky;top:0;background:var(--ui-surface-3);color:var(--admin-muted);font-size:12px;font-weight:700;white-space:nowrap;z-index:1}
 .admin-layout .admin-table tbody tr:hover td{background:rgba(201,168,106,.035)}
 .admin-layout .admin-table tbody tr:last-child td{border-bottom:0}
 .admin-layout .admin-table td{line-height:1.65}
@@ -41,7 +41,7 @@
 
 .admin-layout .pill{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:3px 9px;border-radius:999px;white-space:nowrap}
 .admin-layout .muted{color:var(--admin-muted)}
-.admin-layout .notice{border-color:rgba(201,168,106,.18);background:rgba(201,168,106,.055);border-radius:14px}
+.admin-layout .notice{border-color:color-mix(in srgb,var(--ui-gold) 18%,transparent);background:color-mix(in srgb,var(--ui-gold) 5.5%,transparent);border-radius:14px}
 .admin-layout .check{display:flex!important;flex-direction:row!important;align-items:center;gap:9px!important;cursor:pointer}
 .admin-layout .check input{width:auto;accent-color:var(--admin-gold)}
 
@@ -54,11 +54,11 @@
 .admin-layout .stat-card strong{display:block;margin-top:8px;color:var(--admin-gold-strong);font-size:25px}
 
 .admin-layout .product-admin-identity{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center;min-width:220px}
-.admin-layout .product-admin-thumb{width:64px;height:64px;border-radius:12px;overflow:hidden;background:#0d0d10;border:1px solid var(--admin-line);display:grid;place-items:center}
+.admin-layout .product-admin-thumb{width:64px;height:64px;border-radius:12px;overflow:hidden;background:var(--ui-control);border:1px solid var(--admin-line);display:grid;place-items:center}
 .admin-layout .product-admin-thumb img{width:100%;height:100%;object-fit:cover}
 .admin-layout .product-admin-meta{min-width:0}
 .admin-layout .product-admin-image-file,.admin-layout .product-admin-slug{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.admin-layout .attribute-choice-card,.admin-layout .attribute-card{border:1px solid var(--admin-line);background:rgba(255,255,255,.018);border-radius:14px;padding:14px}
+.admin-layout .attribute-choice-card,.admin-layout .attribute-card{border:1px solid var(--admin-line);background:color-mix(in srgb,var(--ui-text) 1.8%,transparent);border-radius:14px;padding:14px}
 .admin-layout .attribute-choice-main,.admin-layout .attribute-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .admin-layout .attribute-options{display:grid;gap:8px;margin-top:10px}
 .admin-layout .attribute-option-row{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(80px,.7fr) auto auto auto;gap:8px;align-items:center;padding:9px;border:1px solid var(--admin-line);border-radius:10px;background:#101014}
@@ -68,7 +68,7 @@
 .admin-layout .orders-master,.admin-layout .order-detail{min-width:0}
 .admin-layout .orders-master-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 .admin-layout .order-master-row{cursor:pointer}
-.admin-layout .order-master-row.is-selected td,.admin-layout .order-master-row:hover td{background:rgba(201,168,106,.06)}
+.admin-layout .order-master-row.is-selected td,.admin-layout .order-master-row:hover td{background:color-mix(in srgb,var(--ui-gold) 6%,transparent)}
 .admin-layout .order-detail{position:sticky;top:92px}
 .admin-layout .order-detail-section{margin-top:14px}
 .admin-layout .receipt-review-preview{max-width:100%;overflow:hidden;border-radius:12px}
@@ -132,7 +132,7 @@
 .admin-layout .panel{padding:18px;overflow:hidden}
 .admin-layout .panel+.panel{margin-top:18px}
 .admin-layout .panel-head,.admin-layout .sectionhead{padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid var(--admin-line)}
-.admin-layout .data-grid-toolbar{display:grid;grid-template-columns:minmax(220px,1fr) auto auto;gap:10px;align-items:center;margin:0 0 12px;padding:10px;background:rgba(255,255,255,.025);border:1px solid var(--admin-line);border-radius:13px}
+.admin-layout .data-grid-toolbar{display:grid;grid-template-columns:minmax(220px,1fr) auto auto;gap:10px;align-items:center;margin:0 0 12px;padding:10px;background:color-mix(in srgb,var(--ui-text) 2.5%,transparent);border:1px solid var(--admin-line);border-radius:13px}
 .admin-layout .data-grid-toolbar .data-grid-search{min-width:0}
 .admin-layout .data-grid-count{color:var(--admin-muted);font-size:12px;white-space:nowrap}
 .admin-layout .data-grid-clear{min-height:40px}
@@ -206,7 +206,7 @@
 .admin-layout .faq-form-actions{display:flex;gap:8px;flex-wrap:wrap}
 .admin-layout .ticket-thread{display:grid;gap:9px;margin:16px 0}
 .admin-layout .ticket-message{max-width:88%;padding:11px 13px;border:1px solid var(--admin-line);border-radius:13px;line-height:1.85;overflow-wrap:anywhere}
-.admin-layout .ticket-message.from-admin{justify-self:start;border-right:3px solid var(--admin-gold);background:rgba(201,168,106,.045)}
+.admin-layout .ticket-message.from-admin{justify-self:start;border-right:3px solid var(--admin-gold);background:color-mix(in srgb,var(--ui-gold) 4.5%,transparent)}
 .admin-layout .ticket-message.from-user{justify-self:end;background:rgba(255,255,255,.018)}
 .admin-layout .message-meta{font-size:11px;color:var(--admin-muted);margin-bottom:4px}
 .admin-layout .support-admin-detail{min-height:180px}
