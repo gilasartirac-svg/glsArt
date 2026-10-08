@@ -1018,16 +1018,16 @@ main,section,.container,.products,.product-grid,.cards{min-width:0}
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  min-width:14px;
-  height:18px;
+  min-width:20px;
+  height:22px;
   padding:0 2px;
   margin:0;
   border:0;
   border-radius:0;
   background:transparent;
   color:color-mix(in srgb,var(--ui-gold-strong) 68%,var(--ui-muted));
-  font:800 10px/1 "Vazirmatn",Tahoma,Arial,sans-serif;
-  opacity:.68;
+  font:850 13px/1 "Vazirmatn",Tahoma,Arial,sans-serif;
+  opacity:.82;
   box-shadow:none;
   white-space:nowrap;
 }
@@ -1078,7 +1078,7 @@ main,section,.container,.products,.product-grid,.cards{min-width:0}
   .top .header-actions .points-badge{display:none}
   .top .header-actions .theme-toggle,.top .header-actions .iconbtn,.top .header-actions .cart-link{width:40px;min-width:40px;height:40px;min-height:40px;padding:7px}
   .top .header-actions .theme-toggle span,.top .header-actions .cart-link>span:not(.cart-icon-wrap),.top .header-actions .profile-link>span:not(.profile-dot){display:none}
-  .top .cart-control .cart-count-badge{min-width:13px;height:16px;font-size:9px;opacity:.64}
+  .top .cart-control .cart-count-badge{min-width:18px;height:20px;font-size:11px;opacity:.78}
   body{padding-top:var(--header-height-mobile)}
 }
 @media(max-width:520px){
@@ -1087,7 +1087,7 @@ main,section,.container,.products,.product-grid,.cards{min-width:0}
   .top .header-actions .theme-toggle,.top .header-actions .iconbtn,.top .header-actions .cart-link,.top .mobile-menu-toggle{width:38px;min-width:38px;height:38px;min-height:38px;flex-basis:38px;padding:6px;border-radius:9px}
   .top .cart-icon-wrap{width:21px;height:21px;flex-basis:21px}
   .top .cart-icon-wrap>svg{width:20px;height:20px}
-  .top .cart-control .cart-count-badge{min-width:12px;height:15px;font-size:8px}
+  .top .cart-control .cart-count-badge{min-width:16px;height:19px;font-size:10px}
 }
 @media(max-width:370px){
   .top .nav{padding-inline:5px;gap:3px}
