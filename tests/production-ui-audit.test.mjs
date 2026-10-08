@@ -35,7 +35,7 @@ test('public/admin theme architecture remains token-based at key shared controls
  assert.ok(css.includes('--ui-surface:'));
  assert.ok(css.includes('--ui-text:'));
  assert.ok(css.includes('.admin-layout .admin-nav-group a'));
- assert.ok(css.includes('.top .theme-toggle'));
+ assert.ok(css.includes('.ga-header-theme-toggle{')); assert.ok(css.includes('.ga-header-primary-nav#main-menu.is-open'));
 });
 
 
@@ -43,8 +43,8 @@ test('mobile storefront header and menu provide contextual icons without changin
  const js=read('frontend/src/app.js');
  for(const key of ['shop','about','contact','news','articles','rewards']) assert.ok(js.includes('data-menu-icon="'+key+'"'),key+' menu icon marker missing');
  const css=read('frontend/src/styles.css');
- assert.ok(css.includes('.top .links#main-menu a[data-menu-icon="shop"]::before'));
- assert.ok(css.includes('.top .links#main-menu.is-open'));
+ assert.ok(css.includes('.ga-header-primary-nav .ga-header-nav-item[data-menu-icon="shop"]::before'));
+ assert.ok(css.includes('.ga-header-primary-nav#main-menu.is-open'));
  assert.ok(css.includes('overscroll-behavior:contain'));
  assert.ok(css.includes('env(safe-area-inset-bottom'));
 });
@@ -82,4 +82,18 @@ test('storefront header uses an isolated component namespace',()=>{
  assert.ok(!js.includes('class="wrap nav"'));
  assert.ok(!js.includes('class="brand"'));
  assert.ok(!js.includes('class="links"'));
+});
+
+
+test('header responsive ownership stays namespaced',()=>{
+ const css=read('frontend/src/styles.css');
+ const responsive=read('frontend/src/responsive-production.css');
+ assert.ok(css.includes('.ga-header-shell{'));
+ assert.ok(css.includes('.ga-header-primary-nav#main-menu'));
+ assert.ok(css.includes('@media(max-width:1023px)'));
+ assert.ok(css.includes('@media(max-width:520px)'));
+ assert.ok(css.includes('@media(max-width:380px)'));
+ assert.ok(!responsive.includes('.top .wrap.nav'));
+ assert.ok(!responsive.includes('.top .header-actions'));
+ assert.ok(!responsive.includes('.top .mobile-menu-toggle'));
 });
