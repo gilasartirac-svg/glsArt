@@ -183,7 +183,7 @@ jobs:
         if: steps.service.outputs.paused != 'true'
         env:
           API: https://gilasartworker.gilasart-ir-ac.workers.dev
-          ORIGIN: https://www.gilasart.ir
+          ORIGIN: https://gilasart.ir
         run: |
           set -euo pipefail
           for path in /api/health /api/home '/api/products?limit=1' /api/categories /api/flash-sales /api/settings; do
