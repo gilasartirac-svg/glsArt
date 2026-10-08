@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 
 const root=process.cwd();
 const read=p=>readFileSync(root+'/'+p,'utf8');
@@ -62,5 +62,24 @@ test('public stylesheet keeps admin component selectors scoped',()=>{
   for(const selector of ['.admin-table','.admin-page','.admin-header','.admin-sidebar','.admin-nav-group']){
     const re=new RegExp('(?:^|})\\s*'+selector.replace('.','\\.')+'\\b');
     assert.doesNotMatch(css,re,selector+' leaked without .admin-layout scope');
+  }
+});
+
+
+test('responsive-production.css is removed after responsive source merge',()=>{
+  assert.equal(existsSync(root+'/frontend/src/responsive-production.css'),false);
+});
+test('storefront uses one canonical product card class',()=>{
+  const css=read('frontend/src/styles.css');
+  const js=read('frontend/src/app.js');
+  assert.equal((css.match(/product-showcase/g)||[]).length,0);
+  assert.equal((css.match(/product-item/g)||[]).length,0);
+  assert.equal((js.match(/product-showcase/g)||[]).length,0);
+  assert.equal((js.match(/product-item/g)||[]).length,0);
+});
+test('responsive typography and spacing tokens are defined in the canonical root token block',()=>{
+  const css=read('frontend/src/styles.css');
+  for(const token of ['--font-family-base:','--content-max:','--page-gutter:','--section-gap:','--control-min-height:']){
+    assert.equal((css.match(new RegExp(token.replace(/[.*+?^$()|[\]\\]/g,'\\$&'),'g'))||[]).length,1,token+' must have one canonical definition');
   }
 });
