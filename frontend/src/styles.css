@@ -5566,7 +5566,8 @@ html,body,#app,.admin-layout,.admin-layout *,button,input,select,textarea{font-f
 html{font-family:"Vazirmatn"!important}
 body{font-family:"Vazirmatn"!important}
 
-/* Production home-logo — larger, balanced header presentation */
+/* Production home-logo — vertically fitted to the actual header height.
+   Keep a small, intentional breathing gap so the SVG never touches the header edge. */
 .top .nav{
   min-height:92px;
   height:92px;
@@ -5575,23 +5576,25 @@ body{font-family:"Vazirmatn"!important}
   display:inline-flex;
   align-items:center;
   gap:11px;
-  min-height:76px;
-  min-width:76px;
-  padding:4px;
+  min-height:84px;
+  min-width:84px;
+  height:84px;
+  padding:0;
   cursor:pointer;
   text-decoration:none;
   -webkit-tap-highlight-color:transparent;
   touch-action:manipulation;
 }
 .top .brand-logo{
-  width:72px;
-  height:72px;
-  flex:0 0 72px;
+  width:auto;
+  height:84px;
+  aspect-ratio:1024 / 1008;
+  flex:0 0 auto;
   display:block;
   object-fit:contain;
   pointer-events:none;
   user-select:none;
-  transform:scale(1.02);
+  transform:none;
   transform-origin:center;
 }
 .top .brand-copy{
@@ -5604,12 +5607,12 @@ body{font-family:"Vazirmatn"!important}
 .top .brand-copy small{display:block}
 @media(max-width:900px){
   .top .nav{min-height:76px;height:76px}
-  .top .brand{min-height:64px;min-width:64px}
-  .top .brand-logo{width:60px;height:60px;flex-basis:60px}
+  .top .brand{min-height:68px;min-width:68px;height:68px}
+  .top .brand-logo{height:68px}
 }
 @media(max-width:520px){
   .top .nav{min-height:68px;height:68px}
-  .top .brand{min-height:58px;min-width:58px;gap:7px;padding:2px}
-  .top .brand-logo{width:56px;height:56px;flex-basis:56px}
+  .top .brand{min-height:64px;min-width:64px;height:64px;gap:7px}
+  .top .brand-logo{height:64px}
   .top .brand-copy{font-size:18px}
 }
