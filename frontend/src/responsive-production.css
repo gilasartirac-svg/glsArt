@@ -466,3 +466,90 @@ textarea{min-height:110px}
     transition:none;
   }
 }
+
+
+/* =========================================================
+   Account / Authentication — Production UI contract
+   Scoped to /account DOM only; no global component overrides.
+   ========================================================= */
+.account-page,
+.auth-page{min-width:0}
+.account-page .profile-panel,
+.account-page .orders-profile-section,
+.account-page .rewards-account-card,
+.auth-page .login-panel{width:100%;min-width:0}
+.account-page .profile-panel{padding:clamp(20px,3vw,32px);border:1px solid var(--ui-line);background:linear-gradient(145deg,var(--ui-surface),var(--ui-surface-2));box-shadow:var(--ui-shadow-soft)}
+.account-page .profile-head{min-width:0}
+.account-page .profile-head>div:last-child{min-width:0}
+.account-page .profile-head h1{margin:3px 0 5px;font-size:clamp(24px,3vw,34px);line-height:1.35}
+.account-page .profile-head p{margin:0;line-height:1.9}
+.account-page .profile-data{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.account-page .profile-data>div{min-width:0;background:var(--ui-surface-2);border-color:var(--ui-line)}
+.account-page .profile-data strong{overflow-wrap:anywhere;word-break:break-word}
+.account-page .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
+.account-page .toolbar .btn{min-height:44px}
+.account-page .orders-profile-section{margin-top:clamp(28px,4vw,42px)}
+.account-page .orders-profile-section .sectionhead{align-items:flex-end;gap:16px}
+.account-page .orders-profile-section .sectionhead>div{min-width:0}
+.account-page .orders-profile-section h2{margin:3px 0 4px;font-size:clamp(22px,2.5vw,30px)}
+.account-page .orders-profile-section .muted{line-height:1.85}
+.account-page .orders-profile-count{flex:0 0 auto;border-color:var(--ui-line);background:var(--ui-surface-2);color:var(--ui-gold-strong)}
+.account-page .customer-order-card{min-width:0;background:var(--ui-surface);border-color:var(--ui-line);box-shadow:var(--ui-shadow-soft)}
+.account-page .customer-order-head>div:first-child{min-width:0}
+.account-page .customer-order-head h3{overflow-wrap:anywhere}
+.account-page .customer-order-actions{min-width:0}
+.account-page .customer-order-actions .btn{max-width:100%;overflow-wrap:anywhere}
+.account-page .customer-order-summary{border-top-color:var(--ui-line)}
+.account-page .customer-order-summary span{background:var(--ui-surface-2)}
+.account-page .empty-orders{background:var(--ui-surface);border:1px solid var(--ui-line)}
+.account-page .rewards-account-card{margin-top:18px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:clamp(18px,3vw,26px);border-color:color-mix(in srgb,var(--ui-gold) 24%,var(--ui-line));background:linear-gradient(145deg,var(--ui-surface-2),var(--ui-surface))}
+.account-page .rewards-account-card>div{min-width:0}
+.account-page .rewards-account-card h2{margin:3px 0 5px}
+.account-page .rewards-account-card p{margin:0;line-height:1.9}
+.account-page .rewards-account-card .btn{flex:0 0 auto}
+.auth-page{padding-inline:var(--page-gutter)}
+.auth-page .login-panel{isolation:isolate;border:1px solid var(--ui-line);background:linear-gradient(145deg,var(--ui-surface-2),var(--ui-surface));box-shadow:var(--ui-shadow);}
+.auth-page .auth-brand,.auth-page .auth-form,.auth-page .auth-trust{position:relative;z-index:1}
+.auth-page .auth-brand{text-align:center}
+.auth-page .auth-brand .profile-avatar{margin-inline:auto}
+.auth-page .auth-brand h1{margin:10px 0 8px;font-size:clamp(25px,4vw,34px);line-height:1.35}
+.auth-page .auth-brand p{max-width:470px;margin:0 auto;line-height:1.95}
+.auth-page .auth-form{display:grid;gap:12px;margin-top:24px}
+.auth-page .auth-form label{display:grid;gap:7px;min-width:0}
+.auth-page .auth-form label>span{font-size:13px;font-weight:700;color:var(--ui-text)}
+.auth-page .auth-form input{width:100%;min-height:50px;border-color:var(--ui-line);background:var(--ui-input);color:var(--ui-text);border-radius:13px}
+.auth-page .auth-form input:focus{border-color:var(--ui-gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--ui-gold) 13%,transparent)}
+.auth-page .auth-send{width:100%;min-height:50px}
+.auth-page .auth-trust{display:flex;justify-content:center;gap:8px 18px;flex-wrap:wrap;margin-top:18px;color:var(--ui-muted);font-size:11px;line-height:1.8}
+.auth-page .auth-otp-panel{background:var(--ui-surface-2);border-color:var(--ui-line);box-shadow:none}
+.auth-page .otp-digit{background:var(--ui-input)!important;color:var(--ui-text)!important;border-color:var(--ui-line)!important}
+.auth-page .auth-inline-error{background:color-mix(in srgb,var(--ui-danger) 7%,var(--ui-surface));border-color:color-mix(in srgb,var(--ui-danger) 28%,var(--ui-line));color:var(--ui-danger)}
+@media (max-width:767px){
+  .account-page .profile-panel{padding:18px}
+  .account-page .profile-head{align-items:flex-start;gap:12px}
+  .account-page .profile-avatar{width:52px;height:52px;border-radius:15px}
+  .account-page .profile-data{grid-template-columns:1fr;margin:18px 0}
+  .account-page .toolbar{display:grid;grid-template-columns:1fr}
+  .account-page .toolbar .btn{width:100%}
+  .account-page .orders-profile-section .sectionhead{align-items:flex-start;flex-direction:column}
+  .account-page .orders-profile-count{align-self:flex-start}
+  .account-page .customer-order-card{padding:16px;border-radius:18px}
+  .account-page .customer-order-actions{display:grid;grid-template-columns:1fr;width:100%}
+  .account-page .customer-order-actions .btn{width:100%}
+  .account-page .customer-order-summary{display:grid;grid-template-columns:1fr;gap:7px}
+  .account-page .customer-order-summary span{width:100%;border-radius:10px}
+  .account-page .rewards-account-card{align-items:stretch;flex-direction:column}
+  .account-page .rewards-account-card .btn{width:100%}
+  .auth-page{padding-top:20px;padding-bottom:48px}
+  .auth-page .login-panel{border-radius:20px;padding:20px 16px}
+}
+@media (max-width:380px){
+  .account-page .profile-head{flex-direction:column}
+  .account-page .profile-avatar{width:48px;height:48px}
+  .auth-page .login-panel{padding:18px 13px}
+  .auth-page .auth-trust{gap:5px 12px}
+}
+@media (prefers-reduced-motion:reduce){
+  .account-page .customer-order-card,
+  .auth-page .login-panel{scroll-behavior:auto}
+}
