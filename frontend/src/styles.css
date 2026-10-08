@@ -5567,45 +5567,156 @@ html,body,#app,.admin-layout,.admin-layout *,button,input,select,textarea{font-f
 html{font-family:"Vazirmatn"!important}
 body{font-family:"Vazirmatn"!important}
 
-/* Production text wordmark — replaces the graphical header logo. */
+/* Production header — refined responsive navigation and text wordmark. */
+.top{
+  isolation:isolate;
+  box-shadow:0 8px 28px rgba(0,0,0,.08);
+}
 .top .nav{
-  min-height:92px;
-  height:92px;
+  width:min(100% - 32px,var(--max));
+  min-height:78px;
+  height:78px;
+  gap:clamp(12px,1.8vw,24px);
 }
 .top .brand{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  min-height:84px;
-  height:84px;
+  flex:0 0 auto;
   min-width:0;
-  padding:0;
+  width:auto;
+  height:52px;
+  min-height:52px;
+  padding:0 4px;
+  margin-inline-end:clamp(4px,1vw,12px);
+  color:var(--ui-text);
+  border-radius:12px;
   cursor:pointer;
   text-decoration:none;
   -webkit-tap-highlight-color:transparent;
   touch-action:manipulation;
+  transition:background .18s ease,transform .18s var(--ui-ease);
 }
+.top .brand:hover{
+  background:color-mix(in srgb,var(--ui-gold) 8%,transparent);
+}
+.top .brand:focus-visible{
+  outline:2px solid var(--ui-gold);
+  outline-offset:3px;
+}
+.top .brand:active{transform:scale(.98)}
 .top .brand-logo,
-.top .brand-copy{
-  display:none !important;
-}
+.top .brand-copy{display:none!important}
 .top .brand-wordmark{
   display:block;
-  color:var(--ui-text,#f5f1ea);
-  font-size:clamp(24px,2vw,32px);
+  color:var(--ui-text);
+  font-family:"Vazirmatn",Tahoma,Arial,sans-serif;
+  font-size:clamp(24px,2.05vw,31px);
+  font-weight:900;
+  line-height:1;
+  letter-spacing:-.055em;
+  white-space:nowrap;
+  text-shadow:0 2px 16px rgba(0,0,0,.18);
+}
+.top .links{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  min-width:0;
+}
+.top .links a{
+  min-height:42px;
+  padding:8px 11px;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:650;
+  white-space:nowrap;
+}
+.top .spacer{flex:1 1 auto;min-width:8px}
+.top .header-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:7px;
+  flex:0 0 auto;
+}
+.top .header-actions>a,
+.top .header-actions>button{
+  min-height:40px;
+}
+.top .cart-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+.top .theme-toggle{
+  min-width:40px;
+}
+.top .cart-icon-wrap{
+  position:relative;
+  display:inline-grid;
+  place-items:center;
+  width:22px;
+  height:22px;
+}
+.top .cart-count-badge{
+  position:absolute;
+  top:-7px;
+  inset-inline-end:-8px;
+  min-width:17px;
+  height:17px;
+  padding:0 4px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  background:var(--ui-gold);
+  color:#16130d;
+  font-size:9px;
   line-height:1;
   font-weight:900;
-  letter-spacing:-.045em;
-  white-space:nowrap;
-  text-shadow:0 2px 18px rgba(0,0,0,.28);
+  border:2px solid var(--ui-bg);
+}
+@media(max-width:1100px){
+  .top .nav{gap:10px}
+  .top .links a{padding-inline:8px;font-size:13px}
+  .top .header-actions{gap:5px}
 }
 @media(max-width:900px){
-  .top .nav{min-height:76px;height:76px}
-  .top .brand{min-height:68px;height:68px}
+  .top .nav{min-height:72px;height:72px;width:min(100% - 24px,var(--max))}
+  .top .brand{height:50px;min-height:50px;margin-inline-end:2px}
   .top .brand-wordmark{font-size:24px}
+  .top .links{display:none}
+  .top .spacer{min-width:0}
+  .top .header-actions{gap:6px}
 }
 @media(max-width:520px){
-  .top .nav{min-height:68px;height:68px}
-  .top .brand{min-height:60px;height:60px}
-  .top .brand-wordmark{font-size:20px}
+  .top .nav{min-height:64px;height:64px;width:min(100% - 16px,var(--max));gap:7px}
+  .top .brand{height:46px;min-height:46px;padding:0 2px;margin:0}
+  .top .brand-wordmark{font-size:21px}
+  .top .header-actions{gap:5px}
+  .top .header-actions .cart-link span,
+  .top .header-actions .profile-link span{display:none}
+  .top .header-actions .cart-link,
+  .top .header-actions .profile-link,
+  .top .header-actions .iconbtn,
+  .top .theme-toggle{
+    width:40px;
+    min-width:40px;
+    height:40px;
+    padding:7px;
+    border-radius:12px;
+  }
+}
+@media(max-width:380px){
+  .top .brand-wordmark{font-size:19px}
+  .top .header-actions{gap:3px}
+  .top .header-actions .cart-link,
+  .top .header-actions .profile-link,
+  .top .header-actions .iconbtn,
+  .top .theme-toggle{
+    width:38px;
+    min-width:38px;
+  }
 }
