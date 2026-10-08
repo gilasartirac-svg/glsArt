@@ -880,6 +880,7 @@ main,section,.container,.products,.product-grid,.cards{min-width:0}
 :root{
   --header-height:72px;
   --header-height-mobile:64px;
+  --header-height-tablet:68px;
   --header-gap:clamp(16px,2.2vw,32px);
   --header-control-size:42px;
   --header-line:color-mix(in srgb,var(--ui-gold) 12%,var(--ui-line));
@@ -1069,9 +1070,9 @@ main,section,.container,.products,.product-grid,.cards{min-width:0}
   .top .links a{padding-inline:8px;font-size:13px}
   .top .header-actions{gap:2px}
 }
-@media(max-width:900px){
-  .top{position:fixed;top:0;left:0;right:0;width:100%;min-height:var(--header-height-mobile)}
-  .top .nav{width:100%;height:var(--header-height-mobile);min-height:var(--header-height-mobile);padding-inline:12px;gap:6px}
+@media(max-width:1023px){
+  .top{position:fixed;top:0;left:0;right:0;width:100%;min-height:var(--header-height-tablet)}
+  .top .nav{width:100%;height:var(--header-height-tablet);min-height:var(--header-height-tablet);padding-inline:12px;gap:6px}
   .top .links{display:none;position:absolute;top:calc(100% + 8px);inset-inline:10px;z-index:1100;flex-direction:column;align-items:stretch;gap:2px;padding:8px;background:color-mix(in srgb,var(--ui-surface) 96%,transparent);border:1px solid var(--header-line);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.16);backdrop-filter:blur(16px)}
   .top .links.is-open{display:flex;animation:gaHeaderMenuIn 220ms var(--ui-ease) both}
   .top .links a{justify-content:flex-start;min-height:46px;padding:10px 13px;border-radius:9px;font-size:14px}
@@ -1087,6 +1088,12 @@ main,section,.container,.products,.product-grid,.cards{min-width:0}
   .top .header-actions .theme-toggle,.top .header-actions .iconbtn,.top .header-actions .cart-link{width:40px;min-width:40px;height:40px;min-height:40px;padding:7px}
   .top .header-actions .theme-toggle span,.top .header-actions .cart-link>span:not(.cart-icon-wrap),.top .header-actions .profile-link>span:not(.profile-dot){display:none}
   .top .cart-control .cart-count-badge{min-width:20px;width:auto;height:20px;padding-inline:4px;font-size:10px}
+  body{padding-top:var(--header-height-tablet)}
+}
+@media(max-width:767px){
+  .top{min-height:var(--header-height-mobile)}
+  .top .nav{height:var(--header-height-mobile);min-height:var(--header-height-mobile);padding-inline:10px}
+  .top .brand{font-size:clamp(20px,5.5vw,27px)}
   body{padding-top:var(--header-height-mobile)}
 }
 @media(max-width:520px){
