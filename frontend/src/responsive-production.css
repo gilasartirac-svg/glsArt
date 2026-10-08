@@ -99,34 +99,11 @@ textarea{min-height:110px}
     width:min(calc(100% - 32px),var(--ga-content-max));
     margin-inline:auto;
   }
-  .shop-page .shop-control-bar{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .shop-page .product-stream{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-  .shop-page .product-card .product-card-media,
-  .shop-page .product-showcase .product-card-media{aspect-ratio:1/1;min-height:0}
 }
 
 /* Mobile — content-only responsive rules. Header owns its own responsive contract. */
 @media (max-width:767px){
   .page,.section{width:calc(100% - 22px);margin-inline:auto}
-  .shop-page .shop-control-bar{grid-template-columns:1fr}
-  .shop-page .product-stream{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .shop-page .product-card .product-card-media,
-  .shop-page .product-showcase .product-card-media{aspect-ratio:1/1;min-height:0}
-  .shop-page .product-card .product-card-body,
-  .shop-page .product-showcase .product-card-body{padding:13px}
-  .shop-page .product-card .product-card-heading h3,
-  .shop-page .product-showcase .product-card-heading h3{font-size:15px!important;line-height:1.6}
-  .shop-page .product-card .product-sku,
-  .shop-page .product-showcase .product-sku{font-size:11px!important}
-}
-/* Narrow phones — single column only when two cards would become cramped. */
-@media (max-width:380px){
-  .shop-page .product-stream{
-    grid-template-columns:1fr;
-  }
-  .page,.section{
-    width:calc(100% - 16px);
-  }
 }
 
 /* Touch and reduced-motion quality. */
@@ -147,7 +124,6 @@ textarea{min-height:110px}
 
 
 /* Final production UI contract — public storefront */
-.shop-page .product-stream{display:grid;}
 .shop-page .shop-control-panel{max-height:min(62vh,520px);}
 .shop-page .filter-chip{min-height:32px;}
 :where(.shop-page .shop-control-trigger,.shop-page .filter-chip,.shop-page .product-card a):focus-visible{
@@ -302,8 +278,6 @@ textarea{min-height:110px}
 @media (max-width:767px){.home-latest .grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media (max-width:359px){.home-latest .grid{grid-template-columns:1fr;}}
 
-/* Final <360px storefront single-column guard */
-@media (max-width:359px){.shop-page .product-stream,.home-latest .grid{grid-template-columns:1fr;}}
 
 /* legacy audit marker retained for regression compatibility; production desktop is 4 columns above. */
 /* grid-template-columns:repeat(3,minmax(0,1fr)) */
