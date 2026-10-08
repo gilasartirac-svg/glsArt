@@ -2879,13 +2879,7 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 
 /* Shop mobile gallery + collapsible controls */
 @media(max-width:767px){
-  .shop-page .product-stream{grid-template-columns:minmax(0,1fr)!important}
-  .shop-page .product-stream .product-card{width:100%;min-width:0}
-  .shop-page .product-stream .product-card .product-card-media{aspect-ratio:16/10}
-  .shop-page .product-stream .product-card .product-card-body{padding:14px 15px 16px}
-  .shop-page .product-stream .product-card .product-card-title{font-size:15px;line-height:1.8}
-  .shop-page .product-stream .product-card .product-card-price{font-size:15px}
-  .shop-page .shop-control-shell{margin-top:14px}
+    .shop-page .shop-control-shell{margin-top:14px}
   .shop-page .shop-control-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
   .shop-page .sort-control{min-width:0}
   .shop-page .sort-control select,
