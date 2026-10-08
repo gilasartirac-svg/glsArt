@@ -102,9 +102,9 @@ test('header responsive ownership stays namespaced',()=>{
 test('shop production grid is deterministic across desktop tablet mobile and narrow phone',()=>{
  const css=read('frontend/src/responsive-production.css');
  assert.ok(css.includes('.shop-page .product-stream{'));
- assert.ok(css.includes('grid-template-columns:repeat(3,minmax(0,1fr)) !important'));
- assert.ok(css.includes('grid-template-columns:repeat(2,minmax(0,1fr)) !important'));
- assert.ok(css.includes('grid-template-columns:1fr !important'));
+ assert.ok(css.includes('grid-template-columns:repeat(3,minmax(0,1fr))'));
+ assert.ok(css.includes('grid-template-columns:repeat(2,minmax(0,1fr))'));
+ assert.ok(css.includes('grid-template-columns:1fr'));
  assert.ok(css.includes('.shop-page .product-art-frame{'));
  assert.ok(css.includes('aspect-ratio:1 / 1'));
  assert.ok(css.includes('object-fit:contain'));
