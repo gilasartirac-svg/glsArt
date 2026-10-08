@@ -190,7 +190,6 @@ jobs:
             body=$(mktemp)
             code=$(curl -sS --retry 2 --retry-all-errors -o "$body" -w '%{http_code}' "$API$path")
             echo "$path -> HTTP $code"
-            cat "$body"
             test "$code" = 200
             rm -f "$body"
           done
@@ -225,7 +224,6 @@ jobs:
           NODE
           echo "Checking CORS preflight on canonical production API"
           cors_headers=$(curl -sS --retry 2 --retry-all-errors -D - -o /dev/null -X OPTIONS -H "Origin: https://gilasart.ir" -H "Access-Control-Request-Method: GET" "$API/api/health" | tr -d '\r')
-          echo "$cors_headers"
           echo "$cors_headers" | grep -Fxi "access-control-allow-origin: https://gilasart.ir" >/dev/null || { echo "ERROR: canonical CORS origin header missing"; exit 1; }
           echo "$cors_headers" | grep -Fxi "access-control-allow-credentials: true" >/dev/null || { echo "ERROR: CORS credentials header missing"; exit 1; }
           echo "PASS: CORS preflight"
