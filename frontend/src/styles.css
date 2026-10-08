@@ -6039,3 +6039,7 @@ textarea{min-height:110px}
   .home-hero-art img,.product-card{transition:none}
   .home-hero-art:hover img,.product-card:hover{transform:none}
 }
+
+.enamad-trust-link{display:inline-flex;align-items:center;justify-content:center;min-width:120px;min-height:44px;padding:8px 12px;border:1px solid color-mix(in srgb,var(--ui-gold) 20%,var(--ui-line));border-radius:12px;background:var(--ui-surface);transition:border-color .18s ease,transform .18s var(--ui-ease),box-shadow .18s ease}
+.enamad-trust-link:hover,.enamad-trust-link:focus-visible{border-color:color-mix(in srgb,var(--ui-gold) 45%,var(--ui-line));transform:translateY(-1px);box-shadow:var(--ui-shadow-soft)}
+.enamad-trust-logo{display:block;width:auto;max-width:150px;height:auto;max-height:72px;object-fit:contain}
