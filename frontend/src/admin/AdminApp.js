@@ -17,11 +17,13 @@ export default function AdminApp(){
   const b=document.getElementById('admin-mobile-menu'),d=document.getElementById('admin-mobile-drawer'),o=document.getElementById('admin-mobile-backdrop');
   if(b&&d&&o&&!b.dataset.bound){
    b.dataset.bound='1';
-   const close=()=>{d.classList.remove('open');o.classList.remove('open');b.setAttribute('aria-expanded','false');document.body.classList.remove('admin-menu-open')};
-   b.addEventListener('click',()=>{const open=!d.classList.contains('open');d.classList.toggle('open',open);o.classList.toggle('open',open);b.setAttribute('aria-expanded',String(open));document.body.classList.toggle('admin-menu-open',open)});
+   const close=()=>{d.classList.remove('open');o.classList.remove('open');b.setAttribute('aria-expanded','false');document.body.classList.remove('admin-menu-open');b.focus({preventScroll:true})};
+   const openMenu=()=>{d.classList.add('open');o.classList.add('open');b.setAttribute('aria-expanded','true');document.body.classList.add('admin-menu-open');window.setTimeout(()=>d.querySelector('a[data-admin-route]')?.focus({preventScroll:true}),40)};
+   b.addEventListener('click',()=>{d.classList.contains('open')?close():openMenu()});
    o.addEventListener('click',close);
    d.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));
    d.addEventListener('click',e=>{const a=e.target.closest('a[data-admin-route]');if(!a)return;const target=a.getAttribute('href');if(target&&target!==location.hash){e.preventDefault();location.hash=target.slice(1);if(typeof window.GilasArtAdminNavigate==='function')window.setTimeout(window.GilasArtAdminNavigate,0)}});
+   d.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close();return}if(e.key!=='Tab'||!d.classList.contains('open'))return;const focusables=[...d.querySelectorAll('a[href],button:not([disabled])')];if(!focusables.length)return;const first=focusables[0],last=focusables[focusables.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}});
    window.addEventListener('hashchange',close);
   }
   if(!document.documentElement.dataset.adminRouteBound){
