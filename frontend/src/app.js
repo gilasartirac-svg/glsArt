@@ -1181,7 +1181,7 @@ async function cleanupAdminStyles(){
  document.documentElement.removeAttribute('data-admin-route');
 }
 
-function router(){
+async function router(){
  scrollRouteTop();
  routeAbortController?.abort();
  routeAbortController=new AbortController();
@@ -1203,7 +1203,7 @@ function router(){
   applyRouteSeoPolicy(p);
   if(!p[0])return home();
    if(p[0]!=='admin')cleanupAdminStyles();
-if(p[0]==='admin'){
+   if(p[0]==='admin'){
    await loadMe();
    if(!isAdminUser()){navigate('/account');return}
    if(document.querySelector('.admin-layout')&&typeof window.GilasArtAdminNavigate==='function'){await window.GilasArtAdminNavigate();return}
