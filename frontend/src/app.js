@@ -1175,11 +1175,17 @@ async function rewardsPage(){
 }
 async function checkout(){navigate('/cart')}
 
-async function cleanupAdminStyles(){
- const link=document.querySelector('link[data-gilasart-admin-css]');
- if(link)link.remove();
+function cleanupAdminStyles(){
+ document.querySelectorAll('link[data-gilasart-admin-css]').forEach(link=>link.remove());
  document.body.classList.remove('admin-menu-open');
  document.documentElement.removeAttribute('data-admin-route');
+}
+function isCurrentAdminRoute(){
+ const base=routeBase();
+ let cleanPath=location.pathname.startsWith(base)?location.pathname.slice(base.length):location.pathname;
+ cleanPath=cleanPath.replace(/^\\/+|\\/+$/g,'');
+ const first=cleanPath.split('/').filter(Boolean)[0]||'';
+ return first==='admin';
 }
 
 async function router(){
@@ -1210,6 +1216,12 @@ async function router(){
    if(document.querySelector('.admin-layout')&&typeof window.GilasArtAdminNavigate==='function'){await window.GilasArtAdminNavigate();return}
    const adminBase=location.pathname.startsWith('/glsArt/')?'/glsArt':'';
    const {default:AdminApp}=await import(adminBase+'/admin/AdminApp.js?v=20261001-reviews');
+   // The dynamic admin module may resolve after the user has already navigated away.
+   // Never let a stale async admin render re-inject admin CSS into the public storefront.
+   if(!isCurrentAdminRoute()){
+    cleanupAdminStyles();
+    return;
+   }
    app.innerHTML=AdminApp();
    return;
   }
