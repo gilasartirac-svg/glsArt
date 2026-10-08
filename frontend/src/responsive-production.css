@@ -71,7 +71,7 @@ textarea{min-height:110px}
   overscroll-behavior-inline:contain;
 }
 :where(table){max-width:100%}
-:where(.admin-layout,.admin-layout main,.admin-page,.dashboard){min-width:0;max-width:100%}
+:where(.admin-layout,.admin-layout main,.admin-layout .admin-page,.admin-layout .dashboard){min-width:0;max-width:100%}
 :where(.admin-layout .panel,.admin-layout .card,.admin-layout .form,.admin-layout .chart-box){
   min-width:0;
 }
