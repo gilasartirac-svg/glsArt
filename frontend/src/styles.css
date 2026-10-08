@@ -5586,6 +5586,7 @@ body{font-family:"Vazirmatn"!important}
   touch-action:manipulation;
 }
 .top .brand-logo{
+  display:none;
   width:auto;
   height:84px;
   aspect-ratio:1024 / 1008;
