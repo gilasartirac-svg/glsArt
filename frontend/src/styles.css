@@ -1038,7 +1038,7 @@ main,section,.container,.products,.product-grid,.cards{min-width:0}
 @keyframes gaCartCountPulse{
   0%{transform:scale(.82);opacity:.55}
   55%{transform:scale(1.12)}
-  100%{transform:scale(1);opacity:1}
+  100%{transform:scale(1);opacity:1}\n@media(prefers-reduced-motion:reduce){.top .cart-control .cart-count-pulse{animation:none!important}}\n
 }
 
 .top .cart-control .cart-link:hover .cart-count-badge{background:var(--ui-gold);box-shadow:0 3px 9px rgba(0,0,0,.22)}
