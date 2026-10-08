@@ -1208,8 +1208,8 @@ async function router(){
  else loadMe().catch(()=>{});
  try{
   applyRouteSeoPolicy(p);
-  if(!p[0])return home();
-   if(p[0]!=='admin')cleanupAdminStyles();
+  if(p[0]!=='admin')cleanupAdminStyles();
+   if(!p[0])return home();
    if(p[0]==='admin'){
    await loadMe();
    if(!isAdminUser()){navigate('/account');return}
