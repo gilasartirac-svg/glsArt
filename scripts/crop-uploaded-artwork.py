@@ -98,3 +98,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Production execution marker: process the existing uploaded artwork files.
