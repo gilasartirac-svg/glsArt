@@ -5301,6 +5301,24 @@ body{font-family:"Vazirmatn"!important}
   .top .links#main-menu{transition:none}
 }
 
+/* Admin mobile header clearance — keeps the fixed menu control out of header content. */
+@media (max-width:900px){
+  .admin-layout .admin-header{
+    min-height:64px!important;
+    padding-inline-start:12px!important;
+    padding-inline-end:76px!important;
+  }
+  .admin-layout .admin-header-title{min-width:0}
+  .admin-layout .admin-header h3{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
+@media (max-width:520px){
+  .admin-layout .admin-header{padding-inline-end:68px!important}
+}
 /* =========================================================
    ADMIN MOBILE DRAWER — FINAL AUTHORITY
    One responsive contract for #admin-mobile-drawer.
