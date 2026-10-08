@@ -17,7 +17,7 @@ export default function AdminApp(){
    document.documentElement.dataset.adminRouteBound='1';
    document.addEventListener('click',e=>{
     const home=e.target?.closest?.('a[data-admin-home]');
-    if(home){e.preventDefault();e.stopPropagation();window.location.assign('/');return;}
+    if(home){e.preventDefault();e.stopPropagation();window.location.assign('https://gilasart.ir/');return;}
     const a=e.target?.closest?.('a[data-admin-route]');
     if(!a)return;
     const target=a.getAttribute('href');
