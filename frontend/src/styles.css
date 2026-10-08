@@ -5415,3 +5415,239 @@ body{font-family:"Vazirmatn"!important}
 @media (prefers-reduced-motion:reduce){
   .top .links#main-menu{transition:none}
 }
+
+/* =========================================================
+   ADMIN MOBILE DRAWER — FINAL AUTHORITY
+   One responsive contract for #admin-mobile-drawer.
+   Keeps the public storefront untouched.
+   ========================================================= */
+@media (max-width:900px){
+  .admin-layout>aside{
+    display:block!important;
+    position:static!important;
+    width:0!important;
+    min-width:0!important;
+    height:0!important;
+    flex:0 0 0!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    overflow:visible!important;
+  }
+  .admin-layout main{
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+  }
+
+  .admin-mobile-menu{
+    display:flex!important;
+    position:fixed!important;
+    top:max(10px,env(safe-area-inset-top))!important;
+    right:max(10px,env(safe-area-inset-right))!important;
+    z-index:10003!important;
+    width:46px!important;
+    height:46px!important;
+    min-width:46px!important;
+    min-height:46px!important;
+    padding:0!important;
+    margin:0!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex-direction:column!important;
+    gap:5px!important;
+    border:1px solid color-mix(in srgb,var(--ui-gold) 28%,var(--ui-line))!important;
+    border-radius:14px!important;
+    background:color-mix(in srgb,var(--ui-surface) 96%,transparent)!important;
+    color:var(--ui-text)!important;
+    box-shadow:0 10px 28px color-mix(in srgb,var(--ui-bg) 32%,transparent)!important;
+    backdrop-filter:blur(16px)!important;
+    -webkit-backdrop-filter:blur(16px)!important;
+    touch-action:manipulation;
+  }
+  .admin-mobile-menu span{
+    display:block!important;
+    width:21px!important;
+    height:2px!important;
+    flex:0 0 2px!important;
+    margin:0!important;
+    border-radius:999px!important;
+    background:currentColor!important;
+  }
+  .admin-mobile-menu[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)!important}
+  .admin-mobile-menu[aria-expanded="true"] span:nth-child(2){opacity:0!important}
+  .admin-mobile-menu[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)!important}
+
+  .admin-mobile-backdrop{
+    display:block!important;
+    position:fixed!important;
+    inset:0!important;
+    z-index:10000!important;
+    margin:0!important;
+    padding:0!important;
+    background:color-mix(in srgb,var(--ui-bg) 72%,transparent)!important;
+    opacity:0!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+    transition:opacity .22s ease,visibility .22s ease!important;
+    backdrop-filter:blur(5px)!important;
+    -webkit-backdrop-filter:blur(5px)!important;
+  }
+  .admin-mobile-backdrop.open{
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+  }
+
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"]{
+    display:flex!important;
+    position:fixed!important;
+    inset:0 0 0 auto!important;
+    z-index:10001!important;
+    width:min(88vw,360px)!important;
+    height:100dvh!important;
+    max-height:100dvh!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:max(12px,env(safe-area-inset-top)) 12px max(18px,env(safe-area-inset-bottom))!important;
+    box-sizing:border-box!important;
+    flex-direction:column!important;
+    gap:0!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+    background:var(--ui-surface)!important;
+    color:var(--ui-text)!important;
+    border:0!important;
+    border-inline-start:1px solid var(--ui-line)!important;
+    border-radius:20px 0 0 20px!important;
+    box-shadow:-24px 0 70px color-mix(in srgb,var(--ui-bg) 42%,transparent)!important;
+    transform:translate3d(105%,0,0)!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    transition:transform .26s cubic-bezier(.22,1,.36,1),visibility .26s ease,opacity .18s ease!important;
+  }
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"].open{
+    transform:translate3d(0,0,0)!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"] .admin-brand{
+    flex:0 0 auto!important;
+    width:100%!important;
+    min-height:64px!important;
+    margin:0!important;
+    padding:10px 8px 14px!important;
+    box-sizing:border-box!important;
+    border-bottom:1px solid var(--ui-line)!important;
+  }
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"] .admin-nav-label{
+    flex:0 0 auto!important;
+    margin:12px 4px 6px!important;
+    padding:0!important;
+    color:var(--ui-muted)!important;
+    font-size:10px!important;
+    font-weight:800!important;
+    line-height:1.5!important;
+  }
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"] .admin-nav-group{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:4px!important;
+    width:100%!important;
+    margin:0!important;
+    padding:0 0 10px!important;
+  }
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"] .admin-nav-group a{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:48px!important;
+    margin:0!important;
+    padding:9px 11px!important;
+    box-sizing:border-box!important;
+    gap:10px!important;
+    border:1px solid transparent!important;
+    border-radius:12px!important;
+    background:transparent!important;
+    color:var(--ui-muted)!important;
+    font-size:13px!important;
+    font-weight:650!important;
+    line-height:1.5!important;
+    text-align:right!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    transform:none!important;
+    touch-action:manipulation!important;
+  }
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"] .admin-nav-group a:hover,
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"] .admin-nav-group a:focus-visible{
+    background:var(--ui-hover)!important;
+    border-color:var(--ui-line)!important;
+    color:var(--ui-text)!important;
+    transform:none!important;
+  }
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"] .admin-nav-group a.active{
+    background:color-mix(in srgb,var(--ui-gold) 9%,var(--ui-surface))!important;
+    border-color:color-mix(in srgb,var(--ui-gold) 22%,var(--ui-line))!important;
+    color:var(--ui-text)!important;
+    box-shadow:inset -3px 0 0 var(--ui-gold)!important;
+  }
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"] .admin-nav-icon{
+    display:grid!important;
+    place-items:center!important;
+    flex:0 0 34px!important;
+    width:34px!important;
+    height:34px!important;
+    margin:0!important;
+    color:var(--ui-gold-strong)!important;
+  }
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"] .admin-nav-icon svg{
+    display:block!important;
+    width:19px!important;
+    height:19px!important;
+    max-width:19px!important;
+    max-height:19px!important;
+  }
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"] .admin-nav-group a>span:last-child{
+    min-width:0!important;
+    overflow-wrap:anywhere!important;
+  }
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"] .admin-back{
+    flex:0 0 auto!important;
+    width:100%!important;
+    min-height:48px!important;
+    margin:8px 0 0!important;
+    padding:9px 11px!important;
+    justify-content:flex-start!important;
+    gap:10px!important;
+    box-sizing:border-box!important;
+    border:1px solid var(--ui-line)!important;
+    border-radius:12px!important;
+    background:var(--ui-surface-2)!important;
+    color:var(--ui-muted)!important;
+  }
+  body.admin-menu-open{
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+  }
+}
+@media (max-width:520px){
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"]{
+    width:min(91vw,360px)!important;
+    border-radius:18px 0 0 18px!important;
+  }
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"] .admin-nav-group a{
+    min-height:50px!important;
+    font-size:13.5px!important;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .admin-mobile-backdrop,
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"],
+  .admin-mobile-menu span{transition:none!important}
+}
