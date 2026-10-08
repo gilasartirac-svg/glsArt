@@ -727,6 +727,45 @@ textarea{min-height:110px}
 
 
 /* =========================================================
+   Shop / Storefront — final production UI polish
+   ========================================================= */
+.shop-page .shop-control-item[open]{z-index:20}
+.shop-page .shop-control-item>summary{list-style:none;cursor:pointer}
+.shop-page .shop-control-item>summary::-webkit-details-marker{display:none}
+.shop-page .shop-control-trigger{min-height:54px}
+.shop-page .shop-control-trigger:focus-visible{
+  outline:3px solid color-mix(in srgb,var(--ui-gold) 28%,transparent);
+  outline-offset:2px;
+}
+.shop-page .shop-control-panel{max-height:min(62vh,520px);overflow:auto;overscroll-behavior:contain}
+.shop-page .shop-active-filters{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.shop-page .filter-chip{
+  min-height:36px;padding:7px 10px;border:1px solid var(--ui-line);border-radius:999px;
+  background:var(--ui-surface-2);color:var(--ui-text);font:inherit;cursor:pointer;
+}
+.shop-page .filter-chip:hover,.shop-page .filter-chip:focus-visible{
+  background:var(--ui-hover);border-color:color-mix(in srgb,var(--ui-gold) 38%,var(--ui-line));outline:none;
+}
+.shop-page .check-option input:focus-visible+.check-box,
+.shop-page .check-option input:focus-visible+.radio-box{
+  outline:3px solid color-mix(in srgb,var(--ui-gold) 28%,transparent);outline-offset:2px;
+}
+.shop-page .load-more-button{min-height:46px;min-width:150px}
+.shop-page .load-more-wrap{display:grid;justify-items:center;gap:8px;margin-top:24px}
+.shop-page .load-status{min-height:24px;color:var(--ui-muted);font-size:12px;text-align:center}
+.shop-page .empty-state{margin-top:18px}
+@media (max-width:767px){
+  .shop-page .shop-control-trigger{min-height:52px;padding-inline:12px}
+  .shop-page .shop-control-panel{max-height:55vh}
+  .shop-page .shop-active-filters{padding-top:4px}
+  .shop-page .filter-chip{min-height:38px;font-size:12px}
+  .shop-page .load-more-button{width:100%;min-height:48px}
+}
+@media (prefers-reduced-motion:reduce){
+  .shop-page .shop-control-panel,.shop-page .filter-chip{transition:none}
+}
+
+/* =========================================================
    About / CMS — Production responsive contract
    Scoped to .cms-page; preserves existing CMS HTML/JS.
    ========================================================= */
