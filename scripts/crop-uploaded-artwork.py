@@ -9,19 +9,16 @@ PADDING = 0
 
 def background_mask(img):
     rgb = img.convert("RGB")
-    w, h = rgb.size
-    candidate = Image.new("L", (w, h), 0)
-    px = rgb.load()
-    cp = candidate.load()
-    for y in range(h):
-        for x in range(w):
-            r, g, b = px[x, y]
-            if r >= WHITE_THRESHOLD and g >= WHITE_THRESHOLD and b >= WHITE_THRESHOLD:
-                cp[x, y] = 255
+    r, g, b = rgb.split()
+    # C-level Pillow operations: candidate is white-ish only when all
+    # three channels are above the threshold.
+    low = ImageChops.darker(ImageChops.darker(r, g), b)
+    candidate = low.point(lambda p: 255 if p >= WHITE_THRESHOLD else 0)
 
     # Remove only white-ish regions connected to the outside boundary.
     # Interior white areas in the artwork remain untouched.
     bg = candidate.copy()
+    w, h = rgb.size
     seeds = []
     for x in range(w):
         seeds.append((x, 0))
