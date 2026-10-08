@@ -5712,10 +5712,6 @@ body{font-family:"Vazirmatn"!important}
   --ga-shadow-soft:0 8px 25px rgba(50,42,30,.07);
   --ga-shadow-hover:0 16px 38px rgba(50,42,30,.11);
 }
-:root[data-theme="dark"]{
-  --ga-shadow-soft:0 8px 28px rgba(0,0,0,.20);
-  --ga-shadow-hover:0 16px 42px rgba(0,0,0,.30);
-}
 html{font-family:Vazirmatn,Tahoma,Arial,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 body{margin:0;background:var(--ga-bg);color:var(--ga-text)}
 :where(a,button,input,select,textarea):focus-visible{outline:2px solid var(--ga-gold-strong);outline-offset:3px}
