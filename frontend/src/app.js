@@ -384,12 +384,14 @@ function renderFooter(){
 }
 function updateCartBadge(count){const n=Math.max(0,Number(count)||0);state.cartCount=n;document.querySelectorAll('.cart-count-badge').forEach(el=>{el.textContent=n>99?'۹۹+':fa(n);el.hidden=n<=0;el.setAttribute('aria-label',t('cart.count',{count:fa(n)}))})}
 async function syncCartBadge(){if(!state.user){updateCartBadge(0);return}try{const d=await api('/api/cart');state.cart=d;const count=(d.items||[]).reduce((sum,x)=>sum+Math.max(0,Number(x.quantity)||0),0);updateCartBadge(count)}catch{updateCartBadge(0)}}
+function syncHeaderActiveState(){const path=location.pathname;document.querySelectorAll('.top .links a').forEach(a=>{try{const target=new URL(a.href,location.origin).pathname;const active=target==='/'?path==='/':path===target||path.startsWith(target+'/');a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')}catch{}})}
 function layout(content){
  const existingMain=document.querySelector('#main-content'),existingHeader=document.querySelector('.top'),existingFooter=document.querySelector('.footer');
  if(existingMain&&existingHeader&&existingFooter){
   existingMain.innerHTML=content;
   translateRenderedContent(existingMain);
   mountLanguageSwitcher();
+  syncHeaderActiveState();
   return;
  }
  const adminLink=isAdminUser()?'<a class="admin-link" href="'+routeUrl('/admin')+'">'+t('nav.admin')+'</a>':'';
@@ -398,6 +400,7 @@ function layout(content){
  refreshFooterSocialLinks();
  translateRenderedContent(app);
  mountLanguageSwitcher();
+ syncHeaderActiveState();
 }
 function routeBase(){return location.pathname.startsWith('/glsArt/')||location.pathname==='/glsArt'?'/glsArt':''}
 function routeUrl(path){return localePath(path)}
