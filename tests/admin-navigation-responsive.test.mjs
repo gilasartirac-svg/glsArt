@@ -13,14 +13,14 @@ test('every sidebar route has an admin router loader',()=>{
  const routes=['dashboard','products','categories','orders','site-rules','customers','inventory','payments','discounts','coupons','reviews','rewards','notifications','reports','access-control','audit','settings','invoice-settings','sms','payment','visitors','storefront-snapshot','support','about','contact','news','articles'];
  for(const route of routes){
   assert.ok(sidebar.includes("['"+route+"',"),route+' missing from sidebar');
-  assert.ok(router.includes("'"+route+"':"),route+' missing from router');
+  assert.ok(router.includes(route==='dashboard'?'dashboard:':"'"+route+"':"),route+' missing from router');
  }
 });
 test('admin navigation selectors are correctly scoped',()=>{
  const css=read('frontend/src/styles.css');
- assert.match(css,/\\.admin-layout \\.admin-nav-group a:hover \\.admin-nav-icon/);
- assert.match(css,/\\.admin-layout \\.admin-nav-group a\\.active \\.admin-nav-icon/);
- assert.doesNotMatch(css,/a:hover \\.admin-layout \\.admin-nav-icon/);
+ assert.ok(css.includes('.admin-layout .admin-nav-group a:hover .admin-nav-icon'));
+ assert.ok(css.includes('.admin-layout .admin-nav-group a.active .admin-nav-icon'));
+ assert.ok(!css.includes('a:hover .admin-layout .admin-nav-icon'));
 });
 test('responsive admin shell has explicit mobile ownership',()=>{
  const css=read('frontend/src/styles.css');
