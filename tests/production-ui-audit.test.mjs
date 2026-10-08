@@ -66,6 +66,14 @@ test('final public responsive contract covers desktop tablet mobile and narrow-p
 });
 
 
+test('admin stylesheet lifecycle is isolated from public route rendering',()=>{
+ const js=read('frontend/src/app.js');
+ assert.ok(js.includes('document.querySelectorAll(\'link[data-gilasart-admin-css]\').forEach(link=>link.remove())'));
+ assert.ok(js.includes('function isCurrentAdminRoute()'));
+ assert.ok(js.includes('if(!isCurrentAdminRoute())'));
+ assert.ok(js.includes('stale async admin render re-injects admin CSS into the public storefront')===false);
+});
+ 
 test('storefront header uses an isolated component namespace',()=>{
  const js=read('frontend/src/app.js');
  const css=read('frontend/src/styles.css');
