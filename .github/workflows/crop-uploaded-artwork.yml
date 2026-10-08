@@ -2,6 +2,10 @@ name: Crop Uploaded Artwork Images
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "scripts/crop-uploaded-artwork.py"
+      - ".github/workflows/crop-uploaded-artwork.yml"
 
 permissions:
   contents: write
