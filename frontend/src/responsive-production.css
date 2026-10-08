@@ -238,7 +238,7 @@ textarea{min-height:110px}
 
 @media (min-width:1024px){
   .shop-page .product-stream{
-    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-columns:repeat(4,minmax(0,1fr));
   }
 }
 
@@ -295,3 +295,9 @@ textarea{min-height:110px}
 @media (max-width:359px){
   .shop-page .product-stream{grid-template-columns:1fr;}
 }
+
+/* Public storefront final responsive contract */
+@media (min-width:1024px){.home-latest .grid{grid-template-columns:repeat(4,minmax(0,1fr));}}
+@media (min-width:768px) and (max-width:1023px){.home-latest .grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media (max-width:767px){.home-latest .grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media (max-width:359px){.home-latest .grid{grid-template-columns:1fr;}}
