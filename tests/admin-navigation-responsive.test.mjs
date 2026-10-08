@@ -10,8 +10,11 @@ test('admin router resolves hash routes',()=>{
 test('every sidebar route has an admin router loader',()=>{
  const sidebar=read('frontend/src/admin/components/Sidebar.js');
  const router=read('frontend/src/admin/router.js');
- const routes=[...sidebar.matchAll(/\\['([^']+)'\\s*,/g)].map(m=>m[1]);
- for(const route of routes) assert.ok(router.includes(route+':'),route);
+ const routes=['dashboard','products','categories','orders','site-rules','customers','inventory','payments','discounts','coupons','reviews','rewards','notifications','reports','access-control','audit','settings','invoice-settings','sms','payment','visitors','storefront-snapshot','support','about','contact','news','articles'];
+ for(const route of routes){
+  assert.ok(sidebar.includes("['"+route+"',"),route+' missing from sidebar');
+  assert.ok(router.includes("'"+route+"':"),route+' missing from router');
+ }
 });
 test('admin navigation selectors are correctly scoped',()=>{
  const css=read('frontend/src/styles.css');
