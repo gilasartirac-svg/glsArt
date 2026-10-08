@@ -200,5 +200,20 @@ jobs:
           curl -fsS "$API/api/products/Gilas020" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{const d=JSON.parse(s);const a=d.attributes;if(!d.product||!Array.isArray(a)||a.length!==2)process.exit(1);const size=a.find(x=>x.name==='ابعاد'),frame=a.find(x=>x.name==='رنگ قاب');if(!size||!frame||size.options.length!==2||frame.options.length!==4)process.exit(1);if(!size.options.some(x=>x.name==='80x40'&&Number(x.is_default)===1&&Number(x.price_delta_irt)===0))process.exit(1);if(!size.options.some(x=>x.name==='110x60'&&Number(x.price_delta_irt)===85000000))process.exit(1);if(!frame.options.some(x=>x.name==='قهوه ای تنه درختی'&&Number(x.price_delta_irt)===6500000))process.exit(1)})"
           curl -fsS "$API/api/categories" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{if(!Array.isArray(JSON.parse(s).items))process.exit(1)})"
           curl -fsS "$API/api/home" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{const d=JSON.parse(s);if(!Array.isArray(d?.products?.items)||!Array.isArray(d?.categories?.items)||!Array.isArray(d?.flash?.items)||!d?.settings?.settings)process.exit(1);if(d.products.items.length<1||d.categories.items.length<1)process.exit(1);if(!d.products.items.some(x=>String(x.name||'').trim()&&String(x.image||'').trim()))process.exit(1)})"
-          curl -fsS "$API/api/storefront-snapshot" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{const d=JSON.parse(s);if(d?.meta?.schemaVersion!==1||!Array.isArray(d.products)||!Array.isArray(d.categories)||!Array.isArray(d.reviews)||!Array.isArray(d.articles)||!Array.isArray(d.news)||!d.settings)process.exit(1);if(d.products.length<1||Number(d.meta.productCount)!==d.products.length)process.exit(1);if(d.products.some(p=>!p.id||!p.slug||!p.name||!Array.isArray(p.images)||!p.images.length))process.exit(1);if(/admin_bootstrap|kavenegar|invoice_|national_id|postal_code|economic_code/i.test(s))process.exit(1)})"
+          curl -fsS "$API/api/storefront-snapshot" -o /tmp/storefront-snapshot.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const s=fs.readFileSync('/tmp/storefront-snapshot.json','utf8');
+          const d=JSON.parse(s);
+          if(d?.meta?.schemaVersion!==1)throw new Error('snapshot schemaVersion invalid: '+d?.meta?.schemaVersion);
+          for(const k of ['products','categories','reviews','articles','news'])if(!Array.isArray(d[k]))throw new Error('snapshot '+k+' is not an array');
+          if(!d.settings||typeof d.settings!=='object')throw new Error('snapshot settings missing');
+          if(d.products.length<1)throw new Error('snapshot has zero products');
+          if(Number(d.meta.productCount)!==d.products.length)throw new Error('snapshot productCount mismatch: meta='+d.meta.productCount+' actual='+d.products.length);
+          const missing=d.products.filter(p=>!p.id||!p.slug||!p.name||!Array.isArray(p.images)||!p.images.length).slice(0,5).map(p=>p.id||p.slug||'unknown');
+          if(missing.length)throw new Error('snapshot products missing required image/data: '+missing.join(','));
+          const sensitive=(s.match(/admin_bootstrap|kavenegar|invoice_|national_id|postal_code|economic_code/ig)||[]);
+          if(sensitive.length)throw new Error('snapshot contains sensitive setting keys: '+[...new Set(sensitive.map(x=>x.toLowerCase()))].join(','));
+          console.log(JSON.stringify({schemaVersion:d.meta.schemaVersion,productCount:d.meta.productCount,categoryCount:d.meta.categoryCount,reviewCount:d.meta.reviewCount}));
+          NODE
           echo "CORS is verified by the production browser runtime gate; API smoke endpoints above are reachable on the canonical production API."
