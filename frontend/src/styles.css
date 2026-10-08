@@ -96,7 +96,7 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 .admin-layout .admin-page{padding:clamp(18px,3vw,34px)}.admin-layout .admin-title{margin-bottom:20px}.admin-layout .admin-title h2{font-size:clamp(24px,3vw,34px);margin:0 0 6px}.admin-layout .admin-page .panel,.admin-layout .dashboard .card,.admin-layout .dashboard .chart-box{border-radius:var(--ui-radius)}.admin-layout .admin-page .panel{padding:clamp(16px,2vw,24px);margin-bottom:18px}
 .admin-layout .admin-table{width:100%;border-collapse:separate;border-spacing:0}.admin-layout .admin-table th{color:var(--ui-muted);font-size:12px;font-weight:700;background:color-mix(in srgb,var(--ui-surface-3) 65%,transparent)}.admin-layout .admin-table th,.admin-layout .admin-table td{padding:13px 12px;border-bottom:1px solid var(--ui-line);text-align:right;vertical-align:middle}.admin-layout .admin-table tbody tr:hover{background:color-mix(in srgb,var(--ui-gold) 5%,transparent)}
 .pill{display:inline-flex;align-items:center;min-height:27px;padding:3px 9px;border-radius:999px;border:1px solid var(--ui-line);background:color-mix(in srgb,var(--ui-gold) 8%,var(--ui-surface));color:var(--ui-gold-strong);font-size:11px}.error{color:var(--ui-danger);background:color-mix(in srgb,var(--ui-danger) 8%,transparent);border:1px solid color-mix(in srgb,var(--ui-danger) 22%,transparent);border-radius:10px;padding:8px 10px}.notice{padding:13px 15px;border:1px solid color-mix(in srgb,var(--ui-gold) 20%,var(--ui-line));background:color-mix(in srgb,var(--ui-gold) 7%,var(--ui-surface));border-radius:14px}
-#admin-page>.panel>.muted{display:flex;align-items:center;gap:10px;min-height:100px;justify-content:center}#admin-page>.panel>.muted::before{content:"";width:18px;height:18px;border:2px solid var(--ui-line);border-top-color:var(--ui-gold);border-radius:50%;animation:ui-spin .7s linear infinite}@keyframes ui-spin{to{transform:rotate(360deg)}}
+[id="admin-page"]>.panel>.muted{display:flex;align-items:center;gap:10px;min-height:100px;justify-content:center}[id="admin-page"]>.panel>.muted::before{content:"";width:18px;height:18px;border:2px solid var(--ui-line);border-top-color:var(--ui-gold);border-radius:50%;animation:ui-spin .7s linear infinite}@keyframes ui-spin{to{transform:rotate(360deg)}}
 @media(max-width:900px){.admin-layout .admin-header-actions .admin-layout .admin-user-badge{display:none}.admin-layout .admin-header{min-height:64px}.admin-layout>main{width:100%}}@media(max-width:700px){.links{overflow-x:auto;max-width:48vw}.theme-toggle span{display:none}.theme-toggle{width:40px;padding:7px}.admin-layout .admin-header{padding:0 14px}.admin-layout .admin-page{padding:16px 12px}.admin-layout .admin-page .panel{padding:14px;border-radius:15px}.admin-layout .admin-table{min-width:700px}}@media(prefers-reduced-motion:reduce){.page,.hero,.section{animation:none}*,*::before,*::after{transition:none!important}}
 
 /* Sky-frame hero — HTML5 canvas presentation */
@@ -276,14 +276,14 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 
 /* Premium admin navigation visibility fix */
 @media(max-width:900px){
-  .admin-layout .admin-sidebar#admin-mobile-drawer{display:flex!important;visibility:visible!important;opacity:1!important;z-index:1001!important;}
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"]{display:flex!important;visibility:visible!important;opacity:1!important;z-index:1001!important;}
   .admin-mobile-backdrop{z-index:1000!important;}
 }
 
 
 /* Mobile drawer hardening v5 */
 @media(max-width:900px){
-  .admin-layout .admin-sidebar#admin-mobile-drawer{
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"]{
     display:flex!important;
     position:fixed!important;
     inset:0 0 0 auto!important;
@@ -300,11 +300,11 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
     color:#f7f3eb!important;
     transform:translate3d(105%,0,0)!important;
   }
-  .admin-layout .admin-sidebar#admin-mobile-drawer.open{
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"].open{
     transform:translate3d(0,0,0)!important;
   }
-  .admin-layout .admin-sidebar#admin-mobile-drawer a,
-  .admin-layout .admin-sidebar#admin-mobile-drawer span{
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"] a,
+  .admin-layout .admin-sidebar[id="admin-mobile-drawer"] span{
     color:inherit;
   }
   .admin-mobile-backdrop{
@@ -312,7 +312,7 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
     inset:0!important;
     z-index:10000!important;
   }
-  body.admin-menu-open .admin-layout .admin-sidebar#admin-mobile-drawer{
+  body.admin-menu-open .admin-layout .admin-sidebar[id="admin-mobile-drawer"]{
     transform:translate3d(0,0,0)!important;
   }
 }
@@ -1616,16 +1616,16 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 
 
 /* Mobile admin drawer had a hard-coded dark !important background. */
-.admin-layout .admin-sidebar#admin-mobile-drawer{
+.admin-layout .admin-sidebar[id="admin-mobile-drawer"]{
   background:var(--theme-surface)!important;
   color:var(--theme-text)!important;
   border-color:var(--theme-line)!important;
 }
-.admin-layout .admin-sidebar#admin-mobile-drawer a,
-.admin-layout .admin-sidebar#admin-mobile-drawer span{color:var(--theme-text)}
-.admin-layout .admin-sidebar#admin-mobile-drawer .admin-nav-label{color:var(--theme-muted)}
-.admin-layout .admin-sidebar#admin-mobile-drawer .admin-layout .admin-nav-icon{color:var(--theme-muted)}
-.admin-layout .admin-sidebar#admin-mobile-drawer a:hover{
+.admin-layout .admin-sidebar[id="admin-mobile-drawer"] a,
+.admin-layout .admin-sidebar[id="admin-mobile-drawer"] span{color:var(--theme-text)}
+.admin-layout .admin-sidebar[id="admin-mobile-drawer"] .admin-nav-label{color:var(--theme-muted)}
+.admin-layout .admin-sidebar[id="admin-mobile-drawer"] .admin-layout .admin-nav-icon{color:var(--theme-muted)}
+.admin-layout .admin-sidebar[id="admin-mobile-drawer"] a:hover{
   background:color-mix(in srgb,var(--ui-gold) 9%,var(--theme-surface));
 }
 .admin-mobile-backdrop{background:var(--theme-overlay)}
@@ -4074,7 +4074,7 @@ html[data-theme="light"] .language-option{color:#202020}
 }
 
 @media (max-width:900px){
-  .admin-layout>aside>#admin-mobile-drawer{
+  .admin-layout>aside>[id="admin-mobile-drawer"]{
     display:flex!important;
   }
 }
