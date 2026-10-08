@@ -46,7 +46,7 @@ test('shop responsive contract is scoped and unified',()=>{
  assert.ok(css.includes('@media (min-width:1024px)'));
  assert.ok(css.includes('@media (min-width:768px) and (max-width:1023px)'));
  assert.ok(css.includes('@media (max-width:767px)'));
- assert.ok(css.includes('@media (max-width:380px)'));
+ assert.ok(css.includes('@media (max-width:359px)'));\n assert.ok(!css.includes('@media (max-width:380px)'));
  const legacy=read('frontend/src/styles.css');
  assert.ok(!legacy.includes('/* Shop search control — keep the search trigger'));
  assert.ok(!legacy.includes('/* Shop gallery — visual-first responsive sizing'));
