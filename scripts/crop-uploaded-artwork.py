@@ -9,36 +9,34 @@ PADDING = 0
 
 def background_mask(img):
     rgb = img.convert("RGB")
-    # White-ish pixels are candidates for the external background.
-    mask = Image.new("L", rgb.size, 0)
-    px = rgb.load()
-    mp = mask.load()
     w, h = rgb.size
+    candidate = Image.new("L", (w, h), 0)
+    px = rgb.load()
+    cp = candidate.load()
     for y in range(h):
         for x in range(w):
             r, g, b = px[x, y]
             if r >= WHITE_THRESHOLD and g >= WHITE_THRESHOLD and b >= WHITE_THRESHOLD:
-                mp[x, y] = 255
+                cp[x, y] = 255
 
-    # Keep only white regions connected to the image boundary.
-    bg = Image.new("L", rgb.size, 0)
-    draw = ImageDraw.Draw(bg)
+    # Remove only white-ish regions connected to the outside boundary.
+    # Interior white areas in the artwork remain untouched.
+    bg = candidate.copy()
+    seeds = []
     for x in range(w):
-        if mp[x, 0]: draw.point((x, 0), fill=255)
-        if mp[x, h - 1]: draw.point((x, h - 1), fill=255)
-    for y in range(h):
-        if mp[0, y]: draw.point((0, y), fill=255)
-        if mp[w - 1, y]: draw.point((w - 1, y), fill=255)
+        seeds.append((x, 0))
+        if h > 1:
+            seeds.append((x, h - 1))
+    for y in range(1, h - 1):
+        seeds.append((0, y))
+        if w > 1:
+            seeds.append((w - 1, y))
 
-    # Propagate through the connected candidate background.
-    # A few iterations with MaxFilter bridge tiny JPEG gaps without
-    # touching white areas inside the artwork.
-    connected = bg
-    for _ in range(3):
-        connected = connected.filter(ImageFilter.MaxFilter(3))
-        connected = ImageChops.multiply(connected, mask)
+    for seed in seeds:
+        if bg.getpixel(seed) == 255:
+            ImageDraw.floodfill(bg, seed, 0, thresh=0)
 
-    return connected
+    return bg
 
 def crop_one(path):
     with Image.open(path) as im:
