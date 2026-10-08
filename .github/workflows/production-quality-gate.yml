@@ -223,4 +223,9 @@ jobs:
           if(sensitive.length)throw new Error('snapshot contains sensitive setting keys: '+[...new Set(sensitive.map(x=>x.toLowerCase()))].join(','));
           console.log(JSON.stringify({schemaVersion:d.meta.schemaVersion,productCount:d.meta.productCount,categoryCount:d.meta.categoryCount,reviewCount:d.meta.reviewCount}));
           NODE
-          echo "CORS is verified by the production browser runtime gate; API smoke endpoints above are reachable on the canonical production API."
+          echo "Checking CORS preflight on canonical production API"
+          cors_headers=$(curl -sS --retry 2 --retry-all-errors -D - -o /dev/null -X OPTIONS -H "Origin: https://gilasart.ir" -H "Access-Control-Request-Method: GET" "$API/api/health" | tr -d '\r')
+          echo "$cors_headers"
+          echo "$cors_headers" | grep -Fxi "access-control-allow-origin: https://gilasart.ir" >/dev/null || { echo "ERROR: canonical CORS origin header missing"; exit 1; }
+          echo "$cors_headers" | grep -Fxi "access-control-allow-credentials: true" >/dev/null || { echo "ERROR: CORS credentials header missing"; exit 1; }
+          echo "PASS: CORS preflight"
