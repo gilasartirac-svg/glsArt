@@ -17,8 +17,8 @@ export default function AdminApp(){
   const b=document.getElementById('admin-mobile-menu'),d=document.getElementById('admin-mobile-drawer'),o=document.getElementById('admin-mobile-backdrop');
   if(b&&d&&o&&!b.dataset.bound){
    b.dataset.bound='1';
-   const close=()=>{d.classList.remove('open');o.classList.remove('open');b.setAttribute('aria-expanded','false');document.body.classList.remove('admin-menu-open');b.focus({preventScroll:true})};
-   const openMenu=()=>{d.classList.add('open');o.classList.add('open');b.setAttribute('aria-expanded','true');document.body.classList.add('admin-menu-open');window.setTimeout(()=>d.querySelector('a[data-admin-route]')?.focus({preventScroll:true}),40)};
+   const close=()=>{d.classList.remove('open');o.classList.remove('open');b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','باز کردن منوی مدیریت');o.setAttribute('aria-hidden','true');document.body.classList.remove('admin-menu-open');b.focus({preventScroll:true})};
+   const openMenu=()=>{d.classList.add('open');o.classList.add('open');b.setAttribute('aria-expanded','true');b.setAttribute('aria-label','بستن منوی مدیریت');o.setAttribute('aria-hidden','false');document.body.classList.add('admin-menu-open');window.setTimeout(()=>d.querySelector('a[data-admin-route]')?.focus({preventScroll:true}),40)};
    b.addEventListener('click',()=>{d.classList.contains('open')?close():openMenu()});
    o.addEventListener('click',close);
    d.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));
