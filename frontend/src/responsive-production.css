@@ -301,3 +301,6 @@ textarea{min-height:110px}
 @media (min-width:768px) and (max-width:1023px){.home-latest .grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media (max-width:767px){.home-latest .grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media (max-width:359px){.home-latest .grid{grid-template-columns:1fr;}}
+
+/* Final <360px storefront single-column guard */
+@media (max-width:359px){.shop-page .product-stream,.home-latest .grid{grid-template-columns:1fr;}}
