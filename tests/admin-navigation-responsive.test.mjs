@@ -27,7 +27,7 @@ test('admin mobile drawer has one authoritative responsive contract',()=>{
  const css=read('frontend/src/styles.css');
  const final=css.indexOf('ADMIN MOBILE DRAWER — FINAL AUTHORITY');
  assert.ok(final>0,'final admin drawer contract missing');
- assert.equal((css.match(/\.admin-layout \.admin-sidebar\[id="admin-mobile-drawer"\]\{display:flex!important/g)||[]).length,1,'duplicate drawer display contracts remain');
+ assert.equal((css.match(/\.admin-layout \.admin-sidebar\[id="admin-mobile-drawer"\]\{\s*display:flex!important/g)||[]).length,1,'duplicate drawer display contracts remain');
  assert.ok(!css.includes('background:#101013!important'),'legacy hard-coded admin drawer background remains');
  assert.ok(!css.includes('color:#f7f3eb!important'),'legacy hard-coded admin drawer text color remains');
 });
