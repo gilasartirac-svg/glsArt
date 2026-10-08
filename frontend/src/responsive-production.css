@@ -138,8 +138,7 @@ textarea{min-height:110px}
    Shop Product Grid — deterministic production layout
    Owns Shop content only; Header remains isolated in styles.css.
    ========================================================= */
-.shop-page .product-stream{
-  display:grid;
+.shop-page .product-stream{display:grid;
   width:100%;
   min-width:0;
   grid-auto-flow:row;
