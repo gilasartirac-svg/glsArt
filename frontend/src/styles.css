@@ -5567,8 +5567,7 @@ html,body,#app,.admin-layout,.admin-layout *,button,input,select,textarea{font-f
 html{font-family:"Vazirmatn"!important}
 body{font-family:"Vazirmatn"!important}
 
-/* Production home-logo — vertically fitted to the actual header height.
-   Keep a small, intentional breathing gap so the SVG never touches the header edge. */
+/* Production text wordmark — replaces the graphical header logo. */
 .top .nav{
   min-height:92px;
   height:92px;
@@ -5576,45 +5575,37 @@ body{font-family:"Vazirmatn"!important}
 .top .brand{
   display:inline-flex;
   align-items:center;
-  gap:11px;
+  justify-content:center;
   min-height:84px;
-  min-width:84px;
   height:84px;
+  min-width:0;
   padding:0;
   cursor:pointer;
   text-decoration:none;
   -webkit-tap-highlight-color:transparent;
   touch-action:manipulation;
 }
-.top .brand-logo{
-  display:none;
-  width:auto;
-  height:84px;
-  aspect-ratio:1024 / 1008;
-  flex:0 0 auto;
-  display:block;
-  object-fit:contain;
-  pointer-events:none;
-  user-select:none;
-  transform:none;
-  transform-origin:center;
-}
+.top .brand-logo,
 .top .brand-copy{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  min-width:0;
-  pointer-events:none;
+  display:none !important;
 }
-.top .brand-copy small{display:block}
+.top .brand-wordmark{
+  display:block;
+  color:var(--ui-text,#f5f1ea);
+  font-size:clamp(24px,2vw,32px);
+  line-height:1;
+  font-weight:900;
+  letter-spacing:-.045em;
+  white-space:nowrap;
+  text-shadow:0 2px 18px rgba(0,0,0,.28);
+}
 @media(max-width:900px){
   .top .nav{min-height:76px;height:76px}
-  .top .brand{min-height:68px;min-width:68px;height:68px}
-  .top .brand-logo{height:68px}
+  .top .brand{min-height:68px;height:68px}
+  .top .brand-wordmark{font-size:24px}
 }
 @media(max-width:520px){
   .top .nav{min-height:68px;height:68px}
-  .top .brand{min-height:64px;min-width:64px;height:64px;gap:7px}
-  .top .brand-logo{height:64px}
-  .top .brand-copy{font-size:18px}
+  .top .brand{min-height:60px;height:60px}
+  .top .brand-wordmark{font-size:20px}
 }
