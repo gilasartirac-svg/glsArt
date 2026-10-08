@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-07T20:39:30.729Z",
+  "generatedAt": "2026-10-08T07:33:30.993Z",
   "products": [
     {
       "id": "xls_0270",
@@ -10,12 +10,14 @@
       "price_irt": 85000000,
       "image": "/uploaded/0003613_gilas800.png",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 42,
+      "view_count": 44,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 1,
@@ -31,12 +33,14 @@
       "price_irt": 89620000,
       "image": "/uploaded/0003619_gilas410.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 6,
+      "view_count": 7,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 0,
@@ -52,7 +56,9 @@
       "price_irt": 71620000,
       "image": "/uploaded/0003618_gilas409.png",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -73,7 +79,9 @@
       "price_irt": 75620000,
       "image": "/uploaded/0003614_gilas408.png",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -94,7 +102,9 @@
       "price_irt": 94304000,
       "image": "/uploaded/0003571_gilas407.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -115,12 +125,14 @@
       "price_irt": 80648000,
       "image": "/uploaded/0003570_gilas406.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 4,
+      "view_count": 5,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 0,
@@ -136,12 +148,14 @@
       "price_irt": 92579000,
       "image": "/uploaded/0003567_gilas405.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 11,
+      "view_count": 13,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 0,
@@ -157,12 +171,14 @@
       "price_irt": 85579000,
       "image": "/uploaded/0003564_gilas404.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 6,
+      "view_count": 7,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 0,
@@ -172,6 +188,12 @@
     }
   ],
   "categories": [
+    {
+      "id": "cat_gilas_all",
+      "slug": "gilas-all",
+      "name": "همه تابلوها",
+      "description": "مجموعه کامل تمامی تابلوهای گیلاس آرت"
+    },
     {
       "id": "cat_gilas_horizontal",
       "slug": "gilas-horizontal",

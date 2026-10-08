@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-07T20:39:30.729Z",
+  "generatedAt": "2026-10-08T07:33:30.993Z",
   "products": [
     {
       "id": "xls_0270",
@@ -10,12 +10,14 @@
       "price_irt": 85000000,
       "image": "/uploaded/0003613_gilas800.png",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 42,
+      "view_count": 44,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 1,
@@ -31,12 +33,14 @@
       "price_irt": 89620000,
       "image": "/uploaded/0003619_gilas410.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 6,
+      "view_count": 7,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 0,
@@ -52,7 +56,9 @@
       "price_irt": 71620000,
       "image": "/uploaded/0003618_gilas409.png",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -73,7 +79,9 @@
       "price_irt": 75620000,
       "image": "/uploaded/0003614_gilas408.png",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -94,7 +102,9 @@
       "price_irt": 94304000,
       "image": "/uploaded/0003571_gilas407.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -115,12 +125,14 @@
       "price_irt": 80648000,
       "image": "/uploaded/0003570_gilas406.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 4,
+      "view_count": 5,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 0,
@@ -136,12 +148,14 @@
       "price_irt": 92579000,
       "image": "/uploaded/0003567_gilas405.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 11,
+      "view_count": 13,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 0,
@@ -157,12 +171,14 @@
       "price_irt": 85579000,
       "image": "/uploaded/0003564_gilas404.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 6,
+      "view_count": 7,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 0,
@@ -178,7 +194,9 @@
       "price_irt": 92579000,
       "image": "/uploaded/0003563_gilas402.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -199,7 +217,9 @@
       "price_irt": 95570000,
       "image": "/uploaded/0003562_gilas401.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -220,7 +240,9 @@
       "price_irt": 67860000,
       "image": "/uploaded/0003560_gilas400.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -241,7 +263,9 @@
       "price_irt": 102413000,
       "image": "/uploaded/0003559_gilas399.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -262,7 +286,9 @@
       "price_irt": 49000000,
       "image": "/uploaded/0003558_gilas397.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -283,7 +309,9 @@
       "price_irt": 67430000,
       "image": "/uploaded/0003557_gilas395.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -304,7 +332,9 @@
       "price_irt": 59600000,
       "image": "/uploaded/0003556_gilas394.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -325,7 +355,9 @@
       "price_irt": 59960000,
       "image": "/uploaded/0003555_gilas393.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -346,7 +378,9 @@
       "price_irt": 58000000,
       "image": "/uploaded/0003554_gilas392.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -367,7 +401,9 @@
       "price_irt": 69300000,
       "image": "/uploaded/0003552_gilas391.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -388,7 +424,9 @@
       "price_irt": 53630000,
       "image": "/uploaded/0003553_gilas390.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -409,7 +447,9 @@
       "price_irt": 98000000,
       "image": "/uploaded/0003551_gilas389.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -430,7 +470,9 @@
       "price_irt": 48828000,
       "image": "/uploaded/0003561_gilas388.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -451,7 +493,9 @@
       "price_irt": 850000000,
       "image": "/uploaded/0003612_gilas387.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -472,7 +516,9 @@
       "price_irt": 106368000,
       "image": "/uploaded/0003573_gilas386.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -493,7 +539,9 @@
       "price_irt": 89000000,
       "image": "/uploaded/0003544_gilas385.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -514,7 +562,9 @@
       "price_irt": 107304000,
       "image": "/uploaded/0003542_gilas384.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -535,7 +585,9 @@
       "price_irt": 65086000,
       "image": "/uploaded/0003595_gilas383.png",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -556,7 +608,9 @@
       "price_irt": 74538000,
       "image": "/uploaded/0003539_gilas382.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -577,7 +631,9 @@
       "price_irt": 125000000,
       "image": "/uploaded/0003572_gilas381.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -598,7 +654,9 @@
       "price_irt": 49010000,
       "image": "/uploaded/0003537_gilas380.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -619,7 +677,9 @@
       "price_irt": 89510000,
       "image": "/uploaded/0003536_gilas379.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -640,7 +700,9 @@
       "price_irt": 79355000,
       "image": "/uploaded/0003535_gilas378.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -661,7 +723,9 @@
       "price_irt": 82900000,
       "image": "/uploaded/0003528_gilas377.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -682,7 +746,9 @@
       "price_irt": 82900000,
       "image": "/uploaded/0003526_gilas376.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -703,7 +769,9 @@
       "price_irt": 88000000,
       "image": "/uploaded/0002528_gilas375.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -724,7 +792,9 @@
       "price_irt": 59020000,
       "image": "/uploaded/0002527_gilas374.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -745,7 +815,9 @@
       "price_irt": 54500000,
       "image": "/uploaded/0002525_gilas373.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -766,7 +838,9 @@
       "price_irt": 68850000,
       "image": "/uploaded/0002524_gilas372.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -787,7 +861,9 @@
       "price_irt": 150000000,
       "image": "/uploaded/0002523_gilas371.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -808,7 +884,9 @@
       "price_irt": 59300000,
       "image": "/uploaded/0002522_gilas370.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -829,7 +907,9 @@
       "price_irt": 55270000,
       "image": "/uploaded/0002520_gilas368.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -850,7 +930,9 @@
       "price_irt": 124665000,
       "image": "/uploaded/0002519_gilas367.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -871,7 +953,9 @@
       "price_irt": 49730000,
       "image": "/uploaded/0002518_gilas366.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -892,7 +976,9 @@
       "price_irt": 54730000,
       "image": "/uploaded/0002517_gilas365.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -913,7 +999,9 @@
       "price_irt": 63500000,
       "image": "/uploaded/0002516_gilas364.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -934,7 +1022,9 @@
       "price_irt": 89560000,
       "image": "/uploaded/0002513_gilas363.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -955,7 +1045,9 @@
       "price_irt": 97500000,
       "image": "/uploaded/0002508_gilas362.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -976,7 +1068,9 @@
       "price_irt": 75870000,
       "image": "/uploaded/0002510_gilas358.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -997,7 +1091,9 @@
       "price_irt": 85980000,
       "image": "/uploaded/0002509_gilas357.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1018,7 +1114,9 @@
       "price_irt": 69388000,
       "image": "/uploaded/0002505_gilas356.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1039,7 +1137,9 @@
       "price_irt": 141432000,
       "image": "/uploaded/0002515_gilas355.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1060,12 +1160,14 @@
       "price_irt": 56730000,
       "image": "/uploaded/0002503_gilas354.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 0,
+      "view_count": 1,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 0,
@@ -1081,7 +1183,9 @@
       "price_irt": 28690000,
       "image": "/uploaded/0002502_gilas353.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1102,7 +1206,9 @@
       "price_irt": 51620000,
       "image": "/uploaded/0002501_gilas352.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1123,7 +1229,9 @@
       "price_irt": 28690000,
       "image": "/uploaded/0002500_gilas351.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1144,7 +1252,9 @@
       "price_irt": 56820000,
       "image": "/uploaded/0002499_gilas350.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1165,7 +1275,9 @@
       "price_irt": 79895000,
       "image": "/uploaded/0002493_gilas349.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1186,7 +1298,9 @@
       "price_irt": 65000000,
       "image": "/uploaded/0002490_gilas348.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1207,7 +1321,9 @@
       "price_irt": 119860000,
       "image": "/uploaded/0002481_gilas347.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1228,7 +1344,9 @@
       "price_irt": 153100000,
       "image": "/uploaded/0002479_gilas346.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1249,7 +1367,9 @@
       "price_irt": 106400000,
       "image": "/uploaded/0002475_gilas345.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1270,7 +1390,9 @@
       "price_irt": 50760000,
       "image": "/uploaded/0002463_gilas344.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1291,7 +1413,9 @@
       "price_irt": 69400000,
       "image": "/uploaded/0002438_gilas343.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1312,7 +1436,9 @@
       "price_irt": 96000000,
       "image": "/uploaded/0002436_gilas342.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1333,7 +1459,9 @@
       "price_irt": 178000000,
       "image": "/uploaded/0003529_gilas341.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1354,7 +1482,9 @@
       "price_irt": 87470000,
       "image": "/uploaded/0002431_gilas340.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1375,7 +1505,9 @@
       "price_irt": 158000000,
       "image": "/uploaded/0002429_gilas339.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1396,7 +1528,9 @@
       "price_irt": 56840000,
       "image": "/uploaded/0002427_gilas338.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1417,7 +1551,9 @@
       "price_irt": 60000000,
       "image": "/uploaded/0002426_gilas337.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1438,7 +1574,9 @@
       "price_irt": 59300000,
       "image": "/uploaded/0002424_gilas336.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1459,7 +1597,9 @@
       "price_irt": 65100000,
       "image": "/uploaded/0002421_gilas335.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1480,7 +1620,9 @@
       "price_irt": 880000000,
       "image": "/uploaded/0002419_gilas334.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1501,7 +1643,9 @@
       "price_irt": 21730000,
       "image": "/uploaded/0002389_gilas333.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1522,7 +1666,9 @@
       "price_irt": 29730000,
       "image": "/uploaded/0002386_gilas332.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1543,7 +1689,9 @@
       "price_irt": 21730000,
       "image": "/uploaded/0002383_gilas331.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1564,7 +1712,9 @@
       "price_irt": 21730000,
       "image": "/uploaded/0002382_gilas330.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1585,7 +1735,9 @@
       "price_irt": 21730000,
       "image": "/uploaded/0002381_gilas329.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1606,7 +1758,9 @@
       "price_irt": 56400000,
       "image": "/uploaded/0002378_gilas328.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1627,7 +1781,9 @@
       "price_irt": 99000000,
       "image": "/uploaded/0002385_gilas327.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1648,7 +1804,9 @@
       "price_irt": 79320000,
       "image": "/uploaded/0002376_gilas326.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1669,7 +1827,9 @@
       "price_irt": 78780000,
       "image": "/uploaded/0002430_gilas325.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1690,7 +1850,9 @@
       "price_irt": 70000000,
       "image": "/uploaded/0002374_gilas324.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1711,7 +1873,9 @@
       "price_irt": 36160000,
       "image": "/uploaded/0002373_gilas323.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1732,7 +1896,9 @@
       "price_irt": 92650000,
       "image": "/uploaded/0002459_gilas322.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1753,7 +1919,9 @@
       "price_irt": 79895000,
       "image": "/uploaded/0002370_gilas321.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1774,7 +1942,9 @@
       "price_irt": 64600000,
       "image": "/uploaded/0002369_gilas320.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1795,7 +1965,9 @@
       "price_irt": 88000000,
       "image": "/uploaded/0002368_gilas319.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1816,7 +1988,9 @@
       "price_irt": 70000000,
       "image": "/uploaded/0002367_gilas318.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1837,7 +2011,9 @@
       "price_irt": 21730000,
       "image": "/uploaded/0002366_gilas317.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1858,7 +2034,9 @@
       "price_irt": 41730000,
       "image": "/uploaded/0002365_gilas316.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1879,7 +2057,9 @@
       "price_irt": 21730000,
       "image": "/uploaded/0002364_gilas315.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1900,7 +2080,9 @@
       "price_irt": 96800000,
       "image": "/uploaded/0002363_gilas314.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1921,7 +2103,9 @@
       "price_irt": 46260000,
       "image": "/uploaded/0002357_gilas313.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1942,7 +2126,9 @@
       "price_irt": 60000000,
       "image": "/uploaded/0002355_gilas312.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1963,7 +2149,9 @@
       "price_irt": 75650000,
       "image": "/uploaded/0002349_gilas311.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -1984,7 +2172,9 @@
       "price_irt": 94030000,
       "image": "/uploaded/0002356_gilas310.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2005,7 +2195,9 @@
       "price_irt": 75700000,
       "image": "/uploaded/0002491_gilas308.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2026,7 +2218,9 @@
       "price_irt": 70000000,
       "image": "/uploaded/0002472_gilas307.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2047,7 +2241,9 @@
       "price_irt": 42600000,
       "image": "/uploaded/0002471_gilas306.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2068,7 +2264,9 @@
       "price_irt": 70000000,
       "image": "/uploaded/0002346_gilas305.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2089,7 +2287,9 @@
       "price_irt": 69538000,
       "image": "/uploaded/0002476_gilas304.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2110,7 +2310,9 @@
       "price_irt": 60000000,
       "image": "/uploaded/0002295_gilas303.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2131,7 +2333,9 @@
       "price_irt": 75000000,
       "image": "/uploaded/0002298_gilas302.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2152,7 +2356,9 @@
       "price_irt": 138000000,
       "image": "/uploaded/0002286_gilas300.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2173,7 +2379,9 @@
       "price_irt": 10500000,
       "image": "/uploaded/0002276_gilas238.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2194,7 +2402,9 @@
       "price_irt": 10500000,
       "image": "/uploaded/0002274_gilas237.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2215,7 +2425,9 @@
       "price_irt": 10500000,
       "image": "/uploaded/0002272_gilas236.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2236,7 +2448,9 @@
       "price_irt": 10500000,
       "image": "/uploaded/0002270_gilas234.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2257,7 +2471,9 @@
       "price_irt": 10500000,
       "image": "/uploaded/0002268_gilas233.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2278,7 +2494,9 @@
       "price_irt": 10500000,
       "image": "/uploaded/0002265_gilas231.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2299,7 +2517,9 @@
       "price_irt": 10500000,
       "image": "/uploaded/0002263_gilas230.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2320,7 +2540,9 @@
       "price_irt": 10500000,
       "image": "/uploaded/0002261_gilas229.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2341,7 +2563,9 @@
       "price_irt": 30500000,
       "image": "/uploaded/0002258_gilas228.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2362,7 +2586,9 @@
       "price_irt": 87000000,
       "image": "/uploaded/0002422_gilas227.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2383,7 +2609,9 @@
       "price_irt": 96700000,
       "image": "/uploaded/0002249_gilas225.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2404,7 +2632,9 @@
       "price_irt": 92650000,
       "image": "/uploaded/0002244_gilas224.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2425,7 +2655,9 @@
       "price_irt": 90450000,
       "image": "/uploaded/0002236_gilas223.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2446,7 +2678,9 @@
       "price_irt": 85650000,
       "image": "/uploaded/0002390_gilas221.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2467,7 +2701,9 @@
       "price_irt": 50140000,
       "image": "/uploaded/0002345_gilas220.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2488,7 +2724,9 @@
       "price_irt": 70000000,
       "image": "/uploaded/0002392_gilas219.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2509,7 +2747,9 @@
       "price_irt": 62000000,
       "image": "/uploaded/0002344_gilas218.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2530,7 +2770,9 @@
       "price_irt": 85650000,
       "image": "/uploaded/0002492_gilas216.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2551,7 +2793,9 @@
       "price_irt": 95125000,
       "image": "/uploaded/0001139_gilas214.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2572,7 +2816,9 @@
       "price_irt": 43000000,
       "image": "/uploaded/0001140_gilas213.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2593,7 +2839,9 @@
       "price_irt": 135975000,
       "image": "/uploaded/0001141_gilas212.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2614,7 +2862,9 @@
       "price_irt": 68750000,
       "image": "/uploaded/0001143_gilas211.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2635,7 +2885,9 @@
       "price_irt": 95750000,
       "image": "/uploaded/0001144_gilas210.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2656,7 +2908,9 @@
       "price_irt": 52650000,
       "image": "/uploaded/0002478_gilas209.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2677,7 +2931,9 @@
       "price_irt": 60000000,
       "image": "/uploaded/0002474_gilas207.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2698,7 +2954,9 @@
       "price_irt": 60000000,
       "image": "/uploaded/0002477_gilas205.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2719,7 +2977,9 @@
       "price_irt": 78750000,
       "image": "/uploaded/0001145_gilas201.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2740,7 +3000,9 @@
       "price_irt": 78750000,
       "image": "/uploaded/0002464_gilas200.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2761,7 +3023,9 @@
       "price_irt": 58750000,
       "image": "/uploaded/0002394_gilas116.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2782,7 +3046,9 @@
       "price_irt": 82650000,
       "image": "/uploaded/0001151_gilas108.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2803,7 +3069,9 @@
       "price_irt": 85650000,
       "image": "/uploaded/0001086_gilas107.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2824,7 +3092,9 @@
       "price_irt": 85650000,
       "image": "/uploaded/0001152_gilas106.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2845,7 +3115,9 @@
       "price_irt": 85650000,
       "image": "/uploaded/0003605_gilas105.png",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2866,7 +3138,9 @@
       "price_irt": 72650000,
       "image": "/uploaded/0001154_gilas104.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2887,7 +3161,9 @@
       "price_irt": 114483000,
       "image": "/uploaded/0002332_gilas103.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2908,7 +3184,9 @@
       "price_irt": 105000000,
       "image": "/uploaded/0001157_gilas099.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2929,7 +3207,9 @@
       "price_irt": 60000000,
       "image": "/uploaded/0001159_gilas098.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2950,7 +3230,9 @@
       "price_irt": 72650000,
       "image": "/uploaded/0001160_gilas097.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2971,7 +3253,9 @@
       "price_irt": 69000000,
       "image": "/uploaded/0001161_gilas096.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -2992,7 +3276,9 @@
       "price_irt": 118000000,
       "image": "/uploaded/0001162_gilas094.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3013,7 +3299,9 @@
       "price_irt": 118000000,
       "image": "/uploaded/0001163_gilas093.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3034,7 +3322,9 @@
       "price_irt": 189500000,
       "image": "/uploaded/0001164_gilas092.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3055,7 +3345,9 @@
       "price_irt": 50000000,
       "image": "/uploaded/0001165_gilas091.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3076,7 +3368,9 @@
       "price_irt": 60000000,
       "image": "/uploaded/0001166_gilas090.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3097,7 +3391,9 @@
       "price_irt": 30000000,
       "image": "/uploaded/0001169_gilas089.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3118,7 +3414,9 @@
       "price_irt": 60000000,
       "image": "/uploaded/0001170_gilas088.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3139,7 +3437,9 @@
       "price_irt": 40000000,
       "image": "/uploaded/0001171_gilas087.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3160,7 +3460,9 @@
       "price_irt": 40000000,
       "image": "/uploaded/0001174_gilas086.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3181,7 +3483,9 @@
       "price_irt": 69650000,
       "image": "/uploaded/0001175_gilas085.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3202,7 +3506,9 @@
       "price_irt": 99300000,
       "image": "/uploaded/0001176_gilas084.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3223,7 +3529,9 @@
       "price_irt": 92650000,
       "image": "/uploaded/0001178_gilas083.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3244,7 +3552,9 @@
       "price_irt": 78750000,
       "image": "/uploaded/0001180_gilas082.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3265,7 +3575,9 @@
       "price_irt": 60000000,
       "image": "/uploaded/0001182_gilas081.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3286,7 +3598,9 @@
       "price_irt": 170000000,
       "image": "/uploaded/0001183_gilas080.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3307,7 +3621,9 @@
       "price_irt": 79000000,
       "image": "/uploaded/0001184_gilas079.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3328,7 +3644,9 @@
       "price_irt": 57800000,
       "image": "/uploaded/0001185_gilas076.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3349,7 +3667,9 @@
       "price_irt": 95000000,
       "image": "/uploaded/0002289_gilas075.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3370,7 +3690,9 @@
       "price_irt": 97650000,
       "image": "/uploaded/0001187_gilas074.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3391,7 +3713,9 @@
       "price_irt": 92650000,
       "image": "/uploaded/0001188_gilas073.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3412,7 +3736,9 @@
       "price_irt": 62650000,
       "image": "/uploaded/0001189_gilas072.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3433,7 +3759,9 @@
       "price_irt": 92600000,
       "image": "/uploaded/0001190_gilas071.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3454,7 +3782,9 @@
       "price_irt": 60000000,
       "image": "/uploaded/0001191_gilas070.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3475,7 +3805,9 @@
       "price_irt": 60000000,
       "image": "/uploaded/0001192_gilas069.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3496,7 +3828,9 @@
       "price_irt": 30000000,
       "image": "/uploaded/0001195_gilas068.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3517,7 +3851,9 @@
       "price_irt": 60000000,
       "image": "/uploaded/0001197_gilas067.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3538,7 +3874,9 @@
       "price_irt": 49700000,
       "image": "/uploaded/0001198_gilas066.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3559,7 +3897,9 @@
       "price_irt": 72026000,
       "image": "/uploaded/0001199_gilas065.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3580,7 +3920,9 @@
       "price_irt": 75240000,
       "image": "/uploaded/0001200_gilas064.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3601,7 +3943,9 @@
       "price_irt": 69300000,
       "image": "/uploaded/0001201_gilas063.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3622,7 +3966,9 @@
       "price_irt": 69634000,
       "image": "/uploaded/0001204_gilas062.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3643,7 +3989,9 @@
       "price_irt": 58340000,
       "image": "/uploaded/0001208_gilas060.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3664,7 +4012,9 @@
       "price_irt": 95526000,
       "image": "/uploaded/0001209_gilas059.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3685,7 +4035,9 @@
       "price_irt": 78347000,
       "image": "/uploaded/0001210_gilas058.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3706,7 +4058,9 @@
       "price_irt": 77265000,
       "image": "/uploaded/0001212_gilas057.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3727,7 +4081,9 @@
       "price_irt": 73017000,
       "image": "/uploaded/0001213_gilas056.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3748,7 +4104,9 @@
       "price_irt": 88565000,
       "image": "/uploaded/0001214_gilas055.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3769,7 +4127,9 @@
       "price_irt": 49020000,
       "image": "/uploaded/0001215_gilas054.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3790,7 +4150,9 @@
       "price_irt": 44960000,
       "image": "/uploaded/0001216_gilas053.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3811,7 +4173,9 @@
       "price_irt": 44960000,
       "image": "/uploaded/0001217_gilas052.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3832,7 +4196,9 @@
       "price_irt": 78910000,
       "image": "/uploaded/0001219_gilas050.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3853,7 +4219,9 @@
       "price_irt": 80938000,
       "image": "/uploaded/0001132_gilas049.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3874,7 +4242,9 @@
       "price_irt": 78910000,
       "image": "/uploaded/0001131_gilas048.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3895,7 +4265,9 @@
       "price_irt": 59387000,
       "image": "/uploaded/0003604_gilas047.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3916,7 +4288,9 @@
       "price_irt": 98666000,
       "image": "/uploaded/0001126_gilas046.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3937,7 +4311,9 @@
       "price_irt": 89598000,
       "image": "/uploaded/0001124_gilas045.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3958,7 +4334,9 @@
       "price_irt": 100938000,
       "image": "/uploaded/0001123_gilas044.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -3979,7 +4357,9 @@
       "price_irt": 105000000,
       "image": "/uploaded/0001120_gilas043.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -4000,7 +4380,9 @@
       "price_irt": 93017000,
       "image": "/uploaded/0001119_gilas042.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -4021,7 +4403,9 @@
       "price_irt": 78910000,
       "image": "/uploaded/0001118_gilas041.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -4042,7 +4426,9 @@
       "price_irt": 127244000,
       "image": "/uploaded/0001114_gilas040.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -4063,7 +4449,9 @@
       "price_irt": 79812000,
       "image": "/uploaded/0001113_gilas039.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -4084,7 +4472,9 @@
       "price_irt": 63264000,
       "image": "/uploaded/0001112_gilas038.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -4105,7 +4495,9 @@
       "price_irt": 79895000,
       "image": "/uploaded/0001111_gilas036.jpeg",
       "category_id": null,
-      "category_ids": [],
+      "category_ids": [
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -4128,13 +4520,14 @@
       "category_id": "cat_gilas_vertical",
       "category_ids": [
         "cat_gilas_vertical",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 0,
+      "view_count": 1,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 0,
@@ -4152,6 +4545,7 @@
       "category_id": "cat_gilas_vertical",
       "category_ids": [
         "cat_gilas_vertical",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4176,6 +4570,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4200,6 +4595,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4224,6 +4620,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4248,6 +4645,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4272,6 +4670,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4296,6 +4695,7 @@
       "category_id": "cat_gilas_vertical",
       "category_ids": [
         "cat_gilas_vertical",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4320,6 +4720,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4344,6 +4745,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4368,6 +4770,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4392,6 +4795,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4416,6 +4820,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4440,6 +4845,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4464,6 +4870,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4488,6 +4895,7 @@
       "category_id": "cat_gilas_vertical",
       "category_ids": [
         "cat_gilas_vertical",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4512,13 +4920,14 @@
       "category_id": "cat_gilas_vertical",
       "category_ids": [
         "cat_gilas_vertical",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 0,
+      "view_count": 1,
       "review_count": 12,
       "rating_avg": 5,
       "favorite_count": 0,
@@ -4536,6 +4945,7 @@
       "category_id": "cat_gilas_vertical",
       "category_ids": [
         "cat_gilas_vertical",
+        "cat_gilas_all",
         "cat_gilas_poetry"
       ],
       "active": 1,
@@ -4560,6 +4970,7 @@
       "category_id": "cat_gilas_vertical",
       "category_ids": [
         "cat_gilas_vertical",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4584,6 +4995,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4608,6 +5020,7 @@
       "category_id": "cat_gilas_vertical",
       "category_ids": [
         "cat_gilas_vertical",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4632,6 +5045,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4656,6 +5070,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4680,6 +5095,7 @@
       "category_id": "cat_gilas_vertical",
       "category_ids": [
         "cat_gilas_vertical",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4704,6 +5120,7 @@
       "category_id": "cat_gilas_vertical",
       "category_ids": [
         "cat_gilas_vertical",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4728,6 +5145,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4752,6 +5170,7 @@
       "category_id": "cat_gilas_vertical",
       "category_ids": [
         "cat_gilas_vertical",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4776,6 +5195,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4800,6 +5220,7 @@
       "category_id": "cat_gilas_vertical",
       "category_ids": [
         "cat_gilas_vertical",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4824,6 +5245,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4848,6 +5270,7 @@
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
+        "cat_gilas_all",
         "cat_gilas_religious"
       ],
       "active": 1,
@@ -4869,8 +5292,11 @@
       "name": "تابلوی معرق مس برجسته رومیزی آیه وان یکاد بهمراه جعبه مخمل",
       "price_irt": 60200000,
       "image": "/uploaded/0002321_g1002.jpeg",
-      "category_id": null,
-      "category_ids": [],
+      "category_id": "cat_gilas_religious",
+      "category_ids": [
+        "cat_gilas_religious",
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
@@ -4890,13 +5316,16 @@
       "name": "تابلوی معرق مس برجسته رومیزی یاعلی بهمراه جعبه مخمل",
       "price_irt": 59290000,
       "image": "/uploaded/0002319_g1001.jpeg",
-      "category_id": null,
-      "category_ids": [],
+      "category_id": "cat_gilas_religious",
+      "category_ids": [
+        "cat_gilas_religious",
+        "cat_gilas_all"
+      ],
       "active": 1,
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 0,
+      "view_count": 1,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 0,
@@ -4914,6 +5343,7 @@
       "category_id": "cat_gilas_square",
       "category_ids": [
         "cat_gilas_square",
+        "cat_gilas_all",
         "cat_gilas_poetry"
       ],
       "active": 1,
@@ -4930,6 +5360,12 @@
     }
   ],
   "categories": [
+    {
+      "id": "cat_gilas_all",
+      "slug": "gilas-all",
+      "name": "همه تابلوها",
+      "description": "مجموعه کامل تمامی تابلوهای گیلاس آرت"
+    },
     {
       "id": "cat_gilas_horizontal",
       "slug": "gilas-horizontal",
@@ -5044,13 +5480,13 @@
       "title": "ارتباط با هنرکده گیلاس آرت",
       "summary": "برای خرید، پیگیری سفارش و مشاوره با ما در ارتباط باشید.",
       "body": "همکاران گیلاس آرت آماده پاسخ‌گویی به پرسش‌های شما هستند.",
-      "cover_image": "",
+      "cover_image": "https://gilasart.ir/uploaded/0003612_gilas387.jpeg",
       "phone": "05136624919",
       "mobile": "09153090907",
       "address": "مشهد میدان امام حسن شاهد شاهد ۲۵ هنرکده گیلاس آرت",
       "map_url": "https://map.google.com/jo6L42sUBt1FZoFA6",
       "published_at": "2026-09-28 02:34:27",
-      "updated_at": "2026-10-05 12:25:37"
+      "updated_at": "2026-10-08 02:15:21"
     }
   ],
   "settings": {
