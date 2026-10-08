@@ -1174,7 +1174,14 @@ async function rewardsPage(){
 }
 async function checkout(){navigate('/cart')}
 
-async function router(){
+async function cleanupAdminStyles(){
+ const link=document.querySelector('link[data-gilasart-admin-css]');
+ if(link)link.remove();
+ document.body.classList.remove('admin-menu-open');
+ document.documentElement.removeAttribute('data-admin-route');
+}
+
+function router(){
  scrollRouteTop();
  routeAbortController?.abort();
  routeAbortController=new AbortController();
@@ -1195,7 +1202,8 @@ async function router(){
  try{
   applyRouteSeoPolicy(p);
   if(!p[0])return home();
-  if(p[0]==='admin'){
+   if(p[0]!=='admin')cleanupAdminStyles();
+if(p[0]==='admin'){
    await loadMe();
    if(!isAdminUser()){navigate('/account');return}
    if(document.querySelector('.admin-layout')&&typeof window.GilasArtAdminNavigate==='function'){await window.GilasArtAdminNavigate();return}
