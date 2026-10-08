@@ -182,7 +182,7 @@ jobs:
       - name: Smoke test production API
         if: steps.service.outputs.paused != 'true'
         env:
-          API: https://gilasartworker.gilasart-ir-ac.workers.dev
+          API: https://api.gilasart.ir
           ORIGIN: https://gilasart.ir
         run: |
           set -euo pipefail
