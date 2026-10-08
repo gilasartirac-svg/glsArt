@@ -29,8 +29,9 @@ test('route recovery UI has no inline presentation styles',()=>{
 
 test('public/admin theme architecture remains token-based at key shared controls',()=>{
  const css=read('frontend/src/styles.css');
- assert.ok(css.includes(':root[data-theme="light"]'));
+ assert.ok(css.includes(':root{'));
  assert.ok(css.includes(':root[data-theme="dark"]'));
+ assert.equal((css.match(/:root\[data-theme="dark"\]\{/g)||[]).length,1);
  assert.ok(css.includes('--ui-bg:'));
  assert.ok(css.includes('--ui-surface:'));
  assert.ok(css.includes('--ui-text:'));
@@ -96,4 +97,20 @@ test('header responsive ownership stays namespaced',()=>{
  assert.ok(!responsive.includes('.top .wrap.nav'));
  assert.ok(!responsive.includes('.top .header-actions'));
  assert.ok(!responsive.includes('.top .mobile-menu-toggle'));
+});
+
+test('shop production grid is deterministic across desktop tablet mobile and narrow phone',()=>{
+ const css=read('frontend/src/responsive-production.css');
+ assert.ok(css.includes('.shop-page .product-stream{'));
+ assert.ok(css.includes('grid-template-columns:repeat(3,minmax(0,1fr))'));
+ assert.ok(css.includes('grid-template-columns:repeat(2,minmax(0,1fr))'));
+ assert.ok(css.includes('grid-template-columns:1fr'));
+ assert.ok(css.includes('.shop-page .product-art-frame{'));
+ assert.ok(css.includes('aspect-ratio:1 / 1'));
+ assert.ok(css.includes('object-fit:contain'));
+ assert.ok(css.includes('-webkit-line-clamp:2'));
+ assert.ok(css.includes('.shop-page .product-card-body{'));
+ assert.ok(css.includes('.shop-page .product-card-footer{'));
+ assert.ok(css.includes('margin-top:auto'));
+ assert.ok(css.includes('.shop-page .shop-control-bar{'));
 });

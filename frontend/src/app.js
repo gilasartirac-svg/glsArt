@@ -656,9 +656,9 @@ async function product(slug){
   // product configuration. Product detail requires a complete backend response.
   console.error('product_detail_backend_failed',{route:'/product/'+String(slug||''),status:primaryError?.status||0,code:primaryError?.code||'',message:primaryError?.message||String(primaryError)});
   if(Number(primaryError?.status)===404){
-   layout('<section class="wrap page"><div class="panel"><h1>اثر پیدا نشد</h1><p class="muted">اثری با این شناسه یا نشانی در گالری گیلاس آرت پیدا نشد.</p><div class="cart-checkout-bar" style="justify-content:center"><a class="btn primary" href="'+routeUrl('/shop')+'">بازگشت به فروشگاه</a></div></div></section>');
+   layout('<section class="wrap page"><div class="panel"><h1>اثر پیدا نشد</h1><p class="muted">اثری با این شناسه یا نشانی در گالری گیلاس آرت پیدا نشد.</p><div class="cart-checkout-bar cart-checkout-bar--centered"><a class="btn primary" href="'+routeUrl('/shop')+'">بازگشت به فروشگاه</a></div></div></section>');
   }else{
-   layout('<section class="wrap page"><div class="panel"><h1>جزئیات اثر موقتاً در دسترس نیست</h1><p class="error">ارتباط با سرویس اطلاعات این اثر کامل نشد. اطلاعات محصول حذف نشده است؛ لطفاً دوباره تلاش کنید.</p><div class="cart-checkout-bar" style="justify-content:center"><button class="btn primary" id="product-retry" type="button">تلاش دوباره</button><a class="btn ghost" href="'+routeUrl('/shop')+'">بازگشت به فروشگاه</a></div></div></section>');
+   layout('<section class="wrap page"><div class="panel"><h1>جزئیات اثر موقتاً در دسترس نیست</h1><p class="error">ارتباط با سرویس اطلاعات این اثر کامل نشد. اطلاعات محصول حذف نشده است؛ لطفاً دوباره تلاش کنید.</p><div class="cart-checkout-bar cart-checkout-bar--centered"><button class="btn primary" id="product-retry" type="button">تلاش دوباره</button><a class="btn ghost" href="'+routeUrl('/shop')+'">بازگشت به فروشگاه</a></div></div></section>');
    document.querySelector('#product-retry')?.addEventListener('click',()=>router());
   }
   return;
