@@ -57,7 +57,8 @@ test('final public responsive contract covers desktop tablet mobile and narrow-p
  assert.ok(css.includes('@media (min-width:1024px)'));
  assert.ok(css.includes('@media (min-width:768px) and (max-width:1023px)'));
  assert.ok(css.includes('@media (max-width:767px)'));
- assert.ok(css.includes('@media (max-width:359px)'));\n assert.ok(!css.includes('@media (max-width:380px)'));
+ assert.ok(css.includes('@media (max-width:359px)'));
+ assert.ok(!css.includes('@media (max-width:380px)'));
  assert.ok(css.includes('.shop-page .product-stream'));
  assert.ok(css.includes('env(safe-area-inset-bottom'));
  assert.ok(css.includes('prefers-reduced-motion:reduce'));
