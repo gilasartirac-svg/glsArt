@@ -261,7 +261,7 @@
 .admin-layout .products-admin-table-wrap{width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
 .admin-layout .products-admin-table{min-width:980px}
 .admin-layout .admin-product-modal-dialog{width:min(96vw,1180px);max-height:92vh;overflow:auto}
-.admin-layout .admin-product-modal-head,.admin-product-modal-foot{position:sticky;z-index:3;background:var(--admin-surface)}
+.admin-layout .admin-product-modal-head,.admin-layout .admin-product-modal-foot{position:sticky;z-index:3;background:var(--admin-surface)}
 .admin-layout .admin-product-modal-head{top:0}
 .admin-layout .admin-product-modal-foot{bottom:0}
 .admin-layout .admin-product-tabs{display:flex;gap:7px;flex-wrap:wrap}
