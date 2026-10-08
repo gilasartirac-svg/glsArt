@@ -37,3 +37,17 @@ test('admin mobile drawer accessibility state is synchronized',()=>{
  assert.ok(js.includes("o.setAttribute('aria-hidden','true')"));
  assert.ok(js.includes("b.setAttribute('aria-label','بستن منوی مدیریت')"));
 });
+
+test('shop responsive contract is scoped and unified',()=>{
+ const css=read('frontend/src/responsive-production.css');
+ assert.ok(css.includes('.shop-page .product-stream{display:grid'));
+ assert.ok(css.includes('.shop-page .shop-control-panel{max-height:min(62vh,520px)'));
+ assert.ok(css.includes('.shop-page .filter-chip'));
+ assert.ok(css.includes('@media (min-width:1024px)'));
+ assert.ok(css.includes('@media (min-width:768px) and (max-width:1023px)'));
+ assert.ok(css.includes('@media (max-width:767px)'));
+ assert.ok(css.includes('@media (max-width:380px)'));
+ const legacy=read('frontend/src/styles.css');
+ assert.ok(!legacy.includes('/* Shop search control — keep the search trigger'));
+ assert.ok(!legacy.includes('/* Shop gallery — visual-first responsive sizing'));
+});
