@@ -7,9 +7,9 @@
 
 /* GilasArt visual system — premium RTL responsive layer */
 :root{
- --ga-bg:#0b0b0d;--ga-surface:#121216;--ga-surface-2:#18181d;--ga-line:#2a292d;
- --ga-text:#f5f1ea;--ga-muted:#aaa39a;--ga-gold:#c9a86a;--ga-gold-2:#e2c891;
- --ga-radius:18px;--ga-shadow:0 18px 55px rgba(0,0,0,.28);
+ --ga-bg:var(--ui-bg);--ga-surface:var(--ui-surface);--ga-surface-2:var(--ui-surface-2);--ga-line:var(--ui-line);
+ --ga-text:var(--ui-text);--ga-muted:var(--ui-muted);--ga-gold:var(--ui-gold);--ga-gold-2:var(--ui-gold-strong);
+ --ga-radius:var(--ui-radius);--ga-shadow:var(--ui-shadow);
 }
 html{font-family:Vazirmatn,Tahoma,Arial,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;scroll-behavior:smooth}
 body{background:radial-gradient(circle at 80% -10%,rgba(201,168,106,.08),transparent 32%),var(--ga-bg);color:var(--ga-text)}
