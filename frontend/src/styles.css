@@ -182,6 +182,20 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 }
 
 
+/* Admin navigation reliability layer — shared layout ownership */
+.admin-layout{display:flex;align-items:stretch;min-height:100dvh}
+.admin-layout>aside{display:block;flex:0 0 250px;min-width:0}
+.admin-layout .admin-sidebar{box-sizing:border-box;width:250px;background:var(--ui-surface);color:var(--ui-text)}
+.admin-layout main{flex:1 1 auto;min-width:0}
+.admin-layout .admin-nav-group a,.admin-layout .admin-back{box-sizing:border-box;text-decoration:none}
+.admin-layout .admin-header{position:relative;z-index:3;min-width:0}
+@media(max-width:900px){
+ .admin-layout{display:block;min-height:100dvh}
+ .admin-layout>aside{display:block;width:0;min-width:0;flex:0 0 0}
+ .admin-layout main{width:100%;min-width:0}
+ .admin-layout .admin-sidebar{width:min(86vw,320px)}
+}
+
 /* Admin mobile navigation — touch-first responsive system */
 .admin-mobile-menu,.admin-mobile-backdrop{display:none}
 @media(max-width:900px){
@@ -242,8 +256,8 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 .admin-nav-label{padding:2px 12px 4px;color:var(--ui-muted);font-size:10px;font-weight:700;letter-spacing:.04em;opacity:.8}
 .admin-layout .admin-nav-group a{gap:11px!important;position:relative;overflow:hidden}
 .admin-layout .admin-nav-icon{width:24px;height:24px;flex:0 0 24px;display:grid;place-items:center;border:1px solid transparent;border-radius:8px;color:var(--ui-muted);font-size:13px;line-height:1;background:transparent}
-.admin-layout .admin-nav-group a:hover .admin-layout .admin-nav-icon{color:var(--ui-gold-strong);background:color-mix(in srgb,var(--ui-gold) 9%,transparent);border-color:color-mix(in srgb,var(--ui-gold) 13%,transparent)}
-.admin-layout .admin-nav-group a.active .admin-layout .admin-nav-icon{color:var(--ui-gold-strong);background:color-mix(in srgb,var(--ui-gold) 12%,transparent);border-color:color-mix(in srgb,var(--ui-gold) 20%,transparent)}
+.admin-layout .admin-nav-group a:hover .admin-nav-icon{color:var(--ui-gold-strong);background:color-mix(in srgb,var(--ui-gold) 9%,transparent);border-color:color-mix(in srgb,var(--ui-gold) 13%,transparent)}
+.admin-layout .admin-nav-group a.active .admin-nav-icon{color:var(--ui-gold-strong);background:color-mix(in srgb,var(--ui-gold) 12%,transparent);border-color:color-mix(in srgb,var(--ui-gold) 20%,transparent)}
 .admin-layout .admin-nav-group a.active::after{content:"";position:absolute;right:0;top:9px;bottom:9px;width:3px;border-radius:4px;background:var(--ui-gold)}
 .admin-layout .admin-back{gap:9px!important;background:color-mix(in srgb,var(--ui-surface-2) 55%,transparent);transition:all .18s var(--ui-ease)}
 .admin-layout .admin-back:hover{color:var(--ui-text)!important;border-color:color-mix(in srgb,var(--ui-gold) 30%,var(--ui-line))!important;background:color-mix(in srgb,var(--ui-gold) 7%,var(--ui-surface))}
