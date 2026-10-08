@@ -29,7 +29,8 @@ test('route recovery UI has no inline presentation styles',()=>{
 
 test('public/admin theme architecture remains token-based at key shared controls',()=>{
  const css=read('frontend/src/styles.css');
- assert.ok(css.includes(':root{'));\n assert.ok(!css.includes(':root[data-theme="light"]'));
+ assert.ok(css.includes(':root{'));
+ assert.ok(!css.includes(':root[data-theme="light"]'));
  assert.ok(css.includes(':root[data-theme="dark"]'));
  assert.ok(css.includes('--ui-bg:'));
  assert.ok(css.includes('--ui-surface:'));
