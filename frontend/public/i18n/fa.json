@@ -566,6 +566,7 @@
     "enamad.adminLinkLabel": "لینک رسمی اینماد",
     "enamad.adminLinkButton": "مشاهده صفحه رسمی استعلام اینماد",
     "enamad.adminCodeLabel": "کد کامل نشان",
-    "enamad.adminCodeAria": "کد کامل نشان اینماد"
+    "enamad.adminCodeAria": "کد کامل نشان اینماد",
+    "product.toman": "تومان"
   }
 }
