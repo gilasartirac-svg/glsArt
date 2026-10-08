@@ -724,3 +724,54 @@ textarea{min-height:110px}
 @media (prefers-reduced-motion:reduce){
   .shop-page .product-showcase,.shop-page .product-card,.shop-page .product-art-frame img{transition:none}
 }
+
+
+/* =========================================================
+   About / CMS — Production responsive contract
+   Scoped to .cms-page; preserves existing CMS HTML/JS.
+   ========================================================= */
+.cms-page{min-width:0}
+.cms-page .cms-hero,
+.cms-page .cms-page-visual,
+.cms-page .cms-about-card{min-width:0}
+.cms-page .cms-hero{overflow:hidden}
+.cms-page .cms-hero h1{overflow-wrap:anywhere}
+.cms-page .cms-hero-lead{max-width:70ch;line-height:2}
+.cms-page .cms-page-visual{position:relative;overflow:hidden;border:1px solid var(--ui-line);border-radius:24px;background:var(--ui-surface-2);box-shadow:var(--ui-shadow-soft);margin-bottom:18px}
+.cms-page .cms-page-visual img{display:block;width:100%;aspect-ratio:16/7;max-height:430px;object-fit:cover}
+.cms-page .cms-page-visual>span{position:absolute;inset-inline-start:18px;bottom:18px;display:grid;gap:2px;max-width:min(70%,420px);padding:11px 14px;border:1px solid color-mix(in srgb,var(--ui-gold) 25%,var(--ui-line));border-radius:13px;background:color-mix(in srgb,var(--ui-surface) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.cms-page .cms-page-visual>span small{color:var(--ui-gold-strong);font-size:9px;letter-spacing:.14em}
+.cms-page .cms-page-visual>span strong{color:var(--ui-text);font-size:13px;line-height:1.6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cms-page .cms-page-visual-empty{min-height:210px;display:grid;place-items:center;align-content:center;gap:5px}
+.cms-page .cms-page-visual-empty span{position:static;display:block;padding:0;border:0;background:none;color:var(--ui-gold-strong);font-size:11px;letter-spacing:.16em}
+.cms-page .cms-page-visual-empty strong{color:var(--ui-text);font-size:20px}
+.cms-page .cms-about-card{width:100%;box-sizing:border-box}
+.cms-page .cms-about-card .cms-body{font-size:clamp(15px,1.25vw,17px);text-align:justify;text-justify:inter-word;line-height:2.25}
+.cms-page .cms-about-card .cms-lead{max-width:75ch;margin-inline:0}
+.cms-page .cms-about-actions .btn{min-height:46px}
+@media (min-width:768px){
+  .cms-page .cms-about-card{padding:clamp(28px,4vw,42px)}
+}
+@media (max-width:767px){
+  .cms-page{padding-top:18px;padding-bottom:48px}
+  .cms-page .cms-hero{margin-bottom:16px}
+  .cms-page .cms-hero-compact{min-height:96px;padding:18px 16px}
+  .cms-page .cms-hero-compact .cms-hero-mark{width:54px;height:54px;flex-basis:54px;border-radius:16px}
+  .cms-page .cms-page-visual{margin-bottom:14px;border-radius:19px}
+  .cms-page .cms-page-visual img{aspect-ratio:16/9;max-height:280px}
+  .cms-page .cms-page-visual>span{inset-inline-start:10px;bottom:10px;max-width:78%;padding:8px 10px}
+  .cms-page .cms-page-visual>span strong{font-size:11px}
+  .cms-page .cms-about-card{padding:18px 16px;border-radius:19px}
+  .cms-page .cms-about-card h2{font-size:clamp(21px,6vw,27px)}
+  .cms-page .cms-about-card .cms-body{font-size:14px;line-height:2.15;text-align:right}
+  .cms-page .cms-about-actions{display:grid;grid-template-columns:1fr;gap:9px}
+  .cms-page .cms-about-actions .btn{width:100%;min-height:48px}
+}
+@media (max-width:380px){
+  .cms-page .cms-page-visual img{aspect-ratio:4/3}
+  .cms-page .cms-about-card{padding:15px 13px}
+  .cms-page .cms-about-card .cms-body{font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){
+  .cms-page .cms-page-visual img{transition:none}
+}
