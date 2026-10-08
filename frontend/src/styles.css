@@ -5395,3 +5395,23 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
 html,body,#app,.admin-layout,.admin-layout *,button,input,select,textarea{font-family:"Vazirmatn"!important}
 html{font-family:"Vazirmatn"!important}
 body{font-family:"Vazirmatn"!important}
+
+/* Production mobile navigation: standard storefront drawer */
+@media (max-width:900px){
+  body.mobile-nav-open{overflow:hidden;touch-action:none}
+  body.mobile-nav-open::before{content:"";position:fixed;inset:0;z-index:998;background:color-mix(in srgb,var(--ui-bg) 62%,transparent);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+  .top .nav{position:relative;z-index:1000}
+  .top .links#main-menu{position:fixed;z-index:1002;top:calc(var(--header-height-mobile,64px) + env(safe-area-inset-top,0px));right:0;left:auto;width:min(88vw,360px);max-width:100%;height:calc(100dvh - var(--header-height-mobile,64px) - env(safe-area-inset-top,0px));margin:0;padding:14px 12px max(24px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:stretch;gap:4px;overflow-y:auto;overscroll-behavior:contain;background:var(--ui-surface);border:1px solid var(--ui-line);border-inline-start:0;border-top:0;border-radius:0 0 0 22px;box-shadow:-18px 24px 55px color-mix(in srgb,var(--ui-bg) 55%,transparent);transform:translateX(105%);visibility:hidden;opacity:0;pointer-events:none;transition:transform .24s var(--ui-ease),opacity .18s ease,visibility .24s ease}
+  .top .links#main-menu.is-open{transform:translateX(0);visibility:visible;opacity:1;pointer-events:auto}
+  .top .links#main-menu a{display:flex;align-items:center;min-height:50px;padding:10px 14px;border-radius:12px;color:var(--ui-text);font-size:15px;font-weight:650;text-align:right;border:1px solid transparent}
+  .top .links#main-menu a:hover,.top .links#main-menu a:focus-visible{background:var(--ui-hover);border-color:var(--ui-line);color:var(--ui-text);transform:none}
+  .top .links#main-menu .admin-link{color:var(--ui-gold-strong)!important}
+  .top .mobile-menu-toggle{display:flex;position:relative;z-index:1003}
+}
+@media (max-width:430px){
+  .top .links#main-menu{width:min(90vw,340px);padding-inline:10px}
+  .top .links#main-menu a{min-height:48px;font-size:14px}
+}
+@media (prefers-reduced-motion:reduce){
+  .top .links#main-menu{transition:none}
+}
