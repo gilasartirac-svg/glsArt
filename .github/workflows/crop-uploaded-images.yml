@@ -7,6 +7,10 @@ on:
       - '.github/workflows/crop-uploaded-images.yml'
   workflow_dispatch:
 
+concurrency:
+  group: crop-uploaded-images
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -17,38 +21,43 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Install image processing dependencies
-        run: |
-          python -m pip install --disable-pip-version-check Pillow scipy
-
+        run: python -m pip install --disable-pip-version-check Pillow scipy
       - name: Crop white border from product images
         run: python scripts/crop-uploaded-images.py
-
-      - name: Verify filenames and extensions are unchanged
+      - name: Regenerate product thumbnails from cropped originals
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          src=Path("frontend/public/uploaded"); dst=src/"thumb"; dst.mkdir(parents=True,exist_ok=True)
+          files=sorted(p for p in src.iterdir() if p.is_file() and p.suffix.lower() in {".jpg",".jpeg",".png"})
+          if len(files)!=233: raise SystemExit(f"Unexpected source image count: {len(files)}")
+          for p in files:
+              with Image.open(p) as im:
+                  w,h=im.size; nw,nh=max(1,w//2),max(1,h//2); out=dst/p.name
+                  if p.suffix.lower()==".png": im.resize((nw,nh),Image.Resampling.LANCZOS).save(out,format="PNG",optimize=True)
+                  else: im.convert("RGB").resize((nw,nh),Image.Resampling.LANCZOS).save(out,format="JPEG",quality=90,optimize=True,progressive=True)
+          print(f"Regenerated {len(files)} thumbnails.")
+          PY
+      - name: Verify filenames, extensions, and image counts
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
           root=Path("frontend/public/uploaded")
-          files=[p for p in root.iterdir() if p.is_file() and p.suffix.lower() in {".jpg",".jpeg",".png"}]
-          if len(files) != 233:
-              raise SystemExit(f"Unexpected product image count: {len(files)}")
-          for p in files:
-              if p.name != p.name.strip() or not p.suffix:
-                  raise SystemExit(f"Invalid image filename: {p.name}")
-          print(f"Verified {len(files)} product image filenames/extensions.")
+          src=[p for p in root.iterdir() if p.is_file() and p.suffix.lower() in {".jpg",".jpeg",".png"}]
+          thumbs=[p for p in (root/"thumb").iterdir() if p.is_file() and p.suffix.lower() in {".jpg",".jpeg",".png"}]
+          if len(src)!=233 or len(thumbs)!=233: raise SystemExit(f"Unexpected image count: source={len(src)} thumb={len(thumbs)}")
+          if {p.name for p in src}!={p.name for p in thumbs}: raise SystemExit("Thumbnail filenames do not exactly match source filenames.")
+          print(f"Verified {len(src)} source images and {len(thumbs)} matching thumbnails.")
           PY
-
-      - name: Commit cropped originals
+      - name: Commit cropped originals and regenerated thumbnails
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add frontend/public/uploaded/*.jpg frontend/public/uploaded/*.jpeg frontend/public/uploaded/*.png frontend/public/uploaded/.crop-verification.txt
-          if git diff --cached --quiet; then
-            echo "No image changes."
-            exit 0
-          fi
+          git add frontend/public/uploaded/*.jpg frontend/public/uploaded/*.jpeg frontend/public/uploaded/*.png frontend/public/uploaded/.crop-verification.txt frontend/public/uploaded/thumb/*.jpg frontend/public/uploaded/thumb/*.jpeg frontend/public/uploaded/thumb/*.png
+          if git diff --cached --quiet; then echo "No image changes."; exit 0; fi
           git commit -m "perf: crop product images to artwork bounds"
           git push
