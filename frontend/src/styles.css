@@ -5565,3 +5565,37 @@ input[type="checkbox"],input[type="radio"],input[type="range"]{
 html,body,#app,.admin-layout,.admin-layout *,button,input,select,textarea{font-family:"Vazirmatn"!important}
 html{font-family:"Vazirmatn"!important}
 body{font-family:"Vazirmatn"!important}
+
+/* Production mobile home-logo hit target */
+.brand{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  min-height:44px;
+  cursor:pointer;
+  text-decoration:none;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+.brand-logo{
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
+  display:block;
+  object-fit:contain;
+  pointer-events:none;
+  user-select:none;
+}
+.brand-copy{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-width:0;
+  pointer-events:none;
+}
+.brand-copy small{display:block}
+@media(max-width:520px){
+  .brand{min-height:44px;gap:7px;padding-inline-start:8px}
+  .brand-logo{width:32px;height:32px;flex-basis:32px}
+  .brand-copy{font-size:18px}
+}
