@@ -6,6 +6,9 @@ on:
     paths:
       - "scripts/crop-uploaded-artwork.py"
       - ".github/workflows/crop-uploaded-artwork.yml"
+  workflow_run:
+    workflows: ["Production Quality Gate"]
+    types: [completed]
 
 permissions:
   contents: write
