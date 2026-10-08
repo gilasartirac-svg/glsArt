@@ -36,6 +36,6 @@ export default function Sidebar(){
   <nav class="admin-sidebar" id="admin-mobile-drawer" dir="rtl">
     <div class="admin-brand"><span class="admin-brand-mark">G</span><span class="admin-brand-copy"><strong>گیلاس آرت</strong><small>GILAS ART / ADMIN</small></span></div><div class="admin-nav-label">مدیریت فروشگاه</div>
     <div class="admin-nav-group">${items.map(([id,label,icon])=>`<a href="/admin/${id}" data-admin-route="${id}" class="${current===id?'active':''}" ${current===id?'aria-current="page"':''}><span class="admin-nav-icon" aria-hidden="true">${icon}</span><span>${label}</span></a>`).join('')}</div>
-    <a class="admin-back" href="/"><span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span>بازگشت به فروشگاه</span></a>
+    <a class="admin-back" href="/" data-admin-home><span class="admin-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span>بازگشت به فروشگاه</span></a>
   </nav>`;
 }
