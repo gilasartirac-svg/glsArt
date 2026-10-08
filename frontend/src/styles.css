@@ -948,6 +948,43 @@ main,section,.container,.products,.product-grid,.cards{min-width:0}
   .top .links a{padding-inline:8px;font-size:13px}
   .top .header-actions{gap:2px}
 }
+/* Mobile storefront header — premium, compact, thumb-friendly */
+@media(max-width:1023px){
+  .top .nav{gap:8px}
+  .top .brand{flex:1 1 auto;min-width:0;justify-content:flex-start;overflow:hidden;text-overflow:ellipsis}
+  .top .header-actions{flex:0 0 auto}
+  .top .mobile-menu-toggle{order:11;margin-inline-start:2px}
+  .top .links#main-menu{
+    position:fixed;top:calc(var(--header-height-mobile,64px) + env(safe-area-inset-top,0px));
+    right:0;left:auto;width:min(88vw,370px);height:calc(100dvh - var(--header-height-mobile,64px) - env(safe-area-inset-top,0px));
+    padding:14px 12px max(26px,env(safe-area-inset-bottom));border:1px solid var(--ui-line);border-inline-end:0;border-top:0;border-radius:0 0 0 24px;
+    background:color-mix(in srgb,var(--ui-surface) 98%,transparent);box-shadow:-20px 22px 55px color-mix(in srgb,var(--ui-bg) 48%,transparent);
+    transform:translateX(105%);visibility:hidden;opacity:0;pointer-events:none;overflow-y:auto;overscroll-behavior:contain;transition:transform .24s var(--ui-ease),opacity .18s ease,visibility .24s ease;
+  }
+  .top .links#main-menu.is-open{transform:translateX(0);visibility:visible;opacity:1;pointer-events:auto}
+  .top .links#main-menu a{position:relative;justify-content:flex-start;gap:11px;min-height:52px;margin:1px 0;padding:10px 13px;border:1px solid transparent;border-radius:13px;font-size:15px;font-weight:650;text-align:right;direction:rtl}
+  .top .links#main-menu a::before{content:attr(data-menu-icon);display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border-radius:9px;background:color-mix(in srgb,var(--ui-gold) 11%,var(--ui-surface-2));color:var(--ui-gold-strong);font-size:16px;line-height:1}
+  .top .links#main-menu a[data-menu-icon="shop"]::before{content:"🛍️"}
+  .top .links#main-menu a[data-menu-icon="about"]::before{content:"🎨"}
+  .top .links#main-menu a[data-menu-icon="contact"]::before{content:"☎️"}
+  .top .links#main-menu a[data-menu-icon="news"]::before{content:"📰"}
+  .top .links#main-menu a[data-menu-icon="articles"]::before{content:"📖"}
+  .top .links#main-menu a[data-menu-icon="rewards"]::before{content:"🏆"}
+  .top .links#main-menu a.active,.top .links#main-menu a:hover,.top .links#main-menu a:focus-visible{background:color-mix(in srgb,var(--ui-gold) 8%,var(--ui-surface));border-color:color-mix(in srgb,var(--ui-gold) 22%,var(--ui-line));color:var(--ui-text);transform:none}
+  .top .links#main-menu .admin-link{margin-top:8px;border-top:1px solid var(--ui-line);border-radius:0 0 13px 13px;padding-top:16px;color:var(--ui-gold-strong)!important}
+}
+@media(max-width:520px){
+  .top .links#main-menu{width:min(91vw,370px)}
+  .top .links#main-menu a{min-height:50px;font-size:14px}
+  .top .brand{font-size:clamp(21px,6.3vw,27px)}
+}
+@media(max-width:370px){
+  .top .nav{padding-inline:6px}
+  .top .links#main-menu{width:calc(100vw - 16px);right:0}
+  .top .links#main-menu a{min-height:48px;padding-inline:10px}
+}
+@media(prefers-reduced-motion:reduce){.top .links#main-menu{transition:none}}
+
 @media(max-width:1023px){
   .top{position:fixed;top:0;left:0;right:0;width:100%;min-height:var(--header-height-tablet)}
   .top .nav{width:100%;height:var(--header-height-tablet);min-height:var(--header-height-tablet);padding-inline:12px;gap:6px}
