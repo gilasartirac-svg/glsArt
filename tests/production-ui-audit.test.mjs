@@ -74,6 +74,14 @@ test('admin stylesheet lifecycle is isolated from public route rendering',()=>{
  assert.ok(js.includes('stale async admin render re-injects admin CSS into the public storefront')===false);
 });
  
+test('public home route cleans admin stylesheet state before rendering',()=>{
+ const js=read('frontend/src/app.js');
+ const cleanupIndex=js.indexOf("if(p[0]!=='admin')cleanupAdminStyles();");
+ const homeIndex=js.indexOf('if(!p[0])return home();');
+ assert.ok(cleanupIndex>=0,'public-route admin cleanup is missing');
+ assert.ok(homeIndex>cleanupIndex,'Home route can return before admin cleanup');
+});
+ 
 test('storefront header uses an isolated component namespace',()=>{
  const js=read('frontend/src/app.js');
  const css=read('frontend/src/styles.css');
