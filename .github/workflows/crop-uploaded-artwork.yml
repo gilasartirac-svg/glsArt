@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   crop:
-    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_sha == '4c735d385d5e80e3f389e8d9bbe5b951b00f51c8')
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_sha == '84e21ad86fc29687e02af6b4a03b0025da0df7a3')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
