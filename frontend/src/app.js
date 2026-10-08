@@ -239,7 +239,7 @@ async function api(path,opt={}){
    const endpoint=endpoints[i];
    const requestHeaders={...headers};
    const fetchOptions={credentials:'include',cache:'no-store',headers:requestHeaders,...opt};
-   if(method==='GET'&&routeAbortController?.signal&&!opt.signal)fetchOptions.signal=routeAbortController.signal;
+   if(method==='GET'&&routeAbortController?.signal&&!opt.signal&&path!=='/api/me')fetchOptions.signal=routeAbortController.signal;
    try{
     const r=await fetch(endpoint+path,fetchOptions);
     const raw=await r.text();
