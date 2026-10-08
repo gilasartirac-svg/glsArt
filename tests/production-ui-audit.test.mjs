@@ -37,3 +37,14 @@ test('public/admin theme architecture remains token-based at key shared controls
  assert.ok(css.includes('.admin-layout .admin-nav-group a'));
  assert.ok(css.includes('.top .theme-toggle'));
 });
+
+
+test('mobile storefront header and menu provide contextual icons without changing desktop nav semantics',()=>{
+ const js=read('frontend/src/app.js');
+ for(const key of ['shop','about','contact','news','articles','rewards']) assert.ok(js.includes('data-menu-icon="'+key+'"'),key+' menu icon marker missing');
+ const css=read('frontend/src/styles.css');
+ assert.ok(css.includes('.top .links#main-menu a[data-menu-icon="shop"]::before'));
+ assert.ok(css.includes('.top .links#main-menu.is-open'));
+ assert.ok(css.includes('overscroll-behavior:contain'));
+ assert.ok(css.includes('env(safe-area-inset-bottom'));
+});
