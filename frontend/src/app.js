@@ -44,7 +44,7 @@ function localePath(path){
   let clean=p.startsWith('/')?p:'/'+p;
   if(base&&clean.startsWith(base))clean=clean.slice(base.length)||'/';
   const parts=clean.split('/').filter(Boolean);if(parts[0]==='fa')parts.shift();
-  return base+(parts.length?'/'+parts.join('/'):'');
+  return base+(parts.length?'/'+parts.join('/'):'')||'/';
 }
 async function bootstrapLocale(){await loadLocale();setLocale();}
 function mountLanguageSwitcher(){/* Removed: storefront is Persian-only. */}
