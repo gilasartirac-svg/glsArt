@@ -44,7 +44,7 @@ test('legacy generic responsive block is removed from the shared stylesheet',()=
   assert.doesNotMatch(css,/\\@media\(max-width:520px\)\{\.grid\{grid-template-columns:1fr\}/);
 });
 test('canonical responsive contract owns the base viewport bands',()=>{
-  const css=read('frontend/src/responsive-production.css');
+  const css=read('frontend/src/styles.css');
   for(const token of ['@media (min-width:1024px)','@media (min-width:768px) and (max-width:1023px)','@media (max-width:767px)','@media (max-width:359px)']){
     assert.match(css,new RegExp(token.replace(/[.*+?^$()|[\]\\]/g,'\\$&')));
   }
