@@ -5943,3 +5943,48 @@ body{font-family:"Vazirmatn"!important}
   .top .brand,.top .links a,.top .header-actions>a,.top .header-actions>button,.top .mobile-menu-toggle span{transition:none!important}
   .top .links.is-open,.top .links.is-open a{animation:none!important}
 }
+
+/* Mobile Header final fit — eliminate top gap and keep safe-area inside the header. */
+@media(max-width:600px){
+  .top{
+    top:0!important;
+    margin-top:0!important;
+    padding-top:0!important;
+    min-height:64px;
+    overflow:visible;
+  }
+  .top .nav{
+    width:100%;
+    min-height:64px;
+    height:64px;
+    padding-inline:7px;
+    margin:0 auto;
+    gap:5px;
+  }
+  .top .brand{
+    margin-inline-start:0;
+    padding-inline:4px;
+  }
+}
+@media(max-width:520px){
+  .top{
+    min-height:64px;
+    padding-top:0!important;
+  }
+  .top .nav{
+    width:100%;
+    min-height:64px;
+    height:64px;
+    padding-inline:7px;
+  }
+}
+@media(max-width:370px){
+  .top .nav{
+    min-height:60px;
+    height:60px;
+    padding-inline:5px;
+  }
+  .top{
+    min-height:60px;
+  }
+}
