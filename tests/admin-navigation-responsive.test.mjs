@@ -4,8 +4,8 @@ import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(process.cwd()+'/'+p,'utf8');
 test('admin router resolves hash routes',()=>{
  const s=read('frontend/src/admin/router.js');
- assert.match(s,/location\\.hash\\.startsWith\\('#\\/admin\\/'\\)/);
- assert.match(s,/const page=hashPage\\|\\|pathPage\\|\\|'dashboard'/);
+ assert.ok(s.includes("location.hash.startsWith('#/admin/')"));
+ assert.ok(s.includes("const page=hashPage||pathPage||'dashboard'"));
 });
 test('every sidebar route has an admin router loader',()=>{
  const sidebar=read('frontend/src/admin/components/Sidebar.js');
