@@ -131,3 +131,12 @@ test('shop production grid is deterministic across desktop tablet mobile and nar
  assert.ok(css.includes('margin-top:auto'));
  assert.ok(css.includes('.shop-page .shop-control-bar{'));
 });
+
+
+test('product cards display prices in تومان without changing stored rial fields',()=>{
+ const js=read('frontend/src/app.js');
+ assert.ok(js.includes('const shownIrt=hasFlashPrice?Number(p.flash_sale_price_irt):Number(p.price_irt||0);'));
+ assert.ok(js.includes('Math.round(shownIrt/10)'));
+ assert.ok(js.includes("t('product.toman')"));
+ assert.ok(!js.includes("t('product.rial')</small></strong>"));
+});
