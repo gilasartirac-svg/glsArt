@@ -62,3 +62,24 @@ test('final public responsive contract covers desktop tablet mobile and narrow-p
  assert.ok(css.includes('prefers-reduced-motion:reduce'));
  assert.ok(css.includes('focus-visible'));
 });
+
+
+test('storefront header uses an isolated component namespace',()=>{
+ const js=read('frontend/src/app.js');
+ const css=read('frontend/src/styles.css');
+ for(const cls of [
+  'ga-header-shell','ga-header-container','ga-header-brand','ga-header-brand-name',
+  'ga-header-primary-nav','ga-header-nav-item','ga-header-actions',
+  'ga-header-theme-toggle','ga-header-cart','ga-header-cart-link','ga-header-cart-count',
+  'ga-header-rewards','ga-header-account','ga-header-menu-toggle'
+ ]) assert.ok(js.includes(cls)||css.includes('.'+cls),cls+' missing');
+ assert.ok(js.includes('class="ga-header-shell"'));
+ assert.ok(js.includes('class="ga-header-primary-nav"'));
+ assert.ok(css.includes('.ga-header-shell{'));
+ assert.ok(css.includes('.ga-header-primary-nav{'));
+ assert.ok(css.includes('.ga-header-menu-toggle{'));
+ assert.ok(!js.includes('class="top"'));
+ assert.ok(!js.includes('class="wrap nav"'));
+ assert.ok(!js.includes('class="brand"'));
+ assert.ok(!js.includes('class="links"'));
+});
