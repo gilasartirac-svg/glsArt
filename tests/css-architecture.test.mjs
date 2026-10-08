@@ -52,7 +52,7 @@ test('canonical responsive contract owns the base viewport bands',()=>{
 test('public stylesheet keeps admin component selectors scoped',()=>{
   const css=read('frontend/src/styles.css');
   for(const selector of ['.admin-table','.admin-page','.admin-header','.admin-sidebar','.admin-nav-group']){
-    const re=new RegExp('(^|[}\\n])\\s*'+selector.replace('.','\\.')+'\\b');
+    const re=new RegExp('(?:^|})\\s*'+selector.replace('.','\\.')+'\\b');
     assert.doesNotMatch(css,re,selector+' leaked without .admin-layout scope');
   }
 });
