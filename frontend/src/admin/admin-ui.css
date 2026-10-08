@@ -270,7 +270,7 @@
 .admin-layout .attribute-choice-card{min-width:0}
 .admin-layout .attribute-option-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto auto;gap:8px;align-items:center}
 .admin-layout .orders-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:16px;align-items:start}
-.admin-layout .orders-master,.admin-layout .order-detail{min-width:0}
+
 .admin-layout .orders-table-wrap{overflow:auto;max-width:100%}
 .admin-layout .orders-table{min-width:780px}
 .admin-layout .order-detail-section{min-width:0;overflow-wrap:anywhere}
@@ -317,7 +317,7 @@
 .admin-layout #reviews-admin-root{min-width:0}
 .admin-layout .reviews-manager{min-width:0}
 .admin-layout .reviews-toolbar{display:grid;grid-template-columns:minmax(220px,1fr) minmax(170px,220px) auto;gap:10px;align-items:end}
-.admin-layout .review-search{min-width:0}
+
 .admin-layout #reviews-grid{width:100%;overflow-x:auto;max-width:100%;overscroll-behavior-inline:contain}
 .admin-layout #reviews-table{min-width:980px}
 .admin-layout .review-body{max-width:420px;overflow-wrap:anywhere;line-height:1.8}
@@ -351,11 +351,11 @@
 .admin-layout .support-admin-detail{min-width:0}
 .admin-layout .support-admin-detail .sectionhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .admin-layout .faq-manager-body{min-width:0;overflow:auto}
-.admin-layout .faq-manager-list{display:grid;gap:10px;min-width:0}
+
 .admin-layout .faq-manager-item{min-width:0}
 .admin-layout .faq-manager-item-head,.admin-layout .faq-manager-item-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .admin-layout .faq-manager-form{min-width:0}
-.admin-layout .faq-form-actions{display:flex;gap:8px;flex-wrap:wrap}
+
 @media(max-width:1100px){
  .admin-layout .reviews-toolbar{grid-template-columns:minmax(0,1fr) minmax(160px,220px)}
  .admin-layout .reviews-toolbar>*:last-child{grid-column:1/-1;justify-self:start}
