@@ -259,16 +259,12 @@ textarea{min-height:110px}
   }
 }
 
-@media (max-width:380px){
+/* Ultra-narrow phones — preserve the requested <360px single-column contract. */
+@media (max-width:359px){
   .shop-page .product-stream{
     grid-template-columns:1fr;
     gap:14px;
   }
-}
-
-/* Ultra-narrow phones — preserve the requested <360px single-column contract. */
-@media (max-width:359px){
-  .shop-page .product-stream{grid-template-columns:1fr;}
 }
 
 /* Public storefront final responsive contract */
