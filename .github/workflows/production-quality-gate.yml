@@ -195,11 +195,17 @@ jobs:
             rm -f "$body"
           done
           curl -fsS "$API/api/health" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{const d=JSON.parse(s);if(d.ok!==true||d.db!==true)process.exit(1)})"
+          echo "PASS: health"
           curl -fsS "$API/api/products?limit=1" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{if(!Array.isArray(JSON.parse(s).items))process.exit(1)})"
+          echo "PASS: products"
           curl -fsS "$API/api/products/Gilas411" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{const d=JSON.parse(s);const a=d.attributes;if(!d.product||!Array.isArray(a)||a.length!==2)process.exit(1);const size=a.find(x=>x.name==='ابعاد'),frame=a.find(x=>x.name==='رنگ قاب');if(!size||!frame||size.options.length!==2||frame.options.length!==3)process.exit(1);if(!size.options.some(x=>x.name==='30x30'&&Number(x.is_default)===1&&Number(x.price_delta_irt)===0))process.exit(1);if(!size.options.some(x=>x.name==='70x70'&&Number(x.price_delta_irt)===80000000))process.exit(1);if(!frame.options.some(x=>x.name==='طلایی گلدار'&&Number(x.price_delta_irt)===8500000))process.exit(1)})"
+          echo "PASS: Gilas411 options"
           curl -fsS "$API/api/products/Gilas020" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{const d=JSON.parse(s);const a=d.attributes;if(!d.product||!Array.isArray(a)||a.length!==2)process.exit(1);const size=a.find(x=>x.name==='ابعاد'),frame=a.find(x=>x.name==='رنگ قاب');if(!size||!frame||size.options.length!==2||frame.options.length!==4)process.exit(1);if(!size.options.some(x=>x.name==='80x40'&&Number(x.is_default)===1&&Number(x.price_delta_irt)===0))process.exit(1);if(!size.options.some(x=>x.name==='110x60'&&Number(x.price_delta_irt)===85000000))process.exit(1);if(!frame.options.some(x=>x.name==='قهوه ای تنه درختی'&&Number(x.price_delta_irt)===6500000))process.exit(1)})"
+          echo "PASS: Gilas020 options"
           curl -fsS "$API/api/categories" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{if(!Array.isArray(JSON.parse(s).items))process.exit(1)})"
+          echo "PASS: categories"
           curl -fsS "$API/api/home" | node -e "let s='';process.stdin.on('data',x=>s+=x).on('end',()=>{const d=JSON.parse(s);if(!Array.isArray(d?.products?.items)||!Array.isArray(d?.categories?.items)||!Array.isArray(d?.flash?.items)||!d?.settings?.settings)process.exit(1);if(d.products.items.length<1||d.categories.items.length<1)process.exit(1);if(!d.products.items.some(x=>String(x.name||'').trim()&&String(x.image||'').trim()))process.exit(1)})"
+          echo "PASS: home"
           curl -fsS "$API/api/storefront-snapshot" -o /tmp/storefront-snapshot.json
           node - <<'NODE'
           const fs=require('fs');
