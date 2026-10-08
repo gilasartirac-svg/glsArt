@@ -3079,7 +3079,6 @@ body{background:radial-gradient(900px 420px at 85% -10%,color-mix(in srgb,var(--
 .shop-page .shop-search-input-wrap input[type="search"]{
   appearance:none;
   -webkit-appearance:none;
-}
   background:transparent;
   color:var(--ui-text);
   font:inherit;
