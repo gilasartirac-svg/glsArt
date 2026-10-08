@@ -1018,22 +1018,29 @@ main,section,.container,.products,.product-grid,.cards{min-width:0}
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  min-width:20px;
-  height:22px;
-  padding:0 2px;
-  margin:0;
-  border:0;
-  border-radius:0;
-  background:transparent;
-  color:color-mix(in srgb,var(--ui-gold-strong) 68%,var(--ui-muted));
-  font:850 13px/1 "Vazirmatn",Tahoma,Arial,sans-serif;
-  opacity:.82;
-  box-shadow:none;
+  min-width:26px;
+  width:26px;
+  height:26px;
+  padding:0;
+  margin-inline-start:2px;
+  border:1px solid color-mix(in srgb,var(--ui-gold-strong) 72%,var(--ui-line));
+  border-radius:50%;
+  background:color-mix(in srgb,var(--ui-gold) 10%,var(--ui-surface));
+  color:var(--ui-gold-strong);
+  font:850 12px/1 "Vazirmatn",Tahoma,Arial,sans-serif;
+  opacity:1;
+  box-shadow:0 2px 8px rgba(0,0,0,.10),inset 0 0 0 1px color-mix(in srgb,var(--ui-gold) 8%,transparent);
   white-space:nowrap;
+  flex:0 0 26px;
 }
-.top .cart-control .cart-count-badge::before{content:"·";margin-inline-end:2px;opacity:.7}
+.top .cart-control .cart-count-badge::before{content:none}
 .top .cart-control .cart-count-badge[hidden]{display:none}
-.top .cart-control .cart-link:hover + .cart-count-badge{color:var(--ui-gold-strong);opacity:.95}
+.top .cart-control .cart-link:hover + .cart-count-badge{
+  border-color:var(--ui-gold-strong);
+  background:color-mix(in srgb,var(--ui-gold) 17%,var(--ui-surface));
+  color:var(--ui-gold-strong);
+  box-shadow:0 3px 10px rgba(0,0,0,.14),inset 0 0 0 1px color-mix(in srgb,var(--ui-gold) 12%,transparent);
+}
 .top .mobile-menu-toggle{
   display:none;
   align-items:center;
