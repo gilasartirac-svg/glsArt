@@ -145,6 +145,19 @@ textarea{min-height:110px}
 }
 
 
+
+/* Final production UI contract — public storefront */
+.shop-page .product-stream{display:grid;}
+.shop-page .shop-control-panel{max-height:min(62vh,520px);}
+.shop-page .filter-chip{min-height:32px;}
+:where(.shop-page .shop-control-trigger,.shop-page .filter-chip,.shop-page .product-card a):focus-visible{
+  outline:2px solid var(--ui-focus,var(--ui-gold));
+  outline-offset:2px;
+}
+.shop-page .shop-control-panel{
+  padding-bottom:env(safe-area-inset-bottom);
+}
+
 /* =========================================================
    Shop Product Grid — deterministic production layout
    Owns Shop content only; Header remains isolated in styles.css.
@@ -271,7 +284,7 @@ textarea{min-height:110px}
   }
 }
 
-@media (max-width:359px){
+@media (max-width:380px){
   .shop-page .product-stream{
     grid-template-columns:1fr !important;
     gap:14px;
