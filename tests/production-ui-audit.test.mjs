@@ -48,3 +48,17 @@ test('mobile storefront header and menu provide contextual icons without changin
  assert.ok(css.includes('overscroll-behavior:contain'));
  assert.ok(css.includes('env(safe-area-inset-bottom'));
 });
+
+
+test('final public responsive contract covers desktop tablet mobile and narrow-phone storefront states',()=>{
+ const css=read('frontend/src/responsive-production.css');
+ assert.ok(css.includes('Final production UI contract — public storefront'));
+ assert.ok(css.includes('@media (min-width:1024px)'));
+ assert.ok(css.includes('@media (min-width:768px) and (max-width:1023px)'));
+ assert.ok(css.includes('@media (max-width:767px)'));
+ assert.ok(css.includes('@media (max-width:380px)'));
+ assert.ok(css.includes('.shop-page .product-stream'));
+ assert.ok(css.includes('env(safe-area-inset-bottom'));
+ assert.ok(css.includes('prefers-reduced-motion:reduce'));
+ assert.ok(css.includes('focus-visible'));
+});
