@@ -1277,7 +1277,7 @@ async function router(){
   // regression cannot recursively break the error handler itself.
   const title=typeof t==='function'?(t('shop.error')||'خطا در بارگذاری صفحه'):'خطا در بارگذاری صفحه';
   const homeLabel=typeof t==='function'?(t('home.viewWorks')||'مشاهده فروشگاه'):'مشاهده فروشگاه';
-  app.innerHTML='<main class="wrap page" dir="rtl"><section class="panel" style="text-align:center;padding:48px 20px"><h1>'+escapeHtml(title)+'</h1><p class="muted">صفحه در حال حاضر قابل نمایش نیست. لطفاً دوباره تلاش کنید.</p><div class="cart-checkout-bar" style="justify-content:center"><button class="btn primary" id="route-retry" type="button">تلاش دوباره</button><a class="btn ghost" href="'+routeUrl('/')+'">'+escapeHtml(homeLabel)+'</a></div></section></main>';
+  app.innerHTML='<main class="wrap page" dir="rtl"><section class="panel route-error-state"><h1>'+escapeHtml(title)+'</h1><p class="muted">صفحه در حال حاضر قابل نمایش نیست. لطفاً دوباره تلاش کنید.</p><div class="cart-checkout-bar"><button class="btn primary" id="route-retry" type="button">تلاش دوباره</button><a class="btn ghost" href="'+routeUrl('/')+'">'+escapeHtml(homeLabel)+'</a></div></section></main>';
   document.getElementById('route-retry')?.addEventListener('click',()=>{
     routeInFlightTarget=location.pathname+location.search;
     routeInFlight=router().finally(()=>{routeInFlight=null;routeInFlightTarget=''});
@@ -1332,8 +1332,8 @@ window.addEventListener('popstate',()=>{if(routeInFlight)return;routeInFlightTar
    if(link && !link.closest('.footer-social-link,.footer-trust') && (link.target==='_blank'||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey)){e.preventDefault();e.stopPropagation();}
  },{capture:true});
  document.addEventListener('keydown',e=>{   const k=String(e.key||'').toLowerCase();
-   if((e.ctrlKey||e.metaKey)&&['c','x','u','s','p'].includes(k)){e.preventDefault();e.stopPropagation();}
+   if((e.ctrlKey||e.metaKey)&&['u'].includes(k)){e.preventDefault();e.stopPropagation();}
    if(e.key==='ContextMenu'||(e.shiftKey&&e.key==='F10')){e.preventDefault();e.stopPropagation();}
  },{capture:true});
- window.addEventListener('beforeprint',e=>e.preventDefault?.());
+
 })();
