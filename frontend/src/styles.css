@@ -682,9 +682,10 @@ input,textarea,select,button,[contenteditable="true"]{-webkit-user-select:none;u
     gap:6px;
   }
   .top .brand{
-    font-size:18px;
+    font-size:30px;
     flex:0 1 auto;
     min-width:0;
+    white-space:nowrap;
   }
   .top .brand small{display:none}
   .top .theme-toggle,
