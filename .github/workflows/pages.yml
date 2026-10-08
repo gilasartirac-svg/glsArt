@@ -78,6 +78,12 @@ jobs:
 
       - name: Deploy Pages
         id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      - name: Retry Pages deployment after transient artifact lookup failure
+        if: steps.deployment.outcome == 'failure'
+        id: deployment-retry
         uses: actions/deploy-pages@v4
 
       - name: Runtime browser verification of Shop and Product Detail
