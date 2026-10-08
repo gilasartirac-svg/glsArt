@@ -1034,7 +1034,13 @@ main,section,.container,.products,.product-grid,.cards{min-width:0}
   box-shadow:0 2px 7px rgba(0,0,0,.18);
   white-space:nowrap;
 }
-.top .cart-control .cart-count-badge[hidden]{display:none}
+.top .cart-control .cart-count-badge[hidden]{display:none}.top .cart-control .cart-count-pulse{animation:gaCartCountPulse 280ms var(--ui-ease) both}
+@keyframes gaCartCountPulse{
+  0%{transform:scale(.82);opacity:.55}
+  55%{transform:scale(1.12)}
+  100%{transform:scale(1);opacity:1}
+}
+
 .top .cart-control .cart-link:hover .cart-count-badge{background:var(--ui-gold);box-shadow:0 3px 9px rgba(0,0,0,.22)}
 .top .mobile-menu-toggle{
   display:none;
