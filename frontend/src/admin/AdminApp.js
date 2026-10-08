@@ -1,7 +1,18 @@
 import Sidebar from './components/Sidebar.js';
 import Header from './components/Header.js';
 
+function ensureAdminStyles(){
+ const href=(location.pathname.startsWith('/glsArt/')?'/glsArt':'')+'/admin/admin-ui.css';
+ let link=document.querySelector('link[data-gilasart-admin-css]');
+ if(!link){link=document.createElement('link');link.rel='stylesheet';link.href=href+'?v=20261008-admin-ui';link.dataset.gilasartAdminCss='1';document.head.appendChild(link)}
+}
+
+export function removeAdminStyles(){
+ document.querySelector('link[data-gilasart-admin-css]')?.remove();
+}
+
 export default function AdminApp(){
+ ensureAdminStyles();
  requestAnimationFrame(()=>{
   const b=document.getElementById('admin-mobile-menu'),d=document.getElementById('admin-mobile-drawer'),o=document.getElementById('admin-mobile-backdrop');
   if(b&&d&&o&&!b.dataset.bound){
