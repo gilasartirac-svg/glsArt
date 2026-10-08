@@ -11,21 +11,21 @@
 }
 
 html{
-  font-family:var(--font-family-base)!important;
+  font-family:var(--font-family-base);
   overflow-x:clip;
   -webkit-text-size-adjust:100%;
 }
 body,#app{
-  font-family:var(--font-family-base)!important;
+  font-family:var(--font-family-base);
   min-width:0;
   max-width:100%;
   overflow-x:clip;
 }
 body,button,input,select,textarea,option{
-  font-family:var(--font-family-base)!important;
+  font-family:var(--font-family-base);
 }
 h1,h2,h3,h4,h5,h6,p,a,li,small,strong,label,summary,th,td{
-  font-family:var(--font-family-base)!important;
+  font-family:var(--font-family-base);
 }
 *,*::before,*::after{box-sizing:border-box}
 img,svg,video,canvas{max-width:100%}
@@ -361,7 +361,7 @@ textarea{min-height:110px}
   .shop-page .product-card-heading h3{
     min-height:3.05em;
     margin:0;
-    font-family:"Vazirmatn"!important;
+    font-family:"Vazirmatn";
     font-size:clamp(17px,1.18vw,19px)!important;
     font-weight:700;
     line-height:1.52;
@@ -373,7 +373,7 @@ textarea{min-height:110px}
   }
   .shop-page .product-card-kicker,
   .shop-page .product-sku{
-    font-family:"Vazirmatn"!important;
+    font-family:"Vazirmatn";
   }
   .shop-page .product-sku{
     margin-top:6px;
@@ -385,7 +385,7 @@ textarea{min-height:110px}
   .shop-page .product-card-price{
     margin-top:auto;
     padding-top:13px;
-    font-family:"Vazirmatn"!important;
+    font-family:"Vazirmatn";
     font-size:clamp(17px,1.25vw,19px)!important;
     font-weight:800;
     line-height:1.5;
@@ -399,7 +399,7 @@ textarea{min-height:110px}
     min-height:44px;
     margin-top:13px;
     border-radius:11px;
-    font-family:"Vazirmatn"!important;
+    font-family:"Vazirmatn";
     font-size:13px;
     font-weight:700;
   }
