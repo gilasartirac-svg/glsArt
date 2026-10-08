@@ -52,7 +52,7 @@ test('mobile storefront header and menu provide contextual icons without changin
 
 
 test('final public responsive contract covers desktop tablet mobile and narrow-phone storefront states',()=>{
- const css=read('frontend/src/responsive-production.css');
+ const css=read('frontend/src/styles.css');
  assert.ok(css.includes('Final production UI contract — public storefront'));
  assert.ok(css.includes('@media (min-width:1024px)'));
  assert.ok(css.includes('@media (min-width:768px) and (max-width:1023px)'));
@@ -105,7 +105,7 @@ test('storefront header uses an isolated component namespace',()=>{
 
 test('header responsive ownership stays namespaced',()=>{
  const css=read('frontend/src/styles.css');
- const responsive=read('frontend/src/responsive-production.css');
+ const responsive=read('frontend/src/styles.css');
  assert.ok(css.includes('.ga-header-shell{'));
  assert.ok(css.includes('.ga-header-primary-nav#main-menu'));
  assert.ok(css.includes('@media(max-width:1023px)'));
@@ -117,7 +117,7 @@ test('header responsive ownership stays namespaced',()=>{
 });
 
 test('shop production grid is deterministic across desktop tablet mobile and narrow phone',()=>{
- const css=read('frontend/src/responsive-production.css');
+ const css=read('frontend/src/styles.css');
  assert.ok(css.includes('.shop-page .product-stream{'));
  assert.ok(css.includes('grid-template-columns:repeat(3,minmax(0,1fr))'));
  assert.ok(css.includes('grid-template-columns:repeat(2,minmax(0,1fr))'));
