@@ -6153,3 +6153,94 @@ body{font-family:"Vazirmatn"!important}
     font-size:7px!important;
   }
 }
+
+/* Header v5 — centered wordmark and separate cart quantity control. */
+.top .nav{
+  align-items:center!important;
+}
+.top .brand{
+  align-self:stretch!important;
+  height:auto!important;
+  min-height:0!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  margin-block:0!important;
+}
+.top .brand-wordmark{
+  display:inline-flex!important;
+  align-items:center!important;
+  height:100%!important;
+  line-height:1!important;
+  margin:0!important;
+}
+.top .cart-link{
+  gap:7px!important;
+}
+.top .cart-link .cart-icon-wrap{
+  position:relative!important;
+}
+.top .cart-count-badge{
+  position:static!important;
+  inset:auto!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:24px!important;
+  width:auto!important;
+  height:22px!important;
+  padding:1px 7px!important;
+  margin-inline-start:1px!important;
+  border:1px solid color-mix(in srgb,var(--ui-gold) 48%,var(--ui-line))!important;
+  border-radius:999px!important;
+  background:color-mix(in srgb,var(--ui-gold) 14%,var(--ui-surface))!important;
+  color:var(--ui-gold-strong)!important;
+  font-family:"Vazirmatn",Tahoma,Arial,sans-serif!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+  box-shadow:0 2px 9px rgba(0,0,0,.14)!important;
+  z-index:auto!important;
+}
+.top .cart-link .cart-icon-wrap svg{
+  width:20px!important;
+  height:20px!important;
+}
+@media(max-width:700px){
+  .top .brand{
+    align-self:stretch!important;
+    height:auto!important;
+    min-height:0!important;
+  }
+  .top .brand-wordmark{
+    height:100%!important;
+  }
+  .top .cart-link{
+    width:auto!important;
+    min-width:40px!important;
+    max-width:none!important;
+    padding-inline:7px!important;
+    gap:5px!important;
+  }
+  .top .cart-count-badge{
+    min-width:21px!important;
+    height:20px!important;
+    padding-inline:5px!important;
+    font-size:9px!important;
+  }
+}
+@media(max-width:380px){
+  .top .cart-link{
+    width:auto!important;
+    min-width:36px!important;
+    padding-inline:5px!important;
+  }
+  .top .cart-count-badge{
+    min-width:19px!important;
+    height:18px!important;
+    padding-inline:4px!important;
+    font-size:8px!important;
+  }
+}
