@@ -5988,3 +5988,168 @@ body{font-family:"Vazirmatn"!important}
     min-height:60px;
   }
 }
+
+/* GilasArt — final mobile header + action controls polish.
+   Keep the header flush to the viewport and make all action controls one visual family. */
+@media(max-width:600px){
+  html,body,#app{
+    margin-top:0!important;
+    padding-top:0!important;
+  }
+  body{
+    min-height:100%;
+  }
+  #app{
+    position:relative;
+    inset:auto;
+  }
+  #app>.top:first-child{
+    position:sticky!important;
+    top:0!important;
+    margin-top:0!important;
+    padding-top:0!important;
+    border-top:0!important;
+  }
+  .top .nav{
+    box-sizing:border-box;
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+  }
+  .top .header-actions{
+    margin-inline-start:auto;
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .top .header-actions>a,
+  .top .header-actions>button,
+  .top .mobile-menu-toggle{
+    box-sizing:border-box;
+    width:40px!important;
+    min-width:40px!important;
+    max-width:40px!important;
+    height:40px!important;
+    min-height:40px!important;
+    flex:0 0 40px!important;
+    padding:0!important;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid color-mix(in srgb,var(--ui-gold) 18%,var(--ui-line));
+    border-radius:12px;
+    background:color-mix(in srgb,var(--ui-surface) 92%,var(--ui-gold) 8%);
+    color:var(--ui-text);
+    box-shadow:0 5px 16px rgba(0,0,0,.13),inset 0 1px 0 rgba(255,255,255,.035);
+    transform:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .top .header-actions>a:hover,
+  .top .header-actions>button:hover,
+  .top .mobile-menu-toggle:hover{
+    transform:translateY(-1px);
+    border-color:color-mix(in srgb,var(--ui-gold) 42%,var(--ui-line));
+    background:color-mix(in srgb,var(--ui-gold) 10%,var(--ui-surface));
+    box-shadow:0 8px 20px rgba(0,0,0,.18);
+  }
+  .top .header-actions>a:active,
+  .top .header-actions>button:active,
+  .top .mobile-menu-toggle:active{
+    transform:scale(.96);
+  }
+  .top .header-actions .theme-toggle{
+    border-radius:12px;
+  }
+  .top .header-actions .theme-icon,
+  .top .header-actions .cart-icon-wrap svg,
+  .top .header-actions .profile-link svg,
+  .top .header-actions .iconbtn svg{
+    width:20px;
+    height:20px;
+  }
+  .top .header-actions .cart-link{
+    position:relative;
+    overflow:visible;
+  }
+  .top .cart-icon-wrap{
+    position:relative;
+    width:21px!important;
+    height:21px!important;
+    flex:0 0 21px!important;
+    display:grid;
+    place-items:center;
+  }
+  .top .cart-count-badge{
+    top:-5px!important;
+    inset-inline-end:-6px!important;
+    min-width:17px!important;
+    width:auto!important;
+    height:17px!important;
+    padding:0 4px!important;
+    display:grid!important;
+    place-items:center;
+    border:2px solid var(--ui-surface)!important;
+    border-radius:999px!important;
+    background:var(--ui-gold)!important;
+    color:#17130d!important;
+    font-family:"Vazirmatn",Tahoma,Arial,sans-serif;
+    font-size:8px!important;
+    font-weight:900!important;
+    line-height:1!important;
+    font-variant-numeric:tabular-nums;
+    box-shadow:0 2px 7px rgba(0,0,0,.24);
+    white-space:nowrap;
+    z-index:3;
+  }
+  .top .mobile-menu-toggle{
+    gap:4px;
+    cursor:pointer;
+  }
+  .top .mobile-menu-toggle span{
+    width:18px;
+    height:2px;
+  }
+  .top .brand{
+    flex:1 1 auto;
+    min-width:0;
+    justify-content:flex-start;
+  }
+  .top .brand-wordmark{
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+}
+@media(max-width:380px){
+  .top .nav{
+    min-height:60px!important;
+    height:60px!important;
+    padding-inline:5px!important;
+  }
+  .top .header-actions{gap:3px}
+  .top .header-actions>a,
+  .top .header-actions>button,
+  .top .mobile-menu-toggle{
+    width:36px!important;
+    min-width:36px!important;
+    max-width:36px!important;
+    height:36px!important;
+    min-height:36px!important;
+    flex-basis:36px!important;
+    border-radius:10px;
+  }
+  .top .header-actions .theme-icon,
+  .top .header-actions .cart-icon-wrap svg,
+  .top .header-actions .profile-link svg,
+  .top .header-actions .iconbtn svg{
+    width:18px;
+    height:18px;
+  }
+  .top .cart-count-badge{
+    top:-5px!important;
+    inset-inline-end:-5px!important;
+    min-width:16px!important;
+    height:16px!important;
+    font-size:7px!important;
+  }
+}
