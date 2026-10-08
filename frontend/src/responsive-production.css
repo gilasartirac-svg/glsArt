@@ -139,7 +139,7 @@ textarea{min-height:110px}
    Owns Shop content only; Header remains isolated in styles.css.
    ========================================================= */
 .shop-page .product-stream{
-  display:grid !important;
+  display:grid;
   width:100%;
   min-width:0;
   grid-auto-flow:row;
