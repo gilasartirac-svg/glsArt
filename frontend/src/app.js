@@ -1183,7 +1183,7 @@ function cleanupAdminStyles(){
 function isCurrentAdminRoute(){
  const base=routeBase();
  let cleanPath=location.pathname.startsWith(base)?location.pathname.slice(base.length):location.pathname;
- cleanPath=cleanPath.replace(/^\\/+|\\/+$/g,'');
+ cleanPath=cleanPath.replace(/^\/+|\/+$/g,'');
  const first=cleanPath.split('/').filter(Boolean)[0]||'';
  return first==='admin';
 }
