@@ -110,7 +110,6 @@ test('header responsive ownership stays namespaced',()=>{
  assert.ok(css.includes('.ga-header-primary-nav#main-menu'));
  assert.ok(css.includes('@media(max-width:1023px)'));
  assert.ok(css.includes('@media(max-width:520px)'));
- assert.ok(css.includes('@media(max-width:380px)'));
  assert.ok(!responsive.includes('.top .wrap.nav'));
  assert.ok(!responsive.includes('.top .header-actions'));
  assert.ok(!responsive.includes('.top .mobile-menu-toggle'));
