@@ -5954,7 +5954,7 @@ textarea{min-height:110px}
 }
 .product-art-frame::after{inset:0;border-color:color-mix(in srgb,var(--ui-gold) 9%,transparent);border-radius:10px}
 .product-art-frame img{padding:10px;object-fit:contain!important}
-.product-card-body{padding:16px}
+
 .product-card-heading h3{
   font-size:16px!important;
   line-height:1.65;
