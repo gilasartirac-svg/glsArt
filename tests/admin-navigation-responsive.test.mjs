@@ -39,7 +39,7 @@ test('admin mobile drawer accessibility state is synchronized',()=>{
 });
 
 test('shop responsive contract is scoped and unified',()=>{
- const css=read('frontend/src/responsive-production.css');
+ const css=read('frontend/src/styles.css');
  assert.ok(css.includes('.shop-page .product-stream{display:grid'));
  assert.ok(css.includes('.shop-page .shop-control-panel{max-height:min(62vh,520px)'));
  assert.ok(css.includes('.shop-page .filter-chip'));
