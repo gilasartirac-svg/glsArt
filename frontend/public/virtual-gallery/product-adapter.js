@@ -29,6 +29,7 @@ export function normalizeGalleryProduct(raw) {
     id,
     slug,
     sku,
+    categoryIds: Array.isArray(raw.category_ids) ? raw.category_ids.map(value => asText(value, 100)).filter(Boolean) : (raw.category_id ? [asText(raw.category_id, 100)] : []),
     name: asText(raw.name ?? raw.title, 90) || 'اثر هنری',
     description: asText(raw.description ?? raw.short_description, 800),
     price: {
