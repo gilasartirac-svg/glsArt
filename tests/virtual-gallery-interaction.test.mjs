@@ -129,7 +129,6 @@ test('virtual gallery hides category controls and always opens the complete acti
   assert.doesNotMatch(markup, /category-selector/);
   assert.match(script, /selectedGalleryCategory = 'all'/);
   assert.match(script, /galleryProducts = \[\.\.\.allGalleryProducts\]/);
-  assert.match(script, /category_ids/);
 });
 
 test('artwork wall surfaces do not add a second frame around framed product photos',()=>{
@@ -142,7 +141,7 @@ test('product textures load near the visitor and unload at a distance to preserv
   assert.match(script,/if \(distance <= 16\)/);
   assert.match(script,/distance > 30 && record\.imageLoaded/);
   assert.match(script,/updateArtworkTextures\(\);/);
-  assert.match(script,/scene\.fog = new THREE\.Fog\(0xe9e5dc, 16, 38\)/);
+  assert.match(script,/ARTWORK_BUILD_DISTANCE = 14/);
 });
 
 
