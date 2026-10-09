@@ -318,8 +318,8 @@ function setupScene() {
     const z = 1 - i * 3.1;
     const leftProduct = galleryProducts[i] || null;
     const rightProduct = galleryProducts[i + rows] || null;
-    if (leftProduct || i < 5) addWallArt(-5.91, z, Math.PI / 2, i, leftProduct?.name || fallbackTitles[i % fallbackTitles.length], leftProduct?.image || '', leftProduct || null);
-    if (rightProduct || i < 5) addWallArt(5.91, z, -Math.PI / 2, i + rows, rightProduct?.name || fallbackTitles[(i + rows) % fallbackTitles.length], rightProduct?.image || '', rightProduct || null);
+    if (leftProduct || (galleryProducts.length === 0 && i < 5)) addWallArt(-5.91, z, Math.PI / 2, i, leftProduct?.name || fallbackTitles[i % fallbackTitles.length], leftProduct?.image || '', leftProduct || null);
+    if (rightProduct || (galleryProducts.length === 0 && i < 5)) addWallArt(5.91, z, -Math.PI / 2, i + rows, rightProduct?.name || fallbackTitles[(i + rows) % fallbackTitles.length], rightProduct?.image || '', rightProduct || null);
   }
   for (let i = 0; i < rows; i += 2) { const z = -1.2 - i * 3.8; addPillar(-4.6, z); addPillar(4.6, z - 1.4); }
   const endGlow = new THREE.PointLight(0xb76d32, 8, 11, 1.6); endGlow.position.set(0, 2.4, bounds.zMin + 1.5); scene.add(endGlow);
