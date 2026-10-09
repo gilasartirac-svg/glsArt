@@ -63,6 +63,7 @@ test('gallery uses dark granite flooring, deep-brown velvet walls, and non-aggre
   assert.match(script, /new THREE\.HemisphereLight/);
   assert.match(script, /new THREE\.Fog\(0x211d1a, 28, 105\)/);
   assert.match(script, /const velvetCanvas = document\.createElement\('canvas'\)/);
+  assert.match(script, /velvetTexture\.repeat\.set\(Math\.max\(2, corridorLength \/ 8\), 1\)/);
   assert.match(script, /roughness: \.97, metalness: 0/);
   assert.match(script, /const floorMaterial = new THREE\.MeshStandardMaterial\(\{ color: 0xc7c0b4, map: marbleTexture, roughness: \.34/);
   assert.match(script, /hitMeshes: \[inner\]/);
@@ -90,7 +91,7 @@ test('gallery uses a realistic granite-and-velvet scene and natural field of vie
   assert.match(script, /new THREE\.PerspectiveCamera\(57/);
   assert.match(script, /camera\.fov = 57/);
   assert.match(markup, /gallery\.css\?v=7/);
-  assert.match(markup, /gallery\.js\?v=13/);
+  assert.match(markup, /gallery\.js\?v=14/);
 });
 
 test('left and right controls navigate to a centered, front-facing artwork view',()=>{
@@ -157,11 +158,11 @@ test('virtual gallery uses a single renderer and the complete collection without
   assert.match(script, /if \(!renderer\) renderer = new THREE\.WebGLRenderer/);
   assert.match(script, /galleryProducts = \[\.\.\.allGalleryProducts\]/);
   assert.doesNotMatch(markup, /data-gallery-category=/);
-  assert.match(markup, /gallery\.js\?v=13/);
+  assert.match(markup, /gallery\.js\?v=14/);
 });
 
 test('gallery entry camera faces the first wall artwork so portrait mobile users see art immediately',()=>{
   assert.match(script,/yaw = Math\.atan2\(8\.91, 3\.8\)/);
   assert.match(script,/camera\.rotation\.set\(0, yaw \* eased, 0, 'YXZ'\)/);
-  assert.match(markup,/gallery\.js\?v=13/);
+  assert.match(markup,/gallery\.js\?v=14/);
 });
