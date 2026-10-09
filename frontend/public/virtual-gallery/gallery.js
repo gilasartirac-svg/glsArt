@@ -27,6 +27,8 @@ const cameraTarget = new THREE.Vector3(0, 1.65, 4.8);
 const cameraPosition = new THREE.Vector3(0, 1.65, 8.8);
 const bounds = { x: 4.25, zMin: -10.5, zMax: 8.5 };
 const galleryArt = [];
+let galleryProducts = [];
+const fallbackTitles = ['نقش و نگار','گرمای مس','روایت ایرانی','آرامش رنگ','هنر ماندگار','جزئیات هنر','طلایی گرم','بافت و فرم','گیلاس آرت','نقش ایرانی'];
 
 function makeCanvasTexture(index, title) {
   const art = document.createElement('canvas');
@@ -73,8 +75,17 @@ function addWallArt(x, z, rotation, index, title, imageUrl = '') {
   backing.position.z = -.055; group.add(backing);
   const frameMesh = new THREE.Mesh(new THREE.BoxGeometry(width + frame, height + frame, .11), frameMaterial);
   frameMesh.position.z = .012; group.add(frameMesh);
-  const inner = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshStandardMaterial({ map: makeCanvasTexture(index, title), roughness: .72, metalness: .05 }));
+  const artworkMaterial = new THREE.MeshStandardMaterial({ map: makeCanvasTexture(index, title), roughness: .72, metalness: .05 });
+  const inner = new THREE.Mesh(new THREE.PlaneGeometry(width, height), artworkMaterial);
   inner.position.z = .075; group.add(inner);
+  if (imageUrl) {
+    const imagePath = String(imageUrl).startsWith('/') ? imageUrl : '/' + imageUrl;
+    new THREE.TextureLoader().load(new URL(imagePath, location.origin).href, texture => {
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.anisotropy = renderer?.capabilities.getMaxAnisotropy?.() || 1;
+      artworkMaterial.map = texture; artworkMaterial.needsUpdate = true;
+    }, undefined, () => {});
+  }
   const glow = new THREE.PointLight(0xffd99a, 2.4, 4.2, 2);
   glow.position.set(0, 1.15, .55); group.add(glow);
   const spot = new THREE.Mesh(new THREE.SphereGeometry(.035, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffe1a4 }));
@@ -121,8 +132,10 @@ function setupScene() {
 
   for (let i = 0; i < 5; i++) {
     const z = 1 - i * 3.1;
-    addWallArt(-5.91, z, Math.PI / 2, i, ['نقش و نگار','گرمای مس','روایت ایرانی','آرامش رنگ','هنر ماندگار'][i]);
-    addWallArt(5.91, z, -Math.PI / 2, i + 1, ['نقش ایرانی','جزئیات هنر','طلایی گرم','بافت و فرم','گیلاس آرت'][i]);
+    const leftProduct = galleryProducts[i];
+    const rightProduct = galleryProducts[i + 5];
+    addWallArt(-5.91, z, Math.PI / 2, i, leftProduct?.name || fallbackTitles[i], leftProduct?.image || '');
+    addWallArt(5.91, z, -Math.PI / 2, i + 1, rightProduct?.name || fallbackTitles[i + 5], rightProduct?.image || '');
     const lamp = new THREE.SpotLight(0xffd9a0, 22, 8, Math.PI / 5, .65, 1.4);
     lamp.position.set(i % 2 ? -2 : 2, 3.95, z); lamp.target.position.set(0, 1.7, z); scene.add(lamp, lamp.target);
   }
@@ -230,11 +243,23 @@ function exitGallery() {
   if (renderer) renderer.setAnimationLoop(null);
 }
 
+async function loadGalleryProducts() {
+  try {
+    const response = await fetch('/data/storefront-index.json', { cache: 'force-cache', credentials: 'same-origin' });
+    if (!response.ok) return;
+    const data = await response.json();
+    galleryProducts = (Array.isArray(data.products) ? data.products : [])
+      .filter(product => product && product.active !== 0 && typeof product.image === 'string' && product.image.trim())
+      .slice(0, 10)
+      .map(product => ({ name: String(product.name || 'اثر هنری').slice(0, 90), image: product.image }));
+  } catch { galleryProducts = []; }
+}
+
 async function enterGallery() {
   if (entered) return;
   welcome.hidden = true; loading.hidden = false; errorBox.hidden = true;
   try {
-    if (!renderer) setupScene();
+    if (!renderer) { await loadGalleryProducts(); setupScene(); }
     bindControls();
     cameraTarget.set(0, 1.65, 4.8);
     cameraPosition.set(0, 1.65, 8.8);
