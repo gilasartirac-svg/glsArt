@@ -573,6 +573,10 @@
     "home.copperText": "گالری گیلاس آرت؛ انتخابی برای فضاهایی که هنر، متریال و جزئیات در آن اهمیت دارد.",
     "home.copperCta": "ورود به گالری",
     "home.copperAbout": "درباره گیلاس آرت",
-    "home.copperLatestText": "منتخبی از تابلوهای معرق مس دست‌ساز گیلاس آرت."
+    "home.copperLatestText": "منتخبی از تابلوهای معرق مس دست‌ساز گیلاس آرت.",
+    "home.virtualGalleryTitle": "گالری مجازی سه‌بعدی",
+    "home.virtualGalleryText": "در فضایی الهام‌گرفته از یک گالری مجلل قدم بزنید و آثار را تماشا کنید.",
+    "home.virtualGalleryCta": "ورود به گالری",
+    "home.virtualGalleryLabel": "پیش‌نمایش گالری مجازی سه‌بعدی گیلاس آرت"
   }
 }
