@@ -28,5 +28,7 @@ test('clicking a framed artwork triggers a cinematic camera focus and product pa
 
 test('Three.js objects are initialized only after the module is loaded', () => {
   assert.match(script, /let moveVector, targetVector, forward, right, raycaster, pointerNdc/);
-  assert.match(script, /if \(!THREE\) THREE = await import\(THREE_MODULE_URL\);[\s\S]{0,500}new THREE\.Vector3\(\)/);
+  assert.match(script, /let cameraTarget, cameraPosition;/);
+  assert.doesNotMatch(script.slice(0, script.indexOf('async function enterGallery')), /const camera(?:Target|Position) = new THREE\\.Vector3/);
+  assert.match(script, /if \(!THREE\) THREE = await import\(THREE_MODULE_URL\);[\s\S]{0,250}if \(!cameraTarget\) \{[\s\S]{0,150}cameraPosition = new THREE\.Vector3/);
 });
