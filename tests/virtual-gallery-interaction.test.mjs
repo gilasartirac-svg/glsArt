@@ -153,14 +153,12 @@ test('virtual gallery keeps visible fallback artwork when a product image URL fa
   assert.match(script,/record\.imageLoading = false; \}/);
 });
 
-test('switching gallery corridors rebuilds the scene using the selected product category',()=>{
-  assert.match(script,/let sceneCategory = null/);
-  assert.match(script,/sceneCategory = selectedGalleryCategory/);
-  assert.match(script,/else if \(sceneCategory !== selectedGalleryCategory\)/);
-  assert.match(script,/if \(!renderer\) renderer = new THREE\.WebGLRenderer/);
-  assert.match(markup,/gallery\.js\?v=12/);
+test('virtual gallery uses a single renderer and the complete collection without category switching', () => {
+  assert.match(script, /if \(!renderer\) renderer = new THREE\\.WebGLRenderer/);
+  assert.match(script, /galleryProducts = \[\.\.\.allGalleryProducts\]/);
+  assert.doesNotMatch(markup, /data-gallery-category=/);
+  assert.match(markup, /gallery\\.js\\?v=12/);
 });
-
 
 test('gallery entry camera faces the first wall artwork so portrait mobile users see art immediately',()=>{
   assert.match(script,/yaw = Math\.atan2\(5\.91, 3\.8\)/);
