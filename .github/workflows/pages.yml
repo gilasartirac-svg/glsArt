@@ -136,6 +136,28 @@ jobs:
           await menuToggle.click();
           if(await menuToggle.getAttribute('aria-expanded')!=='false')fail('Mobile menu did not close on second toggle click');
           if(await desktopNav.isVisible())fail('Mobile menu remains visible after second toggle click');
+          // Cover narrow phone, tablet, and desktop breakpoint boundaries.
+          for(const width of [320,768,820,1023]){
+            await page.setViewportSize({width,height:820});
+            await page.waitForTimeout(80);
+            if(!await menuToggle.isVisible())fail('Mobile/tablet menu toggle missing at '+width+'px');
+            if(await desktopNav.isVisible())fail('Mobile/tablet navigation should start closed at '+width+'px');
+          }
+          await page.setViewportSize({width:320,height:740});
+          await menuToggle.click();
+          if(!await desktopNav.isVisible())fail('Narrow-phone drawer failed to open at 320px');
+          const narrowDrawer=await desktopNav.boundingBox();
+          if(!narrowDrawer||narrowDrawer.x< -1||narrowDrawer.x+narrowDrawer.width>321)fail('Narrow-phone drawer exceeds viewport: '+JSON.stringify(narrowDrawer));
+          await menuToggle.click();
+          for(const width of [1024,1280,1440]){
+            await page.setViewportSize({width,height:1000});
+            await page.waitForTimeout(100);
+            if(!await desktopNav.isVisible())fail('Desktop primary navigation is not visible at '+width+'px');
+            if(await menuToggle.isVisible())fail('Mobile menu toggle should be hidden at '+width+'px');
+            const viewportWidth=await page.evaluate(()=>window.innerWidth);
+            const boxes=await desktopNav.locator('.ga-header-nav-item').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width,height:r.height,clientWidth:el.clientWidth,scrollWidth:el.scrollWidth}}));
+            if(boxes.length<5||boxes.some(r=>r.width<1||r.height<1||r.left< -1||r.right>viewportWidth+1||r.scrollWidth>r.clientWidth+2))fail('Desktop navigation overflow/clipping at '+width+'px: '+JSON.stringify(boxes));
+          }
           await page.setViewportSize({width:1440,height:1000});
           await page.waitForTimeout(100);
           await page.goto('https://gilasart.ir/shop?runtime_verify='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
