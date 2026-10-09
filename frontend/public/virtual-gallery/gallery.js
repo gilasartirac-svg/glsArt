@@ -12,6 +12,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
 let renderer, scene, camera, clock, animationFrame = 0;
 let entered = false;
+let controlsBound = false;
 let dragging = false;
 let lastPointerX = 0;
 let lastPointerY = 0;
@@ -174,6 +175,8 @@ function setHeld(name, on) {
 }
 
 function bindControls() {
+  if (controlsBound) return;
+  controlsBound = true;
   document.querySelectorAll('[data-move]').forEach(button => {
     const name = button.dataset.move;
     const down = (event) => { event.preventDefault(); setHeld(name, true); try { button.setPointerCapture(event.pointerId); } catch {} };
