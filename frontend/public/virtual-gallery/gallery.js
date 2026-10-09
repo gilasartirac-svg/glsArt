@@ -31,7 +31,7 @@ let panelCloseTimer = 0;
 let cameraTarget, cameraPosition, cameraVelocity, desiredVelocity;
 let yawVelocity = 0, pitchVelocity = 0;
 const bounds = { x: 4.25, zMin: -10.5, zMax: 8.5 };
-const movementTuning = { walkSpeed: 1.05, sprintSpeed: 1.7, acceleration: 2.6, damping: 3.8, turnDamping: 5.2, boundarySpring: 7.5 };
+const movementTuning = { walkSpeed: 3.2, sprintSpeed: 6.2, acceleration: 8.5, damping: 4.2, turnDamping: 5.2, boundarySpring: 7.5 };
 const galleryArt = [];
 let galleryProducts = [];
 const fallbackTitles = ['نقش و نگار','گرمای مس','روایت ایرانی','آرامش رنگ','هنر ماندگار','جزئیات هنر','طلایی گرم','بافت و فرم','گیلاس آرت','نقش ایرانی'];
@@ -242,9 +242,13 @@ function addPillar(x, z) {
 }
 
 function setupScene() {
+  const rows = Math.max(5, Math.ceil(galleryProducts.length / 2));
+  const corridorLength = Math.max(30, (rows - 1) * 3.1 + 12);
+  bounds.zMin = -Math.max(10.5, (rows - 1) * 3.1 + 4.5);
+  const corridorCenter = (bounds.zMax + bounds.zMin) / 2;
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xe9e5dc);
-  scene.fog = new THREE.Fog(0xe9e5dc, 22, 42);
+  scene.fog = new THREE.Fog(0xe9e5dc, Math.max(22, corridorLength * .55), Math.max(42, corridorLength * 1.15));
   camera = new THREE.PerspectiveCamera(66, window.innerWidth / window.innerHeight, .1, 80);
   camera.position.copy(cameraPosition);
   camera.rotation.order = 'YXZ';
@@ -288,37 +292,37 @@ function setupScene() {
   const hemisphere = new THREE.HemisphereLight(0xffffff, 0xb9aa94, 1.05); scene.add(hemisphere);
   const galleryFill = new THREE.DirectionalLight(0xfff0d9, 1.15); galleryFill.position.set(-3, 7, 5); scene.add(galleryFill);
   const ceilingMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: marbleTexture, roughness: .32, metalness: .025, side: THREE.DoubleSide });
-  const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(12, 24), ceilingMaterial);
-  ceiling.rotation.x = Math.PI / 2; ceiling.position.set(0, 4.2, -2); scene.add(ceiling);
+  const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(12, corridorLength), ceilingMaterial);
+  ceiling.rotation.x = Math.PI / 2; ceiling.position.set(0, 4.2, corridorCenter); scene.add(ceiling);
   const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: marbleTexture, roughness: .24, metalness: .055, side: THREE.DoubleSide });
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 30), floorMaterial);
-  floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, -2); scene.add(floor);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, corridorLength), floorMaterial);
+  floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, corridorCenter); scene.add(floor);
   const floorGrid = new THREE.GridHelper(12, 32, 0x9a805d, 0xd4c9b8);
   floorGrid.position.y = .014; floorGrid.material.transparent = true; floorGrid.material.opacity = .045; scene.add(floorGrid);
 
   const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: marbleTexture, roughness: .38, metalness: .025, side: THREE.DoubleSide });
   const backWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 4.2), wallMaterial);
-  backWall.position.set(0, 2.1, -14); scene.add(backWall);
+  backWall.position.set(0, 2.1, bounds.zMin - 2); scene.add(backWall);
   const sideWallMaterial = new THREE.MeshStandardMaterial({ color: 0xf5f0e7, map: marbleTexture, roughness: .36, metalness: .025, side: THREE.DoubleSide });
-  const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 4.2), sideWallMaterial);
-  leftWall.rotation.y = Math.PI / 2; leftWall.position.set(-6, 2.1, -2); scene.add(leftWall);
+  const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(corridorLength, 4.2), sideWallMaterial);
+  leftWall.rotation.y = Math.PI / 2; leftWall.position.set(-6, 2.1, corridorCenter); scene.add(leftWall);
   const rightWall = leftWall.clone(); rightWall.rotation.y = -Math.PI / 2; rightWall.position.x = 6; scene.add(rightWall);
   const baseTrimMaterial = new THREE.MeshStandardMaterial({ color: 0x6c4827, roughness: .42, metalness: .68 });
-  const leftBaseTrim = new THREE.Mesh(new THREE.BoxGeometry(.055, .12, 30), baseTrimMaterial);
-  leftBaseTrim.position.set(-5.94, .08, -2); scene.add(leftBaseTrim);
+  const leftBaseTrim = new THREE.Mesh(new THREE.BoxGeometry(.055, .12, corridorLength), baseTrimMaterial);
+  leftBaseTrim.position.set(-5.94, .08, corridorCenter); scene.add(leftBaseTrim);
   const rightBaseTrim = leftBaseTrim.clone(); rightBaseTrim.position.x = 5.94; scene.add(rightBaseTrim);
   const ceilingTrim = new THREE.Mesh(new THREE.BoxGeometry(12, .045, .045), baseTrimMaterial);
   ceilingTrim.position.set(0, 4.02, -2); scene.add(ceilingTrim);
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < rows; i++) {
     const z = 1 - i * 3.1;
-    const leftProduct = galleryProducts[i];
-    const rightProduct = galleryProducts[i + 5];
-    addWallArt(-5.91, z, Math.PI / 2, i, leftProduct?.name || fallbackTitles[i], leftProduct?.image || '', leftProduct || null);
-    addWallArt(5.91, z, -Math.PI / 2, i + 1, rightProduct?.name || fallbackTitles[i + 5], rightProduct?.image || '', rightProduct || null);
+    const leftProduct = galleryProducts[i] || null;
+    const rightProduct = galleryProducts[i + rows] || null;
+    if (leftProduct || i < 5) addWallArt(-5.91, z, Math.PI / 2, i, leftProduct?.name || fallbackTitles[i % fallbackTitles.length], leftProduct?.image || '', leftProduct || null);
+    if (rightProduct || i < 5) addWallArt(5.91, z, -Math.PI / 2, i + rows, rightProduct?.name || fallbackTitles[(i + rows) % fallbackTitles.length], rightProduct?.image || '', rightProduct || null);
   }
-  for (let i = 0; i < 4; i++) { addPillar(-4.6, -1.2 - i * 3.8); addPillar(4.6, -2.6 - i * 3.8); }
-  const endGlow = new THREE.PointLight(0xb76d32, 8, 11, 1.6); endGlow.position.set(0, 2.4, -12.5); scene.add(endGlow);
+  for (let i = 0; i < rows; i += 2) { const z = -1.2 - i * 3.8; addPillar(-4.6, z); addPillar(4.6, z - 1.4); }
+  const endGlow = new THREE.PointLight(0xb76d32, 8, 11, 1.6); endGlow.position.set(0, 2.4, bounds.zMin + 1.5); scene.add(endGlow);
   clock = new THREE.Clock();
 }
 
@@ -513,19 +517,18 @@ function bindControls() {
       if (current && previousTouchGesture) {
         if (current.count === 1 && previousTouchGesture.count === 1) {
           // One finger: look around the gallery.
-          yawVelocity -= (current.x - previousTouchGesture.x) * .024;
-          pitchVelocity -= (current.y - previousTouchGesture.y) * .016;
+          yawVelocity -= (current.x - previousTouchGesture.x) * .042;
+          pitchVelocity -= (current.y - previousTouchGesture.y) * .03;
         } else if (current.count >= 2 && previousTouchGesture.count >= 2) {
           // Two fingers: pan through the gallery and pinch to move closer/farther.
           const dx = current.x - previousTouchGesture.x;
           const dy = current.y - previousTouchGesture.y;
-          const travel = Math.min(1.8, Math.hypot(dx, dy) * .012);
           const direction = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
           const strafe = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
-          cameraPosition.addScaledVector(strafe, -dx * .012);
-          cameraPosition.addScaledVector(direction, -dy * .012);
+          cameraPosition.addScaledVector(strafe, -dx * .035);
+          cameraPosition.addScaledVector(direction, -dy * .035);
           const pinchDelta = current.distance - previousTouchGesture.distance;
-          if (Math.abs(pinchDelta) > 1) cameraPosition.addScaledVector(direction, pinchDelta * .018);
+          if (Math.abs(pinchDelta) > 1) cameraPosition.addScaledVector(direction, pinchDelta * .055);
           clampCamera();
           cameraVelocity.set(0, 0, 0);
           cameraTarget.copy(cameraPosition);
@@ -540,8 +543,8 @@ function bindControls() {
     const deltaX = event.clientX - lastPointerX;
     const deltaY = event.clientY - lastPointerY;
     // Convert mouse deltas into short angular impulses; damping supplies the after-motion.
-    yawVelocity -= deltaX * .024;
-    pitchVelocity -= deltaY * .016;
+    yawVelocity -= deltaX * .042;
+    pitchVelocity -= deltaY * .03;
     lastPointerX = event.clientX; lastPointerY = event.clientY;
   });
   function getTouchGesture() {
@@ -605,7 +608,7 @@ async function loadGalleryProducts() {
   const root = location.pathname.startsWith('/glsArt') ? '/glsArt/' : '/';
   galleryProducts = await loadProductsFromSource({
     fallbackUrl: root + 'data/storefront-index.json',
-    limit: 10
+    limit: 5000
   });
 }
 
