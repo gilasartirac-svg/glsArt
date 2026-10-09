@@ -43,7 +43,7 @@ test('gallery products use an API-ready normalized contract with static JSON as 
   assert.match(adapter, /availability:/);
   assert.match(adapter, /productsApiUrl/);
   assert.match(adapter, /fallbackUrl/);
-  assert.match(adapter, /data\.products/);
+  assert.match(adapter, /payload\.products/);
 });
 
 test('add-to-cart button emits an integration intent without performing a real cart operation', () => {
