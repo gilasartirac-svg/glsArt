@@ -48,6 +48,18 @@
         <button class="move move--back" data-move="back" type="button" aria-label="حرکت به عقب">▼</button>
         <button class="move move--right" data-move="right" type="button" aria-label="حرکت به راست">▶</button>
       </div>
+      <aside id="artwork-panel" class="artwork-panel" aria-labelledby="artwork-panel-title" aria-hidden="true" hidden>
+        <button id="artwork-panel-close" class="artwork-panel__close" type="button" aria-label="بستن جزئیات اثر">×</button>
+        <img id="artwork-panel-image" class="artwork-panel__image" alt="" hidden>
+        <div class="artwork-panel__body">
+          <span class="artwork-panel__eyebrow">GILASART · ARTWORK</span>
+          <h2 id="artwork-panel-title">اثر هنری</h2>
+          <p id="artwork-panel-sku" class="artwork-panel__sku"></p>
+          <p id="artwork-panel-price" class="artwork-panel__price"></p>
+          <p id="artwork-panel-description" class="artwork-panel__description"></p>
+          <a id="artwork-panel-details" class="button button--gold artwork-panel__details" href="/shop">مشاهده جزئیات اثر <span aria-hidden="true">↗</span></a>
+        </div>
+      </aside>
       <a class="shop-link" href="/shop">مشاهده آثار در فروشگاه <span aria-hidden="true">↗</span></a>
       <div id="gallery-error" class="gallery-error" role="status" hidden>بارگذاری فضای سه‌بعدی انجام نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.</div>
     </div>
