@@ -173,3 +173,18 @@ test('homepage product cards have dedicated mobile and tablet responsive layouts
  assert.ok(css.includes('.home-latest .product-card:focus-within'));
  assert.ok(css.includes('object-fit:contain!important'));
 });
+
+
+test('homepage mobile product cards prioritize readable title and price without changing shop cards',()=>{
+ const css=read('frontend/src/styles.css');
+ const marker='Homepage mobile readability fix — intentionally does not affect Shop or desktop.';
+ const i=css.lastIndexOf(marker);
+ assert.ok(i>=0,'homepage-only mobile readability patch is missing');
+ const mobile=css.slice(i);
+ assert.ok(mobile.includes('@media (max-width:767px)'));
+ assert.ok(mobile.includes('.home-latest .product-card-link{\n    display:flex;\n    flex-direction:column;'));
+ assert.ok(mobile.includes('font-size:17px!important;'));
+ assert.ok(mobile.includes('font-size:clamp(20px,5.4vw,24px)!important;'));
+ assert.ok(mobile.includes('.home-latest .product-sku{display:none}'));
+ assert.ok(!mobile.includes('.shop-page .product-card'));
+});
