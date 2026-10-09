@@ -5355,12 +5355,12 @@ body{font-family:"Vazirmatn"!important}
     background:color-mix(in srgb,var(--ui-gold) 8%,var(--ui-surface));
     border-color:color-mix(in srgb,var(--ui-gold) 22%,var(--ui-line));
   }
-  .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="shop"]::before{content:"🛍️"}
-  .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="about"]::before{content:"🎨"}
-  .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="contact"]::before{content:"☎️"}
-  .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="news"]::before{content:"📰"}
-  .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="articles"]::before{content:"📖"}
-  .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="rewards"]::before{content:"🏆"}
+  .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="shop"]::before{content:"◈"}
+  .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="about"]::before{content:"✦"}
+  .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="contact"]::before{content:"☎"}
+  .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="news"]::before{content:"▤"}
+  .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="articles"]::before{content:"≡"}
+  .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="rewards"]::before{content:"★"}
   .ga-header-primary-nav .ga-header-nav-item--admin{
     margin-top:8px;
     padding-top:16px;
@@ -6171,4 +6171,63 @@ select{max-width:100%;text-overflow:ellipsis}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+
+/* Navigation repair — prevent the drawer being covered by its own backdrop. */
+.ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="true"]){
+  z-index:1001;
+}
+body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="true"]){
+  z-index:1001;
+}
+@media (min-width:1024px) and (max-width:1240px){
+  .ga-header-container:has(> #main-menu){
+    width:calc(100% - 28px);
+    gap:8px;
+  }
+  .ga-header-primary-nav#main-menu{
+    flex:1 1 auto;
+    margin-inline-start:0;
+    gap:0;
+  }
+  .ga-header-primary-nav#main-menu > .ga-header-nav-item{
+    padding-inline:clamp(5px,.65vw,9px);
+    font-size:12px;
+    letter-spacing:-.02em;
+  }
+  .ga-header-brand-name{
+    font-size:clamp(20px,1.8vw,25px);
+  }
+  .ga-header-actions:has(.ga-header-cart){
+    gap:4px;
+  }
+}
+@media (max-width:767px){
+  .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="true"]){
+    z-index:1001;
+  }
+  .ga-header-primary-nav#main-menu{
+    padding-inline:14px;
+    padding-top:16px;
+    gap:7px;
+    border-inline-start:1px solid var(--ui-line);
+    border-radius:0 0 0 20px;
+  }
+  .ga-header-primary-nav#main-menu > .ga-header-nav-item{
+    min-height:50px;
+    padding:10px 14px;
+    font-size:15px;
+    line-height:1.55;
+    border:1px solid transparent;
+  }
+  .ga-header-primary-nav#main-menu > .ga-header-nav-item::before{
+    width:34px;
+    height:34px;
+    flex-basis:34px;
+    border:1px solid color-mix(in srgb,var(--ui-gold) 15%,var(--ui-line));
+    background:color-mix(in srgb,var(--ui-gold) 8%,var(--ui-surface-2));
+    font-family:Vazirmatn,Tahoma,sans-serif;
+    font-size:16px;
+  }
 }
