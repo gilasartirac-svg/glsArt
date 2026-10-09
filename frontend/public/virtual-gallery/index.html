@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090a0d">
+  <meta name="description" content="گالری مجازی سه‌بعدی گیلاس آرت؛ آثار هنری را در فضایی سینمایی و تعاملی تماشا کنید.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://gilasart.ir/virtual-gallery/">
+  <link rel="icon" href="/invoice/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+  <link rel="stylesheet" href="./gallery.css?v=1">
+  <title>گالری مجازی سه‌بعدی | GilasArt</title>
+</head>
+<body>
+  <main id="gallery-app">
+    <section id="welcome" class="welcome" aria-labelledby="welcome-title">
+      <div class="welcome__ornament" aria-hidden="true"></div>
+      <a class="brand" href="/" aria-label="بازگشت به سایت گیلاس آرت"><img src="/invoice/logo.svg" alt="" onerror="this.hidden=true"><span>گیلاس آرت<small>GILASART · VIRTUAL GALLERY</small></span></a>
+      <div class="welcome__copy">
+        <p class="eyebrow">A QUIET SPACE FOR ART</p>
+        <h1 id="welcome-title">هنر را<br><em>از نزدیک تجربه کنید.</em></h1>
+        <p class="welcome__description">در گالری مجازی گیلاس آرت قدم بزنید، آثار را تماشا کنید و در فضایی آرام جزئیات هر تابلو را کشف کنید.</p>
+        <button id="enter-gallery" class="button button--gold" type="button">ورود به گالری <span aria-hidden="true">←</span></button>
+        <a class="welcome__back" href="/">بازگشت به فروشگاه</a>
+      </div>
+      <div class="welcome__meta"><span>فضای سه‌بعدی تعاملی</span><span>بهینه‌شده برای موبایل و دسکتاپ</span></div>
+    </section>
+
+    <section id="loading" class="loading" aria-live="polite" hidden>
+      <div class="loading__mark" aria-hidden="true"></div><p>در حال آماده‌سازی گالری...</p><div class="loading__track"><span></span></div>
+    </section>
+
+    <div id="scene-shell" class="scene-shell" hidden>
+      <canvas id="gallery-canvas" aria-label="نمای سه‌بعدی گالری؛ از کلیدهای جهت‌دار یا کنترل‌های صفحه برای حرکت استفاده کنید."></canvas>
+      <header class="gallery-header">
+        <a class="gallery-brand" href="/"><img src="/invoice/logo.svg" alt=""><span>GilasArt<small>گالری مجازی</small></span></a>
+        <div class="gallery-header__actions"><span class="live-indicator"><i></i> فضای تعاملی</span><button id="help-toggle" class="icon-button" type="button" aria-expanded="false" aria-controls="help-panel" aria-label="راهنمای حرکت">؟</button><button id="exit-gallery" class="icon-button" type="button" aria-label="خروج از گالری">×</button></div>
+      </header>
+      <aside id="help-panel" class="help-panel" hidden>
+        <strong>چطور حرکت کنم؟</strong><p>دکمه‌های روی صفحه یا کلیدهای جهت‌دار را لمس کنید. در دسکتاپ از W A S D نیز می‌توانید استفاده کنید. برای نگاه‌کردن اطراف، روی تصویر بکشید.</p>
+        <p class="help-panel__note">حرکت آهسته و پیوسته طراحی شده است؛ روی موبایل از کنترل‌های پایین صفحه استفاده کنید.</p>
+      </aside>
+      <div class="scene-caption"><span class="scene-caption__eyebrow">THE GALLERY</span><strong id="scene-title">گالری آثار گیلاس آرت</strong><span id="scene-status">برای شروع، به‌آرامی حرکت کنید.</span></div>
+      <div class="movement-controls" aria-label="کنترل حرکت">
+        <button class="move move--forward" data-move="forward" type="button" aria-label="حرکت به جلو">▲</button>
+        <button class="move move--left" data-move="left" type="button" aria-label="حرکت به چپ">◀</button>
+        <button class="move move--back" data-move="back" type="button" aria-label="حرکت به عقب">▼</button>
+        <button class="move move--right" data-move="right" type="button" aria-label="حرکت به راست">▶</button>
+      </div>
+      <a class="shop-link" href="/shop">مشاهده آثار در فروشگاه <span aria-hidden="true">↗</span></a>
+      <div id="gallery-error" class="gallery-error" role="status" hidden>بارگذاری فضای سه‌بعدی انجام نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.</div>
+    </div>
+  </main>
+  <script type="module" src="./gallery.js?v=1"></script>
+</body>
+</html>
