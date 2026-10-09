@@ -5786,27 +5786,7 @@ textarea{min-height:110px}
    Shared public-site tokens and component polish.
    Keeps the existing light-theme option and all application logic.
    ========================================================= */
-html[data-theme="dark"]{
-  --ui-bg:#11100f;
-  --ui-surface:#191715;
-  --ui-surface-2:#211e1a;
-  --ui-surface-3:#2b2620;
-  --ui-text:#f5efe5;
-  --ui-muted:#b4aa9b;
-  --ui-line:rgba(231,190,120,.16);
-  --ui-gold:#d4a84b;
-  --ui-gold-strong:#e5bd70;
-  --ui-copper:#c17f3e;
-  --ui-control:var(--ui-surface);
-  --ui-control-strong:var(--ui-surface-2);
-  --ui-field:#151311;
-  --ui-hover:rgba(212,168,75,.09);
-  --ui-media:#211d18;
-  --ui-overlay:rgba(8,7,6,.72);
-  --ui-shadow:0 22px 58px rgba(0,0,0,.34);
-  --ui-shadow-soft:0 10px 30px rgba(0,0,0,.24);
-  --ui-focus:rgba(212,168,75,.24);
-}
+/* Dark-theme palette is defined once in the canonical token block at the top of this file. */
 :root{
   --ga-space-0:4px;
   --ga-space-1:8px;
