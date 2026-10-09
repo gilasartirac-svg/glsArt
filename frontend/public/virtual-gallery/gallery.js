@@ -424,8 +424,9 @@ function bindControls() {
     if (Math.abs(event.clientX - lastPointerX) + Math.abs(event.clientY - lastPointerY) > 5) dragMoved = true;
     const deltaX = event.clientX - lastPointerX;
     const deltaY = event.clientY - lastPointerY;
-    yawVelocity -= deltaX * .00055;
-    pitchVelocity -= deltaY * .00038;
+    // Convert pointer deltas into short angular impulses; damping supplies the after-motion.
+    yawVelocity -= deltaX * .024;
+    pitchVelocity -= deltaY * .016;
     lastPointerX = event.clientX; lastPointerY = event.clientY;
   });
   const stopDrag = () => { dragging = false; };
