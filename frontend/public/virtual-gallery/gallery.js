@@ -725,7 +725,7 @@ async function enterGallery() {
         const t = Math.min(1, (performance.now() - start) / duration);
         const eased = 1 - Math.pow(1 - t, 4);
         camera.position.set(0, 2.15 - .5 * eased, 10.5 - 5.7 * eased);
-        camera.rotation.set(0, 0, 0, 'YXZ');
+        camera.rotation.set(0, yaw * eased, 0, 'YXZ');
         renderer.render(scene, camera);
         if (t < 1) requestAnimationFrame(intro);
         else { cameraPosition.copy(cameraTarget); cameraVelocity.set(0, 0, 0); animate(); }
