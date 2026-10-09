@@ -6288,3 +6288,37 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
 @media (min-width:1024px){
   .ga-header-shell .ga-header-menu-toggle{display:none!important}
 }
+
+
+/* Production correction: one-column product presentation on every phone width. */
+@media(max-width:767px){
+ .shop-page .product-stream,.shop-page .product-grid,.home-latest .grid,.gallery-results .product-stream,.product-grid{grid-template-columns:minmax(0,1fr)!important;gap:16px!important}
+ .home-latest .product-card{display:grid;grid-template-columns:minmax(110px,36%) minmax(0,1fr);align-items:stretch}
+}
+.category-mark svg{display:block!important;width:100%!important;height:100%!important;padding:8px!important;color:var(--ui-gold)!important;overflow:visible}
+
+/* HTML5 animated galaxy replaces the cluttered wall-of-art banner. */
+.virtual-gallery-preview{background:#070a14;border-color:color-mix(in srgb,var(--ui-gold) 40%,var(--ui-line))}
+.vg3-galaxy-scene{position:absolute;inset:0 0 24%;overflow:hidden;isolation:isolate;background:radial-gradient(ellipse at 52% 42%,rgba(90,69,151,.24),transparent 34%),radial-gradient(ellipse at 25% 28%,rgba(27,114,151,.22),transparent 32%),radial-gradient(ellipse at 78% 24%,rgba(177,91,116,.16),transparent 31%),linear-gradient(145deg,#080b18,#111329 52%,#080a13);mask-image:linear-gradient(#000 78%,transparent)}
+.vg3-starfield{position:absolute;inset:-35%;pointer-events:none;background-image:radial-gradient(1px 1px at 8% 17%,#fff 50%,transparent 100%),radial-gradient(1.5px 1.5px at 18% 73%,#ffe2b3 50%,transparent 100%),radial-gradient(1px 1px at 31% 44%,#fff 50%,transparent 100%),radial-gradient(2px 2px at 47% 12%,#fff 50%,transparent 100%),radial-gradient(1px 1px at 64% 63%,#ffe0ae 50%,transparent 100%),radial-gradient(1.5px 1.5px at 79% 31%,#fff 50%,transparent 100%),radial-gradient(1px 1px at 91% 78%,#fff 50%,transparent 100%);background-size:240px 190px;animation:vg3-stars-drift 34s linear infinite}
+.vg3-starfield-b{opacity:.48;background-size:173px 137px;animation-duration:48s;animation-direction:reverse;transform:rotate(13deg) scale(1.1)}
+.vg3-nebula{position:absolute;width:70%;height:65%;left:15%;top:3%;border-radius:50%;filter:blur(22px);opacity:.52;background:conic-gradient(from 20deg,transparent,rgba(93,82,180,.2),rgba(89,181,194,.34),rgba(199,131,157,.2),transparent 78%);animation:vg3-nebula-breathe 12s ease-in-out infinite alternate}
+.vg3-nebula-b{left:37%;top:19%;width:45%;height:45%;opacity:.36;animation-delay:-6s}
+.vg3-galaxy-core{position:absolute;left:50%;top:43%;width:clamp(40px,7vw,78px);aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,#fff9dc,#e6d5ff 9%,rgba(167,137,255,.62) 24%,rgba(115,88,196,.2) 48%,transparent 72%);box-shadow:0 0 28px rgba(197,173,255,.65),0 0 95px rgba(115,102,217,.38);animation:vg3-core-pulse 5s ease-in-out infinite alternate}
+.vg3-galaxy-ring{position:absolute;left:50%;top:43%;width:clamp(210px,35vw,370px);height:clamp(70px,12vw,130px);border:1px solid rgba(219,202,255,.48);border-radius:50%;transform:translate(-50%,-50%) rotate(-24deg);box-shadow:0 0 22px rgba(153,134,236,.12);animation:vg3-ring-spin 26s linear infinite}
+.vg3-galaxy-ring-a:after,.vg3-galaxy-ring-b:after{content:"";position:absolute;left:18%;top:7%;width:7px;height:7px;border-radius:50%;background:#f9e8b7;box-shadow:0 0 12px 4px rgba(249,232,183,.5)}
+.vg3-galaxy-ring-b{width:clamp(160px,28vw,300px);height:clamp(100px,16vw,165px);border-color:rgba(113,202,219,.4);transform:translate(-50%,-50%) rotate(38deg);animation-duration:36s;animation-direction:reverse}
+.vg3-galaxy-ring-b:after{left:auto;right:14%;top:20%;background:#b3e8ff}
+.vg3-orbit{position:absolute;left:50%;top:43%;width:clamp(250px,45vw,480px);height:clamp(100px,18vw,185px);border:1px dashed rgba(255,255,255,.17);border-radius:50%;transform:translate(-50%,-50%) rotate(17deg);animation:vg3-ring-spin 54s linear infinite}
+.vg3-orbit-b{width:clamp(300px,53vw,560px);height:clamp(140px,24vw,235px);transform:translate(-50%,-50%) rotate(-39deg);animation-direction:reverse;animation-duration:66s}
+.vg3-galaxy-particle{position:absolute;width:5px;height:5px;border-radius:50%;background:#f5d99a;box-shadow:0 0 14px 4px rgba(245,217,154,.35);animation:vg3-particle-float 8s ease-in-out infinite alternate}
+.vg3-particle-a{left:24%;top:28%}.vg3-particle-b{right:23%;top:52%;background:#b6e9ff;animation-delay:-3s}.vg3-particle-c{left:68%;top:16%;width:3px;height:3px;animation-delay:-5s}
+.vg3-galaxy-scene .vg3-scene-vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 35%,rgba(4,5,12,.26) 100%)}
+@keyframes vg3-stars-drift{from{transform:translate3d(0,0,0) rotate(0)}to{transform:translate3d(2%,1%,0) rotate(4deg)}}
+@keyframes vg3-nebula-breathe{from{opacity:.32;filter:blur(24px) hue-rotate(0)}to{opacity:.62;filter:blur(17px) hue-rotate(24deg)}}
+@keyframes vg3-core-pulse{from{filter:brightness(.85);transform:translate(-50%,-50%) scale(.92)}to{filter:brightness(1.25);transform:translate(-50%,-50%) scale(1.08)}}
+@keyframes vg3-ring-spin{from{rotate:0deg}to{rotate:360deg}}
+@keyframes vg3-particle-float{from{translate:0 0;opacity:.45}to{translate:12px -18px;opacity:1}}
+.virtual-gallery-preview .vg3-preview-copy,.virtual-gallery-preview .vg3-live-badge{z-index:2}
+@media(max-width:767px){.virtual-gallery-preview{min-height:390px;border-radius:22px}.vg3-galaxy-scene{inset:0 0 30%}.vg3-galaxy-ring-a{width:250px;height:85px}.vg3-galaxy-ring-b{width:190px;height:120px}.vg3-orbit-a{width:290px;height:120px}.vg3-orbit-b{width:340px;height:155px}.vg3-nebula{width:100%;left:0}}
+@media(prefers-reduced-motion:reduce){.vg3-starfield,.vg3-nebula,.vg3-galaxy-core,.vg3-galaxy-ring,.vg3-orbit,.vg3-galaxy-particle{animation:none!important}}
