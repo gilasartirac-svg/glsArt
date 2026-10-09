@@ -48,7 +48,7 @@ export async function loadGalleryProducts({
 } = {}) {
   const sources = [];
   if (apiUrl) sources.push({ url: apiUrl, cache: 'no-store' });
-  if (fallbackUrl && !apiUrl) sources.push({ url: fallbackUrl, cache: 'force-cache' });
+  if (fallbackUrl && fallbackUrl !== apiUrl) sources.push({ url: fallbackUrl, cache: 'force-cache' });
 
   for (const source of sources) {
     try {
