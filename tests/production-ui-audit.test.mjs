@@ -150,7 +150,7 @@ test('virtual gallery link uses native navigation to its standalone static entry
  const clickEnd=js.indexOf("},{capture:true});",clickStart);
  const handler=js.slice(clickStart,clickEnd);
  const bypass=handler.indexOf("u.pathname.replace(/\\/+$/,'')||'/')==='/virtual-gallery'");
- const prevent=handler.indexOf('e.preventDefault()');
+ const prevent=handler.indexOf('e.preventDefault();',bypass);
  assert.ok(bypass>=0,'gallery route must bypass SPA interception');
  assert.ok(prevent>bypass,'gallery native navigation guard must run before SPA preventDefault');
  assert.ok(html.includes('<main id="gallery-app">'),'standalone gallery entry page is present');
