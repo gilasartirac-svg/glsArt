@@ -112,3 +112,38 @@ test('responsive viewport bands do not redefine the shared theme palette',()=>{
     assert.equal((css.match(new RegExp(token+'\\s*:','g'))||[]).length,2,token+' must remain consistent across desktop, tablet and mobile');
   }
 });
+
+
+test('theme accent text meets WCAG AA contrast on its surfaces',()=>{
+  const css=read('frontend/src/styles.css');
+  const light=css.match(/:root\s*\{([^}]+)\}/)?.[1]||'';
+  const dark=css.match(/:root\[data-theme="dark"\]\s*\{([^}]+)\}/)?.[1]||'';
+  const value=(block,token)=>{
+    const match=block.match(new RegExp(token+':\\s*(#[0-9a-fA-F]{6})'));
+    assert.ok(match,token+' must be a literal six-digit theme color');
+    return match[1];
+  };
+  const luminance=hex=>{
+    const rgb=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(c=>c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4));
+    return 0.2126*rgb[0]+0.7152*rgb[1]+0.0722*rgb[2];
+  };
+  const ratio=(a,b)=>{
+    const values=[luminance(a),luminance(b)].sort((x,y)=>y-x);
+    return (values[0]+0.05)/(values[1]+0.05);
+  };
+  for(const token of ['--ui-muted','--ui-gold','--ui-gold-strong','--ui-copper','--ui-warning']){
+    const foreground=value(light,token);
+    for(const surface of ['--ui-bg','--ui-surface','--ui-surface-2']){
+      assert.ok(ratio(foreground,value(light,surface))>=4.5,token+' lacks 4.5:1 contrast on '+surface);
+    }
+  }
+  const lightButtonText=value(light,'--ui-on-gold');
+  assert.ok(ratio(lightButtonText,value(light,'--ui-gold'))>=4.5);
+  assert.ok(ratio(lightButtonText,value(light,'--ui-gold-strong'))>=4.5);
+  for(const token of ['--ui-text','--ui-muted','--ui-gold','--ui-gold-strong','--ui-success','--ui-danger','--ui-warning']){
+    const foreground=value(dark,token);
+    for(const surface of ['--ui-bg','--ui-surface','--ui-surface-2']){
+      assert.ok(ratio(foreground,value(dark,surface))>=4.5,token+' lacks 4.5:1 contrast on dark '+surface);
+    }
+  }
+});
