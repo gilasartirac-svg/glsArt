@@ -55,3 +55,24 @@ test('add-to-cart button emits an integration intent without performing a real c
   assert.match(script, /اتصال سبد خرید هنوز فعال نشده است/);
   assert.match(styles, /\.artwork-panel__cart/);
 });
+
+
+test('luxury scene uses physically based materials, layered framing, and per-artwork spot lighting', () => {
+  assert.match(script, /new THREE\.AmbientLight/);
+  assert.match(script, /new THREE\.HemisphereLight/);
+  assert.match(script, /new THREE\.Fog\(/);
+  assert.match(script, /roughness: \.28, metalness: \.22/);
+  assert.match(script, /const innerRim = new THREE\.Mesh/);
+  assert.match(script, /const spotlight = new THREE\.SpotLight/);
+});
+
+test('camera motion uses velocity damping, angular inertia, and cinematic focus easing', () => {
+  assert.match(script, /let cameraTarget, cameraPosition, cameraVelocity, desiredVelocity/);
+  assert.match(script, /movementTuning\.acceleration/);
+  assert.match(script, /movementTuning\.damping/);
+  assert.match(script, /yawVelocity \*= Math\.exp/);
+  assert.match(script, /pitchVelocity \*= Math\.exp/);
+  assert.match(script, /const eased = 1 - Math\.pow\(1 - progress, 5\)/);
+  assert.match(script, /Soft spring forces begin before the hard boundary/);
+  assert.match(script, /walkSpeed: 1\.05/);
+});
