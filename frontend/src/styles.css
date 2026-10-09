@@ -6618,3 +6618,89 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
     grid-column:1 / -1;
   }
 }
+
+/* Shop controls — keep search, category, filter and sort in one row at every viewport. */
+.shop-page .shop-control-bar{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  align-items:stretch;
+  gap:clamp(4px,1vw,10px)!important;
+  min-width:0;
+}
+.shop-page .shop-control-item{
+  min-width:0;
+  width:100%;
+}
+.shop-page .shop-control-trigger{
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  min-height:clamp(40px,4vw,52px);
+  height:100%;
+  padding:clamp(4px,.8vw,10px) clamp(3px,.8vw,10px);
+  justify-content:center;
+  gap:clamp(2px,.5vw,7px);
+}
+.shop-page .shop-control-trigger-main{
+  min-width:0;
+  justify-content:center;
+  gap:clamp(2px,.5vw,6px);
+  font-size:clamp(10px,.95vw,13px);
+}
+.shop-page .shop-control-trigger-hint{
+  min-width:0;
+  font-size:clamp(8px,.72vw,10px);
+}
+.shop-page .shop-control-trigger:after{
+  font-size:clamp(10px,1vw,14px);
+}
+@media(max-width:767px){
+  .shop-page .shop-control-bar{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:4px!important;
+  }
+  .shop-page .shop-control-trigger{
+    min-height:40px;
+    padding:4px 2px;
+    border-radius:10px;
+    flex-direction:row;
+    gap:2px;
+  }
+  .shop-page .shop-control-trigger-main{
+    flex:1 1 auto;
+    gap:2px;
+    font-size:clamp(9px,2.7vw,11px);
+    line-height:1.25;
+    white-space:nowrap;
+  }
+  .shop-page .shop-control-icon,
+  .shop-page .shop-control-trigger-hint,
+  .shop-page .shop-control-indicator{
+    display:none!important;
+  }
+  .shop-page .shop-control-trigger:after{
+    flex:0 0 auto;
+    font-size:10px;
+    line-height:1;
+  }
+  .shop-page .shop-control-panel{
+    max-height:min(68vh,560px);
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+}
+@media(max-width:359px){
+  .shop-page .shop-control-bar{gap:3px!important}
+  .shop-page .shop-control-trigger{
+    min-height:38px;
+    padding-inline:1px;
+    border-radius:9px;
+  }
+  .shop-page .shop-control-trigger-main{font-size:9px}
+  .shop-page .shop-control-trigger:after{font-size:9px}
+}
+@media(min-width:768px) and (max-width:1023px){
+  .shop-page .shop-control-bar{gap:7px!important}
+  .shop-page .shop-control-trigger{padding-inline:7px}
+  .shop-page .shop-control-trigger-hint{display:none}
+}
