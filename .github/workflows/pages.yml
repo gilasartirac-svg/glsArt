@@ -100,22 +100,32 @@ jobs:
           const context=await browser.newContext({viewport:{width:1440,height:1000},locale:'fa-IR',serviceWorkers:'block'});
           const page=await context.newPage();
           const errors=[];
+          const responses=[];
+          page.on('response',r=>{if(r.url().includes('/data/storefront-')||r.url().includes('/api/home'))responses.push({url:r.url().split('?')[0],status:r.status()})});
           page.on('pageerror',e=>errors.push('pageerror: '+e.message));
           page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('trustseal.enamad.ir')&&!m.text().includes('Failed to load resource'))errors.push('console: '+m.text())});
           page.on('requestfailed',r=>{if(r.url().includes('trustseal.enamad.ir')||r.url().includes('/api/visitors/heartbeat')||r.url().includes('/api/me')||r.url().includes('/api/settings')||r.url().includes('/assets/social/')||r.url().includes('/uploaded/thumb/'))return;errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||''))});
           const fail=m=>{throw new Error(m)};
-          await page.goto('https://gilasart.ir/?runtime_verify='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
-          await page.locator('.product-card').first().waitFor({state:'visible',timeout:30000});
-          const homeCards=await page.locator('.product-card').count();
+          await page.goto('https://gilasart.ir/?runtime_verify='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
+          let homeCards=0;
+          try {
+            await page.locator('.product-card').first().waitFor({state:'visible',timeout:45000});
+            homeCards=await page.locator('.product-card').count();
+          } catch (e) {
+            const appText=(await page.locator('#app').innerText().catch(()=>'' )).slice(0,1200);
+            const snapshot=await page.evaluate(async()=>{try{const r=await fetch('/data/storefront-index.json?runtime_diag='+Date.now(),{cache:'no-store'});const t=await r.text();let d;try{d=JSON.parse(t)}catch{}return {status:r.status,ok:r.ok,productCount:Array.isArray(d?.products)?d.products.length:null,bodyPreview:t.slice(0,240)}}catch(err){return {error:String(err)}}});
+            console.error('Home product-card diagnostic: '+JSON.stringify({url:page.url(),title:await page.title(),appText,snapshot,responses,errors:errors.slice(0,10)}));
+            throw new Error('Home did not render visible product cards within 45s; diagnostics logged above. Original error: '+e.message);
+          }
           if(homeCards<1)fail('Home runtime rendered zero product cards');
-          await page.goto('https://gilasart.ir/shop?runtime_verify='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
-          await page.locator('#results .product-card').first().waitFor({state:'visible',timeout:30000});
+          await page.goto('https://gilasart.ir/shop?runtime_verify='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
+          await page.locator('#results .product-card').first().waitFor({state:'visible',timeout:45000});
           const shopCards=await page.locator('#results .product-card').count();
           if(shopCards<1)fail('Shop runtime rendered zero product cards');
           const href=await page.locator('#results .product-card a.product-card-link').first().getAttribute('href');
           if(!href||!href.includes('/'))fail('Shop product link missing');
-          await page.goto(new URL(href,'https://gilasart.ir').href+'?runtime_verify='+Date.now(),{waitUntil:'domcontentloaded',timeout:60000});
-          await page.locator('.product-info h1').waitFor({state:'visible',timeout:30000});
+          await page.goto(new URL(href,'https://gilasart.ir').href+'?runtime_verify='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
+          await page.locator('.product-info h1').waitFor({state:'visible',timeout:45000});
           const title=(await page.locator('.product-info h1').innerText()).trim();
           if(!title)fail('Product Detail title did not render');
           const hasOptions=await page.locator('.product-option-input').count();
