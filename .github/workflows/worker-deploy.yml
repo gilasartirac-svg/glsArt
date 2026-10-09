@@ -83,11 +83,7 @@ jobs:
         if: steps.service.outputs.paused != 'true'
         run: npx wrangler d1 migrations apply gilasartdatabase --remote
 
-      - name: Deploy Worker code
-        if: steps.service.outputs.paused != 'true'
-        run: npx wrangler deploy --config wrangler.toml
-
-      - name: Sync Worker secrets in one deployment
+      - name: Deploy Worker code and sync secrets atomically
         if: steps.service.outputs.paused != 'true'
         run: |
           set -euo pipefail
@@ -103,10 +99,10 @@ jobs:
             if (!value) throw new Error('Required Worker secret is missing: ' + key);
             secrets[key] = value;
           }
-          // Preserve the existing bootstrap secret when the optional GitHub secret is not configured.
+          // An omitted optional secret is preserved from the previous Worker version.
           if (process.env.ADMIN_BOOTSTRAP_MOBILE) {
             secrets.ADMIN_BOOTSTRAP_MOBILE = process.env.ADMIN_BOOTSTRAP_MOBILE;
           }
           fs.writeFileSync(output, JSON.stringify(secrets), { mode: 0o600 });
           NODE
-          npx wrangler secret bulk "$secret_file" --config wrangler.toml
+          npx wrangler deploy --config wrangler.toml --secrets-file "$secret_file"
