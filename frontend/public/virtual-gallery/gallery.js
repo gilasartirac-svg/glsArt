@@ -305,7 +305,7 @@ function setupScene() {
   }
   const velvetTexture = new THREE.CanvasTexture(velvetCanvas);
   velvetTexture.wrapS = velvetTexture.wrapT = THREE.RepeatWrapping;
-  velvetTexture.repeat.set(1, Math.max(2, corridorLength / 8)); velvetTexture.colorSpace = THREE.SRGBColorSpace;
+  velvetTexture.repeat.set(Math.max(2, corridorLength / 8), 1); velvetTexture.colorSpace = THREE.SRGBColorSpace;
   const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: velvetTexture, roughness: .97, metalness: 0, side: THREE.DoubleSide });
   const backWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 4.2), wallMaterial);
   backWall.position.set(0, 2.1, bounds.zMin - 2); scene.add(backWall);
