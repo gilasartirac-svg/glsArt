@@ -76,3 +76,22 @@ test('camera motion uses velocity damping, angular inertia, and cinematic focus 
   assert.match(script, /Soft spring forces begin before the hard boundary/);
   assert.match(script, /walkSpeed: 1\.05/);
 });
+
+
+test('virtual gallery environment uses a bright marble finish and natural lighting',()=>{
+  assert.match(script,/new THREE\.Color\(0xe9e5dc\)/);
+  assert.match(script,/const marbleCanvas = document\.createElement\('canvas'\)/);
+  assert.match(script,/map: marbleTexture, roughness: \.24/);
+  assert.match(script,/map: marbleTexture, roughness: \.38/);
+  assert.match(script,/new THREE\.AmbientLight\(0xfff5e5, \.82\)/);
+  assert.match(markup,/gallery\.css\?v=5/);
+  assert.match(markup,/gallery\.js\?v=5/);
+});
+
+test('left and right controls navigate to a centered, front-facing artwork view',()=>{
+  assert.match(script,/function navigateToWallArtwork\(side\)/);
+  assert.match(script,/candidates\.sort\(\(a, b\) => Math\.abs\(a\.group\.position\.z - cameraPosition\.z\)/);
+  assert.match(script,/record\.group\.position\.clone\(\)\.addScaledVector\(normal, 2\.65\)/);
+  assert.match(script,/const destinationYaw = Math\.atan2\(-dx, -dz\)/);
+  assert.match(script,/if \(name === 'left' \|\| name === 'right'\)\s*\{\s*navigateToWallArtwork\(name\)/);
+});
