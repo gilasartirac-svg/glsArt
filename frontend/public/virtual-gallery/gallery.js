@@ -707,7 +707,8 @@ async function enterGallery() {
     cameraPosition.set(0, 1.65, 8.8);
     cameraVelocity.set(0, 0, 0); desiredVelocity.set(0, 0, 0);
     yawVelocity = 0; pitchVelocity = 0;
-    yaw = 0; pitch = 0; camera.position.copy(cameraPosition); camera.rotation.set(0, 0, 0);
+    // Face the first left-wall artwork on entry; portrait mobile FOV otherwise hides side-wall art.
+    yaw = Math.atan2(5.91, 3.8); pitch = 0; camera.position.copy(cameraPosition); camera.rotation.set(0, 0, 0);
     shell.hidden = false;
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     loading.hidden = true;
