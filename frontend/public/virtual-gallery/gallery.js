@@ -232,7 +232,7 @@ function onArtworkClick(event) {
 }
 
 function addPillar(x, z) {
-  const material = new THREE.MeshStandardMaterial({ color: 0x24201b, roughness: .72, metalness: .12 });
+  const material = new THREE.MeshStandardMaterial({ color: 0xe7e0d3, roughness: .38, metalness: .035 });
   const pillar = new THREE.Mesh(new THREE.BoxGeometry(.3, 4.3, .3), material);
   pillar.position.set(x, 2.15, z); scene.add(pillar);
   const trim = new THREE.Mesh(new THREE.BoxGeometry(.38, .06, .38), new THREE.MeshStandardMaterial({ color: 0x967044, metalness: .55, roughness: .38 }));
@@ -241,8 +241,8 @@ function addPillar(x, z) {
 
 function setupScene() {
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x07080b);
-  scene.fog = new THREE.Fog(0x0b0b0e, 15, 31);
+  scene.background = new THREE.Color(0xe9e5dc);
+  scene.fog = new THREE.Fog(0xe9e5dc, 22, 42);
   camera = new THREE.PerspectiveCamera(66, window.innerWidth / window.innerHeight, .1, 80);
   camera.position.copy(cameraPosition);
   camera.rotation.order = 'YXZ';
@@ -251,23 +251,53 @@ function setupScene() {
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = .92;
+  renderer.toneMappingExposure = 1.18;
 
-  const ambient = new THREE.AmbientLight(0xd6c5a8, .34); scene.add(ambient);
-  const hemisphere = new THREE.HemisphereLight(0xcab99a, 0x100d0b, .52); scene.add(hemisphere);
-  const ceilingMaterial = new THREE.MeshStandardMaterial({ color: 0x111114, roughness: .94, metalness: .02, side: THREE.DoubleSide });
+  // Generate a reusable ivory marble texture with soft, branching grey-gold veins.
+  const marbleCanvas = document.createElement('canvas');
+  marbleCanvas.width = 768; marbleCanvas.height = 768;
+  const marbleContext = marbleCanvas.getContext('2d');
+  const marbleBase = marbleContext.createLinearGradient(0, 0, 768, 768);
+  marbleBase.addColorStop(0, '#fffdf8'); marbleBase.addColorStop(.48, '#e9e4da'); marbleBase.addColorStop(1, '#faf7f0');
+  marbleContext.fillStyle = marbleBase; marbleContext.fillRect(0, 0, 768, 768);
+  let marbleSeed = 4317;
+  const marbleRandom = () => { marbleSeed = (marbleSeed * 16807) % 2147483647; return (marbleSeed - 1) / 2147483646; };
+  for (let vein = 0; vein < 24; vein++) {
+    let x = marbleRandom() * 768, y = marbleRandom() * 768;
+    marbleContext.beginPath(); marbleContext.moveTo(x, y);
+    const segments = 5 + Math.floor(marbleRandom() * 8);
+    for (let s = 0; s < segments; s++) {
+      const bendX = x + (marbleRandom() - .5) * 150;
+      const bendY = y + 28 + marbleRandom() * 90;
+      x += (marbleRandom() - .5) * 90; y += 35 + marbleRandom() * 70;
+      marbleContext.quadraticCurveTo(bendX, bendY, x, y);
+    }
+    marbleContext.strokeStyle = vein % 5 === 0 ? 'rgba(177,145,99,.24)' : 'rgba(112,117,119,.17)';
+    marbleContext.lineWidth = vein % 5 === 0 ? 2.1 : .9;
+    marbleContext.stroke();
+    marbleContext.strokeStyle = 'rgba(255,255,255,.72)'; marbleContext.lineWidth = .7; marbleContext.stroke();
+  }
+  const marbleTexture = new THREE.CanvasTexture(marbleCanvas);
+  marbleTexture.colorSpace = THREE.SRGBColorSpace;
+  marbleTexture.wrapS = marbleTexture.wrapT = THREE.RepeatWrapping;
+  marbleTexture.repeat.set(2, 3);
+  marbleTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const ambient = new THREE.AmbientLight(0xfff5e5, .82); scene.add(ambient);
+  const hemisphere = new THREE.HemisphereLight(0xffffff, 0xb9aa94, 1.05); scene.add(hemisphere);
+  const galleryFill = new THREE.DirectionalLight(0xfff0d9, 1.15); galleryFill.position.set(-3, 7, 5); scene.add(galleryFill);
+  const ceilingMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: marbleTexture, roughness: .32, metalness: .025, side: THREE.DoubleSide });
   const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(12, 24), ceilingMaterial);
   ceiling.rotation.x = Math.PI / 2; ceiling.position.set(0, 4.2, -2); scene.add(ceiling);
-  const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x201a15, roughness: .28, metalness: .22, side: THREE.DoubleSide });
+  const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: marbleTexture, roughness: .24, metalness: .055, side: THREE.DoubleSide });
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 30), floorMaterial);
   floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, -2); scene.add(floor);
-  const floorGrid = new THREE.GridHelper(12, 32, 0x4b3827, 0x29221b);
-  floorGrid.position.y = .014; floorGrid.material.transparent = true; floorGrid.material.opacity = .13; scene.add(floorGrid);
+  const floorGrid = new THREE.GridHelper(12, 32, 0x9a805d, 0xd4c9b8);
+  floorGrid.position.y = .014; floorGrid.material.transparent = true; floorGrid.material.opacity = .045; scene.add(floorGrid);
 
-  const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x101014, roughness: .91, metalness: .04, side: THREE.DoubleSide });
+  const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: marbleTexture, roughness: .38, metalness: .025, side: THREE.DoubleSide });
   const backWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 4.2), wallMaterial);
   backWall.position.set(0, 2.1, -14); scene.add(backWall);
-  const sideWallMaterial = new THREE.MeshStandardMaterial({ color: 0x131316, roughness: .88, metalness: .06, side: THREE.DoubleSide });
+  const sideWallMaterial = new THREE.MeshStandardMaterial({ color: 0xf5f0e7, map: marbleTexture, roughness: .36, metalness: .025, side: THREE.DoubleSide });
   const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 4.2), sideWallMaterial);
   leftWall.rotation.y = Math.PI / 2; leftWall.position.set(-6, 2.1, -2); scene.add(leftWall);
   const rightWall = leftWall.clone(); rightWall.rotation.y = -Math.PI / 2; rightWall.position.x = 6; scene.add(rightWall);
@@ -390,12 +420,52 @@ function setHeld(name, on) {
   document.querySelectorAll('[data-move="' + name + '"]').forEach(button => button.classList.toggle('is-active', on));
 }
 
+function navigateToWallArtwork(side) {
+  if (!entered || focusTransition || !galleryArt.length) return;
+  const candidates = galleryArt.filter(record => side === 'left' ? record.group.position.x < 0 : record.group.position.x > 0);
+  if (!candidates.length) return;
+  // Pick the closest frame along the corridor, then move to a centered, front-facing viewing position.
+  candidates.sort((a, b) => Math.abs(a.group.position.z - cameraPosition.z) - Math.abs(b.group.position.z - cameraPosition.z));
+  const record = candidates[0];
+  const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(record.group.quaternion).normalize();
+  const destination = record.group.position.clone().addScaledVector(normal, 2.65);
+  destination.y = 1.65;
+  const dx = record.group.position.x - destination.x;
+  const dy = record.group.position.y - destination.y;
+  const dz = record.group.position.z - destination.z;
+  const horizontal = Math.hypot(dx, dz);
+  const destinationYaw = Math.atan2(-dx, -dz);
+  const destinationPitch = Math.atan2(dy, horizontal);
+  focusTransition = {
+    fromPosition: cameraPosition.clone(), toPosition: destination,
+    fromYaw: yaw, toYaw: destinationYaw,
+    fromPitch: pitch, toPitch: destinationPitch,
+    startedAt: performance.now(), duration: prefersReducedMotion ? 20 : 950,
+    artwork: record
+  };
+  cameraVelocity.set(0, 0, 0);
+  held.clear();
+  document.querySelectorAll('[data-move]').forEach(button => button.classList.remove('is-active'));
+  statusText.textContent = 'در حال قرارگیری دقیق روبه‌روی تابلو...';
+  titleText.textContent = String(record.product?.name || record.title || 'گالری آثار گیلاس آرت');
+}
+
 function bindControls() {
   if (controlsBound) return;
   controlsBound = true;
   document.querySelectorAll('[data-move]').forEach(button => {
     const name = button.dataset.move;
-    const down = (event) => { event.preventDefault(); setHeld(name, true); try { button.setPointerCapture(event.pointerId); } catch {} };
+    const down = (event) => {
+      event.preventDefault();
+      if (name === 'left' || name === 'right') {
+        navigateToWallArtwork(name);
+        button.classList.add('is-active');
+        setTimeout(() => button.classList.remove('is-active'), 180);
+        return;
+      }
+      setHeld(name, true);
+      try { button.setPointerCapture(event.pointerId); } catch {}
+    };
     const up = (event) => { event.preventDefault(); setHeld(name, false); };
     button.addEventListener('pointerdown', down);
     ['pointerup','pointercancel','lostpointercapture','pointerleave'].forEach(type => button.addEventListener(type, up));
@@ -404,7 +474,12 @@ function bindControls() {
   window.addEventListener('keydown', (event) => {
     const key = event.key.toLowerCase();
     const map = { w:'forward', arrowup:'forward', s:'back', arrowdown:'back', a:'left', arrowleft:'left', d:'right', arrowright:'right', shift:'shift' };
-    if (map[key]) { event.preventDefault(); setHeld(map[key], true); }
+    if (map[key]) {
+      event.preventDefault();
+      if (map[key] === 'left' || map[key] === 'right') {
+        if (!event.repeat) navigateToWallArtwork(map[key]);
+      } else setHeld(map[key], true);
+    }
     if (key === 'escape' && entered) exitGallery();
   });
   window.addEventListener('keyup', (event) => {
