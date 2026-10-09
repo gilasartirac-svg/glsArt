@@ -141,3 +141,19 @@ test('product textures load near the visitor and unload at a distance to preserv
   assert.match(script,/updateArtworkTextures\(\);/);
   assert.match(script,/scene\.fog = new THREE\.Fog\(0xe9e5dc, 16, 38\)/);
 });
+
+
+test('virtual gallery keeps visible fallback artwork when a product image URL fails',()=>{
+  assert.match(script,/const placeholderTexture = makeCanvasTexture\(index, title\)/);
+  assert.doesNotMatch(script,/if \(record\.imageUrl\) inner\.material\.map = null/);
+  assert.match(script,/record\.artworkMaterial\.map = record\.placeholderTexture/);
+  assert.match(script,/record\.imageLoading = false; \}/);
+});
+
+test('switching gallery corridors rebuilds the scene using the selected product category',()=>{
+  assert.match(script,/let sceneCategory = null/);
+  assert.match(script,/sceneCategory = selectedGalleryCategory/);
+  assert.match(script,/else if \(sceneCategory !== selectedGalleryCategory\)/);
+  assert.match(script,/if \(!renderer\) renderer = new THREE\.WebGLRenderer/);
+  assert.match(markup,/gallery\.js\?v=10/);
+});
