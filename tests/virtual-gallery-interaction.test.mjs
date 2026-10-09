@@ -12,8 +12,8 @@ const [script, markup, styles, adapter] = await Promise.all([
 test('virtual gallery loads real storefront artwork images and product metadata', () => {
   assert.match(script, /storefront-index\.json/);
   assert.match(script, /new THREE\.TextureLoader\(\)\.load/);
-  assert.match(script, /price_irt/);
-  assert.match(script, /description:/);
+  assert.match(adapter, /price_irt/);
+  assert.match(adapter, /description:/);
 });
 
 test('clicking a framed artwork triggers a cinematic camera focus and product panel', () => {
