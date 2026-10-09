@@ -22,7 +22,7 @@ const errorBox = $('gallery-error');
 const statusText = $('scene-status');
 const titleText = $('scene-title');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-bindCategorySelector();
+// The gallery always opens the complete active collection; category controls are intentionally hidden.
 
 let renderer, scene, camera, clock, animationFrame = 0;
 let entered = false;
@@ -43,9 +43,13 @@ let dragMoved = false;
 let panelCloseTimer = 0;
 let cameraTarget, cameraPosition, cameraVelocity, desiredVelocity;
 let yawVelocity = 0, pitchVelocity = 0;
-const bounds = { x: 4.25, zMin: -10.5, zMax: 8.5 };
+const bounds = { x: 6.6, zMin: -10.5, zMax: 8.5 };
 const movementTuning = { walkSpeed: 3.2, sprintSpeed: 6.2, acceleration: 8.5, damping: 4.2, turnDamping: 5.2, boundarySpring: 7.5 };
 const galleryArt = [];
+const artworkQueue = [];
+let nextArtworkIndex = 0;
+const ARTWORK_BATCH_SIZE = 10;
+const ARTWORK_BUILD_DISTANCE = 14;
 let sceneCategory = null;
 let galleryProducts = [];
 let allGalleryProducts = [];
@@ -101,16 +105,7 @@ function addWallArt(x, z, rotation, index, title, imageUrl = '', product = null)
   const inner = new THREE.Mesh(new THREE.PlaneGeometry(maxWidth, maxHeight), artworkMaterial);
   inner.position.z = .025;
   group.add(inner);
-  const glow = new THREE.PointLight(0xffd19a, 1.15, 3.2, 2);
-  glow.position.set(0, .25, .52); group.add(glow);
-  const spotlight = new THREE.SpotLight(0xffd6a0, 34, 5.2, Math.PI / 7, .62, 1.65);
-  spotlight.position.set(0, 1.52, .95);
-  const aim = new THREE.Object3D();
-  aim.position.set(0, .05, .08);
-  group.add(spotlight, aim);
-  spotlight.target = aim;
-  const spot = new THREE.Mesh(new THREE.SphereGeometry(.025, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffe0aa }));
-  spot.position.set(0, 1.52, .88); group.add(spot);
+  // No per-artwork spotlights: keep image surfaces evenly lit and free of glare.
   scene.add(group);
   const record = {
     group, title, index, product, hitMeshes: [inner], inner,
@@ -240,9 +235,9 @@ function setupScene() {
   galleryArt.length = 0;
   scene = new THREE.Scene();
   sceneCategory = selectedGalleryCategory;
-  scene.background = new THREE.Color(0xe9e5dc);
-  scene.fog = new THREE.Fog(0xe9e5dc, 16, 38)
-  camera = new THREE.PerspectiveCamera(66, window.innerWidth / window.innerHeight, .1, 55);
+  scene.background = new THREE.Color(0x211d1a);
+  scene.fog = new THREE.Fog(0x211d1a, 28, 105);
+  camera = new THREE.PerspectiveCamera(57, window.innerWidth / window.innerHeight, .1, 90);
   camera.position.copy(cameraPosition);
   camera.rotation.order = 'YXZ';
   if (!renderer) renderer = new THREE.WebGLRenderer({ canvas, antialias: !/Android|iPhone|iPad/i.test(navigator.userAgent), alpha: false, powerPreference: 'low-power' });
@@ -257,7 +252,7 @@ function setupScene() {
   marbleCanvas.width = 768; marbleCanvas.height = 768;
   const marbleContext = marbleCanvas.getContext('2d');
   const marbleBase = marbleContext.createLinearGradient(0, 0, 768, 768);
-  marbleBase.addColorStop(0, '#fffdf8'); marbleBase.addColorStop(.48, '#e9e4da'); marbleBase.addColorStop(1, '#faf7f0');
+  marbleBase.addColorStop(0, '#252523'); marbleBase.addColorStop(.48, '#4a4742'); marbleBase.addColorStop(1, '#302e2a');
   marbleContext.fillStyle = marbleBase; marbleContext.fillRect(0, 0, 768, 768);
   let marbleSeed = 4317;
   const marbleRandom = () => { marbleSeed = (marbleSeed * 16807) % 2147483647; return (marbleSeed - 1) / 2147483646; };
@@ -271,7 +266,7 @@ function setupScene() {
       x += (marbleRandom() - .5) * 90; y += 35 + marbleRandom() * 70;
       marbleContext.quadraticCurveTo(bendX, bendY, x, y);
     }
-    marbleContext.strokeStyle = vein % 5 === 0 ? 'rgba(177,145,99,.24)' : 'rgba(112,117,119,.17)';
+    marbleContext.strokeStyle = vein % 5 === 0 ? 'rgba(190,157,112,.25)' : 'rgba(205,201,192,.12)';
     marbleContext.lineWidth = vein % 5 === 0 ? 2.1 : .9;
     marbleContext.stroke();
     marbleContext.strokeStyle = 'rgba(255,255,255,.72)'; marbleContext.lineWidth = .7; marbleContext.stroke();
@@ -279,43 +274,59 @@ function setupScene() {
   const marbleTexture = new THREE.CanvasTexture(marbleCanvas);
   marbleTexture.colorSpace = THREE.SRGBColorSpace;
   marbleTexture.wrapS = marbleTexture.wrapT = THREE.RepeatWrapping;
-  marbleTexture.repeat.set(2, 3);
+  marbleTexture.repeat.set(2, 5);
   marbleTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const ambient = new THREE.AmbientLight(0xfff5e5, .82); scene.add(ambient);
-  const hemisphere = new THREE.HemisphereLight(0xffffff, 0xb9aa94, 1.05); scene.add(hemisphere);
-  const galleryFill = new THREE.DirectionalLight(0xfff0d9, 1.15); galleryFill.position.set(-3, 7, 5); scene.add(galleryFill);
-  const ceilingMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: marbleTexture, roughness: .32, metalness: .025, side: THREE.DoubleSide });
-  const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(12, corridorLength), ceilingMaterial);
+  // Warm room-wide illumination; no concentrated beam is aimed at artwork faces.
+  const ambient = new THREE.AmbientLight(0xffe7c7, .78); scene.add(ambient);
+  const hemisphere = new THREE.HemisphereLight(0xf8e9d2, 0x33251d, .72); scene.add(hemisphere);
+  const galleryFill = new THREE.DirectionalLight(0xffd9a6, .48); galleryFill.position.set(-3, 7, 5); scene.add(galleryFill);
+  const ceilingMaterial = new THREE.MeshStandardMaterial({ color: 0x302820, roughness: .94, metalness: 0, side: THREE.DoubleSide });
+  const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(18, corridorLength), ceilingMaterial);
   ceiling.rotation.x = Math.PI / 2; ceiling.position.set(0, 4.2, corridorCenter); scene.add(ceiling);
-  const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: marbleTexture, roughness: .24, metalness: .055, side: THREE.DoubleSide });
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, corridorLength), floorMaterial);
+  const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xc7c0b4, map: marbleTexture, roughness: .34, metalness: .025, side: THREE.DoubleSide });
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(18, corridorLength), floorMaterial);
   floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, corridorCenter); scene.add(floor);
-  const floorGrid = new THREE.GridHelper(12, 32, 0x9a805d, 0xd4c9b8);
+  const floorGrid = new THREE.GridHelper(18, 48, 0x8b6a45, 0x5b554e);
   floorGrid.position.y = .014; floorGrid.material.transparent = true; floorGrid.material.opacity = .045; scene.add(floorGrid);
 
-  const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: marbleTexture, roughness: .38, metalness: .025, side: THREE.DoubleSide });
-  const backWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 4.2), wallMaterial);
+  // Deep-brown velvet wall texture with subtle vertical nap.
+  const velvetCanvas = document.createElement('canvas'); velvetCanvas.width = 512; velvetCanvas.height = 512;
+  const velvetContext = velvetCanvas.getContext('2d');
+  const velvetBase = velvetContext.createLinearGradient(0, 0, 512, 0);
+  velvetBase.addColorStop(0, '#241713'); velvetBase.addColorStop(.48, '#3b251d'); velvetBase.addColorStop(1, '#291a15');
+  velvetContext.fillStyle = velvetBase; velvetContext.fillRect(0, 0, 512, 512);
+  let velvetSeed = 7129;
+  const velvetRandom = () => { velvetSeed = (velvetSeed * 48271) % 2147483647; return (velvetSeed - 1) / 2147483646; };
+  for (let i = 0; i < 1700; i++) {
+    const x = velvetRandom() * 512, y = velvetRandom() * 512;
+    velvetContext.strokeStyle = velvetRandom() > .52 ? 'rgba(226,177,125,.035)' : 'rgba(0,0,0,.08)';
+    velvetContext.lineWidth = .5 + velvetRandom() * 1.1;
+    velvetContext.beginPath(); velvetContext.moveTo(x, y); velvetContext.lineTo(x + (velvetRandom() - .5) * 2, y + 4 + velvetRandom() * 16); velvetContext.stroke();
+  }
+  const velvetTexture = new THREE.CanvasTexture(velvetCanvas);
+  velvetTexture.wrapS = velvetTexture.wrapT = THREE.RepeatWrapping;
+  velvetTexture.repeat.set(1, Math.max(2, corridorLength / 8)); velvetTexture.colorSpace = THREE.SRGBColorSpace;
+  const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: velvetTexture, roughness: .97, metalness: 0, side: THREE.DoubleSide });
+  const backWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 4.2), wallMaterial);
   backWall.position.set(0, 2.1, bounds.zMin - 2); scene.add(backWall);
-  const sideWallMaterial = new THREE.MeshStandardMaterial({ color: 0xf5f0e7, map: marbleTexture, roughness: .36, metalness: .025, side: THREE.DoubleSide });
-  const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(corridorLength, 4.2), sideWallMaterial);
-  leftWall.rotation.y = Math.PI / 2; leftWall.position.set(-6, 2.1, corridorCenter); scene.add(leftWall);
-  const rightWall = leftWall.clone(); rightWall.rotation.y = -Math.PI / 2; rightWall.position.x = 6; scene.add(rightWall);
+  const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(corridorLength, 4.2), wallMaterial);
+  leftWall.rotation.y = Math.PI / 2; leftWall.position.set(-9, 2.1, corridorCenter); scene.add(leftWall);
+  const rightWall = leftWall.clone(); rightWall.rotation.y = -Math.PI / 2; rightWall.position.x = 9; scene.add(rightWall);
   const baseTrimMaterial = new THREE.MeshStandardMaterial({ color: 0x6c4827, roughness: .42, metalness: .68 });
   const leftBaseTrim = new THREE.Mesh(new THREE.BoxGeometry(.055, .12, corridorLength), baseTrimMaterial);
-  leftBaseTrim.position.set(-5.94, .08, corridorCenter); scene.add(leftBaseTrim);
-  const rightBaseTrim = leftBaseTrim.clone(); rightBaseTrim.position.x = 5.94; scene.add(rightBaseTrim);
-  const ceilingTrim = new THREE.Mesh(new THREE.BoxGeometry(12, .045, .045), baseTrimMaterial);
+  leftBaseTrim.position.set(-8.94, .08, corridorCenter); scene.add(leftBaseTrim);
+  const rightBaseTrim = leftBaseTrim.clone(); rightBaseTrim.position.x = 8.94; scene.add(rightBaseTrim);
+  const ceilingTrim = new THREE.Mesh(new THREE.BoxGeometry(18, .045, .045), baseTrimMaterial);
   ceilingTrim.position.set(0, 4.02, -2); scene.add(ceilingTrim);
 
-  for (let i = 0; i < rows; i++) {
-    const z = 1 - i * 3.1;
-    const leftProduct = galleryProducts[i] || null;
-    const rightProduct = galleryProducts[i + rows] || null;
-    if (leftProduct || (galleryProducts.length === 0 && i < 5)) addWallArt(-5.91, z, Math.PI / 2, i, leftProduct?.name || fallbackTitles[i % fallbackTitles.length], leftProduct?.image || '', leftProduct || null);
-    if (rightProduct || (galleryProducts.length === 0 && i < 5)) addWallArt(5.91, z, -Math.PI / 2, i + rows, rightProduct?.name || fallbackTitles[(i + rows) % fallbackTitles.length], rightProduct?.image || '', rightProduct || null);
-  }
-  for (let i = 0; i < rows; i += 2) { const z = -1.2 - i * 3.8; addPillar(-4.6, z); addPillar(4.6, z - 1.4); }
-  const endGlow = new THREE.PointLight(0xb76d32, 8, 11, 1.6); endGlow.position.set(0, 2.4, bounds.zMin + 1.5); scene.add(endGlow);
+  artworkQueue.length = 0; nextArtworkIndex = 0;
+  galleryProducts.forEach((product, index) => {
+    const row = Math.floor(index / 2), left = index % 2 === 0;
+    artworkQueue.push({ product, index, x: left ? -8.91 : 8.91, z: 1 - row * 3.1, rotation: left ? Math.PI / 2 : -Math.PI / 2 });
+  });
+  // Wider architectural piers break up the long-hall rhythm.
+  for (let i = 0; i < rows; i += 4) { const z = -2.2 - i * 3.1; addPillar(-7.25, z); addPillar(7.25, z - 1.45); }
+  const endGlow = new THREE.PointLight(0x8d512b, 2.2, 16, 1.8); endGlow.position.set(0, 2.4, bounds.zMin + 1.5); scene.add(endGlow);
   galleryTextureLoader = new THREE.TextureLoader();
   clock = new THREE.Clock();
 }
@@ -398,6 +409,17 @@ function updateMovement(delta) {
   camera.rotation.set(pitch, yaw, 0, 'YXZ');
 }
 
+function buildNearbyArtworkBatch() {
+  if (!cameraPosition || !scene || nextArtworkIndex >= artworkQueue.length) return;
+  const next = artworkQueue[nextArtworkIndex];
+  if (Math.hypot(next.x - cameraPosition.x, next.z - cameraPosition.z) > ARTWORK_BUILD_DISTANCE) return;
+  const end = Math.min(nextArtworkIndex + ARTWORK_BATCH_SIZE, artworkQueue.length);
+  while (nextArtworkIndex < end) {
+    const item = artworkQueue[nextArtworkIndex++];
+    addWallArt(item.x, item.z, item.rotation, item.index, item.product.name, item.product.image, item.product);
+  }
+}
+
 function updateArtworkTextures() {
   if (!cameraPosition || !galleryTextureLoader) return;
   const now = performance.now();
@@ -446,6 +468,7 @@ function animate() {
   animationFrame = requestAnimationFrame(animate);
   const delta = clock.getDelta();
   updateMovement(delta);
+  buildNearbyArtworkBatch();
   updateArtworkTextures();
   renderer.render(scene, camera);
 }
@@ -453,7 +476,7 @@ function animate() {
 function onResize() {
   if (!renderer || !camera) return;
   camera.aspect = window.innerWidth / window.innerHeight;
-  camera.fov = window.innerWidth < 600 ? 72 : 66;
+  camera.fov = 57;
   camera.updateProjectionMatrix();
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
   renderer.setSize(window.innerWidth, window.innerHeight, false);
@@ -645,32 +668,13 @@ async function loadGalleryProducts() {
   const { loadGalleryProducts: loadProductsFromSource } = await import('./product-adapter.js');
   const root = location.pathname.startsWith('/glsArt') ? '/glsArt/' : '/';
   allGalleryProducts = await loadProductsFromSource({
-    fallbackUrl: root + 'data/storefront-index.json',
-    limit: 5000
+    fallbackUrl: root + 'data/storefront-index.json'
   });
   applySelectedGalleryCategory();
 }
 function applySelectedGalleryCategory() {
-  galleryProducts = selectedGalleryCategory === 'all'
-    ? [...allGalleryProducts]
-    : allGalleryProducts.filter(product => product.categoryIds?.includes(selectedGalleryCategory));
-  const count = $('category-selector-count');
-  if (count) count.textContent = selectedGalleryCategory === 'all'
-    ? 'نمایش همه آثار · ' + allGalleryProducts.length + ' اثر'
-    : 'تعداد آثار این راهرو · ' + galleryProducts.length;
-}
-function bindCategorySelector() {
-  document.querySelectorAll('[data-gallery-category]').forEach(button => {
-    button.addEventListener('click', () => {
-      selectedGalleryCategory = button.dataset.galleryCategory || 'all';
-      document.querySelectorAll('[data-gallery-category]').forEach(option => {
-        const selected = option === button;
-        option.classList.toggle('is-selected', selected);
-        option.setAttribute('aria-pressed', String(selected));
-      });
-      applySelectedGalleryCategory();
-    });
-  });
+  selectedGalleryCategory = 'all';
+  galleryProducts = [...allGalleryProducts];
 }
 
 async function enterGallery() {
@@ -695,10 +699,6 @@ async function enterGallery() {
     if (!renderer) {
       await loadGalleryProducts();
       setupScene();
-    } else if (sceneCategory !== selectedGalleryCategory) {
-      if (!allGalleryProducts.length) await loadGalleryProducts();
-      else applySelectedGalleryCategory();
-      setupScene();
     }
     bindControls();
     focusTransition = null; focusReturn = null; activeArtwork = null;
@@ -708,7 +708,7 @@ async function enterGallery() {
     cameraVelocity.set(0, 0, 0); desiredVelocity.set(0, 0, 0);
     yawVelocity = 0; pitchVelocity = 0;
     // Face the first left-wall artwork on entry; portrait mobile FOV otherwise hides side-wall art.
-    yaw = Math.atan2(5.91, 3.8); pitch = 0; camera.position.copy(cameraPosition); camera.rotation.set(0, 0, 0);
+    yaw = Math.atan2(8.91, 3.8); pitch = 0; camera.position.copy(cameraPosition); camera.rotation.set(0, 0, 0);
     shell.hidden = false;
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     loading.hidden = true;
@@ -717,6 +717,7 @@ async function enterGallery() {
     titleText.textContent = 'گالری آثار گیلاس آرت';
     if (!prefersReducedMotion) {
       cameraPosition.set(0, 2.15, 10.5);
+      buildNearbyArtworkBatch();
       cameraTarget.set(0, 1.65, 4.8);
       cameraVelocity.set(0, 0, 0);
       const start = performance.now();
