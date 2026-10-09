@@ -20,10 +20,12 @@ let lastPointerY = 0;
 let yaw = 0;
 let pitch = 0;
 const held = new Set();
-const moveVector = new THREE.Vector3();
-const targetVector = new THREE.Vector3();
-const forward = new THREE.Vector3();
-const right = new THREE.Vector3();
+let moveVector, targetVector, forward, right, raycaster, pointerNdc;
+let focusTransition = null;
+let focusReturn = null;
+let activeArtwork = null;
+let dragMoved = false;
+let panelCloseTimer = 0;
 const cameraTarget = new THREE.Vector3(0, 1.65, 4.8);
 const cameraPosition = new THREE.Vector3(0, 1.65, 8.8);
 const bounds = { x: 4.25, zMin: -10.5, zMax: 8.5 };
@@ -65,7 +67,7 @@ function makeCanvasTexture(index, title) {
   return texture;
 }
 
-function addWallArt(x, z, rotation, index, title, imageUrl = '') {
+function addWallArt(x, z, rotation, index, title, imageUrl = '', product = null) {
   const group = new THREE.Group();
   group.position.set(x, 2.05, z);
   group.rotation.y = rotation;
@@ -80,10 +82,19 @@ function addWallArt(x, z, rotation, index, title, imageUrl = '') {
   const inner = new THREE.Mesh(new THREE.PlaneGeometry(width, height), artworkMaterial);
   inner.position.z = .075; group.add(inner);
   if (imageUrl) {
-    const imagePath = String(imageUrl).startsWith('/') ? imageUrl : '/' + imageUrl;
-    new THREE.TextureLoader().load(new URL(imagePath, location.origin).href, texture => {
+    const imagePath = galleryImageUrl(imageUrl);
+    if (imagePath) new THREE.TextureLoader().load(imagePath, texture => {
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.anisotropy = renderer?.capabilities.getMaxAnisotropy?.() || 1;
+      const imageAspect = (texture.image?.width || width) / (texture.image?.height || height);
+      const frameAspect = width / height;
+      if (imageAspect > frameAspect) {
+        texture.repeat.x = frameAspect / imageAspect;
+        texture.offset.x = (1 - texture.repeat.x) / 2;
+      } else {
+        texture.repeat.y = imageAspect / frameAspect;
+        texture.offset.y = (1 - texture.repeat.y) / 2;
+      }
       artworkMaterial.map = texture; artworkMaterial.needsUpdate = true;
     }, undefined, () => {});
   }
@@ -92,7 +103,103 @@ function addWallArt(x, z, rotation, index, title, imageUrl = '') {
   const spot = new THREE.Mesh(new THREE.SphereGeometry(.035, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffe1a4 }));
   spot.position.set(0, 1.05, .15); group.add(spot);
   scene.add(group);
-  galleryArt.push({ group, title, index });
+  const record = { group, title, index, product, hitMeshes: [backing, frameMesh, inner] };
+  record.hitMeshes.forEach(mesh => { mesh.userData.galleryArtwork = record; });
+  galleryArt.push(record);
+}
+
+function galleryImageUrl(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  try {
+    const base = location.pathname.startsWith('/glsArt') ? '/glsArt' : '';
+    const rooted = raw.startsWith('/') && base && !raw.startsWith(base + '/') ? base + raw : raw;
+    const url = new URL(rooted.startsWith('/') ? rooted : '/' + rooted, location.origin);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+  } catch { return ''; }
+}
+
+function openArtworkPanel(record) {
+  const panel = $('artwork-panel');
+  const product = record?.product || {};
+  if (!panel) return;
+  clearTimeout(panelCloseTimer);
+  const image = $('artwork-panel-image');
+  const imageUrl = galleryImageUrl(product.image);
+  image.hidden = !imageUrl;
+  image.alt = String(product.name || record.title || 'اثر هنری');
+  image.onerror = () => { image.hidden = true; };
+  if (imageUrl) image.src = imageUrl;
+  $('artwork-panel-title').textContent = String(product.name || record.title || 'اثر هنری');
+  $('artwork-panel-sku').textContent = product.sku ? 'شناسه اثر: ' + String(product.sku) : 'مجموعه آثار گیلاس آرت';
+  const price = Number(product.price_irt || 0);
+  const priceNode = $('artwork-panel-price');
+  priceNode.textContent = price > 0 ? new Intl.NumberFormat('fa-IR').format(price) + ' ریال' : 'برای اطلاع از قیمت، جزئیات اثر را ببینید';
+  $('artwork-panel-description').textContent = String(product.description || 'برای مشاهده مشخصات کامل، ابعاد و جزئیات این اثر وارد صفحه محصول شوید.');
+  const details = $('artwork-panel-details');
+  const slug = String(product.slug || '').trim();
+  details.href = slug ? '/product/' + encodeURIComponent(slug) : '/shop';
+  panel.hidden = false;
+  panel.setAttribute('aria-hidden', 'false');
+  requestAnimationFrame(() => panel.classList.add('is-open'));
+  statusText.textContent = 'نمای نزدیک اثر انتخاب‌شده؛ برای بازگشت، پنل را ببندید.';
+  titleText.textContent = String(product.name || record.title || 'اثر هنری');
+}
+
+function closeArtworkPanel() {
+  const panel = $('artwork-panel');
+  if (panel) {
+    panel.classList.remove('is-open');
+    panel.setAttribute('aria-hidden', 'true');
+    clearTimeout(panelCloseTimer);
+    panelCloseTimer = setTimeout(() => { panel.hidden = true; }, 280);
+  }
+  if (focusReturn && entered) {
+    const back = focusReturn;
+    focusReturn = null;
+    focusTransition = {
+      fromPosition: cameraPosition.clone(), toPosition: back.position.clone(),
+      fromYaw: yaw, toYaw: back.yaw, fromPitch: pitch, toPitch: back.pitch,
+      startedAt: performance.now(), duration: 850
+    };
+    statusText.textContent = 'در حال بازگشت به نمای گالری...';
+    titleText.textContent = 'گالری آثار گیلاس آرت';
+  }
+  activeArtwork = null;
+}
+
+function focusArtwork(record) {
+  if (!record || !record.product || !entered) return;
+  if (!focusReturn) focusReturn = { position: cameraPosition.clone(), yaw, pitch };
+  const lookTarget = record.group.position.clone();
+  const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(record.group.quaternion).normalize();
+  const destination = lookTarget.clone().addScaledVector(normal, 2.65);
+  destination.y = lookTarget.y + 0.05;
+  const dx = lookTarget.x - destination.x;
+  const dy = lookTarget.y - destination.y;
+  const dz = lookTarget.z - destination.z;
+  const horizontal = Math.hypot(dx, dz);
+  focusTransition = {
+    fromPosition: cameraPosition.clone(), toPosition: destination,
+    fromYaw: yaw, toYaw: Math.atan2(-dx, -dz),
+    fromPitch: pitch, toPitch: Math.atan2(dy, horizontal),
+    startedAt: performance.now(), duration: prefersReducedMotion ? 20 : 1250,
+    artwork: record
+  };
+  activeArtwork = record;
+  openArtworkPanel(record);
+}
+
+function onArtworkClick(event) {
+  if (dragMoved) { dragMoved = false; return; }
+  if (!raycaster || !camera || !entered) return;
+  const rect = canvas.getBoundingClientRect();
+  pointerNdc.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  pointerNdc.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointerNdc, camera);
+  const hit = raycaster.intersectObjects(galleryArt.flatMap(art => art.hitMeshes), false)[0];
+  const record = hit?.object?.userData?.galleryArtwork;
+  if (record?.product) focusArtwork(record);
 }
 
 function addPillar(x, z) {
@@ -135,8 +242,8 @@ function setupScene() {
     const z = 1 - i * 3.1;
     const leftProduct = galleryProducts[i];
     const rightProduct = galleryProducts[i + 5];
-    addWallArt(-5.91, z, Math.PI / 2, i, leftProduct?.name || fallbackTitles[i], leftProduct?.image || '');
-    addWallArt(5.91, z, -Math.PI / 2, i + 1, rightProduct?.name || fallbackTitles[i + 5], rightProduct?.image || '');
+    addWallArt(-5.91, z, Math.PI / 2, i, leftProduct?.name || fallbackTitles[i], leftProduct?.image || '', leftProduct || null);
+    addWallArt(5.91, z, -Math.PI / 2, i + 1, rightProduct?.name || fallbackTitles[i + 5], rightProduct?.image || '', rightProduct || null);
     const lamp = new THREE.SpotLight(0xffd9a0, 22, 8, Math.PI / 5, .65, 1.4);
     lamp.position.set(i % 2 ? -2 : 2, 3.95, z); lamp.target.position.set(0, 1.7, z); scene.add(lamp, lamp.target);
   }
@@ -152,6 +259,23 @@ function clampCamera() {
 }
 
 function updateMovement(delta) {
+  if (focusTransition) {
+    const transition = focusTransition;
+    const progress = Math.min(1, (performance.now() - transition.startedAt) / transition.duration);
+    const eased = progress * progress * (3 - 2 * progress);
+    cameraPosition.lerpVectors(transition.fromPosition, transition.toPosition, eased);
+    const yawDelta = Math.atan2(Math.sin(transition.toYaw - transition.fromYaw), Math.cos(transition.toYaw - transition.fromYaw));
+    yaw = transition.fromYaw + yawDelta * eased;
+    pitch = transition.fromPitch + (transition.toPitch - transition.fromPitch) * eased;
+    camera.position.copy(cameraPosition);
+    camera.rotation.set(pitch, yaw, 0, 'YXZ');
+    if (progress >= 1) {
+      cameraPosition.copy(transition.toPosition);
+      cameraTarget.copy(transition.toPosition);
+      focusTransition = null;
+    }
+    return;
+  }
   const speed = (held.has('shift') ? 3.2 : 1.8) * Math.min(delta, .05);
   forward.set(-Math.sin(yaw), 0, -Math.cos(yaw)).normalize();
   right.set(Math.cos(yaw), 0, -Math.sin(yaw)).normalize();
@@ -212,12 +336,14 @@ function bindControls() {
   });
   window.addEventListener('blur', () => held.clear());
   canvas.addEventListener('pointerdown', (event) => {
+    dragMoved = false;
     if (event.pointerType === 'touch') return;
     dragging = true; lastPointerX = event.clientX; lastPointerY = event.clientY;
     try { canvas.setPointerCapture(event.pointerId); } catch {}
   });
   canvas.addEventListener('pointermove', (event) => {
     if (!dragging) return;
+    if (Math.abs(event.clientX - lastPointerX) + Math.abs(event.clientY - lastPointerY) > 5) dragMoved = true;
     yaw -= (event.clientX - lastPointerX) * .003;
     pitch -= (event.clientY - lastPointerY) * .002;
     pitch = THREE.MathUtils.clamp(pitch, -.32, .32);
@@ -225,6 +351,8 @@ function bindControls() {
   });
   const stopDrag = () => { dragging = false; };
   ['pointerup','pointercancel','lostpointercapture'].forEach(type => canvas.addEventListener(type, stopDrag));
+  canvas.addEventListener('click', onArtworkClick);
+  $('artwork-panel-close').addEventListener('click', closeArtworkPanel);
   $('help-toggle').addEventListener('click', () => {
     const panel = $('help-panel'); panel.hidden = !panel.hidden;
     $('help-toggle').setAttribute('aria-expanded', String(!panel.hidden));
@@ -239,6 +367,9 @@ function bindControls() {
 
 function exitGallery() {
   entered = false; cancelAnimationFrame(animationFrame); held.clear();
+  focusTransition = null; focusReturn = null; activeArtwork = null;
+  const panel = $('artwork-panel');
+  if (panel) { panel.hidden = true; panel.classList.remove('is-open'); panel.setAttribute('aria-hidden', 'true'); }
   shell.hidden = true; welcome.hidden = false;
   document.body.style.overflow = 'hidden';
   if (renderer) renderer.setAnimationLoop(null);
@@ -246,13 +377,22 @@ function exitGallery() {
 
 async function loadGalleryProducts() {
   try {
-    const response = await fetch('/data/storefront-index.json', { cache: 'force-cache', credentials: 'same-origin' });
+    const root = location.pathname.startsWith('/glsArt') ? '/glsArt/' : '/';
+    const response = await fetch(root + 'data/storefront-index.json', { cache: 'force-cache', credentials: 'same-origin' });
     if (!response.ok) return;
     const data = await response.json();
     galleryProducts = (Array.isArray(data.products) ? data.products : [])
-      .filter(product => product && product.active !== 0 && typeof product.image === 'string' && product.image.trim())
+      .filter(product => product && Number(product.active) !== 0 && typeof product.image === 'string' && product.image.trim())
       .slice(0, 10)
-      .map(product => ({ name: String(product.name || 'اثر هنری').slice(0, 90), image: product.image }));
+      .map(product => ({
+        id: product.id ?? null,
+        slug: String(product.slug || ''),
+        sku: String(product.sku || ''),
+        name: String(product.name || 'اثر هنری').slice(0, 90),
+        description: String(product.description || '').slice(0, 800),
+        price_irt: Number(product.price_irt || 0),
+        image: String(product.image || '')
+      }));
   } catch { galleryProducts = []; }
 }
 
@@ -261,8 +401,18 @@ async function enterGallery() {
   welcome.hidden = true; loading.hidden = false; errorBox.hidden = true;
   try {
     if (!THREE) THREE = await import(THREE_MODULE_URL);
+    if (!moveVector) {
+      moveVector = new THREE.Vector3();
+      targetVector = new THREE.Vector3();
+      forward = new THREE.Vector3();
+      right = new THREE.Vector3();
+      raycaster = new THREE.Raycaster();
+      pointerNdc = new THREE.Vector2();
+    }
     if (!renderer) { await loadGalleryProducts(); setupScene(); }
     bindControls();
+    focusTransition = null; focusReturn = null; activeArtwork = null;
+    closeArtworkPanel();
     cameraTarget.set(0, 1.65, 4.8);
     cameraPosition.set(0, 1.65, 8.8);
     yaw = 0; pitch = 0; camera.position.copy(cameraPosition); camera.rotation.set(0, 0, 0);
