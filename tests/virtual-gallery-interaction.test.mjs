@@ -57,13 +57,14 @@ test('add-to-cart button emits an integration intent without performing a real c
 });
 
 
-test('luxury scene uses physically based materials, layered framing, and per-artwork spot lighting', () => {
+test('luxury scene uses physically based materials, frameless artwork surfaces, and per-artwork spot lighting', () => {
   assert.match(script, /new THREE\.AmbientLight/);
   assert.match(script, /new THREE\.HemisphereLight/);
   assert.match(script, /new THREE\.Fog\(/);
   assert.match(script, /map: marbleTexture, roughness: \.24, metalness: \.055/);
   assert.match(script, /map: marbleTexture, roughness: \.38, metalness: \.025/);
-  assert.match(script, /const innerRim = new THREE\.Mesh/);
+  assert.match(script, /hitMeshes: \[inner\]/);
+  assert.doesNotMatch(script, /const innerRim = new THREE\.Mesh/);
   assert.match(script, /const spotlight = new THREE\.SpotLight/);
 });
 
@@ -86,7 +87,7 @@ test('virtual gallery environment uses a bright marble finish and natural lighti
   assert.match(script,/map: marbleTexture, roughness: \.38/);
   assert.match(script,/new THREE\.AmbientLight\(0xfff5e5, \.82\)/);
   assert.match(markup,/gallery\.css\?v=6/);
-  assert.match(markup,/gallery\.js\?v=7/);
+  assert.match(markup,/gallery\.js\?v=8/);
 });
 
 test('left and right controls navigate to a centered, front-facing artwork view',()=>{
