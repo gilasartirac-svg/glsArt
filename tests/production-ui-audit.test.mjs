@@ -49,6 +49,7 @@ test('mobile storefront header and menu provide contextual icons without changin
  assert.ok(css.includes('overscroll-behavior:contain'));
  assert.ok(css.includes('env(safe-area-inset-bottom'));
  assert.ok(js.includes("e.target?.closest?.('.ga-header-menu-toggle,.mobile-menu-toggle')"),'outside-click handler must not intercept the actual header toggle');
+ assert.ok(js.includes("window.addEventListener('resize',()=>{if(window.innerWidth>1023&&document.querySelector('#main-menu.is-open'))window.GilasArtMobileMenu?.close()"),'desktop resize must release the mobile navigation overlay');
 });
 
 
