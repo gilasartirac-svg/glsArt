@@ -188,3 +188,16 @@ test('homepage mobile product cards prioritize readable title and price without 
  assert.ok(mobile.includes('.home-latest .product-sku{display:none}'));
  assert.ok(!mobile.includes('.shop-page .product-card'));
 });
+
+
+test('homepage mobile product card does not reserve an empty second grid column',()=>{
+ const css=read('frontend/src/styles.css');
+ const marker='Final mobile fix: product card itself must not reserve a phantom second grid column.';
+ const i=css.lastIndexOf(marker);
+ assert.ok(i>=0,'mobile card grid fix is missing');
+ const mobile=css.slice(i);
+ assert.ok(mobile.includes('@media (max-width:767px)'));
+ assert.ok(mobile.includes('.home-latest .product-card{\n    display:block!important;'));
+ assert.ok(mobile.includes('grid-template-columns:minmax(0,1fr)!important;'));
+ assert.ok(mobile.includes('.home-latest .product-card-link{\n    display:flex!important;'));
+});
