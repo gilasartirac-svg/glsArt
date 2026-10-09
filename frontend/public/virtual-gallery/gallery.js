@@ -10,6 +10,7 @@ const errorBox = $('gallery-error');
 const statusText = $('scene-status');
 const titleText = $('scene-title');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+bindCategorySelector();
 
 let renderer, scene, camera, clock, animationFrame = 0;
 let entered = false;
@@ -34,6 +35,9 @@ const bounds = { x: 4.25, zMin: -10.5, zMax: 8.5 };
 const movementTuning = { walkSpeed: 3.2, sprintSpeed: 6.2, acceleration: 8.5, damping: 4.2, turnDamping: 5.2, boundarySpring: 7.5 };
 const galleryArt = [];
 let galleryProducts = [];
+let allGalleryProducts = [];
+let selectedGalleryCategory = 'all';
+let galleryTextureLoader = null;
 const fallbackTitles = ['نقش و نگار','گرمای مس','روایت ایرانی','آرامش رنگ','هنر ماندگار','جزئیات هنر','طلایی گرم','بافت و فرم','گیلاس آرت','نقش ایرانی'];
 
 function makeCanvasTexture(index, title) {
@@ -74,47 +78,15 @@ function addWallArt(x, z, rotation, index, title, imageUrl = '', product = null)
   const group = new THREE.Group();
   group.position.set(x, 2.05, z);
   group.rotation.y = rotation;
-  const width = 1.36, height = 1.7, frame = .105;
-  const shadowMaterial = new THREE.MeshStandardMaterial({ color: 0x030303, roughness: .96, metalness: .02 });
-  const darkFrame = new THREE.MeshStandardMaterial({ color: 0x100d0a, metalness: .34, roughness: .42 });
-  const frameMaterial = new THREE.MeshStandardMaterial({ color: index % 2 ? 0x9c552b : 0xc39a4c, metalness: .82, roughness: .24 });
-  const innerTrim = new THREE.MeshStandardMaterial({ color: 0xead29a, metalness: .72, roughness: .28 });
-  const backing = new THREE.Mesh(new THREE.BoxGeometry(width + frame * 2.2, height + frame * 2.2, .17), shadowMaterial);
-  backing.position.set(0, 0, -.095); group.add(backing);
-  const outerFrame = new THREE.Mesh(new THREE.BoxGeometry(width + frame * 2, height + frame * 2, .145), darkFrame);
-  outerFrame.position.z = -.025; group.add(outerFrame);
-  const frameMesh = new THREE.Mesh(new THREE.BoxGeometry(width + frame, height + frame, .13), frameMaterial);
-  frameMesh.position.z = .035; group.add(frameMesh);
-  const innerRim = new THREE.Mesh(new THREE.BoxGeometry(width + .025, height + .025, .035), innerTrim);
-  innerRim.position.z = .104; group.add(innerRim);
-  const artworkMaterial = new THREE.MeshStandardMaterial({ map: makeCanvasTexture(index, title), roughness: .86, metalness: .02 });
-  const inner = new THREE.Mesh(new THREE.PlaneGeometry(width, height), artworkMaterial);
-  inner.position.z = .126; group.add(inner);
-  const sideRailMaterial = new THREE.MeshStandardMaterial({ color: 0x5e381d, metalness: .78, roughness: .3 });
-  for (const side of [-1, 1]) {
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(.025, height + frame * 1.7, .035), sideRailMaterial);
-    rail.position.set(side * (width / 2 + frame * .55), 0, .115); group.add(rail);
-  }
-  const topRail = new THREE.Mesh(new THREE.BoxGeometry(width + frame * 1.7, .025, .035), sideRailMaterial);
-  topRail.position.set(0, height / 2 + frame * .55, .115); group.add(topRail);
-  const bottomRail = topRail.clone(); bottomRail.position.y = -height / 2 - frame * .55; group.add(bottomRail);
-  if (imageUrl) {
-    const imagePath = galleryImageUrl(imageUrl);
-    if (imagePath) new THREE.TextureLoader().load(imagePath, texture => {
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.anisotropy = renderer?.capabilities.getMaxAnisotropy?.() || 1;
-      const imageAspect = (texture.image?.width || width) / (texture.image?.height || height);
-      const frameAspect = width / height;
-      if (imageAspect > frameAspect) {
-        texture.repeat.x = frameAspect / imageAspect;
-        texture.offset.x = (1 - texture.repeat.x) / 2;
-      } else {
-        texture.repeat.y = imageAspect / frameAspect;
-        texture.offset.y = (1 - texture.repeat.y) / 2;
-      }
-      artworkMaterial.map = texture; artworkMaterial.needsUpdate = true;
-    }, undefined, () => {});
-  }
+  const maxWidth = 1.82, maxHeight = 2.08;
+  const placeholderTexture = imageUrl ? null : makeCanvasTexture(index, title);
+  const artworkMaterial = new THREE.MeshStandardMaterial({
+    map: placeholderTexture, color: imageUrl ? 0xf4efe6 : 0xffffff,
+    roughness: .86, metalness: .01, side: THREE.DoubleSide
+  });
+  const inner = new THREE.Mesh(new THREE.PlaneGeometry(maxWidth, maxHeight), artworkMaterial);
+  inner.position.z = .025;
+  group.add(inner);
   const glow = new THREE.PointLight(0xffd19a, 1.15, 3.2, 2);
   glow.position.set(0, .25, .52); group.add(glow);
   const spotlight = new THREE.SpotLight(0xffd6a0, 34, 5.2, Math.PI / 7, .62, 1.65);
@@ -126,7 +98,13 @@ function addWallArt(x, z, rotation, index, title, imageUrl = '', product = null)
   const spot = new THREE.Mesh(new THREE.SphereGeometry(.025, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffe0aa }));
   spot.position.set(0, 1.52, .88); group.add(spot);
   scene.add(group);
-  const record = { group, title, index, product, hitMeshes: [backing, frameMesh, inner] };
+  const record = {
+    group, title, index, product, hitMeshes: [inner], inner,
+    imageUrl: imageUrl ? galleryImageUrl(imageUrl) : '',
+    placeholderTexture, artworkMaterial, imageLoaded: false, imageLoading: false,
+    maxWidth, maxHeight, lastNearAt: 0
+  };
+  if (record.imageUrl) inner.material.map = null;
   record.hitMeshes.forEach(mesh => { mesh.userData.galleryArtwork = record; });
   galleryArt.push(record);
 }
@@ -248,8 +226,8 @@ function setupScene() {
   const corridorCenter = (bounds.zMax + bounds.zMin) / 2;
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xe9e5dc);
-  scene.fog = new THREE.Fog(0xe9e5dc, Math.max(22, corridorLength * .55), Math.max(42, corridorLength * 1.15));
-  camera = new THREE.PerspectiveCamera(66, window.innerWidth / window.innerHeight, .1, 80);
+  scene.fog = new THREE.Fog(0xe9e5dc, 16, 38)
+  camera = new THREE.PerspectiveCamera(66, window.innerWidth / window.innerHeight, .1, 55);
   camera.position.copy(cameraPosition);
   camera.rotation.order = 'YXZ';
   renderer = new THREE.WebGLRenderer({ canvas, antialias: !/Android|iPhone|iPad/i.test(navigator.userAgent), alpha: false, powerPreference: 'low-power' });
@@ -323,6 +301,7 @@ function setupScene() {
   }
   for (let i = 0; i < rows; i += 2) { const z = -1.2 - i * 3.8; addPillar(-4.6, z); addPillar(4.6, z - 1.4); }
   const endGlow = new THREE.PointLight(0xb76d32, 8, 11, 1.6); endGlow.position.set(0, 2.4, bounds.zMin + 1.5); scene.add(endGlow);
+  galleryTextureLoader = new THREE.TextureLoader();
   clock = new THREE.Clock();
 }
 
@@ -404,11 +383,55 @@ function updateMovement(delta) {
   camera.rotation.set(pitch, yaw, 0, 'YXZ');
 }
 
+function updateArtworkTextures() {
+  if (!cameraPosition || !galleryTextureLoader) return;
+  const now = performance.now();
+  for (const record of galleryArt) {
+    if (!record.imageUrl) continue;
+    const distance = Math.hypot(record.group.position.x - cameraPosition.x, record.group.position.z - cameraPosition.z);
+    if (distance <= 16) {
+      record.lastNearAt = now;
+      if (!record.imageLoaded && !record.imageLoading) {
+        record.imageLoading = true;
+        galleryTextureLoader.load(record.imageUrl, texture => {
+          record.imageLoading = false;
+          if (!renderer || !scene) { texture.dispose(); return; }
+          const currentDistance = Math.hypot(record.group.position.x - cameraPosition.x, record.group.position.z - cameraPosition.z);
+          if (currentDistance > 28) { texture.dispose(); return; }
+          texture.colorSpace = THREE.SRGBColorSpace;
+          texture.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy() || 1);
+          texture.generateMipmaps = true;
+          texture.minFilter = THREE.LinearMipmapLinearFilter;
+          const imageAspect = (texture.image?.width || 1) / (texture.image?.height || 1);
+          const width = Math.min(record.maxWidth, record.maxHeight * imageAspect);
+          const height = Math.min(record.maxHeight, record.maxWidth / imageAspect);
+          record.inner.geometry.dispose();
+          record.inner.geometry = new THREE.PlaneGeometry(width, height);
+          record.artworkMaterial.map = texture;
+          record.artworkMaterial.color.set(0xffffff);
+          record.artworkMaterial.needsUpdate = true;
+          record.imageLoaded = true;
+        }, undefined, () => { record.imageLoading = false; });
+      }
+    } else if (distance > 30 && record.imageLoaded && now - record.lastNearAt > 900) {
+      const texture = record.artworkMaterial.map;
+      record.artworkMaterial.map = null;
+      record.artworkMaterial.color.set(0xf4efe6);
+      record.artworkMaterial.needsUpdate = true;
+      record.inner.geometry.dispose();
+      record.inner.geometry = new THREE.PlaneGeometry(record.maxWidth, record.maxHeight);
+      record.imageLoaded = false;
+      if (texture) texture.dispose();
+    }
+  }
+}
+
 function animate() {
   if (!entered) return;
   animationFrame = requestAnimationFrame(animate);
   const delta = clock.getDelta();
   updateMovement(delta);
+  updateArtworkTextures();
   renderer.render(scene, camera);
 }
 
@@ -606,9 +629,32 @@ function exitGallery() {
 async function loadGalleryProducts() {
   const { loadGalleryProducts: loadProductsFromSource } = await import('./product-adapter.js');
   const root = location.pathname.startsWith('/glsArt') ? '/glsArt/' : '/';
-  galleryProducts = await loadProductsFromSource({
+  allGalleryProducts = await loadProductsFromSource({
     fallbackUrl: root + 'data/storefront-index.json',
     limit: 5000
+  });
+  applySelectedGalleryCategory();
+}
+function applySelectedGalleryCategory() {
+  galleryProducts = selectedGalleryCategory === 'all'
+    ? [...allGalleryProducts]
+    : allGalleryProducts.filter(product => product.categoryIds?.includes(selectedGalleryCategory));
+  const count = $('category-selector-count');
+  if (count) count.textContent = selectedGalleryCategory === 'all'
+    ? 'نمایش همه آثار · ' + allGalleryProducts.length + ' اثر'
+    : 'تعداد آثار این راهرو · ' + galleryProducts.length;
+}
+function bindCategorySelector() {
+  document.querySelectorAll('[data-gallery-category]').forEach(button => {
+    button.addEventListener('click', () => {
+      selectedGalleryCategory = button.dataset.galleryCategory || 'all';
+      document.querySelectorAll('[data-gallery-category]').forEach(option => {
+        const selected = option === button;
+        option.classList.toggle('is-selected', selected);
+        option.setAttribute('aria-pressed', String(selected));
+      });
+      applySelectedGalleryCategory();
+    });
   });
 }
 
