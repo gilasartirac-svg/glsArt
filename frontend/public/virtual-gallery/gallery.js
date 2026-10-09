@@ -670,6 +670,7 @@ async function loadGalleryProducts() {
   allGalleryProducts = await loadProductsFromSource({
     fallbackUrl: root + 'data/storefront-index.json'
   });
+  if (!allGalleryProducts.length) throw new Error('فهرست آثار گالری بارگذاری نشد؛ برای جلوگیری از نمایش گالری ناقص، دوباره تلاش کنید.');
   applySelectedGalleryCategory();
 }
 function applySelectedGalleryCategory() {
