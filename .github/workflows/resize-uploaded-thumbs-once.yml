@@ -1,0 +1,107 @@
+name: One-time resize uploaded root images to 50 percent
+
+on:
+  push:
+    paths:
+      - ".github/workflows/resize-uploaded-thumbs-once.yml"
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: resize-uploaded-thumbs-once
+  cancel-in-progress: false
+
+jobs:
+  resize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install image processor
+        run: python -m pip install --disable-pip-version-check Pillow
+
+      - name: Resize and verify all root images
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import math
+
+          root = Path("frontend/public/uploaded")
+          target = root / "thumb"
+          target.mkdir(parents=True, exist_ok=True)
+          extensions = {".jpeg", ".jpg", ".png"}
+          sources = sorted(
+              p for p in root.iterdir()
+              if p.is_file() and p.suffix.lower() in extensions
+          )
+          expected = 234
+          if len(sources) != expected:
+              raise SystemExit(f"Safety check failed: expected {expected} root images, found {len(sources)}")
+
+          expected_dimensions = {}
+          for src in sources:
+              with Image.open(src) as im:
+                  im.verify()
+              with Image.open(src) as im:
+                  original_format = im.format
+                  if src.suffix.lower() in {".jpeg", ".jpg"} and original_format != "JPEG":
+                      raise SystemExit(f"Unexpected image format: {src} reports {original_format}")
+                  if src.suffix.lower() == ".png" and original_format != "PNG":
+                      raise SystemExit(f"Unexpected image format: {src} reports {original_format}")
+                  width, height = im.size
+                  new_size = (max(1, round(width * 0.5)), max(1, round(height * 0.5)))
+                  resized = im.resize(new_size, Image.Resampling.LANCZOS)
+                  dest = target / src.name
+                  if original_format == "JPEG":
+                      if resized.mode not in ("RGB", "L"):
+                          resized = resized.convert("RGB")
+                      resized.save(dest, format="JPEG", quality=90, optimize=True)
+                  elif original_format == "PNG":
+                      resized.save(dest, format="PNG", optimize=True)
+                  else:
+                      raise SystemExit(f"Unsupported source image format: {src} ({original_format})")
+                  expected_dimensions[src.name] = new_size
+
+          if len(expected_dimensions) != expected:
+              raise SystemExit(f"Processed {len(expected_dimensions)} images, expected {expected}")
+
+          for name, dimensions in expected_dimensions.items():
+              dest = target / name
+              if not dest.is_file():
+                  raise SystemExit(f"Missing output: {dest}")
+              with Image.open(dest) as im:
+                  if im.size != dimensions:
+                      raise SystemExit(f"Dimension verification failed for {name}: {im.size} != {dimensions}")
+                  ext = dest.suffix.lower()
+                  if ext in {".jpeg", ".jpg"} and im.format != "JPEG":
+                      raise SystemExit(f"JPEG format verification failed: {name}")
+                  if ext == ".png" and im.format != "PNG":
+                      raise SystemExit(f"PNG format verification failed: {name}")
+
+          print(f"SUCCESS: resized and verified {len(expected_dimensions)} images.")
+          print("Formats: " + ", ".join(f"{ext}: {sum(1 for p in sources if p.suffix.lower() == ext)}" for ext in sorted(extensions)))
+          print(f"Destination images verified: {len(expected_dimensions)}")
+          PY
+
+      - name: Commit thumbnails and remove one-time workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .github/workflows/resize-uploaded-thumbs-once.yml
+          git add -- frontend/public/uploaded/thumb .github/workflows/resize-uploaded-thumbs-once.yml
+          git commit -m "Resize uploaded root images to half-size thumbnails"
+          git push origin HEAD:main
