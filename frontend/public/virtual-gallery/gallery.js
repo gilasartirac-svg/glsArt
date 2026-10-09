@@ -430,8 +430,8 @@ function updateArtworkTextures() {
       }
     } else if (distance > 30 && record.imageLoaded && now - record.lastNearAt > 900) {
       const texture = record.artworkMaterial.map;
-      record.artworkMaterial.map = null;
-      record.artworkMaterial.color.set(0xf4efe6);
+      record.artworkMaterial.map = record.placeholderTexture;
+      record.artworkMaterial.color.set(0xffffff);
       record.artworkMaterial.needsUpdate = true;
       record.inner.geometry.dispose();
       record.inner.geometry = new THREE.PlaneGeometry(record.maxWidth, record.maxHeight);
