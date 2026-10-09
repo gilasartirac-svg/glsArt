@@ -141,3 +141,19 @@ test('product cards display prices in تومان without changing stored rial fi
  assert.ok(js.includes("t('product.toman')"));
  assert.ok(!js.includes("t('product.rial')</small></strong>"));
 });
+
+
+test('virtual gallery link uses native navigation to its standalone static entry page',()=>{
+ const js=read('frontend/src/app.js');
+ const html=read('frontend/public/virtual-gallery/index.html');
+ const clickStart=js.indexOf("document.addEventListener('click',e=>{",js.indexOf('async function router()'));
+ const clickEnd=js.indexOf("},{capture:true});",clickStart);
+ const handler=js.slice(clickStart,clickEnd);
+ const bypass=handler.indexOf("u.pathname.replace(/\\\\/+$/,'')||'/')==='/virtual-gallery'");
+ const prevent=handler.indexOf('e.preventDefault()');
+ assert.ok(bypass>=0,'gallery route must bypass SPA interception');
+ assert.ok(prevent>bypass,'gallery native navigation guard must run before SPA preventDefault');
+ assert.ok(html.includes('<main id="gallery-app">'),'standalone gallery entry page is present');
+ assert.ok(html.includes('id="enter-gallery"'),'gallery entry control is present');
+ assert.ok(html.includes('type="module" src="./gallery.js'),'gallery runtime module is linked');
+});
