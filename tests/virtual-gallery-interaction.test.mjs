@@ -11,12 +11,12 @@ const [script, markup, styles, adapter] = await Promise.all([
 
 test('virtual gallery loads real storefront artwork images and product metadata', () => {
   assert.match(script, /storefront-index\.json/);
-  assert.match(script, /new THREE\.TextureLoader\(\)\.load/);
+  assert.match(script, /galleryTextureLoader\.load\(/);
   assert.match(adapter, /price_irt/);
   assert.match(adapter, /description:/);
 });
 
-test('clicking a framed artwork triggers a cinematic camera focus and product panel', () => {
+test('clicking a frameless artwork triggers a cinematic camera focus and product panel', () => {
   assert.match(script, /raycaster\.intersectObjects/);
   assert.match(script, /function focusArtwork\(/);
   assert.match(script, /duration: prefersReducedMotion \? 20 : 1250/);
@@ -85,7 +85,7 @@ test('virtual gallery environment uses a bright marble finish and natural lighti
   assert.match(script,/map: marbleTexture, roughness: \.24/);
   assert.match(script,/map: marbleTexture, roughness: \.38/);
   assert.match(script,/new THREE\.AmbientLight\(0xfff5e5, \.82\)/);
-  assert.match(markup,/gallery\.css\?v=5/);
+  assert.match(markup,/gallery\.css\?v=6/);
   assert.match(markup,/gallery\.js\?v=7/);
 });
 
@@ -105,7 +105,7 @@ test('virtual gallery supports one-finger look and faster two-finger pan/pinch o
   assert.match(script,/Two fingers: pan through the gallery and pinch to move closer\/farther/);
   assert.match(script,/getTouchGesture\(\)/);
   assert.match(script,/cameraPosition\.addScaledVector\(direction, pinchDelta \* \.055\)/);
-  assert.match(markup,/gallery\.js\?v=6/);
+  assert.match(markup,/gallery\.js\?v=8/);
 });
 
 
@@ -115,4 +115,27 @@ test('gallery builds enough corridor rows for every product instead of truncatin
   assert.match(script,/bounds\.zMin = -Math\.max\(10\.5, \(rows - 1\) \* 3\.1 \+ 4\.5\)/);
   assert.match(adapter,/limit = 5000/);
   assert.doesNotMatch(adapter,/if \(!image \|\| active === false/);
+});
+
+test('gallery entrance offers category corridors and filters using actual category IDs',()=>{
+  assert.match(markup,/data-gallery-category="cat_gilas_religious"/);
+  assert.match(markup,/data-gallery-category="cat_gilas_poetry"/);
+  assert.match(markup,/data-gallery-category="cat_gilas_horizontal"/);
+  assert.match(markup,/data-gallery-category="cat_gilas_vertical"/);
+  assert.match(markup,/data-gallery-category="cat_gilas_square"/);
+  assert.match(script,/function bindCategorySelector\(\)/);
+  assert.match(script,/product\.categoryIds\?\.includes\(selectedGalleryCategory\)/);
+  assert.match(adapter,/categoryIds: Array\.isArray\(raw\.category_ids\)/);
+});
+test('artwork wall surfaces do not add a second frame around framed product photos',()=>{
+  assert.match(script,/hitMeshes: \[inner\]/);
+  assert.doesNotMatch(script,/const outerFrame = new THREE\.Mesh/);
+  assert.doesNotMatch(script,/const frameMesh = new THREE\.Mesh/);
+});
+test('product textures load near the visitor and unload at a distance to preserve memory',()=>{
+  assert.match(script,/function updateArtworkTextures\(\)/);
+  assert.match(script,/if \(distance <= 16\)/);
+  assert.match(script,/distance > 30 && record\.imageLoaded/);
+  assert.match(script,/updateArtworkTextures\(\);/);
+  assert.match(script,/scene\.fog = new THREE\.Fog\(0xe9e5dc, 16, 38\)/);
 });
