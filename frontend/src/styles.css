@@ -6245,3 +6245,11 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
     width:min(88vw,370px);
   }
 }
+
+
+/* Mobile header top-gap fix: the current ga-header-shell is in normal flow, so legacy body top padding must not push it down. */
+@media (max-width:900px){
+  body:has(.ga-header-shell){
+    padding-top:0!important;
+  }
+}
