@@ -155,7 +155,7 @@ test('switching gallery corridors rebuilds the scene using the selected product 
   assert.match(script,/sceneCategory = selectedGalleryCategory/);
   assert.match(script,/else if \(sceneCategory !== selectedGalleryCategory\)/);
   assert.match(script,/if \(!renderer\) renderer = new THREE\.WebGLRenderer/);
-  assert.match(markup,/gallery\.js\?v=10/);
+  assert.match(markup,/gallery\.js\?v=11/);
 });
 
 
