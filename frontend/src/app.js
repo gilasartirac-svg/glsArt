@@ -1336,6 +1336,9 @@ document.addEventListener('click',e=>{
  if(u.origin!==location.origin)return;
  const base=routeBase();
  if(base&&!(u.pathname===base||u.pathname.startsWith(base+'/')))return;
+ // The 3D gallery is a standalone static HTML application, not an SPA route.
+ // Let the browser request its published index.html instead of resolving it as a product slug.
+ if((u.pathname.replace(/\\/+$/,'')||'/')==='/virtual-gallery')return;
  e.preventDefault();
  const path=(u.pathname+(u.search||'')).replace(new RegExp('^'+base),'')||'/';
  navigate(path);
