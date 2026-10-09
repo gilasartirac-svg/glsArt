@@ -123,8 +123,9 @@ jobs:
           const menuToggle=page.locator('.ga-header-menu-toggle');
           if(!await desktopNav.isVisible())fail('Desktop primary navigation is not visible');
           if(await menuToggle.isVisible())fail('Mobile menu toggle is visible at desktop width');
+          const desktopViewportWidth=await page.evaluate(()=>window.innerWidth);
           const desktopNavBoxes=await desktopNav.locator('.ga-header-nav-item').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width,height:r.height}}));
-          if(desktopNavBoxes.length<5||desktopNavBoxes.some(r=>r.width<1||r.height<1||r.left< -1||r.right>window.innerWidth+1))fail('Desktop navigation links overflow or collapse: '+JSON.stringify(desktopNavBoxes));
+          if(desktopNavBoxes.length<5||desktopNavBoxes.some(r=>r.width<1||r.height<1||r.left< -1||r.right>desktopViewportWidth+1))fail('Desktop navigation links overflow or collapse: '+JSON.stringify(desktopNavBoxes));
           await page.setViewportSize({width:390,height:844});
           await page.waitForTimeout(150);
           if(!await menuToggle.isVisible())fail('Mobile menu toggle is not visible at 390px');
