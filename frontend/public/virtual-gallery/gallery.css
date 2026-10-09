@@ -13,3 +13,11 @@
 .artwork-panel__details{width:100%;justify-content:space-between;border-radius:5px;gap:12px}
 @media(max-width:650px){.artwork-panel{top:auto;right:10px;bottom:10px;left:10px;width:auto;max-height:min(66vh,620px);border-radius:12px;transform:translateY(18px) scale(.99)}.artwork-panel.is-open{transform:translateY(0) scale(1)}.artwork-panel__image{max-height:24vh;aspect-ratio:16/7}.artwork-panel__body{padding:16px 18px 18px}.artwork-panel h2{font-size:19px}.artwork-panel__description{-webkit-line-clamp:3}.artwork-panel__close{top:8px;left:8px;width:34px;height:34px}.scene-caption{transition:opacity .25s ease}.scene-shell:has(.artwork-panel.is-open) .scene-caption{opacity:.25}}
 @media(prefers-reduced-motion:reduce){.artwork-panel{transition:none}}
+
+/* Stage 3: cart-ready action; intentionally does not mutate a real cart. */
+.artwork-panel__cart{display:flex;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:10px;padding:11px 16px;border:1px solid rgba(217,164,65,.7);border-radius:5px;background:rgba(217,164,65,.1);color:#f1d49a;font-weight:700;transition:background .2s ease,border-color .2s ease}
+.artwork-panel__cart:hover{background:rgba(217,164,65,.18);border-color:var(--gold)}
+.artwork-panel__cart:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.artwork-panel__cart-message{min-height:0;margin:8px 0 0;color:#d8c6a4;font-size:11px;line-height:1.9}
+.artwork-panel__cart-message:empty{display:none}
+@media(prefers-reduced-motion:reduce){.artwork-panel__cart{transition:none}}
