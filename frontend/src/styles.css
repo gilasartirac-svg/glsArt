@@ -6066,7 +6066,7 @@ body{font-family:Vazirmatn,Tahoma,Arial,sans-serif;text-rendering:optimizeLegibi
   --ga-label-size:clamp(12px,.95vw,14px);
   --ga-panel-padding:clamp(14px,2vw,24px);
 }
-*,*::before,*::after{box-sizing:border-box}
+
 html{max-width:100%;overflow-x:clip}
 body{max-width:100%;min-width:320px;overflow-x:clip;font-size:var(--ga-copy-size);line-height:1.75}
 :where(main,section,article,aside,nav,header,footer,form,fieldset,.container,.page,.page-content,.admin-layout,.admin-content,.admin-main,.card,.panel,.modal,.drawer,.dialog,.form-section,.settings-section){min-width:0;max-width:100%}
