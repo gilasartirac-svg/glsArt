@@ -26,8 +26,7 @@ let focusReturn = null;
 let activeArtwork = null;
 let dragMoved = false;
 let panelCloseTimer = 0;
-const cameraTarget = new THREE.Vector3(0, 1.65, 4.8);
-const cameraPosition = new THREE.Vector3(0, 1.65, 8.8);
+let cameraTarget, cameraPosition;
 const bounds = { x: 4.25, zMin: -10.5, zMax: 8.5 };
 const galleryArt = [];
 let galleryProducts = [];
@@ -401,6 +400,10 @@ async function enterGallery() {
   welcome.hidden = true; loading.hidden = false; errorBox.hidden = true;
   try {
     if (!THREE) THREE = await import(THREE_MODULE_URL);
+    if (!cameraTarget) {
+      cameraTarget = new THREE.Vector3(0, 1.65, 4.8);
+      cameraPosition = new THREE.Vector3(0, 1.65, 8.8);
+    }
     if (!moveVector) {
       moveVector = new THREE.Vector3();
       targetVector = new THREE.Vector3();
