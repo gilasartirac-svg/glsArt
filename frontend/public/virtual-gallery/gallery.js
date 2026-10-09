@@ -1,4 +1,5 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
+let THREE;
+const THREE_MODULE_URL = 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 
 const $ = (id) => document.getElementById(id);
 const welcome = $('welcome');
@@ -259,6 +260,7 @@ async function enterGallery() {
   if (entered) return;
   welcome.hidden = true; loading.hidden = false; errorBox.hidden = true;
   try {
+    if (!THREE) THREE = await import(THREE_MODULE_URL);
     if (!renderer) { await loadGalleryProducts(); setupScene(); }
     bindControls();
     cameraTarget.set(0, 1.65, 4.8);
