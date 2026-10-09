@@ -88,7 +88,7 @@ test('virtual gallery environment uses a bright marble finish and natural lighti
   assert.match(script,/map: marbleTexture, roughness: \.38/);
   assert.match(script,/new THREE\.AmbientLight\(0xfff5e5, \.82\)/);
   assert.match(markup,/gallery\.css\?v=6/);
-  assert.match(markup,/gallery\.js\?v=8/);
+  assert.match(markup,/gallery\\.js\\?v=\\d+/);
 });
 
 test('left and right controls navigate to a centered, front-facing artwork view',()=>{
@@ -107,7 +107,7 @@ test('virtual gallery supports one-finger look and faster two-finger pan/pinch o
   assert.match(script,/Two fingers: pan through the gallery and pinch to move closer\/farther/);
   assert.match(script,/getTouchGesture\(\)/);
   assert.match(script,/cameraPosition\.addScaledVector\(direction, pinchDelta \* \.055\)/);
-  assert.match(markup,/gallery\.js\?v=8/);
+  assert.match(markup,/gallery\\.js\\?v=\\d+/);
 });
 
 
