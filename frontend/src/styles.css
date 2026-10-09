@@ -6600,3 +6600,21 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
   .home-latest .product-card-heading h3{font-size:16px!important}
   .home-latest .product-card-price{font-size:19px!important}
 }
+
+
+/* Final mobile fix: product card itself must not reserve a phantom second grid column.
+   The image/details are already stacked by the mobile link layout above. */
+@media (max-width:767px){
+  .home-latest .product-card{
+    display:block!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    width:100%;
+    min-width:0;
+  }
+  .home-latest .product-card-link{
+    display:flex!important;
+    width:100%;
+    min-width:0;
+    grid-column:1 / -1;
+  }
+}
