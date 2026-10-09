@@ -86,7 +86,7 @@ test('virtual gallery environment uses a bright marble finish and natural lighti
   assert.match(script,/map: marbleTexture, roughness: \.38/);
   assert.match(script,/new THREE\.AmbientLight\(0xfff5e5, \.82\)/);
   assert.match(markup,/gallery\.css\?v=5/);
-  assert.match(markup,/gallery\.js\?v=5/);
+  assert.match(markup,/gallery\.js\?v=6/);
 });
 
 test('left and right controls navigate to a centered, front-facing artwork view',()=>{
