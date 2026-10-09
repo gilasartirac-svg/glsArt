@@ -31,7 +31,8 @@ test('Three.js objects are initialized only after the module is loaded', () => {
   assert.match(script, /let moveVector, targetVector, forward, right, raycaster, pointerNdc/);
   assert.match(script, /let cameraTarget, cameraPosition(?:, cameraVelocity, desiredVelocity)?;/);
   assert.doesNotMatch(script.slice(0, script.indexOf('async function enterGallery')), /const camera(?:Target|Position) = new THREE\.Vector3/);
-  assert.match(script, /if \(!THREE\) THREE = await import\(THREE_MODULE_URL\);[\s\S]{0,250}if \(!cameraTarget\) \{[\s\S]{0,150}cameraPosition = new THREE\.Vector3/);
+  assert.match(script, /const THREE_MODULE_URLS = \[[\s\S]*?unpkg\.com\/three@0\.180\.0[\s\S]*?esm\.sh\/three@0\.180\.0/);
+  assert.match(script, /if \(!THREE\) THREE = await loadThreeModule\(\);[\s\S]{0,250}if \(!cameraTarget\) \{[\s\S]{0,150}cameraPosition = new THREE\.Vector3/);
 });
 
 test('gallery products use an API-ready normalized contract with static JSON as current source', () => {
