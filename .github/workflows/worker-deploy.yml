@@ -83,18 +83,30 @@ jobs:
         if: steps.service.outputs.paused != 'true'
         run: npx wrangler d1 migrations apply gilasartdatabase --remote
 
-      - name: Sync admin bootstrap secret
-        if: steps.service.outputs.paused != 'true' && env.ADMIN_BOOTSTRAP_MOBILE != ''
-        run: printf '%s' "$ADMIN_BOOTSTRAP_MOBILE" | npx wrangler secret put ADMIN_BOOTSTRAP_MOBILE --config wrangler.toml
+      - name: Deploy Worker code
+        if: steps.service.outputs.paused != 'true'
+        run: npx wrangler deploy --config wrangler.toml
 
-      - name: Sync OTP and SMS secrets
+      - name: Sync Worker secrets in one deployment
         if: steps.service.outputs.paused != 'true'
         run: |
           set -euo pipefail
-          printf '%s' "$OTP_PEPPER" | npx wrangler secret put OTP_PEPPER --config wrangler.toml
-          printf '%s' "$KAVENEGAR_API_KEY" | npx wrangler secret put KAVENEGAR_API_KEY --config wrangler.toml
-          printf '%s' "$KAVENEGAR_SENDER" | npx wrangler secret put KAVENEGAR_SENDER --config wrangler.toml
-
-      - name: Deploy Worker
-        if: steps.service.outputs.paused != 'true'
-        run: npx wrangler deploy --config wrangler.toml
+          secret_file="$(mktemp)"
+          trap 'rm -f "$secret_file"' EXIT
+          node - "$secret_file" <<'NODE'
+          const fs = require('node:fs');
+          const output = process.argv[2];
+          const required = ['OTP_PEPPER', 'KAVENEGAR_API_KEY', 'KAVENEGAR_SENDER'];
+          const secrets = {};
+          for (const key of required) {
+            const value = process.env[key];
+            if (!value) throw new Error('Required Worker secret is missing: ' + key);
+            secrets[key] = value;
+          }
+          // Preserve the existing bootstrap secret when the optional GitHub secret is not configured.
+          if (process.env.ADMIN_BOOTSTRAP_MOBILE) {
+            secrets.ADMIN_BOOTSTRAP_MOBILE = process.env.ADMIN_BOOTSTRAP_MOBILE;
+          }
+          fs.writeFileSync(output, JSON.stringify(secrets), { mode: 0o600 });
+          NODE
+          npx wrangler secret bulk "$secret_file" --config wrangler.toml
