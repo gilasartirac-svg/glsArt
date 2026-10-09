@@ -163,7 +163,8 @@ test('virtual gallery link uses native navigation to its standalone static entry
 test('homepage product cards have dedicated mobile and tablet responsive layouts',()=>{
  const css=read('frontend/src/styles.css');
  const js=read('frontend/src/app.js');
- assert.ok(js.includes('class="grid">'+(state.products.slice(0,8).map(productCard).join('')'));
+ assert.ok(js.includes("const latestSection='<section class=\"wrap section home-latest\""));
+ assert.ok(js.includes("state.products.slice(0,8).map(productCard).join('')"));
  assert.ok(css.includes('.home-latest .product-card-link{'));
  assert.ok(css.includes('grid-template-columns:minmax(0,1fr);'));
  assert.ok(css.includes('grid-template-columns:minmax(108px,34%) minmax(0,1fr);'));
