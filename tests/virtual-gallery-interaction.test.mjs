@@ -75,7 +75,7 @@ test('camera motion uses velocity damping, angular inertia, and cinematic focus 
   assert.match(script, /pitchVelocity \*= Math\.exp/);
   assert.match(script, /const eased = 1 - Math\.pow\(1 - progress, 5\)/);
   assert.match(script, /Soft spring forces begin before the hard boundary/);
-  assert.match(script, /walkSpeed: 1\.05/);
+  assert.match(script, /walkSpeed: 3\.2/);
 });
 
 
@@ -86,7 +86,7 @@ test('virtual gallery environment uses a bright marble finish and natural lighti
   assert.match(script,/map: marbleTexture, roughness: \.38/);
   assert.match(script,/new THREE\.AmbientLight\(0xfff5e5, \.82\)/);
   assert.match(markup,/gallery\.css\?v=5/);
-  assert.match(markup,/gallery\.js\?v=6/);
+  assert.match(markup,/gallery\.js\?v=7/);
 });
 
 test('left and right controls navigate to a centered, front-facing artwork view',()=>{
@@ -98,12 +98,21 @@ test('left and right controls navigate to a centered, front-facing artwork view'
 });
 
 
-test('virtual gallery supports one-finger look and two-finger pan/pinch on touch screens',()=>{
+test('virtual gallery supports one-finger look and faster two-finger pan/pinch on touch screens',()=>{
   assert.match(script,/const touchPointers = new Map\(\)/);
   assert.match(script,/canvas\.style\.touchAction = 'none'/);
   assert.match(script,/One finger: look around the gallery/);
   assert.match(script,/Two fingers: pan through the gallery and pinch to move closer\/farther/);
   assert.match(script,/getTouchGesture\(\)/);
-  assert.match(script,/cameraPosition\.addScaledVector\(direction, pinchDelta \* \.018\)/);
+  assert.match(script,/cameraPosition\.addScaledVector\(direction, pinchDelta \* \.055\)/);
   assert.match(markup,/gallery\.js\?v=6/);
+});
+
+
+test('gallery builds enough corridor rows for every product instead of truncating at ten',()=>{
+  assert.match(script,/const rows = Math\.max\(5, Math\.ceil\(galleryProducts\.length \/ 2\)\)/);
+  assert.match(script,/for \(let i = 0; i < rows; i\+\+\)/);
+  assert.match(script,/bounds\.zMin = -Math\.max\(10\.5, \(rows - 1\) \* 3\.1 \+ 4\.5\)/);
+  assert.match(adapter,/limit = 5000/);
+  assert.doesNotMatch(adapter,/if \(!image \|\| active === false/);
 });
