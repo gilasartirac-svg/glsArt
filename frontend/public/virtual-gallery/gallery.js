@@ -26,8 +26,10 @@ let focusReturn = null;
 let activeArtwork = null;
 let dragMoved = false;
 let panelCloseTimer = 0;
-let cameraTarget, cameraPosition;
+let cameraTarget, cameraPosition, cameraVelocity, desiredVelocity;
+let yawVelocity = 0, pitchVelocity = 0;
 const bounds = { x: 4.25, zMin: -10.5, zMax: 8.5 };
+const movementTuning = { walkSpeed: 1.05, sprintSpeed: 1.7, acceleration: 2.6, damping: 3.8, turnDamping: 5.2, boundarySpring: 7.5 };
 const galleryArt = [];
 let galleryProducts = [];
 const fallbackTitles = ['نقش و نگار','گرمای مس','روایت ایرانی','آرامش رنگ','هنر ماندگار','جزئیات هنر','طلایی گرم','بافت و فرم','گیلاس آرت','نقش ایرانی'];
@@ -70,16 +72,30 @@ function addWallArt(x, z, rotation, index, title, imageUrl = '', product = null)
   const group = new THREE.Group();
   group.position.set(x, 2.05, z);
   group.rotation.y = rotation;
-  const width = 1.36, height = 1.7, frame = .095;
-  const frameMaterial = new THREE.MeshStandardMaterial({ color: index % 2 ? 0x9a6336 : 0xc7a15b, metalness: .72, roughness: .3 });
-  const darkFrame = new THREE.MeshStandardMaterial({ color: 0x17130f, metalness: .4, roughness: .35 });
-  const backing = new THREE.Mesh(new THREE.BoxGeometry(width + frame * 2, height + frame * 2, .12), darkFrame);
-  backing.position.z = -.055; group.add(backing);
-  const frameMesh = new THREE.Mesh(new THREE.BoxGeometry(width + frame, height + frame, .11), frameMaterial);
-  frameMesh.position.z = .012; group.add(frameMesh);
-  const artworkMaterial = new THREE.MeshStandardMaterial({ map: makeCanvasTexture(index, title), roughness: .72, metalness: .05 });
+  const width = 1.36, height = 1.7, frame = .105;
+  const shadowMaterial = new THREE.MeshStandardMaterial({ color: 0x030303, roughness: .96, metalness: .02 });
+  const darkFrame = new THREE.MeshStandardMaterial({ color: 0x100d0a, metalness: .34, roughness: .42 });
+  const frameMaterial = new THREE.MeshStandardMaterial({ color: index % 2 ? 0x9c552b : 0xc39a4c, metalness: .82, roughness: .24 });
+  const innerTrim = new THREE.MeshStandardMaterial({ color: 0xead29a, metalness: .72, roughness: .28 });
+  const backing = new THREE.Mesh(new THREE.BoxGeometry(width + frame * 2.2, height + frame * 2.2, .17), shadowMaterial);
+  backing.position.set(0, 0, -.095); group.add(backing);
+  const outerFrame = new THREE.Mesh(new THREE.BoxGeometry(width + frame * 2, height + frame * 2, .145), darkFrame);
+  outerFrame.position.z = -.025; group.add(outerFrame);
+  const frameMesh = new THREE.Mesh(new THREE.BoxGeometry(width + frame, height + frame, .13), frameMaterial);
+  frameMesh.position.z = .035; group.add(frameMesh);
+  const innerRim = new THREE.Mesh(new THREE.BoxGeometry(width + .025, height + .025, .035), innerTrim);
+  innerRim.position.z = .104; group.add(innerRim);
+  const artworkMaterial = new THREE.MeshStandardMaterial({ map: makeCanvasTexture(index, title), roughness: .86, metalness: .02 });
   const inner = new THREE.Mesh(new THREE.PlaneGeometry(width, height), artworkMaterial);
-  inner.position.z = .075; group.add(inner);
+  inner.position.z = .126; group.add(inner);
+  const sideRailMaterial = new THREE.MeshStandardMaterial({ color: 0x5e381d, metalness: .78, roughness: .3 });
+  for (const side of [-1, 1]) {
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(.025, height + frame * 1.7, .035), sideRailMaterial);
+    rail.position.set(side * (width / 2 + frame * .55), 0, .115); group.add(rail);
+  }
+  const topRail = new THREE.Mesh(new THREE.BoxGeometry(width + frame * 1.7, .025, .035), sideRailMaterial);
+  topRail.position.set(0, height / 2 + frame * .55, .115); group.add(topRail);
+  const bottomRail = topRail.clone(); bottomRail.position.y = -height / 2 - frame * .55; group.add(bottomRail);
   if (imageUrl) {
     const imagePath = galleryImageUrl(imageUrl);
     if (imagePath) new THREE.TextureLoader().load(imagePath, texture => {
@@ -97,10 +113,16 @@ function addWallArt(x, z, rotation, index, title, imageUrl = '', product = null)
       artworkMaterial.map = texture; artworkMaterial.needsUpdate = true;
     }, undefined, () => {});
   }
-  const glow = new THREE.PointLight(0xffd99a, 2.4, 4.2, 2);
-  glow.position.set(0, 1.15, .55); group.add(glow);
-  const spot = new THREE.Mesh(new THREE.SphereGeometry(.035, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffe1a4 }));
-  spot.position.set(0, 1.05, .15); group.add(spot);
+  const glow = new THREE.PointLight(0xffd19a, 1.15, 3.2, 2);
+  glow.position.set(0, .25, .52); group.add(glow);
+  const spotlight = new THREE.SpotLight(0xffd6a0, 34, 5.2, Math.PI / 7, .62, 1.65);
+  spotlight.position.set(0, 1.52, .95);
+  const aim = new THREE.Object3D();
+  aim.position.set(0, .05, .08);
+  group.add(spotlight, aim);
+  spotlight.target = aim;
+  const spot = new THREE.Mesh(new THREE.SphereGeometry(.025, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffe0aa }));
+  spot.position.set(0, 1.52, .88); group.add(spot);
   scene.add(group);
   const record = { group, title, index, product, hitMeshes: [backing, frameMesh, inner] };
   record.hitMeshes.forEach(mesh => { mesh.userData.galleryArtwork = record; });
@@ -219,8 +241,8 @@ function addPillar(x, z) {
 
 function setupScene() {
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x090a0d);
-  scene.fog = new THREE.FogExp2(0x090a0d, .037);
+  scene.background = new THREE.Color(0x07080b);
+  scene.fog = new THREE.Fog(0x0b0b0e, 15, 31);
   camera = new THREE.PerspectiveCamera(66, window.innerWidth / window.innerHeight, .1, 80);
   camera.position.copy(cameraPosition);
   camera.rotation.order = 'YXZ';
@@ -229,21 +251,32 @@ function setupScene() {
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.12;
+  renderer.toneMappingExposure = .92;
 
-  const ambient = new THREE.HemisphereLight(0xead8b7, 0x18110c, 1.35); scene.add(ambient);
-  const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(12, 24), new THREE.MeshStandardMaterial({ color: 0x17171a, roughness: .9, side: THREE.DoubleSide }));
+  const ambient = new THREE.AmbientLight(0xd6c5a8, .34); scene.add(ambient);
+  const hemisphere = new THREE.HemisphereLight(0xcab99a, 0x100d0b, .52); scene.add(hemisphere);
+  const ceilingMaterial = new THREE.MeshStandardMaterial({ color: 0x111114, roughness: .94, metalness: .02, side: THREE.DoubleSide });
+  const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(12, 24), ceilingMaterial);
   ceiling.rotation.x = Math.PI / 2; ceiling.position.set(0, 4.2, -2); scene.add(ceiling);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 30), new THREE.MeshStandardMaterial({ color: 0x28221b, roughness: .32, metalness: .16 }));
+  const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x201a15, roughness: .28, metalness: .22, side: THREE.DoubleSide });
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 30), floorMaterial);
   floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, -2); scene.add(floor);
-  const floorGrid = new THREE.GridHelper(12, 32, 0x59442b, 0x332b21);
-  floorGrid.position.y = .012; floorGrid.material.transparent = true; floorGrid.material.opacity = .24; scene.add(floorGrid);
+  const floorGrid = new THREE.GridHelper(12, 32, 0x4b3827, 0x29221b);
+  floorGrid.position.y = .014; floorGrid.material.transparent = true; floorGrid.material.opacity = .13; scene.add(floorGrid);
 
-  const backWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 4.2), new THREE.MeshStandardMaterial({ color: 0x151518, roughness: .86, side: THREE.DoubleSide }));
+  const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x101014, roughness: .91, metalness: .04, side: THREE.DoubleSide });
+  const backWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 4.2), wallMaterial);
   backWall.position.set(0, 2.1, -14); scene.add(backWall);
-  const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 4.2), new THREE.MeshStandardMaterial({ color: 0x171719, roughness: .9, side: THREE.DoubleSide }));
+  const sideWallMaterial = new THREE.MeshStandardMaterial({ color: 0x131316, roughness: .88, metalness: .06, side: THREE.DoubleSide });
+  const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 4.2), sideWallMaterial);
   leftWall.rotation.y = Math.PI / 2; leftWall.position.set(-6, 2.1, -2); scene.add(leftWall);
   const rightWall = leftWall.clone(); rightWall.rotation.y = -Math.PI / 2; rightWall.position.x = 6; scene.add(rightWall);
+  const baseTrimMaterial = new THREE.MeshStandardMaterial({ color: 0x6c4827, roughness: .42, metalness: .68 });
+  const leftBaseTrim = new THREE.Mesh(new THREE.BoxGeometry(.055, .12, 30), baseTrimMaterial);
+  leftBaseTrim.position.set(-5.94, .08, -2); scene.add(leftBaseTrim);
+  const rightBaseTrim = leftBaseTrim.clone(); rightBaseTrim.position.x = 5.94; scene.add(rightBaseTrim);
+  const ceilingTrim = new THREE.Mesh(new THREE.BoxGeometry(12, .045, .045), baseTrimMaterial);
+  ceilingTrim.position.set(0, 4.02, -2); scene.add(ceilingTrim);
 
   for (let i = 0; i < 5; i++) {
     const z = 1 - i * 3.1;
@@ -251,8 +284,6 @@ function setupScene() {
     const rightProduct = galleryProducts[i + 5];
     addWallArt(-5.91, z, Math.PI / 2, i, leftProduct?.name || fallbackTitles[i], leftProduct?.image || '', leftProduct || null);
     addWallArt(5.91, z, -Math.PI / 2, i + 1, rightProduct?.name || fallbackTitles[i + 5], rightProduct?.image || '', rightProduct || null);
-    const lamp = new THREE.SpotLight(0xffd9a0, 22, 8, Math.PI / 5, .65, 1.4);
-    lamp.position.set(i % 2 ? -2 : 2, 3.95, z); lamp.target.position.set(0, 1.7, z); scene.add(lamp, lamp.target);
   }
   for (let i = 0; i < 4; i++) { addPillar(-4.6, -1.2 - i * 3.8); addPillar(4.6, -2.6 - i * 3.8); }
   const endGlow = new THREE.PointLight(0xb76d32, 8, 11, 1.6); endGlow.position.set(0, 2.4, -12.5); scene.add(endGlow);
@@ -260,20 +291,23 @@ function setupScene() {
 }
 
 function clampCamera() {
-  cameraTarget.x = THREE.MathUtils.clamp(cameraTarget.x, -bounds.x, bounds.x);
-  cameraTarget.z = THREE.MathUtils.clamp(cameraTarget.z, bounds.zMin, bounds.zMax);
-  cameraTarget.y = THREE.MathUtils.clamp(cameraTarget.y, 1.35, 2.15);
+  cameraPosition.x = THREE.MathUtils.clamp(cameraPosition.x, -bounds.x, bounds.x);
+  cameraPosition.z = THREE.MathUtils.clamp(cameraPosition.z, bounds.zMin, bounds.zMax);
+  cameraPosition.y = THREE.MathUtils.clamp(cameraPosition.y, 1.35, 2.15);
 }
 
 function updateMovement(delta) {
+  const dt = Math.min(delta, .04);
   if (focusTransition) {
     const transition = focusTransition;
     const progress = Math.min(1, (performance.now() - transition.startedAt) / transition.duration);
-    const eased = progress * progress * (3 - 2 * progress);
+    const eased = 1 - Math.pow(1 - progress, 5);
     cameraPosition.lerpVectors(transition.fromPosition, transition.toPosition, eased);
     const yawDelta = Math.atan2(Math.sin(transition.toYaw - transition.fromYaw), Math.cos(transition.toYaw - transition.fromYaw));
     yaw = transition.fromYaw + yawDelta * eased;
     pitch = transition.fromPitch + (transition.toPitch - transition.fromPitch) * eased;
+    cameraVelocity.set(0, 0, 0);
+    yawVelocity = 0; pitchVelocity = 0;
     camera.position.copy(cameraPosition);
     camera.rotation.set(pitch, yaw, 0, 'YXZ');
     if (progress >= 1) {
@@ -283,7 +317,7 @@ function updateMovement(delta) {
     }
     return;
   }
-  const speed = (held.has('shift') ? 3.2 : 1.8) * Math.min(delta, .05);
+
   forward.set(-Math.sin(yaw), 0, -Math.cos(yaw)).normalize();
   right.set(Math.cos(yaw), 0, -Math.sin(yaw)).normalize();
   moveVector.set(0, 0, 0);
@@ -291,8 +325,45 @@ function updateMovement(delta) {
   if (held.has('back') || held.has('s') || held.has('arrowdown')) moveVector.sub(forward);
   if (held.has('right') || held.has('d') || held.has('arrowright')) moveVector.add(right);
   if (held.has('left') || held.has('a') || held.has('arrowleft')) moveVector.sub(right);
-  if (moveVector.lengthSq()) { moveVector.normalize().multiplyScalar(speed); cameraTarget.add(moveVector); clampCamera(); }
-  cameraPosition.lerp(cameraTarget, 1 - Math.exp(-5.5 * Math.min(delta, .05)));
+
+  const maxSpeed = held.has('shift') ? movementTuning.sprintSpeed : movementTuning.walkSpeed;
+  if (moveVector.lengthSq() > 0) {
+    moveVector.normalize().multiplyScalar(maxSpeed);
+    desiredVelocity.copy(moveVector);
+    cameraVelocity.lerp(desiredVelocity, 1 - Math.exp(-movementTuning.acceleration * dt));
+  } else {
+    cameraVelocity.multiplyScalar(Math.exp(-movementTuning.damping * dt));
+  }
+
+  // Soft spring forces begin before the hard boundary, so the camera eases away from walls.
+  const softX = bounds.x - .32;
+  const softMinZ = bounds.zMin + .38;
+  const softMaxZ = bounds.zMax - .38;
+  if (cameraPosition.x > softX) cameraVelocity.x -= (cameraPosition.x - softX) * movementTuning.boundarySpring * dt;
+  if (cameraPosition.x < -softX) cameraVelocity.x += (-softX - cameraPosition.x) * movementTuning.boundarySpring * dt;
+  if (cameraPosition.z < softMinZ) cameraVelocity.z += (softMinZ - cameraPosition.z) * movementTuning.boundarySpring * dt;
+  if (cameraPosition.z > softMaxZ) cameraVelocity.z -= (cameraPosition.z - softMaxZ) * movementTuning.boundarySpring * dt;
+
+  cameraPosition.addScaledVector(cameraVelocity, dt);
+  if (cameraPosition.x > bounds.x || cameraPosition.x < -bounds.x) {
+    cameraPosition.x = THREE.MathUtils.clamp(cameraPosition.x, -bounds.x, bounds.x);
+    cameraVelocity.x *= -.12;
+  }
+  if (cameraPosition.z > bounds.zMax || cameraPosition.z < bounds.zMin) {
+    cameraPosition.z = THREE.MathUtils.clamp(cameraPosition.z, bounds.zMin, bounds.zMax);
+    cameraVelocity.z *= -.12;
+  }
+  cameraPosition.y = 1.65;
+
+  yaw += yawVelocity * dt;
+  pitch += pitchVelocity * dt;
+  yawVelocity *= Math.exp(-movementTuning.turnDamping * dt);
+  pitchVelocity *= Math.exp(-movementTuning.turnDamping * dt);
+  pitch = THREE.MathUtils.clamp(pitch, -.32, .32);
+  if (Math.abs(yawVelocity) < .001) yawVelocity = 0;
+  if (Math.abs(pitchVelocity) < .001) pitchVelocity = 0;
+
+  cameraTarget.copy(cameraPosition);
   camera.position.copy(cameraPosition);
   camera.rotation.set(pitch, yaw, 0, 'YXZ');
 }
@@ -351,9 +422,10 @@ function bindControls() {
   canvas.addEventListener('pointermove', (event) => {
     if (!dragging) return;
     if (Math.abs(event.clientX - lastPointerX) + Math.abs(event.clientY - lastPointerY) > 5) dragMoved = true;
-    yaw -= (event.clientX - lastPointerX) * .003;
-    pitch -= (event.clientY - lastPointerY) * .002;
-    pitch = THREE.MathUtils.clamp(pitch, -.32, .32);
+    const deltaX = event.clientX - lastPointerX;
+    const deltaY = event.clientY - lastPointerY;
+    yawVelocity -= deltaX * .00055;
+    pitchVelocity -= deltaY * .00038;
     lastPointerX = event.clientX; lastPointerY = event.clientY;
   });
   const stopDrag = () => { dragging = false; };
@@ -415,6 +487,8 @@ async function enterGallery() {
     if (!cameraTarget) {
       cameraTarget = new THREE.Vector3(0, 1.65, 4.8);
       cameraPosition = new THREE.Vector3(0, 1.65, 8.8);
+      cameraVelocity = new THREE.Vector3();
+      desiredVelocity = new THREE.Vector3();
     }
     if (!moveVector) {
       moveVector = new THREE.Vector3();
@@ -430,6 +504,8 @@ async function enterGallery() {
     closeArtworkPanel();
     cameraTarget.set(0, 1.65, 4.8);
     cameraPosition.set(0, 1.65, 8.8);
+    cameraVelocity.set(0, 0, 0); desiredVelocity.set(0, 0, 0);
+    yawVelocity = 0; pitchVelocity = 0;
     yaw = 0; pitch = 0; camera.position.copy(cameraPosition); camera.rotation.set(0, 0, 0);
     shell.hidden = false;
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -440,17 +516,18 @@ async function enterGallery() {
     if (!prefersReducedMotion) {
       cameraPosition.set(0, 2.15, 10.5);
       cameraTarget.set(0, 1.65, 4.8);
+      cameraVelocity.set(0, 0, 0);
       const start = performance.now();
-      const duration = 1700;
+      const duration = 2100;
       const intro = () => {
         if (!entered) return;
         const t = Math.min(1, (performance.now() - start) / duration);
-        const eased = 1 - Math.pow(1 - t, 3);
+        const eased = 1 - Math.pow(1 - t, 4);
         camera.position.set(0, 2.15 - .5 * eased, 10.5 - 5.7 * eased);
-        camera.rotation.set(0, 0, 0);
+        camera.rotation.set(0, 0, 0, 'YXZ');
         renderer.render(scene, camera);
         if (t < 1) requestAnimationFrame(intro);
-        else { cameraPosition.copy(cameraTarget); animate(); }
+        else { cameraPosition.copy(cameraTarget); cameraVelocity.set(0, 0, 0); animate(); }
       };
       requestAnimationFrame(intro);
     } else animate();
