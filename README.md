@@ -923,6 +923,43 @@ Assets:
 - عدم تغییر بی‌دلیل Font
 - تصویر واقعی اثر
 
+### Day / Night Theme Contract
+
+پالت روز و شب فقط در بلوک‌های اصلی Theme Tokens در `frontend/src/styles.css` تعریف می‌شود؛ breakpointهای Desktop، Tablet و Mobile مجاز به تعریف دوباره رنگ‌های اصلی نیستند.
+
+**تم روز (Light):**
+- Background: `#f5f2ec`
+- Surface: `#fffdfa`
+- Secondary surface: `#f0ece4`
+- Primary text: `#202020`
+- Muted text: `#6d685f`
+- Gold / brass: `#805f20`
+- Strong gold: `#76551e`
+- Copper: `#965222`
+- Warning: `#8a570d`
+- متن دکمه طلایی: `#fffdfa`
+
+**تم شب (Dark):**
+- Background: `#0b0d11`
+- Surface: `#12161d`
+- Secondary surface: `#181e27`
+- Raised surface: `#222a35`
+- Primary text: `#f4f1ea`
+- Muted text: `#a9a69f`
+- Gold / brass: `#d9a441`
+- Strong gold: `#f0cf86`
+- Copper: `#c27643`
+- متن روی دکمه طلایی: `#16130d`
+
+**قرارداد واکنش‌گرایی:**
+- Desktop: عرض `1024px` به بالا
+- Tablet: `768px` تا `1023px`
+- Mobile: تا `767px`؛ عرض‌های بسیار کوچک `320–359px` نیز پوشش داده می‌شوند.
+- رنگ‌های معنایی در هر سه گروه یکسان‌اند؛ فقط چیدمان، فاصله‌ها، اندازه کنترل‌ها و تراکم محتوا تغییر می‌کند.
+- رنگ متن‌های معمولیِ Gold، Copper، Warning و Muted در تم روز باید نسبت کنتراست WCAG AA حداقل `4.5:1` روی سطوح اصلی را حفظ کند.
+- تنها یک `meta[name="theme-color"]` وجود دارد و رنگ نوار مرورگر باید با تم انتخاب‌شده همگام باشد. در نبود انتخاب ذخیره‌شده، تم سیستم‌عامل در اولین نمایش رعایت می‌شود.
+- تست‌های معماری CSS باید از تکرار پالت تم و افت کنتراست جلوگیری کنند.
+
 ---
 
 ## 34. SEO
