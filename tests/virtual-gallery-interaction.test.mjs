@@ -157,3 +157,10 @@ test('switching gallery corridors rebuilds the scene using the selected product 
   assert.match(script,/if \(!renderer\) renderer = new THREE\.WebGLRenderer/);
   assert.match(markup,/gallery\.js\?v=10/);
 });
+
+
+test('gallery entry camera faces the first wall artwork so portrait mobile users see art immediately',()=>{
+  assert.match(script,/yaw = Math\.atan2\(5\.91, 3\.8\)/);
+  assert.match(script,/camera\.rotation\.set\(0, yaw \* eased, 0, 'YXZ'\)/);
+  assert.match(markup,/gallery\.js\?v=11/);
+});
