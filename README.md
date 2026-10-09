@@ -1466,3 +1466,23 @@ The current public GilasArt storefront is **Persian-only**.
 
 This is the current product requirement and overrides any older multilingual storefront experiment.
 
+
+
+## 50. Virtual Gallery — Stage 1
+
+A standalone cinematic Three.js gallery is served at:
+
+    https://gilasart.ir/virtual-gallery/
+
+Source assets:
+
+    frontend/public/virtual-gallery/index.html
+    frontend/public/virtual-gallery/gallery.css
+    frontend/public/virtual-gallery/gallery.js
+    frontend/public/virtual-gallery-entry.js
+
+The homepage entry-point enhancer adds a link to the gallery inside the existing home hero action row only; it does not replace the storefront router or change commerce flows. The gallery reads the already-published `/data/storefront-index.json` snapshot for product artwork and falls back to generated decorative artwork if the snapshot or an image is unavailable. It does not query D1 directly.
+
+Stage 1 includes a welcome screen, loading state, cinematic 3D room, warm metallic frames, soft spot lighting, smooth camera movement, keyboard/touch movement controls, help panel, responsive layout, and reduced-motion support. Gallery JavaScript syntax is included in `npm run check`.
+
+The gallery is a separate public route. Storefront, authentication, checkout, payments, and Admin routing remain unchanged.
