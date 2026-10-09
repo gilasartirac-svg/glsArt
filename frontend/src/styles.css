@@ -6482,3 +6482,121 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
   .home-latest .product-card,
   .home-latest .product-card-link{transition:none!important}
 }
+
+
+/* Homepage mobile readability fix — intentionally does not affect Shop or desktop.
+   Use a vertical card on phones so artwork, full title and price each get enough room. */
+@media (max-width:767px){
+  .home-latest .grid{
+    grid-template-columns:minmax(0,1fr);
+    gap:16px;
+  }
+  .home-latest .product-card{
+    border-radius:18px;
+    background:var(--ui-surface);
+    border-color:var(--ui-line);
+    box-shadow:0 5px 18px color-mix(in srgb,#000 10%,transparent);
+  }
+  .home-latest .product-card-link{
+    display:flex;
+    flex-direction:column;
+    height:auto;
+  }
+  .home-latest .product-card-media{
+    width:100%;
+    aspect-ratio:4/3;
+    min-height:0;
+    max-height:none;
+    border-inline-end:0;
+    border-bottom:1px solid var(--ui-line);
+  }
+  .home-latest .product-art-frame{
+    width:100%;
+    height:100%;
+    padding:12px;
+  }
+  .home-latest .product-card-body{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    padding:16px;
+  }
+  .home-latest .product-card-heading{
+    display:block;
+    width:100%;
+  }
+  .home-latest .product-card-kicker{display:none}
+  .home-latest .product-card-heading h3{
+    display:block;
+    overflow:visible;
+    max-height:none;
+    -webkit-line-clamp:unset;
+    font-size:17px!important;
+    font-weight:800;
+    line-height:1.9;
+    color:var(--ui-text);
+    overflow-wrap:anywhere;
+    text-wrap:pretty;
+  }
+  .home-latest .product-sku{display:none}
+  .home-latest .product-social-proof{
+    gap:8px 14px;
+    font-size:12px;
+    color:var(--ui-muted);
+  }
+  .home-latest .product-rating{
+    color:var(--ui-text);
+    font-weight:750;
+  }
+  .home-latest .product-card-footer{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-top:0;
+    padding-top:12px;
+    border-top:1px solid var(--ui-line);
+  }
+  .home-latest .product-price-group{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:2px;
+    min-width:0;
+  }
+  .home-latest .product-price-label{
+    color:var(--ui-muted);
+    font-size:12px;
+    line-height:1.8;
+  }
+  .home-latest .product-card-price{
+    display:block;
+    color:var(--ui-gold-strong);
+    font-size:clamp(20px,5.4vw,24px)!important;
+    font-weight:900;
+    line-height:1.8;
+    overflow-wrap:anywhere;
+  }
+  .home-latest .product-card-price small{
+    color:var(--ui-text);
+    font-size:12px!important;
+    font-weight:700;
+  }
+  .home-latest .product-price-group .flash-old{
+    font-size:12px;
+    line-height:1.7;
+  }
+  .home-latest .product-card-arrow{
+    flex:0 0 44px;
+    width:44px!important;
+    min-width:44px!important;
+    height:44px!important;
+    align-self:center;
+  }
+  .home-latest .product-card-overlay{display:none}
+}
+@media (max-width:359px){
+  .home-latest .product-card-body{padding:13px;gap:10px}
+  .home-latest .product-card-heading h3{font-size:16px!important}
+  .home-latest .product-card-price{font-size:19px!important}
+}
