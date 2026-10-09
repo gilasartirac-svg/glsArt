@@ -5786,7 +5786,7 @@ textarea{min-height:110px}
    Shared public-site tokens and component polish.
    Keeps the existing light-theme option and all application logic.
    ========================================================= */
-:root[data-theme="dark"]{
+html[data-theme="dark"]{
   --ui-bg:#11100f;
   --ui-surface:#191715;
   --ui-surface-2:#211e1a;
