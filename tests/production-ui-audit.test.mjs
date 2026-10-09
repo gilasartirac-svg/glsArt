@@ -48,6 +48,7 @@ test('mobile storefront header and menu provide contextual icons without changin
  assert.ok(css.includes('.ga-header-primary-nav#main-menu.is-open'));
  assert.ok(css.includes('overscroll-behavior:contain'));
  assert.ok(css.includes('env(safe-area-inset-bottom'));
+ assert.ok(js.includes("e.target?.closest?.('.ga-header-menu-toggle,.mobile-menu-toggle')"),'outside-click handler must not intercept the actual header toggle');
 });
 
 
