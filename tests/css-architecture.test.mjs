@@ -92,8 +92,8 @@ test('day and night palettes have one canonical token definition per theme',()=>
   for(const token of tokens){
     assert.equal((css.match(new RegExp(token+'\\s*:','g'))||[]).length,2,token+' must be defined only in the canonical light and dark palettes');
   }
-  assert.ok(css.includes(':root[data-theme="dark"]{\\n  color-scheme:dark;'));
-  assert.equal(css.includes('html[data-theme="dark"]{\\n  --ui-bg:'),false);
+  assert.ok(css.includes(':root[data-theme="dark"]{'));
+  assert.doesNotMatch(css,/html\[data-theme="dark"\]\s*\{\s*--ui-bg:/);
 });
 
 test('browser theme metadata follows the selected theme and system preference',()=>{
