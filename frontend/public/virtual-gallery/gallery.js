@@ -1,5 +1,17 @@
 let THREE;
-const THREE_MODULE_URL = 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
+const THREE_MODULE_URLS = [
+  'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js',
+  'https://unpkg.com/three@0.180.0/build/three.module.js',
+  'https://esm.sh/three@0.180.0'
+];
+async function loadThreeModule() {
+  let lastError;
+  for (const url of THREE_MODULE_URLS) {
+    try { return await import(url); }
+    catch (error) { lastError = error; }
+  }
+  throw new Error('کتابخانه گالری سه‌بعدی بارگذاری نشد. اتصال اینترنت یا دسترسی به سرویس‌های کتابخانه را بررسی کنید.', { cause: lastError });
+}
 
 const $ = (id) => document.getElementById(id);
 const welcome = $('welcome');
@@ -662,7 +674,7 @@ async function enterGallery() {
   if (entered) return;
   welcome.hidden = true; loading.hidden = false; errorBox.hidden = true;
   try {
-    if (!THREE) THREE = await import(THREE_MODULE_URL);
+    if (!THREE) THREE = await loadThreeModule();
     if (!cameraTarget) {
       cameraTarget = new THREE.Vector3(0, 1.65, 4.8);
       cameraPosition = new THREE.Vector3(0, 1.65, 8.8);
