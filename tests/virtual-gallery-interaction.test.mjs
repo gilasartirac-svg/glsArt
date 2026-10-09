@@ -59,16 +59,16 @@ test('add-to-cart button emits an integration intent without performing a real c
 
 
 test('gallery uses dark granite flooring, deep-brown velvet walls, and non-aggressive artwork lighting', () => {
-  assert.match(script, /new THREE\\.AmbientLight/);
-  assert.match(script, /new THREE\\.HemisphereLight/);
-  assert.match(script, /new THREE\\.Fog\\(0x211d1a, 28, 105\\)/);
-  assert.match(script, /const velvetCanvas = document\\.createElement\\('canvas'\\)/);
-  assert.match(script, /roughness: \\.97, metalness: 0/);
-  assert.match(script, /const floorMaterial = new THREE\\.MeshStandardMaterial\\(\\{ color: 0xc7c0b4, map: marbleTexture, roughness: \\.34/);
-  assert.match(script, /hitMeshes: \\[inner\\]/);
-  assert.doesNotMatch(script, /new THREE\\.SpotLight/);
-  assert.doesNotMatch(script, /new THREE\\.PointLight\\(0xffd19a/);
-  assert.match(markup, /gallery\\.css\\?v=7/);
+  assert.match(script, /new THREE\.AmbientLight/);
+  assert.match(script, /new THREE\.HemisphereLight/);
+  assert.match(script, /new THREE\.Fog\(0x211d1a, 28, 105\)/);
+  assert.match(script, /const velvetCanvas = document\.createElement\('canvas'\)/);
+  assert.match(script, /roughness: \.97, metalness: 0/);
+  assert.match(script, /const floorMaterial = new THREE\.MeshStandardMaterial\(\{ color: 0xc7c0b4, map: marbleTexture, roughness: \.34/);
+  assert.match(script, /hitMeshes: \[inner\]/);
+  assert.doesNotMatch(script, /new THREE\.SpotLight/);
+  assert.doesNotMatch(script, /new THREE\.PointLight\(0xffd19a/);
+  assert.match(markup, /gallery\.css\?v=7/);
 });
 
 test('camera motion uses velocity damping, angular inertia, and cinematic focus easing', () => {
@@ -84,13 +84,13 @@ test('camera motion uses velocity damping, angular inertia, and cinematic focus 
 
 
 test('gallery uses a realistic granite-and-velvet scene and natural field of view', () => {
-  assert.match(script, /const marbleCanvas = document\\.createElement\\('canvas'\\)/);
-  assert.match(script, /marbleBase\\.addColorStop\\(0, '#252523'\\)/);
-  assert.match(script, /const velvetCanvas = document\\.createElement\\('canvas'\\)/);
-  assert.match(script, /new THREE\\.PerspectiveCamera\\(57/);
-  assert.match(script, /camera\\.fov = 57/);
-  assert.match(markup, /gallery\\.css\\?v=7/);
-  assert.match(markup, /gallery\\.js\\?v=12/);
+  assert.match(script, /const marbleCanvas = document\.createElement\('canvas'\)/);
+  assert.match(script, /marbleBase\.addColorStop\(0, '#252523'\)/);
+  assert.match(script, /const velvetCanvas = document\.createElement\('canvas'\)/);
+  assert.match(script, /new THREE\.PerspectiveCamera\(57/);
+  assert.match(script, /camera\.fov = 57/);
+  assert.match(markup, /gallery\.css\?v=7/);
+  assert.match(markup, /gallery\.js\?v=12/);
 });
 
 test('left and right controls navigate to a centered, front-facing artwork view',()=>{
@@ -114,21 +114,21 @@ test('virtual gallery supports one-finger look and faster two-finger pan/pinch o
 
 
 test('gallery creates every active product in progressive batches of ten without an artificial cap', () => {
-  assert.match(script, /const rows = Math\\.max\\(5, Math\\.ceil\\(galleryProducts\\.length \\/ 2\\)\\)/);
+  assert.match(script, /const rows = Math\.max\(5, Math\.ceil\(galleryProducts\.length \/ 2\)\)/);
   assert.match(script, /const ARTWORK_BATCH_SIZE = 10/);
   assert.match(script, /const ARTWORK_BUILD_DISTANCE = 14/);
-  assert.match(script, /function buildNearbyArtworkBatch\\(\\)/);
-  assert.match(script, /nextArtworkIndex \\+ ARTWORK_BATCH_SIZE/);
-  assert.match(script, /buildNearbyArtworkBatch\\(\\);/);
+  assert.match(script, /function buildNearbyArtworkBatch\(\)/);
+  assert.match(script, /nextArtworkIndex \+ ARTWORK_BATCH_SIZE/);
+  assert.match(script, /buildNearbyArtworkBatch\(\);/);
   assert.doesNotMatch(adapter, /limit = 5000/);
-  assert.doesNotMatch(adapter, /slice\\(0, limit\\)/);
+  assert.doesNotMatch(adapter, /slice\(0, limit\)/);
   assert.doesNotMatch(script, /limit: 5000/);
 });
 test('virtual gallery hides category controls and always opens the complete active collection', () => {
   assert.doesNotMatch(markup, /data-gallery-category=/);
   assert.doesNotMatch(markup, /category-selector/);
   assert.match(script, /selectedGalleryCategory = 'all'/);
-  assert.match(script, /galleryProducts = \\[\\.\\.\\.allGalleryProducts\\]/);
+  assert.match(script, /galleryProducts = \[\.\.\.allGalleryProducts\]/);
   assert.match(script, /category_ids/);
 });
 
@@ -158,12 +158,12 @@ test('switching gallery corridors rebuilds the scene using the selected product 
   assert.match(script,/sceneCategory = selectedGalleryCategory/);
   assert.match(script,/else if \(sceneCategory !== selectedGalleryCategory\)/);
   assert.match(script,/if \(!renderer\) renderer = new THREE\.WebGLRenderer/);
-  assert.match(markup,/gallery\.js\?v=11/);
+  assert.match(markup,/gallery\.js\?v=12/);
 });
 
 
 test('gallery entry camera faces the first wall artwork so portrait mobile users see art immediately',()=>{
   assert.match(script,/yaw = Math\.atan2\(5\.91, 3\.8\)/);
   assert.match(script,/camera\.rotation\.set\(0, yaw \* eased, 0, 'YXZ'\)/);
-  assert.match(markup,/gallery\.js\?v=11/);
+  assert.match(markup,/gallery\.js\?v=12/);
 });
