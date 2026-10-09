@@ -17,6 +17,8 @@ let controlsBound = false;
 let dragging = false;
 let lastPointerX = 0;
 let lastPointerY = 0;
+const touchPointers = new Map();
+let previousTouchGesture = null;
 let yaw = 0;
 let pitch = 0;
 const held = new Set();
@@ -488,23 +490,75 @@ function bindControls() {
     if (map[key]) setHeld(map[key], false);
   });
   window.addEventListener('blur', () => held.clear());
+  canvas.style.touchAction = 'none';
   canvas.addEventListener('pointerdown', (event) => {
     dragMoved = false;
-    if (event.pointerType === 'touch') return;
-    dragging = true; lastPointerX = event.clientX; lastPointerY = event.clientY;
     try { canvas.setPointerCapture(event.pointerId); } catch {}
+    if (event.pointerType === 'touch') {
+      event.preventDefault();
+      touchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      previousTouchGesture = getTouchGesture();
+      dragging = true;
+      return;
+    }
+    dragging = true; lastPointerX = event.clientX; lastPointerY = event.clientY;
   });
   canvas.addEventListener('pointermove', (event) => {
-    if (!dragging) return;
+    if (event.pointerType === 'touch' && touchPointers.has(event.pointerId)) {
+      event.preventDefault();
+      const previous = touchPointers.get(event.pointerId);
+      if (Math.abs(event.clientX - previous.x) + Math.abs(event.clientY - previous.y) > 4) dragMoved = true;
+      touchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      const current = getTouchGesture();
+      if (current && previousTouchGesture) {
+        if (current.count === 1 && previousTouchGesture.count === 1) {
+          // One finger: look around the gallery.
+          yawVelocity -= (current.x - previousTouchGesture.x) * .024;
+          pitchVelocity -= (current.y - previousTouchGesture.y) * .016;
+        } else if (current.count >= 2 && previousTouchGesture.count >= 2) {
+          // Two fingers: pan through the gallery and pinch to move closer/farther.
+          const dx = current.x - previousTouchGesture.x;
+          const dy = current.y - previousTouchGesture.y;
+          const travel = Math.min(1.8, Math.hypot(dx, dy) * .012);
+          const direction = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
+          const strafe = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
+          cameraPosition.addScaledVector(strafe, -dx * .012);
+          cameraPosition.addScaledVector(direction, -dy * .012);
+          const pinchDelta = current.distance - previousTouchGesture.distance;
+          if (Math.abs(pinchDelta) > 1) cameraPosition.addScaledVector(direction, pinchDelta * .018);
+          clampCamera();
+          cameraVelocity.set(0, 0, 0);
+          cameraTarget.copy(cameraPosition);
+        }
+      }
+      previousTouchGesture = current;
+      lastPointerX = event.clientX; lastPointerY = event.clientY;
+      return;
+    }
+    if (!dragging || event.pointerType === 'touch') return;
     if (Math.abs(event.clientX - lastPointerX) + Math.abs(event.clientY - lastPointerY) > 5) dragMoved = true;
     const deltaX = event.clientX - lastPointerX;
     const deltaY = event.clientY - lastPointerY;
-    // Convert pointer deltas into short angular impulses; damping supplies the after-motion.
+    // Convert mouse deltas into short angular impulses; damping supplies the after-motion.
     yawVelocity -= deltaX * .024;
     pitchVelocity -= deltaY * .016;
     lastPointerX = event.clientX; lastPointerY = event.clientY;
   });
-  const stopDrag = () => { dragging = false; };
+  function getTouchGesture() {
+    const points = [...touchPointers.values()];
+    if (!points.length) return null;
+    const x = points.reduce((sum, point) => sum + point.x, 0) / points.length;
+    const y = points.reduce((sum, point) => sum + point.y, 0) / points.length;
+    let distance = 0;
+    if (points.length >= 2) distance = Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
+    return { count: points.length, x, y, distance };
+  }
+  const stopDrag = (event) => {
+    if (event?.pointerId != null) touchPointers.delete(event.pointerId);
+    previousTouchGesture = getTouchGesture();
+    dragging = touchPointers.size > 0;
+    if (!dragging) { dragging = false; previousTouchGesture = null; }
+  };
   ['pointerup','pointercancel','lostpointercapture'].forEach(type => canvas.addEventListener(type, stopDrag));
   canvas.addEventListener('click', onArtworkClick);
   $('artwork-panel-close').addEventListener('click', closeArtworkPanel);
