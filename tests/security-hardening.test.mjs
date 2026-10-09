@@ -20,9 +20,13 @@ test('frontend does not use a hard-coded admin mobile and escapes dynamic HTML',
   assert.match(frontend,/escapeHtml\(r\.body\|\|''\)/);
 });
 
-test('production worker deployment is consolidated and uses the bootstrap secret',()=>{
+test('production worker deploys code before syncing all secrets in one deployment',()=>{
   assert.match(deploy,/d1 migrations apply gilasartdatabase --remote/);
-  assert.match(deploy,/wrangler secret put ADMIN_BOOTSTRAP_MOBILE/);
+  assert.match(deploy,/name: Deploy Worker code[\s\S]*?wrangler deploy --config wrangler\.toml[\s\S]*?name: Sync Worker secrets in one deployment/);
+  assert.match(deploy,/wrangler secret bulk "\$secret_file" --config wrangler\.toml/);
+  assert.match(deploy,/\['OTP_PEPPER', 'KAVENEGAR_API_KEY', 'KAVENEGAR_SENDER'\]/);
+  assert.match(deploy,/secrets\.ADMIN_BOOTSTRAP_MOBILE = process\.env\.ADMIN_BOOTSTRAP_MOBILE/);
+  assert.doesNotMatch(deploy,/wrangler secret put/);
 });
 
 test('payment settlement requires an active stock reservation',()=>{
