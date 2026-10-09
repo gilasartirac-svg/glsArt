@@ -85,29 +85,30 @@ test('responsive typography and spacing tokens are defined in the canonical root
 });
 
 
+
 test('day and night palettes have one canonical token definition per theme',()=>{
   const css=read('frontend/src/styles.css');
   const tokens=['--ui-bg','--ui-surface','--ui-surface-2','--ui-surface-3','--ui-text','--ui-muted','--ui-line','--ui-gold','--ui-gold-strong','--ui-copper','--ui-success','--ui-danger','--ui-warning','--ui-control','--ui-control-strong','--ui-field','--ui-hover','--ui-media','--ui-overlay','--ui-on-gold','--ui-inverse','--ui-code','--ui-focus','--ui-shadow','--ui-shadow-soft'];
   for(const token of tokens){
-    assert.equal((css.match(new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*:','g'))||[]).length,2,token+' must be defined only in the canonical light and dark palettes');
+    assert.equal((css.match(new RegExp(token+'\\s*:','g'))||[]).length,2,token+' must be defined only in the canonical light and dark palettes');
   }
-  assert.match(css,/:root\\[data-theme="dark"\\]\\s*\\{\\s*color-scheme:dark/);
-  assert.doesNotMatch(css,/html\\[data-theme="dark"\\]\\s*\\{\\s*--ui-bg:/);
+  assert.ok(css.includes(':root[data-theme="dark"]{\\n  color-scheme:dark;'));
+  assert.equal(css.includes('html[data-theme="dark"]{\\n  --ui-bg:'),false);
 });
 
 test('browser theme metadata follows the selected theme and system preference',()=>{
   const html=read('frontend/src/index.html');
   const app=read('frontend/src/app.js');
-  assert.equal((html.match(/name="theme-color"/g)||[]).length,1);
-  assert.match(html,/prefers-color-scheme:\\s*dark/);
-  assert.match(html,/meta\\[name="theme-color"\\]/);
-  assert.match(app,/THEME_COLORS=\\{light:'#f5f2ec',dark:'#0b0d11'\\}/);
-  assert.match(app,/meta\\.setAttribute\\('content',THEME_COLORS\\[t\\]\\)/);
+  assert.equal((html.match(/<meta name="theme-color"/g)||[]).length,1);
+  assert.ok(html.includes('prefers-color-scheme: dark'));
+  assert.ok(html.includes('meta[name="theme-color"]'));
+  assert.ok(app.includes("const THEME_COLORS={light:'#f5f2ec',dark:'#0b0d11'};"));
+  assert.ok(app.includes("meta.setAttribute('content',THEME_COLORS[t])"));
 });
 
 test('responsive viewport bands do not redefine the shared theme palette',()=>{
   const css=read('frontend/src/styles.css');
   for(const token of ['--ui-bg','--ui-surface','--ui-text','--ui-muted','--ui-gold','--ui-danger']){
-    assert.equal((css.match(new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*:','g'))||[]).length,2,token+' must remain consistent across desktop, tablet and mobile');
+    assert.equal((css.match(new RegExp(token+'\\s*:','g'))||[]).length,2,token+' must remain consistent across desktop, tablet and mobile');
   }
 });
