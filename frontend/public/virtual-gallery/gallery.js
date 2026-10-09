@@ -1,3 +1,5 @@
+import { loadGalleryProducts as loadProductsFromSource } from './product-adapter.js';
+
 let THREE;
 const THREE_MODULE_URL = 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 
@@ -131,13 +133,21 @@ function openArtworkPanel(record) {
   if (imageUrl) image.src = imageUrl;
   $('artwork-panel-title').textContent = String(product.name || record.title || 'اثر هنری');
   $('artwork-panel-sku').textContent = product.sku ? 'شناسه اثر: ' + String(product.sku) : 'مجموعه آثار گیلاس آرت';
-  const price = Number(product.price_irt || 0);
+  const price = Number(product.price?.amount ?? product.price_irt ?? 0);
   const priceNode = $('artwork-panel-price');
   priceNode.textContent = price > 0 ? new Intl.NumberFormat('fa-IR').format(price) + ' ریال' : 'برای اطلاع از قیمت، جزئیات اثر را ببینید';
   $('artwork-panel-description').textContent = String(product.description || 'برای مشاهده مشخصات کامل، ابعاد و جزئیات این اثر وارد صفحه محصول شوید.');
   const details = $('artwork-panel-details');
   const slug = String(product.slug || '').trim();
-  details.href = slug ? '/product/' + encodeURIComponent(slug) : '/shop';
+  details.href = product.url || (slug ? '/product/' + encodeURIComponent(slug) : '/shop');
+  const cartButton = $('artwork-panel-cart');
+  const cartMessage = $('artwork-panel-cart-message');
+  if (cartButton) {
+    cartButton.dataset.productId = String(product.id || '');
+    cartButton.dataset.productSlug = slug;
+    cartButton.dataset.productSku = String(product.sku || '');
+  }
+  if (cartMessage) cartMessage.textContent = '';
   panel.hidden = false;
   panel.setAttribute('aria-hidden', 'false');
   requestAnimationFrame(() => panel.classList.add('is-open'));
@@ -352,6 +362,22 @@ function bindControls() {
   ['pointerup','pointercancel','lostpointercapture'].forEach(type => canvas.addEventListener(type, stopDrag));
   canvas.addEventListener('click', onArtworkClick);
   $('artwork-panel-close').addEventListener('click', closeArtworkPanel);
+  $('artwork-panel-cart')?.addEventListener('click', () => {
+    const product = activeArtwork?.product;
+    if (!product) return;
+    const intent = {
+      productId: product.id,
+      slug: product.slug,
+      sku: product.sku,
+      quantity: 1,
+      price: product.price,
+      source: 'virtual-gallery'
+    };
+    window.dispatchEvent(new CustomEvent('gilasart:cart:add', { detail: intent }));
+    const message = $('artwork-panel-cart-message');
+    if (message) message.textContent = 'اتصال سبد خرید هنوز فعال نشده است؛ انتخاب محصول برای اتصال آینده آماده شد.';
+    statusText.textContent = 'سبد خرید در حال حاضر فعال نیست.';
+  });
   $('help-toggle').addEventListener('click', () => {
     const panel = $('help-panel'); panel.hidden = !panel.hidden;
     $('help-toggle').setAttribute('aria-expanded', String(!panel.hidden));
@@ -375,24 +401,11 @@ function exitGallery() {
 }
 
 async function loadGalleryProducts() {
-  try {
-    const root = location.pathname.startsWith('/glsArt') ? '/glsArt/' : '/';
-    const response = await fetch(root + 'data/storefront-index.json', { cache: 'force-cache', credentials: 'same-origin' });
-    if (!response.ok) return;
-    const data = await response.json();
-    galleryProducts = (Array.isArray(data.products) ? data.products : [])
-      .filter(product => product && Number(product.active) !== 0 && typeof product.image === 'string' && product.image.trim())
-      .slice(0, 10)
-      .map(product => ({
-        id: product.id ?? null,
-        slug: String(product.slug || ''),
-        sku: String(product.sku || ''),
-        name: String(product.name || 'اثر هنری').slice(0, 90),
-        description: String(product.description || '').slice(0, 800),
-        price_irt: Number(product.price_irt || 0),
-        image: String(product.image || '')
-      }));
-  } catch { galleryProducts = []; }
+  const root = location.pathname.startsWith('/glsArt') ? '/glsArt/' : '/';
+  galleryProducts = await loadProductsFromSource({
+    fallbackUrl: root + 'data/storefront-index.json',
+    limit: 10
+  });
 }
 
 async function enterGallery() {
