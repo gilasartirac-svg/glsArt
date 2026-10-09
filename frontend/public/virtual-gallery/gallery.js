@@ -46,6 +46,7 @@ let yawVelocity = 0, pitchVelocity = 0;
 const bounds = { x: 4.25, zMin: -10.5, zMax: 8.5 };
 const movementTuning = { walkSpeed: 3.2, sprintSpeed: 6.2, acceleration: 8.5, damping: 4.2, turnDamping: 5.2, boundarySpring: 7.5 };
 const galleryArt = [];
+let sceneCategory = null;
 let galleryProducts = [];
 let allGalleryProducts = [];
 let selectedGalleryCategory = 'all';
@@ -91,7 +92,8 @@ function addWallArt(x, z, rotation, index, title, imageUrl = '', product = null)
   group.position.set(x, 2.05, z);
   group.rotation.y = rotation;
   const maxWidth = 1.82, maxHeight = 2.08;
-  const placeholderTexture = imageUrl ? null : makeCanvasTexture(index, title);
+  // Always keep a visible local artwork texture while the real product image loads or if its URL fails.
+  const placeholderTexture = makeCanvasTexture(index, title);
   const artworkMaterial = new THREE.MeshStandardMaterial({
     map: placeholderTexture, color: imageUrl ? 0xf4efe6 : 0xffffff,
     roughness: .86, metalness: .01, side: THREE.DoubleSide
@@ -116,7 +118,6 @@ function addWallArt(x, z, rotation, index, title, imageUrl = '', product = null)
     placeholderTexture, artworkMaterial, imageLoaded: false, imageLoading: false,
     maxWidth, maxHeight, lastNearAt: 0
   };
-  if (record.imageUrl) inner.material.map = null;
   record.hitMeshes.forEach(mesh => { mesh.userData.galleryArtwork = record; });
   galleryArt.push(record);
 }
@@ -236,13 +237,15 @@ function setupScene() {
   const corridorLength = Math.max(30, (rows - 1) * 3.1 + 12);
   bounds.zMin = -Math.max(10.5, (rows - 1) * 3.1 + 4.5);
   const corridorCenter = (bounds.zMax + bounds.zMin) / 2;
+  galleryArt.length = 0;
   scene = new THREE.Scene();
+  sceneCategory = selectedGalleryCategory;
   scene.background = new THREE.Color(0xe9e5dc);
   scene.fog = new THREE.Fog(0xe9e5dc, 16, 38)
   camera = new THREE.PerspectiveCamera(66, window.innerWidth / window.innerHeight, .1, 55);
   camera.position.copy(cameraPosition);
   camera.rotation.order = 'YXZ';
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: !/Android|iPhone|iPad/i.test(navigator.userAgent), alpha: false, powerPreference: 'low-power' });
+  if (!renderer) renderer = new THREE.WebGLRenderer({ canvas, antialias: !/Android|iPhone|iPad/i.test(navigator.userAgent), alpha: false, powerPreference: 'low-power' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -433,7 +436,7 @@ function updateArtworkTextures() {
       record.inner.geometry.dispose();
       record.inner.geometry = new THREE.PlaneGeometry(record.maxWidth, record.maxHeight);
       record.imageLoaded = false;
-      if (texture) texture.dispose();
+      if (texture && texture !== record.placeholderTexture) texture.dispose();
     }
   }
 }
@@ -689,7 +692,14 @@ async function enterGallery() {
       raycaster = new THREE.Raycaster();
       pointerNdc = new THREE.Vector2();
     }
-    if (!renderer) { await loadGalleryProducts(); setupScene(); }
+    if (!renderer) {
+      await loadGalleryProducts();
+      setupScene();
+    } else if (sceneCategory !== selectedGalleryCategory) {
+      if (!allGalleryProducts.length) await loadGalleryProducts();
+      else applySelectedGalleryCategory();
+      setupScene();
+    }
     bindControls();
     focusTransition = null; focusReturn = null; activeArtwork = null;
     closeArtworkPanel();
