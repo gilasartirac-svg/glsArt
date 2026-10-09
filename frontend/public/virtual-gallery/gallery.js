@@ -1,5 +1,3 @@
-import { loadGalleryProducts as loadProductsFromSource } from './product-adapter.js';
-
 let THREE;
 const THREE_MODULE_URL = 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 
@@ -401,6 +399,7 @@ function exitGallery() {
 }
 
 async function loadGalleryProducts() {
+  const { loadGalleryProducts: loadProductsFromSource } = await import('./product-adapter.js');
   const root = location.pathname.startsWith('/glsArt') ? '/glsArt/' : '/';
   galleryProducts = await loadProductsFromSource({
     fallbackUrl: root + 'data/storefront-index.json',
