@@ -6292,3 +6292,19 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
 @keyframes vg3-frame-shimmer{0%{filter:brightness(.82)}100%{filter:brightness(1.12)}}
 @media(max-width:767px){.virtual-gallery-preview{min-height:390px;border-radius:22px}.vg3-scene{inset:0 0 29%}.vg3-hall{inset:-7% -24%;animation-duration:28s}.vg3-side-wall{width:82%}.vg3-left-wall{left:-30%}.vg3-right-wall{right:-30%}.vg3-frame{width:clamp(43px,15vw,68px);padding:4px}.vg3-preview-copy{gap:8px;padding:20px}.vg3-preview-copy>strong{font-size:25px}.vg3-description{font-size:12px}.vg3-live-badge{top:12px;inset-inline-start:12px}}
 @media(prefers-reduced-motion:reduce){.vg3-hall,.vg3-frame{animation:none!important}.virtual-gallery-preview:hover .vg3-enter{transform:none}}
+
+/* Runtime regression fix: keep the menu control visible at tablet widths even after later header rules. */
+@media (min-width:768px) and (max-width:1023px){
+  .ga-header-shell .ga-header-menu-toggle{
+    display:flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex:0 0 40px!important;
+  }
+  .ga-header-shell .ga-header-primary-nav#main-menu:not(.is-open){display:none!important}
+}
+@media (min-width:1024px){
+  .ga-header-shell .ga-header-menu-toggle{display:none!important}
+}
