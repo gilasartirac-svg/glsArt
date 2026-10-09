@@ -118,6 +118,25 @@ jobs:
             throw new Error('Home did not render visible product cards within 45s; diagnostics logged above. Original error: '+e.message);
           }
           if(homeCards<1)fail('Home runtime rendered zero product cards');
+          // Verify the actual responsive header, including the menu toggle regression.
+          const desktopNav=page.locator('#main-menu');
+          const menuToggle=page.locator('.ga-header-menu-toggle');
+          if(!await desktopNav.isVisible())fail('Desktop primary navigation is not visible');
+          if(await menuToggle.isVisible())fail('Mobile menu toggle is visible at desktop width');
+          const desktopNavBoxes=await desktopNav.locator('.ga-header-nav-item').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width,height:r.height}}));
+          if(desktopNavBoxes.length<5||desktopNavBoxes.some(r=>r.width<1||r.height<1||r.left< -1||r.right>window.innerWidth+1))fail('Desktop navigation links overflow or collapse: '+JSON.stringify(desktopNavBoxes));
+          await page.setViewportSize({width:390,height:844});
+          await page.waitForTimeout(150);
+          if(!await menuToggle.isVisible())fail('Mobile menu toggle is not visible at 390px');
+          if(await desktopNav.isVisible())fail('Mobile navigation drawer should start closed');
+          await menuToggle.click();
+          if(await menuToggle.getAttribute('aria-expanded')!=='true')fail('Mobile menu did not set aria-expanded=true');
+          if(!await desktopNav.isVisible())fail('Mobile menu did not open after toggle click');
+          await menuToggle.click();
+          if(await menuToggle.getAttribute('aria-expanded')!=='false')fail('Mobile menu did not close on second toggle click');
+          if(await desktopNav.isVisible())fail('Mobile menu remains visible after second toggle click');
+          await page.setViewportSize({width:1440,height:1000});
+          await page.waitForTimeout(100);
           await page.goto('https://gilasart.ir/shop?runtime_verify='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
           await page.locator('#results .product-card').first().waitFor({state:'visible',timeout:45000});
           const shopCards=await page.locator('#results .product-card').count();
