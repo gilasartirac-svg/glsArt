@@ -58,15 +58,17 @@ test('add-to-cart button emits an integration intent without performing a real c
 });
 
 
-test('luxury scene uses physically based materials, frameless artwork surfaces, and per-artwork spot lighting', () => {
-  assert.match(script, /new THREE\.AmbientLight/);
-  assert.match(script, /new THREE\.HemisphereLight/);
-  assert.match(script, /new THREE\.Fog\(/);
-  assert.match(script, /map: marbleTexture, roughness: \.24, metalness: \.055/);
-  assert.match(script, /map: marbleTexture, roughness: \.38, metalness: \.025/);
-  assert.match(script, /hitMeshes: \[inner\]/);
-  assert.doesNotMatch(script, /const innerRim = new THREE\.Mesh/);
-  assert.match(script, /const spotlight = new THREE\.SpotLight/);
+test('gallery uses dark granite flooring, deep-brown velvet walls, and non-aggressive artwork lighting', () => {
+  assert.match(script, /new THREE\\.AmbientLight/);
+  assert.match(script, /new THREE\\.HemisphereLight/);
+  assert.match(script, /new THREE\\.Fog\\(0x211d1a, 28, 105\\)/);
+  assert.match(script, /const velvetCanvas = document\\.createElement\\('canvas'\\)/);
+  assert.match(script, /roughness: \\.97, metalness: 0/);
+  assert.match(script, /const floorMaterial = new THREE\\.MeshStandardMaterial\\(\\{ color: 0xc7c0b4, map: marbleTexture, roughness: \\.34/);
+  assert.match(script, /hitMeshes: \\[inner\\]/);
+  assert.doesNotMatch(script, /new THREE\\.SpotLight/);
+  assert.doesNotMatch(script, /new THREE\\.PointLight\\(0xffd19a/);
+  assert.match(markup, /gallery\\.css\\?v=7/);
 });
 
 test('camera motion uses velocity damping, angular inertia, and cinematic focus easing', () => {
@@ -81,14 +83,14 @@ test('camera motion uses velocity damping, angular inertia, and cinematic focus 
 });
 
 
-test('virtual gallery environment uses a bright marble finish and natural lighting',()=>{
-  assert.match(script,/new THREE\.Color\(0xe9e5dc\)/);
-  assert.match(script,/const marbleCanvas = document\.createElement\('canvas'\)/);
-  assert.match(script,/map: marbleTexture, roughness: \.24/);
-  assert.match(script,/map: marbleTexture, roughness: \.38/);
-  assert.match(script,/new THREE\.AmbientLight\(0xfff5e5, \.82\)/);
-  assert.match(markup,/gallery\.css\?v=6/);
-  assert.match(markup,/gallery\.js\?v=\d+/);
+test('gallery uses a realistic granite-and-velvet scene and natural field of view', () => {
+  assert.match(script, /const marbleCanvas = document\\.createElement\\('canvas'\\)/);
+  assert.match(script, /marbleBase\\.addColorStop\\(0, '#252523'\\)/);
+  assert.match(script, /const velvetCanvas = document\\.createElement\\('canvas'\\)/);
+  assert.match(script, /new THREE\\.PerspectiveCamera\\(57/);
+  assert.match(script, /camera\\.fov = 57/);
+  assert.match(markup, /gallery\\.css\\?v=7/);
+  assert.match(markup, /gallery\\.js\\?v=12/);
 });
 
 test('left and right controls navigate to a centered, front-facing artwork view',()=>{
@@ -111,24 +113,25 @@ test('virtual gallery supports one-finger look and faster two-finger pan/pinch o
 });
 
 
-test('gallery builds enough corridor rows for every product instead of truncating at ten',()=>{
-  assert.match(script,/const rows = Math\.max\(5, Math\.ceil\(galleryProducts\.length \/ 2\)\)/);
-  assert.match(script,/for \(let i = 0; i < rows; i\+\+\)/);
-  assert.match(script,/bounds\.zMin = -Math\.max\(10\.5, \(rows - 1\) \* 3\.1 \+ 4\.5\)/);
-  assert.match(adapter,/limit = 5000/);
-  assert.doesNotMatch(adapter,/if \(!image \|\| active === false/);
+test('gallery creates every active product in progressive batches of ten without an artificial cap', () => {
+  assert.match(script, /const rows = Math\\.max\\(5, Math\\.ceil\\(galleryProducts\\.length \\/ 2\\)\\)/);
+  assert.match(script, /const ARTWORK_BATCH_SIZE = 10/);
+  assert.match(script, /const ARTWORK_BUILD_DISTANCE = 14/);
+  assert.match(script, /function buildNearbyArtworkBatch\\(\\)/);
+  assert.match(script, /nextArtworkIndex \\+ ARTWORK_BATCH_SIZE/);
+  assert.match(script, /buildNearbyArtworkBatch\\(\\);/);
+  assert.doesNotMatch(adapter, /limit = 5000/);
+  assert.doesNotMatch(adapter, /slice\\(0, limit\\)/);
+  assert.doesNotMatch(script, /limit: 5000/);
+});
+test('virtual gallery hides category controls and always opens the complete active collection', () => {
+  assert.doesNotMatch(markup, /data-gallery-category=/);
+  assert.doesNotMatch(markup, /category-selector/);
+  assert.match(script, /selectedGalleryCategory = 'all'/);
+  assert.match(script, /galleryProducts = \\[\\.\\.\\.allGalleryProducts\\]/);
+  assert.match(script, /category_ids/);
 });
 
-test('gallery entrance offers category corridors and filters using actual category IDs',()=>{
-  assert.match(markup,/data-gallery-category="cat_gilas_religious"/);
-  assert.match(markup,/data-gallery-category="cat_gilas_poetry"/);
-  assert.match(markup,/data-gallery-category="cat_gilas_horizontal"/);
-  assert.match(markup,/data-gallery-category="cat_gilas_vertical"/);
-  assert.match(markup,/data-gallery-category="cat_gilas_square"/);
-  assert.match(script,/function bindCategorySelector\(\)/);
-  assert.match(script,/product\.categoryIds\?\.includes\(selectedGalleryCategory\)/);
-  assert.match(adapter,/categoryIds: Array\.isArray\(raw\.category_ids\)/);
-});
 test('artwork wall surfaces do not add a second frame around framed product photos',()=>{
   assert.match(script,/hitMeshes: \[inner\]/);
   assert.doesNotMatch(script,/const outerFrame = new THREE\.Mesh/);
