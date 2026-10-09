@@ -35,7 +35,7 @@
   --ui-text:#f4f1ea;--ui-muted:#a9a69f;--ui-line:rgba(255,255,255,.10);
   --ui-gold:#d9a441;--ui-gold-strong:#f0cf86;--ui-copper:#c27643;--ui-success:#6ed8aa;--ui-danger:#ef8d8d;--ui-warning:#e2c47c;
   --ui-control:var(--ui-surface);--ui-control-strong:var(--ui-surface-2);--ui-field:var(--ui-surface);
-  --ui-hover:color-mix(in srgb,var(--ui-gold) 9%,transparent);--ui-media:#11161e;--ui-overlay:rgba(0,0,0,.58);--ui-on-gold:#16130d;--ui-inverse:#f4f1ea;--ui-code:#151a22;
+  --ui-hover:color-mix(in srgb,var(--ui-gold) 9%,transparent);--ui-media:#11161e;--ui-overlay:rgba(0,0,0,.58);--ui-focus:color-mix(in srgb,var(--ui-gold) 22%,transparent);--ui-on-gold:#16130d;--ui-inverse:#f4f1ea;--ui-code:#151a22;
   --ui-shadow:0 18px 60px rgba(0,0,0,.34);--ui-shadow-soft:0 10px 35px rgba(0,0,0,.22);
   --bg:var(--ui-bg);--panel:var(--ui-surface);--panel2:var(--ui-surface-2);--text:var(--ui-text);--muted:var(--ui-muted);--gold:var(--ui-gold);--line:var(--ui-line);--danger:var(--ui-danger);--ok:var(--ui-success);
   --border:var(--ui-line);--surface:var(--ui-surface);--panel-soft:var(--ui-surface-2);
