@@ -17,7 +17,7 @@ export function normalizeGalleryProduct(raw) {
   if (!raw || typeof raw !== 'object') return null;
   const image = asText(raw.image ?? raw.image_url ?? raw.images?.[0]?.url, 1200);
   const active = raw.active ?? raw.is_active ?? raw.status;
-  if (!image || active === false || active === 0 || active === 'inactive') return null;
+  if (active === false || active === 0 || active === 'inactive') return null;
 
   const priceObject = raw.price && typeof raw.price === 'object' ? raw.price : {};
   const amount = asPrice(priceObject.amount ?? raw.price_irt ?? raw.price);
@@ -44,7 +44,7 @@ export function normalizeGalleryProduct(raw) {
 export async function loadGalleryProducts({
   fallbackUrl,
   apiUrl = window.GILASART_GALLERY_CONFIG?.productsApiUrl || DEFAULT_PRODUCTS_API_URL,
-  limit = 10
+  limit = 5000
 } = {}) {
   const sources = [];
   if (apiUrl) sources.push({ url: apiUrl, cache: 'no-store' });
