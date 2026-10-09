@@ -158,3 +158,17 @@ test('virtual gallery link uses native navigation to its standalone static entry
  assert.ok(html.includes('id="enter-gallery"'),'gallery entry control is present');
  assert.ok(html.includes('type="module" src="./gallery.js'),'gallery runtime module is linked');
 });
+
+
+test('homepage product cards have dedicated mobile and tablet responsive layouts',()=>{
+ const css=read('frontend/src/styles.css');
+ const js=read('frontend/src/app.js');
+ assert.ok(js.includes('class="grid">'+(state.products.slice(0,8).map(productCard).join('')'));
+ assert.ok(css.includes('.home-latest .product-card-link{'));
+ assert.ok(css.includes('grid-template-columns:minmax(0,1fr);'));
+ assert.ok(css.includes('grid-template-columns:minmax(108px,34%) minmax(0,1fr);'));
+ assert.ok(css.includes('@media (min-width:768px) and (max-width:1023px)'));
+ assert.ok(css.includes('@media (max-width:359px)'));
+ assert.ok(css.includes('.home-latest .product-card:focus-within'));
+ assert.ok(css.includes('object-fit:contain!important'));
+});
