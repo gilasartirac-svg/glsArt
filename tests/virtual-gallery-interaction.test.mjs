@@ -61,7 +61,8 @@ test('luxury scene uses physically based materials, layered framing, and per-art
   assert.match(script, /new THREE\.AmbientLight/);
   assert.match(script, /new THREE\.HemisphereLight/);
   assert.match(script, /new THREE\.Fog\(/);
-  assert.match(script, /roughness: \.28, metalness: \.22/);
+  assert.match(script, /map: marbleTexture, roughness: \.24, metalness: \.055/);
+  assert.match(script, /map: marbleTexture, roughness: \.38, metalness: \.025/);
   assert.match(script, /const innerRim = new THREE\.Mesh/);
   assert.match(script, /const spotlight = new THREE\.SpotLight/);
 });
