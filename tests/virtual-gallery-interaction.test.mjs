@@ -105,5 +105,5 @@ test('virtual gallery supports one-finger look and two-finger pan/pinch on touch
   assert.match(script,/Two fingers: pan through the gallery and pinch to move closer\/farther/);
   assert.match(script,/getTouchGesture\(\)/);
   assert.match(script,/cameraPosition\.addScaledVector\(direction, pinchDelta \* \.018\)/);
-  assert.match(html,/gallery\.js\?v=6/);
+  assert.match(markup,/gallery\.js\?v=6/);
 });
