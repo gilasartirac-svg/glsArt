@@ -7415,3 +7415,52 @@ body{
   outline:2px solid #9B742D;
   outline-offset:2px;
 }
+
+
+/* Product detail polish: make the live final price the primary visual anchor. */
+#product-live-price.product-live-price{
+  display:block;
+  width:fit-content;
+  max-width:100%;
+  margin-block:1rem .5rem;
+  font-size:clamp(1.625rem,2.5vw,2.125rem);
+  font-weight:900;
+  line-height:1.5;
+  letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+}
+#product-price-breakdown[hidden]{display:none!important}
+.product-stock-status{margin-block:.625rem 1rem;min-width:0}
+.product-stock-remaining{
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  max-width:100%;
+  padding:.625rem .875rem;
+  border:1px solid color-mix(in srgb,#C45B36 40%,var(--ui-line));
+  border-radius:12px;
+  background:color-mix(in srgb,#D86B3D 9%,var(--ui-surface));
+  color:var(--ui-text);
+  font-size:.9375rem;
+  font-weight:750;
+  line-height:1.8;
+  box-shadow:0 3px 10px rgba(130,58,25,.07);
+}
+.product-stock-fire{flex:0 0 auto;font-size:1.125rem;line-height:1}
+.product-stock-available{display:inline-block;color:var(--ui-muted);font-size:.9375rem;font-weight:650;line-height:1.8}
+.product-purchase-messages{display:none!important}
+
+/* Refined quantity-discount outline for the light theme only. */
+:root[data-theme="light"] .quantity-discount-card{
+  border:1px solid #C6A96B;
+  box-shadow:0 5px 18px rgba(105,75,28,.08),inset 0 0 0 1px rgba(198,169,107,.16);
+}
+:root[data-theme="light"] .quantity-discount-card .quantity-discount-head strong{color:#3D2C12}
+
+@media(min-width:621px) and (max-width:1024px){
+  #product-live-price.product-live-price{font-size:1.875rem}
+}
+@media(max-width:620px){
+  #product-live-price.product-live-price{font-size:1.625rem;margin-block:.875rem .375rem}
+  .product-stock-remaining{padding:.5625rem .75rem;font-size:.875rem}
+}
