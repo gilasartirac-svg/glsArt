@@ -9,7 +9,7 @@ const loaders={
  roles:()=>import('./pages/Roles.js?v=20260929-admin'),
  'access-control':()=>import('./pages/AccessControl.js?v=20260929-admin'),
  audit:()=>import('./pages/AuditLogs.js?v=20260929-admin'),
- settings:()=>import('./pages/Settings.js?v=20260929-admin'),
+ settings:()=>import('./pages/Settings.js?v=20261010-partner-logo-management'),
  'invoice-settings':()=>import('./pages/InvoiceSettings.js?v=20260929-admin'),
  categories:()=>import('./pages/Categories.js?v=20260929-admin'),
  coupons:()=>import('./pages/Coupons.js?v=20260929-admin'),
