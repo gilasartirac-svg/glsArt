@@ -7,6 +7,9 @@ const PLATFORMS=[
 ];
 const iconPath=id=>`/assets/social/${['telegram','instagram','aparat','whatsapp','youtube','linkedin','other'].includes(id)?id:'other'}.svg`;
 
+function normalizePartnerLogos(raw){
+ try{const items=typeof raw==='string'?JSON.parse(raw||'[]'):raw;if(!Array.isArray(items))return [];return items.filter(x=>x&&/^\\/uploaded\\/thumb\\/[A-Za-z0-9._/-]+\\.(?:png|jpe?g|webp|svg)$/i.test(String(x.path||''))&&!String(x.path||'').includes('..')).slice(0,24).map((x,i)=>({label:String(x.label||'').trim().slice(0,80)||String(x.path).split('/').pop(),path:String(x.path),active:x.active!==false,sort:Number.isFinite(Number(x.sort))?Number(x.sort):i}));}catch{return []}
+}
 function normalizeLinks(raw){
  try{
   const x=typeof raw==='string'?JSON.parse(raw||'[]'):raw;
@@ -51,6 +54,15 @@ export default function Settings(){
    <button type="button" class="btn primary" id="social-save">ذخیره شبکه‌های اجتماعی</button>
   </div>
 
+  <div class="panel partner-logo-admin">
+   <div class="sectionhead"><div><h3>لوگوهای مشتریان و همکاران سازمانی</h3><p class="muted">فایل لوگوها را در پوشه frontend/public/uploaded/thumb مخزن قرار دهید؛ سپس از کتابخانه زیر انتخاب، مرتب و برای صفحه اصلی فعال کنید.</p></div><button type="button" class="btn primary" id="partner-library-load">بارگذاری کتابخانه Repository</button></div>
+   <label class="partner-library-search">جست‌وجوی فایل<input id="partner-library-search" type="search" placeholder="نام فایل یا لوگو..." autocomplete="off"></label>
+   <div id="partner-library-status" class="notice" role="status">برای مشاهده تصاویر پوشه thumb، «بارگذاری کتابخانه Repository» را بزنید.</div>
+   <div id="partner-library-grid" class="partner-library-grid" aria-label="کتابخانه تصاویر Repository"></div>
+   <div class="sectionhead partner-selected-heading"><div><h4>لوگوهای انتخاب‌شده برای صفحه اصلی</h4><p class="muted">حداکثر ۲۴ لوگو؛ ترتیب ردیف از بالا به پایین و وضعیت نمایش قابل کنترل است.</p></div></div>
+   <div id="partner-selected-list" class="partner-selected-list"></div>
+   <button type="button" class="btn primary" id="partner-logos-save">ذخیره لوگوهای صفحه اصلی</button>
+  </div>
   <div class="panel">
    <div class="sectionhead"><div><h3>مرکز کنترل ورود و نشست</h3><p class="muted">ورود کاربر و مدیر، اعتبار Session و خروج از حساب از همین سیاست مرکزی کنترل می‌شود.</p></div></div>
    <form id="auth-session-form" class="form">
@@ -86,6 +98,7 @@ export async function mount(){
   document.querySelectorAll('#seo-form [name]').forEach(e=>{e.value=map[e.name]||''});
   const sessionDays=document.querySelector('#auth-session-form [name="auth_session_ttl_days"]');if(sessionDays)sessionDays.value=map.auth_session_ttl_days||'30';
   renderSocialLinks(normalizeLinks(map.footer_social_links));
+  renderPartnerLogos(normalizePartnerLogos(map.partner_logos));
  }catch(e){
   if(error)error.textContent=e.message||'تنظیمات قابل دریافت نیست.';
   renderSocialLinks([]);
@@ -101,6 +114,9 @@ export async function mount(){
 
  document.querySelector('#auth-session-form')?.addEventListener('submit',async e=>{e.preventDefault();const n=Number(new FormData(e.currentTarget).get('auth_session_ttl_days'));if(!Number.isInteger(n)||n<1||n>90){alert('مدت اعتبار باید بین ۱ تا ۹۰ روز باشد.');return}try{await api('/api/admin/settings',{method:'PUT',body:JSON.stringify({auth_session_ttl_days:n})});alert('سیاست اعتبار Session ذخیره شد.')}catch(x){alert(x.message)}});
 
+ document.querySelector('#partner-library-load')?.addEventListener('click',loadPartnerLibrary);
+ document.querySelector('#partner-library-search')?.addEventListener('input',filterPartnerLibrary);
+ document.querySelector('#partner-logos-save')?.addEventListener('click',savePartnerLogos);
  document.querySelector('#social-add')?.addEventListener('click',()=>addSocialRow({id:'instagram',label:'اینستاگرام',url:'',active:true,sort:document.querySelectorAll('.social-link-row').length}));
  document.querySelector('#social-save')?.addEventListener('click',async()=>{
   const rows=[...document.querySelectorAll('.social-link-row')].map((row,i)=>({
@@ -117,6 +133,32 @@ export async function mount(){
   }catch(x){alert(x.message)}
  });
  function renderSocialLinks(items){const box=document.querySelector('#social-links-list');if(!box)return;box.innerHTML='';(items.length?items:[]).forEach(addSocialRow);if(!items.length)box.innerHTML='<div class="social-links-empty">هنوز شبکه اجتماعی ثبت نشده است. برای شروع «افزودن شبکه اجتماعی» را بزنید.</div>'}
+ let partnerLibraryItems=[];
+ function renderPartnerLogos(items){
+  const box=document.querySelector('#partner-selected-list');if(!box)return;box.innerHTML='';
+  if(!items.length){box.innerHTML='<div class="notice">هنوز لوگویی برای صفحه اصلی انتخاب نشده است.</div>';return}
+  items.forEach((item,index)=>{
+   const row=document.createElement('div');row.className='partner-selected-row';row.dataset.path=item.path;
+   row.innerHTML='<img class="partner-selected-preview" src="'+esc(item.path)+'" alt=""><div class="partner-selected-fields"><label>نام نمایشی<input data-field="label" maxlength="80" value="'+esc(item.label)+'"></label><small dir="ltr">'+esc(item.path)+'</small></div><label class="partner-logo-active"><input data-field="active" type="checkbox" '+(item.active?'checked':'')+'> نمایش</label><div class="partner-row-actions"><button type="button" class="btn secondary" data-move="-1" aria-label="انتقال به بالا" '+(index===0?'disabled':'')+'>↑</button><button type="button" class="btn secondary" data-move="1" aria-label="انتقال به پایین" '+(index===items.length-1?'disabled':'')+'>↓</button><button type="button" class="btn danger" data-remove>حذف</button></div>';box.appendChild(row);
+  });
+  box.querySelectorAll('[data-remove]').forEach(button=>button.addEventListener('click',()=>{button.closest('.partner-selected-row')?.remove();refreshPartnerRowButtons()}));
+  box.querySelectorAll('[data-move]').forEach(button=>button.addEventListener('click',()=>{const row=button.closest('.partner-selected-row'),direction=Number(button.dataset.move);if(direction<0&&row.previousElementSibling)row.parentNode.insertBefore(row,row.previousElementSibling);if(direction>0&&row.nextElementSibling)row.parentNode.insertBefore(row.nextElementSibling,row);refreshPartnerRowButtons()}));
+ }
+ function refreshPartnerRowButtons(){const rows=[...document.querySelectorAll('.partner-selected-row')];rows.forEach((row,i)=>row.querySelectorAll('[data-move]').forEach(button=>button.disabled=Number(button.dataset.move)<0?i===0:i===rows.length-1))}
+ async function loadPartnerLibrary(){
+  const status=document.querySelector('#partner-library-status'),grid=document.querySelector('#partner-library-grid'),button=document.querySelector('#partner-library-load');if(!status||!grid)return;button.disabled=true;status.textContent='در حال دریافت فهرست تصاویر پوشه thumb از Repository…';grid.innerHTML='';
+  try{const response=await fetch('https://api.github.com/repos/gilasartirac-svg/glsArt/contents/frontend/public/uploaded/thumb?ref=main&per_page=1000',{headers:{Accept:'application/vnd.github+json'},cache:'no-store'});if(!response.ok)throw new Error(response.status===403?'محدودیت موقت درخواست GitHub؛ کمی بعد دوباره تلاش کنید.':'دریافت کتابخانه تصاویر ناموفق بود.');const files=await response.json();partnerLibraryItems=Array.isArray(files)?files.filter(file=>file.type==='file'&&/\\.(?:png|jpe?g|webp|svg)$/i.test(file.name)).map(file=>({name:file.name,path:'/uploaded/thumb/'+file.name})):[];renderPartnerLibrary();status.textContent=partnerLibraryItems.length+' تصویر از پوشه thumb پیدا شد. فقط لوگوهای واقعی و مجاز سازمان‌ها را انتخاب کنید.';}catch(error){status.textContent=error.message||'کتابخانه تصاویر در دسترس نیست.'}finally{button.disabled=false}
+ }
+ function renderPartnerLibrary(){
+  const grid=document.querySelector('#partner-library-grid');if(!grid)return;const query=String(document.querySelector('#partner-library-search')?.value||'').trim().toLowerCase();const selected=new Set([...document.querySelectorAll('.partner-selected-row')].map(row=>row.dataset.path));const items=partnerLibraryItems.filter(x=>x.name.toLowerCase().includes(query)).slice(0,160);grid.innerHTML='';
+  if(!items.length){grid.innerHTML='<div class="notice">تصویری با این جست‌وجو پیدا نشد.</div>';return}
+  items.forEach(file=>{const button=document.createElement('button');button.type='button';button.className='partner-library-item';button.disabled=selected.has(file.path);button.innerHTML='<img src="'+esc(file.path)+'" alt="" loading="lazy" decoding="async"><span>'+esc(file.name)+'</span><small>'+(selected.has(file.path)?'انتخاب شده':'افزودن به فهرست')+'</small>';button.addEventListener('click',()=>{const rows=[...document.querySelectorAll('.partner-selected-row')];if(rows.length>=24){document.querySelector('#partner-library-status').textContent='حداکثر ۲۴ لوگو قابل انتخاب است.';return}const items=rows.map((row,i)=>({label:row.querySelector('[data-field="label"]').value.trim(),path:row.dataset.path,active:row.querySelector('[data-field="active"]').checked,sort:i}));if(items.some(x=>x.path===file.path))return;items.push({label:file.name.replace(/\\.[^.]+$/,'').replace(/[_-]+/g,' ').trim(),path:file.path,active:true,sort:items.length});renderPartnerLogos(items);renderPartnerLibrary()});grid.appendChild(button)});
+ }
+ function filterPartnerLibrary(){renderPartnerLibrary()}
+ async function savePartnerLogos(){
+  const rows=[...document.querySelectorAll('.partner-selected-row')].map((row,sort)=>({label:row.querySelector('[data-field="label"]').value.trim(),path:row.dataset.path,active:row.querySelector('[data-field="active"]').checked,sort}));if(rows.some(x=>!x.label||!/^\\/uploaded\\/thumb\\/[A-Za-z0-9._/-]+\\.(?:png|jpe?g|webp|svg)$/i.test(x.path)||x.path.includes('..'))){alert('نام و مسیر معتبر برای تمام لوگوها الزامی است.');return}
+  try{await api('/api/admin/settings',{method:'PUT',body:JSON.stringify({partner_logos:JSON.stringify(rows)})});alert('لوگوهای سازمانی ذخیره شد. پس از انتشار تنظیمات، لوگوهای فعال در صفحه اصلی نمایش داده می‌شوند.')}catch(error){alert(error.message||'ذخیره لوگوها ناموفق بود.')}
+ }
  function addSocialRow(item){
   const box=document.querySelector('#social-links-list');if(!box)return;
   box.querySelector('.social-links-empty')?.remove();
