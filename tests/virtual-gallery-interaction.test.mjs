@@ -68,12 +68,20 @@ test('gallery uses warm fixed lighting, real stone surfaces, and no direct artwo
   assert.match(script, /new THREE\.Fog\(0xf0e7d8, 38, 118\)/);
   assert.match(script, /marble_01_diff_1k\.jpg/);
   assert.match(script, /loadStoneSurface\(floorMaterial/);
+  assert.match(script, /large_floor_tiles_02_diff_1k\.png/);
+  assert.match(script, /function addCeilingTileGrid\(/);
+  assert.match(script, /function addEntranceDoor\(/);
+  assert.match(script, /dark_wooden_planks_diff_1k\.png/);
+  assert.match(script, /function addGrandfatherClock\(/);
+  assert.match(script, /grandfatherClock\.pendulum\.rotation\.z/);
+  assert.match(script, /function syncArtworkLoadingIndicator\(/);
+  assert.match(markup, /id="artwork-loading"/);
   assert.match(script, /loadVelvetSurface\(wallMaterial/);
   assert.match(script, /velour_velvet_diff_1k\.jpg/);
   assert.match(script, /roughness: \.68, metalness: 0/);
   assert.match(script, /new THREE\.MeshBasicMaterial\(\{ color: 0xf4efe6, side: THREE\.DoubleSide, toneMapped: false \}\)/);
   assert.doesNotMatch(script, /new THREE\.SpotLight/);
-  assert.match(markup, /gallery\.css\?v=8/);
+  assert.match(markup, /gallery\.css\?v=9/);
 });
 
 test('camera motion uses velocity damping, angular inertia, and cinematic focus easing', () => {
@@ -96,8 +104,8 @@ test('gallery has a bright stone finish, decorative rugs and vases, and a fixed 
   assert.match(script, /new THREE\.LatheGeometry/);
   assert.match(script, /new THREE\.PerspectiveCamera\(57/);
   assert.match(script, /camera\.fov = 57/);
-  assert.match(markup, /gallery\.css\?v=8/);
-  assert.match(markup, /gallery\.js\?v=16/);
+  assert.match(markup, /gallery\.css\?v=9/);
+  assert.match(markup, /gallery\.js\?v=17/);
 });
 
 test('left and right controls navigate to a centered, front-facing artwork view',()=>{
@@ -163,19 +171,20 @@ test('product artwork uses the original image texture without synthetic art or c
   assert.doesNotMatch(script, /record\.placeholderTexture/);
 });
 
-test('mobile and tablet use separate look and movement joysticks plus the client-local clock', () => {
-  assert.match(markup, /data-joystick="look"/);
-  assert.match(markup, /data-joystick="move"/);
+test('mobile and tablet use one combined movement and 360-degree joystick plus the client-local clock', () => {
+  assert.match(markup, /data-joystick="combined"/);
+  assert.equal((markup.match(/data-joystick=/g)||[]).length, 1);
   assert.match(markup, /id="client-clock"/);
   assert.match(script, /function bindJoysticks\(/);
-  assert.match(markup, /جوی‌استیک سمت چپ برای چرخش و نگاه ۳۶۰ درجه است/);
-  assert.match(markup, /جوی‌استیک سمت راست برای حرکت جلو و عقب/);
+  assert.match(markup, /جلو و عقب بکشید تا در راهرو حرکت کنید/);
+  assert.match(markup, /چرخش ۳۶۰ درجه/);
+  assert.match(script, /kind === 'combined'/);
   assert.match(script, /joystickState\.lookX/);
   assert.match(script, /joystickState\.moveY/);
   assert.match(script, /new Intl\.DateTimeFormat\('fa-IR'/);
   assert.match(styles, /\.joystick-controls\{display:none/);
   assert.match(styles, /@media\(max-width:1024px\)/);
-  assert.match(styles, /\.movement-controls\{display:none\}/);
+  assert.match(styles, /\.artwork-loading__spinner/);
 });
 
 test('virtual gallery uses a single renderer and the complete collection without category switching', () => {
