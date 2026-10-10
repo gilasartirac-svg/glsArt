@@ -58,18 +58,17 @@ test('add-to-cart button emits an integration intent without performing a real c
 });
 
 
-test('gallery uses dark granite flooring, deep-brown velvet walls, and non-aggressive artwork lighting', () => {
-  assert.match(script, /new THREE\.AmbientLight/);
-  assert.match(script, /new THREE\.HemisphereLight/);
-  assert.match(script, /new THREE\.Fog\(0x211d1a, 28, 105\)/);
-  assert.match(script, /const velvetCanvas = document\.createElement\('canvas'\)/);
-  assert.match(script, /velvetTexture\.repeat\.set\(Math\.max\(2, corridorLength \/ 8\), 1\)/);
-  assert.match(script, /roughness: \.97, metalness: 0/);
-  assert.match(script, /const floorMaterial = new THREE\.MeshStandardMaterial\(\{ color: 0xc7c0b4, map: marbleTexture, roughness: \.34/);
-  assert.match(script, /hitMeshes: \[inner\]/);
-  assert.doesNotMatch(script, /new THREE\.SpotLight/);
-  assert.doesNotMatch(script, /new THREE\.PointLight\(0xffd19a/);
-  assert.match(markup, /gallery\.css\?v=7/);
+test('gallery uses warm fixed lighting, real stone surfaces, and no direct artwork spotlights', () => {
+  assert.match(script, /new THREE\\.AmbientLight/);
+  assert.match(script, /new THREE\\.HemisphereLight/);
+  assert.match(script, /new THREE\\.Fog\\(0xf0e7d8, 38, 118\\)/);
+  assert.match(script, /marble_01_diff_1k\\.jpg/);
+  assert.match(script, /loadStoneSurface\\(floorMaterial/);
+  assert.match(script, /loadStoneSurface\\(wallMaterial/);
+  assert.match(script, /roughness: \\.68, metalness: 0/);
+  assert.match(script, /new THREE\\.MeshBasicMaterial\\(\\{ color: 0xf4efe6, side: THREE\\.DoubleSide, toneMapped: false \\}\\)/);
+  assert.doesNotMatch(script, /new THREE\\.SpotLight/);
+  assert.match(markup, /gallery\\.css\\?v=8/);
 });
 
 test('camera motion uses velocity damping, angular inertia, and cinematic focus easing', () => {
@@ -84,14 +83,16 @@ test('camera motion uses velocity damping, angular inertia, and cinematic focus 
 });
 
 
-test('gallery uses a realistic granite-and-velvet scene and natural field of view', () => {
-  assert.match(script, /const marbleCanvas = document\.createElement\('canvas'\)/);
-  assert.match(script, /marbleBase\.addColorStop\(0, '#252523'\)/);
-  assert.match(script, /const velvetCanvas = document\.createElement\('canvas'\)/);
-  assert.match(script, /new THREE\.PerspectiveCamera\(57/);
-  assert.match(script, /camera\.fov = 57/);
-  assert.match(markup, /gallery\.css\?v=7/);
-  assert.match(markup, /gallery\.js\?v=\d+/);
+test('gallery has a bright stone finish, decorative rugs and vases, and a fixed field of view', () => {
+  assert.match(script, /const marbleCanvas = document\\.createElement\\('canvas'\\)/);
+  assert.match(script, /marbleBase\\.addColorStop\\(0, '#e8ddca'\\)/);
+  assert.match(script, /function addGalleryDecor\\(/);
+  assert.match(script, /#681c25/);
+  assert.match(script, /new THREE\\.LatheGeometry/);
+  assert.match(script, /new THREE\\.PerspectiveCamera\\(57/);
+  assert.match(script, /camera\\.fov = 57/);
+  assert.match(markup, /gallery\\.css\\?v=8/);
+  assert.match(markup, /gallery\\.js\\?v=15/);
 });
 
 test('left and right controls navigate to a centered, front-facing artwork view',()=>{
@@ -147,11 +148,27 @@ test('product textures load near the visitor and unload at a distance to preserv
 });
 
 
-test('virtual gallery keeps visible fallback artwork when a product image URL fails',()=>{
-  assert.match(script,/const placeholderTexture = makeCanvasTexture\(index, title\)/);
-  assert.doesNotMatch(script,/if \(record\.imageUrl\) inner\.material\.map = null/);
-  assert.match(script,/record\.artworkMaterial\.map = record\.placeholderTexture/);
-  assert.match(script,/record\.imageLoading = false; \}/);
+test('product artwork uses the original image texture without synthetic art or color treatment', () => {
+  assert.match(script, /new THREE\\.MeshBasicMaterial\\(\\{ color: 0xf4efe6, side: THREE\\.DoubleSide, toneMapped: false \\}\\)/);
+  assert.match(script, /texture\\.colorSpace = THREE\\.SRGBColorSpace/);
+  assert.match(script, /const imageAspect = \\(texture\\.image\\?\\.width \\|\\| 1\\) \\/ \\(texture\\.image\\?\\.height \\|\\| 1\\)/);
+  assert.match(script, /const width = Math\\.min\\(record\\.maxWidth, record\\.maxHeight \\* imageAspect\\)/);
+  assert.match(script, /record\\.artworkMaterial\\.map = texture/);
+  assert.doesNotMatch(script, /makeCanvasTexture\\(index, title\\)/);
+  assert.doesNotMatch(script, /record\\.placeholderTexture/);
+});
+
+test('mobile and tablet use separate look and movement joysticks plus the client-local clock', () => {
+  assert.match(markup, /data-joystick="look"/);
+  assert.match(markup, /data-joystick="move"/);
+  assert.match(markup, /id="client-clock"/);
+  assert.match(script, /function bindJoysticks\\(/);
+  assert.match(script, /joystickState\\.lookX/);
+  assert.match(script, /joystickState\\.moveY/);
+  assert.match(script, /new Intl\\.DateTimeFormat\\('fa-IR'/);
+  assert.match(styles, /\\.joystick-controls\\{display:none/);
+  assert.match(styles, /@media\\(max-width:1024px\\)/);
+  assert.match(styles, /\\.movement-controls\\{display:none\\}/);
 });
 
 test('virtual gallery uses a single renderer and the complete collection without category switching', () => {
