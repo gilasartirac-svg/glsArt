@@ -196,21 +196,40 @@ function addPillar(x, z) {
 function addEntranceDoor(wallMaterial, doorMaterial, floorMaterial, ceilingMaterial) {
   const wallZ = bounds.zMax + 2.6, doorZ = wallZ - .78;
   const entranceDepth = wallZ - bounds.zMax;
+  // Repeating ornamental wallpaper pattern in warm ivory, burgundy and muted gold.
+  const wallpaperCanvas = document.createElement('canvas'); wallpaperCanvas.width = 512; wallpaperCanvas.height = 512;
+  const wallpaperContext = wallpaperCanvas.getContext('2d');
+  const wallpaperBase = wallpaperContext.createLinearGradient(0, 0, 512, 512);
+  wallpaperBase.addColorStop(0, '#e7dbc3'); wallpaperBase.addColorStop(.5, '#d7c5a4'); wallpaperBase.addColorStop(1, '#eee2cb');
+  wallpaperContext.fillStyle = wallpaperBase; wallpaperContext.fillRect(0, 0, 512, 512);
+  for (let y = 0; y <= 512; y += 64) for (let x = 0; x <= 512; x += 64) {
+    wallpaperContext.save(); wallpaperContext.translate(x + ((y / 64) % 2) * 32, y);
+    wallpaperContext.strokeStyle = 'rgba(112,54,43,.72)'; wallpaperContext.lineWidth = 2;
+    wallpaperContext.beginPath(); wallpaperContext.moveTo(0,-25); wallpaperContext.bezierCurveTo(23,-12,22,12,0,25); wallpaperContext.bezierCurveTo(-22,12,-23,-12,0,-25); wallpaperContext.stroke();
+    wallpaperContext.strokeStyle = 'rgba(158,119,59,.86)'; wallpaperContext.lineWidth = 1.6;
+    wallpaperContext.beginPath(); wallpaperContext.arc(0,0,11,0,Math.PI*2); wallpaperContext.stroke();
+    for (let petal = 0; petal < 4; petal++) { wallpaperContext.save(); wallpaperContext.rotate(petal*Math.PI/2); wallpaperContext.beginPath(); wallpaperContext.ellipse(0,-7,3.5,7,0,0,Math.PI*2); wallpaperContext.stroke(); wallpaperContext.restore(); }
+    wallpaperContext.restore();
+  }
+  const wallpaperTexture = new THREE.CanvasTexture(wallpaperCanvas);
+  wallpaperTexture.colorSpace = THREE.SRGBColorSpace; wallpaperTexture.wrapS = wallpaperTexture.wrapT = THREE.RepeatWrapping;
+  wallpaperTexture.repeat.set(1.6, 1.2);
+  const wallpaperMaterial = new THREE.MeshStandardMaterial({ map: wallpaperTexture, color: 0xffffff, roughness: .92, metalness: .01, side: THREE.DoubleSide });
   const extensionFloor = new THREE.Mesh(new THREE.PlaneGeometry(18, entranceDepth), floorMaterial);
   extensionFloor.rotation.x = -Math.PI / 2; extensionFloor.position.set(0, .006, (wallZ + bounds.zMax) / 2); scene.add(extensionFloor);
   const extensionCeiling = new THREE.Mesh(new THREE.PlaneGeometry(18, entranceDepth), ceilingMaterial);
   extensionCeiling.rotation.x = Math.PI / 2; extensionCeiling.position.set(0, 4.2, (wallZ + bounds.zMax) / 2); scene.add(extensionCeiling);
   for (const side of [-1, 1]) {
-    const extension = new THREE.Mesh(new THREE.PlaneGeometry(entranceDepth, 4.2), wallMaterial);
+    const extension = new THREE.Mesh(new THREE.PlaneGeometry(entranceDepth, 4.2), wallpaperMaterial);
     extension.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2;
     extension.position.set(side * 9, 2.1, (wallZ + bounds.zMax) / 2); scene.add(extension);
   }
   const sideWidth = (18 - 3.7) / 2;
   for (const side of [-1, 1]) {
-    const panel = new THREE.Mesh(new THREE.PlaneGeometry(sideWidth, 4.2), wallMaterial);
+    const panel = new THREE.Mesh(new THREE.PlaneGeometry(sideWidth, 4.2), wallpaperMaterial);
     panel.position.set(side * (1.85 + sideWidth / 2), 2.1, wallZ); scene.add(panel);
   }
-  const upperPanel = new THREE.Mesh(new THREE.PlaneGeometry(3.7, .62), wallMaterial);
+  const upperPanel = new THREE.Mesh(new THREE.PlaneGeometry(3.7, .62), wallpaperMaterial);
   upperPanel.position.set(0, 3.89, wallZ); scene.add(upperPanel);
   const gold = new THREE.MeshStandardMaterial({ color: 0x9b6b31, metalness: .62, roughness: .32 });
   for (const side of [-1, 1]) {
