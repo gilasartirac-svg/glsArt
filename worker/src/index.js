@@ -966,7 +966,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
    const [h,it,p]=await Promise.all([
     env.DB.prepare('SELECT h.*,u.name changed_by_name FROM order_status_history h LEFT JOIN users u ON u.id=h.changed_by_user_id WHERE h.order_id=? ORDER BY h.changed_at ASC').bind(o.id).all(),
     env.DB.prepare('SELECT id,product_id,sku,name,unit_price_irt,quantity,line_total_irt,options_json FROM order_items WHERE order_id=? ORDER BY id').bind(o.id).all(),
-    env.DB.prepare('SELECT status,provider,amount_irt,ref_id,authority,paid_at,created_at,updated_at FROM payments WHERE order_id=?').bind(o.id).first()
+    env.DB.prepare('SELECT status,provider,amount_irt,ref_id,authority,paid_at,created_at,updated_at,receipt_status,receipt_mime,receipt_size,receipt_uploaded_at,receipt_reviewed_at,receipt_rejection_reason FROM payments WHERE order_id=?').bind(o.id).first()
    ]);
    histories.push({orderId:o.id,history:h.results||[]});
    items.push({orderId:o.id,items:it.results||[],payment:p||null});
