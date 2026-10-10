@@ -577,6 +577,18 @@
     "home.virtualGalleryTitle": "گالری مجازی سه‌بعدی",
     "home.virtualGalleryText": "در فضایی الهام‌گرفته از یک گالری مجلل قدم بزنید و آثار را تماشا کنید.",
     "home.virtualGalleryCta": "ورود به گالری",
-    "home.virtualGalleryLabel": "پیش‌نمایش گالری مجازی سه‌بعدی گیلاس آرت"
+    "home.virtualGalleryLabel": "پیش‌نمایش گالری مجازی سه‌بعدی گیلاس آرت",
+    "admin.partnerLogos.title": "لوگوهای مشتریان و همکاران سازمانی",
+    "admin.partnerLogos.description": "فایل لوگوها را در پوشه frontend/public/uploaded/thumb مخزن قرار دهید؛ سپس از کتابخانه زیر انتخاب، مرتب و برای صفحه اصلی فعال کنید.",
+    "admin.partnerLogos.loadLibrary": "بارگذاری کتابخانه Repository",
+    "admin.partnerLogos.search": "جست‌وجوی فایل",
+    "admin.partnerLogos.loadHint": "برای مشاهده تصاویر پوشه thumb، «بارگذاری کتابخانه Repository» را بزنید.",
+    "admin.partnerLogos.selected": "لوگوهای انتخاب‌شده برای صفحه اصلی",
+    "admin.partnerLogos.orderHint": "حداکثر ۲۴ لوگو؛ ترتیب ردیف از بالا به پایین و وضعیت نمایش قابل کنترل است.",
+    "admin.partnerLogos.save": "ذخیره لوگوهای صفحه اصلی",
+    "admin.partnerLogos.searchPlaceholder": "نام فایل یا لوگو...",
+    "admin.partnerLogos.libraryLabel": "کتابخانه تصاویر Repository",
+    "admin.partnerLogos.invalid": "نام و مسیر معتبر برای تمام لوگوها الزامی است.",
+    "admin.partnerLogos.saved": "لوگوهای سازمانی ذخیره شد. لوگوهای فعال در صفحه اصلی نمایش داده می‌شوند."
   }
 }
