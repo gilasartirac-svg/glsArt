@@ -340,15 +340,21 @@ function setupScene() {
   const surfaceLoader = new THREE.TextureLoader();
   surfaceLoader.setCrossOrigin('anonymous');
   const stoneTextureUrl = 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/marble_01/marble_01_diff_1k.jpg';
-  const loadStoneSurface = (material, repeatX, repeatY) => surfaceLoader.load(stoneTextureUrl, texture => {
+  const velvetTextureUrl = 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/velour_velvet/velour_velvet_diff_1k.jpg';
+  const loadSurfaceTexture = (material, textureUrl, repeatX, repeatY, tint = 0xffffff) => surfaceLoader.load(textureUrl, texture => {
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(repeatX, repeatY);
     texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy() || 1);
-    material.map = texture; material.needsUpdate = true;
-  }, undefined, () => { /* Keep the local fallback if the texture host is unavailable. */ });
+    material.map = texture;
+    material.color.setHex(tint);
+    material.needsUpdate = true;
+  }, undefined, () => { /* Keep the local procedural texture if the remote texture is unavailable. */ });
+  const loadStoneSurface = (material, repeatX, repeatY) => loadSurfaceTexture(material, stoneTextureUrl, repeatX, repeatY);
+  const loadVelvetSurface = (material, repeatX, repeatY) => loadSurfaceTexture(material, velvetTextureUrl, repeatX, repeatY, 0x98745d);
   loadStoneSurface(floorMaterial, 2.4, Math.max(4, corridorLength / 5));
-  loadStoneSurface(wallMaterial, Math.max(2, corridorLength / 9), 1.25);
+  // Keep the wall's real velvet material separate from the natural-stone floor texture.
+  loadVelvetSurface(wallMaterial, Math.max(2, corridorLength / 9), 1.25);
   addGalleryDecor(corridorLength, corridorCenter);
 
   artworkQueue.length = 0; nextArtworkIndex = 0;
@@ -720,21 +726,72 @@ function bindControls() {
   ['pointerup','pointercancel','lostpointercapture'].forEach(type => canvas.addEventListener(type, stopDrag));
   canvas.addEventListener('click', onArtworkClick);
   $('artwork-panel-close').addEventListener('click', closeArtworkPanel);
-  $('artwork-panel-cart')?.addEventListener('click', () => {
+  $('artwork-panel-cart')?.addEventListener('click', async event => {
     const product = activeArtwork?.product;
-    if (!product) return;
-    const intent = {
-      productId: product.id,
-      slug: product.slug,
-      sku: product.sku,
-      quantity: 1,
-      price: product.price,
-      source: 'virtual-gallery'
-    };
-    window.dispatchEvent(new CustomEvent('gilasart:cart:add', { detail: intent }));
+    const button = event.currentTarget;
     const message = $('artwork-panel-cart-message');
-    if (message) message.textContent = 'اتصال سبد خرید هنوز فعال نشده است؛ انتخاب محصول برای اتصال آینده آماده شد.';
-    statusText.textContent = 'سبد خرید در حال حاضر فعال نیست.';
+    if (!product || !button || button.disabled) return;
+    button.disabled = true;
+    const originalLabel = button.textContent;
+    button.textContent = 'در حال افزودن…';
+    if (message) message.textContent = 'در حال بررسی حساب و افزودن اثر به سبد خرید…';
+    const apiOrigins = ['https://api.gilasart.ir', 'https://gilasartworker.gilasart-ir-ac.workers.dev'];
+    const request = async (path, options = {}) => {
+      let lastError;
+      for (const origin of apiOrigins) {
+        try {
+          const response = await fetch(origin + path, {
+            ...options,
+            credentials: 'include',
+            cache: 'no-store',
+            headers: { Accept: 'application/json', ...(options.headers || {}) }
+          });
+          const raw = await response.text();
+          let data = {};
+          try { data = raw ? JSON.parse(raw) : {}; } catch {}
+          if (!response.ok) {
+            const error = new Error(String(data.error || data.message || 'درخواست انجام نشد.'));
+            error.status = response.status;
+            if ([502, 503, 504].includes(response.status)) { lastError = error; continue; }
+            throw error;
+          }
+          return data;
+        } catch (error) {
+          if (error instanceof TypeError) { lastError = error; continue; }
+          throw error;
+        }
+      }
+      throw lastError || new Error('ارتباط با سرویس فروشگاه برقرار نشد.');
+    };
+    try {
+      const session = await request('/api/me');
+      if (!session?.user) {
+        if (message) message.textContent = 'برای افزودن اثر، ابتدا وارد حساب کاربری شوید.';
+        window.location.assign('/account');
+        return;
+      }
+      const token = String(session.csrfToken || '');
+      if (!token) throw new Error('جلسه خرید معتبر نیست؛ لطفاً دوباره وارد حساب شوید.');
+      await request('/api/cart', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-csrf-token': token },
+        body: JSON.stringify({ productId: product.id, quantity: 1, options: [] })
+      });
+      if (message) message.textContent = 'این اثر با موفقیت به سبد خرید اضافه شد.';
+      button.textContent = 'افزوده شد ✓';
+      statusText.textContent = 'اثر به سبد خرید شما اضافه شد.';
+      window.dispatchEvent(new CustomEvent('gilasart:cart:added', { detail: { productId: product.id, source: 'virtual-gallery' } }));
+      window.setTimeout(() => { if (button.isConnected) button.textContent = originalLabel; }, 1800);
+    } catch (error) {
+      console.error('[GilasArt virtual gallery cart]', error);
+      if (message) message.textContent = error?.status === 401 || error?.status === 403
+        ? 'برای افزودن اثر، وارد حساب کاربری شوید.'
+        : (error?.message || 'افزودن اثر به سبد خرید انجام نشد؛ لطفاً از صفحه محصول دوباره تلاش کنید.');
+      if (error?.status === 401 || error?.status === 403) window.location.assign('/account');
+      button.textContent = originalLabel;
+    } finally {
+      button.disabled = false;
+    }
   });
   $('help-toggle').addEventListener('click', () => {
     const panel = $('help-panel'); panel.hidden = !panel.hidden;
