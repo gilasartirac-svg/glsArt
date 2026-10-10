@@ -530,7 +530,18 @@ const categorySection=state.categories.length?'<section class="wrap home-categor
 const galleryFrameProducts=state.products.filter(p=>p&&p.image&&p.slug);
 const galleryProductsPayload=escapeHtml(JSON.stringify(galleryFrameProducts.map(p=>({name:p.name||'اثر هنری',slug:p.slug,image:productThumbUrl(p.image)}))));
 // Homepage localization compatibility contract: t('home.galleryArt'), t('home.virtualGalleryTitle'), t('home.virtualGalleryText'), t('home.virtualGalleryCta'), t('home.virtualGalleryLabel') remain supported by the existing Persian dictionary.
-const roomArtwork=galleryFrameProducts.length?galleryFrameProducts[Math.floor(Math.random()*galleryFrameProducts.length)]:null;
+const roomArtworkPool=galleryFrameProducts;
+const roomArtworkKey='ga-home-room-artwork-cycle-v1';
+const roomArtwork=roomArtworkPool.length?(()=>{
+ let index=0;
+ try{
+  const saved=JSON.parse(localStorage.getItem(roomArtworkKey)||'null');
+  const valid=Number.isInteger(saved?.index)&&saved.index>=0&&saved.index<roomArtworkPool.length;
+  index=valid?(saved.index+1)%roomArtworkPool.length:Math.floor(Math.random()*roomArtworkPool.length);
+  localStorage.setItem(roomArtworkKey,JSON.stringify({index,slug:roomArtworkPool[index]?.slug,updatedAt:Date.now()}));
+ }catch{index=Math.floor(Math.random()*roomArtworkPool.length)}
+ return roomArtworkPool[index];
+})():null;
 const roomArtworkUrl=roomArtwork?safeUrl(roomArtwork.image):'';
 const heroMedia='<section class="ga-home-room" aria-label="اتاق نمایش هنر معرق مس"><div class="ga-room-viewport" data-ga-room tabindex="0" role="region" aria-label="برای ورود به گالری مجازی گیلاس آرت کلیک کنید"><div class="ga-room-scene" data-ga-room-scene><div class="ga-room-back-wall"><div class="ga-room-wallpaper" aria-hidden="true"></div><div class="ga-room-artwork-frame">'+(roomArtworkUrl?'<img class="ga-room-artwork" src="'+escapeHtml(roomArtworkUrl)+'" alt="'+escapeHtml(roomArtwork.name||'تابلوی معرق مس')+'" decoding="async" fetchpriority="high">':'<span class="ga-room-artwork-empty">گیلاس آرت</span>')+'</div><div class="ga-room-wall-plaque" aria-hidden="true">GILASART · COPPER MARQUETRY</div></div><div class="ga-room-side-wall ga-room-side-wall-left"><span class="ga-room-wallpaper" aria-hidden="true"></span></div><div class="ga-room-side-wall ga-room-side-wall-right"><span class="ga-room-wallpaper" aria-hidden="true"></span></div><div class="ga-room-floor" aria-hidden="true"></div><div class="ga-room-ceiling" aria-hidden="true"></div><div class="ga-room-light ga-room-light-one" aria-hidden="true"></div><div class="ga-room-light ga-room-light-two" aria-hidden="true"></div></div><div class="ga-room-brand-copy"><h2>گیلاس آرت</h2><p>تولید کننده برتر تابلوهای معرق مس در ایران</p><a href="'+routeUrl('/virtual-gallery/')+'" class="ga-room-shop-link">بازدید مجازی از تابلوها <span aria-hidden="true">←</span></a></div></div></section>';
 const latestSection='<section class="wrap section home-latest"><div class="sectionhead"><div><span class="eyebrow">'+t('home.latestEyebrow')+'</span><h2>'+t('home.latest')+'</h2><p class="muted">'+t('home.latestActive')+' '+t('home.copperLatestText')+'</p></div><a class="muted" href="'+routeUrl('/shop')+'">'+t('home.allWorks')+'</a></div><div class="grid">'+(state.products.slice(0,8).map(productCard).join('')||'<div class="panel">'+t('home.noActive')+'</div>')+'</div></section>';
