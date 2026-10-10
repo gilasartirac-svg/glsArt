@@ -7448,6 +7448,7 @@ body{
 #main-content>.wrap,#main-content .wrap{max-width:var(--content-max,1240px)}
 #main-content p:not(.eyebrow):not(.vg3-kicker):not(.product-card-kicker),.footer-caption{text-align:justify;text-justify:inter-word}
 .ga-header-shell .ga-header-container{width:min(calc(100% - 2 * var(--page-gutter)),1240px)}
+.ga-header-shell .ga-header-brand{margin-inline-start:8px}
 #main-content .wrap{width:min(calc(100% - 2 * var(--page-gutter)),var(--max,1240px))}
 .ga-header-shell .ga-header-theme-toggle{min-width:54px;min-height:44px;padding:5px 8px;border-radius:999px;background:var(--ui-surface-2);border-color:color-mix(in srgb,var(--ui-gold) 30%,var(--ui-line))}
 .ga-theme-switch{position:relative;display:inline-flex;align-items:center;justify-content:space-between;width:66px;height:30px;padding:3px 5px;border:1px solid color-mix(in srgb,var(--ui-gold) 38%,var(--ui-line));border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--ui-gold) 14%,var(--ui-surface)),var(--ui-surface-2));font-size:15px;line-height:1}
