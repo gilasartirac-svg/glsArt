@@ -8001,3 +8001,13 @@ body{
  .ga-home-room .ga-room-controls button{width:32px;height:32px}
 }
 @media(prefers-reduced-motion:reduce){.ga-home-room .ga-room-scene{transition:none}}
+
+
+/* Production correction: banner uses the artwork's own frame and opens the virtual gallery. */
+.ga-home-room .ga-room-viewport{cursor:pointer}
+.ga-home-room .ga-room-artwork-frame{padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+.ga-home-room .ga-room-artwork{display:block;width:auto;height:auto;max-width:100%;max-height:clamp(170px,35vw,390px);object-fit:contain;box-shadow:none!important}
+.ga-home-room .ga-room-brand-copy h2{margin:.15rem 0 .45rem;font-size:clamp(32px,4.5vw,58px)}
+.ga-home-room .ga-room-brand-copy p{max-width:100%;margin-bottom:1.25rem}
+.ga-home-room .ga-room-shop-link{cursor:pointer}
+@media(max-width:760px){.ga-home-room .ga-room-artwork{max-height:clamp(160px,45vw,270px)}}
