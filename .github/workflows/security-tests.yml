@@ -24,5 +24,7 @@ jobs:
       - run: npm ci
       - name: Static checks
         run: npm run check
+      - name: Frontend production build
+        run: npm run build
       - name: Security regression tests
         run: node --test tests/*.test.mjs
