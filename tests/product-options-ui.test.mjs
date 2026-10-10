@@ -70,9 +70,9 @@ test('light theme keeps clear borders and a persistent selected option highlight
 
 
 test('final selected product price is visually larger on desktop, tablet, and mobile', () => {
-  assert.match(css, /#product-live-price\.product-live-price\{[^}]*font-size:clamp\(1\.625rem,2\.5vw,2\.125rem\)/s);
-  assert.match(css, /@media\(min-width:621px\) and \(max-width:1024px\)\{\s*#product-live-price\.product-live-price\{font-size:1\.875rem\}/);
-  assert.match(css, /@media\(max-width:620px\)\{\s*#product-live-price\.product-live-price\{font-size:1\.625rem/);
+  assert.match(css, /#product-live-price\.product-live-price\{[^}]*font-size:clamp\\(1\\.875rem,3vw,2\\.375rem\\)/s);
+  assert.match(css, /@media\(min-width:621px\) and \(max-width:1024px\)\{\s*#product-live-price\.product-live-price\{font-size:2\\.125rem\\}/);
+  assert.match(css, /@media\(max-width:620px\)\{\s*#product-live-price\.product-live-price\{font-size:1\\.875rem/);
 });
 
 test('product page hides the price delta breakdown and redundant purchase disclaimer', () => {
