@@ -840,7 +840,7 @@ async function product(slug){
  if(stockEl){
    if(stock===0)stockEl.innerHTML='<span class="error">'+t('product.outOfStock')+'</span>';
    else if(stock<=3)stockEl.innerHTML='<span class="product-stock-remaining" role="status"><span class="product-stock-fire" aria-hidden="true">🔥</span><span>تنها '+fa(stock)+' عدد در انبار باقی مانده است</span></span>';
-   else stockEl.innerHTML='<span class="product-stock-available" role="status">بیش از ۳ عدد</span>';
+   else stockEl.innerHTML='<span class="product-stock-available" role="status">موجودی: بیش از <strong>۳</strong> عدد</span>';
  }
  const related=Array.isArray(d.relatedProducts)?d.relatedProducts:[];
  if(related.length){
