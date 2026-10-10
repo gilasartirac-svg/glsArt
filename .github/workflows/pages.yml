@@ -171,6 +171,11 @@ jobs:
           const title=(await page.locator('.product-info h1').innerText()).trim();
           if(!title)fail('Product Detail title did not render');
           const hasOptions=await page.locator('.product-option-input').count();
+          if(hasOptions){
+            const optionLayout=await page.locator('.product-option-grid').first().evaluate(el=>{const s=getComputedStyle(el);return {display:s.display,flexDirection:s.flexDirection,flexWrap:s.flexWrap,overflowX:s.overflowX,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,cardCount:el.querySelectorAll('.product-option-card').length}});
+            if(optionLayout.display!=='flex'||optionLayout.flexDirection!=='row'||optionLayout.flexWrap!=='nowrap'||optionLayout.overflowX!=='auto')fail('Product options are not horizontally scrollable: '+JSON.stringify(optionLayout));
+            if(optionLayout.cardCount<1)fail('Product option row has no option cards');
+          }
           const hasPrice=await page.locator('#product-live-price').count();
           const hasGallery=await page.locator('#product-media').count();
           if(!hasPrice||!hasGallery)fail('Product Detail required runtime nodes missing');
