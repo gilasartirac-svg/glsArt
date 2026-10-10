@@ -7178,3 +7178,97 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
   :root[data-theme="light"] .shop-page .shop-control-bar{gap:7px}
   :root[data-theme="light"] .shop-page .shop-control-trigger{min-height:42px;padding:8px 10px}
 }
+
+
+/* Mobile virtual-gallery banner correction — isolated to this card only. */
+.home-copper-gallery .virtual-gallery-preview{
+  position:relative;
+  isolation:isolate;
+  min-height:clamp(430px,118vw,510px);
+  aspect-ratio:4/5;
+  background:#211a12;
+  border:1px solid color-mix(in srgb,var(--ui-gold) 42%,var(--ui-line));
+  border-radius:24px;
+  overflow:hidden;
+}
+.home-copper-gallery .virtual-gallery-preview .home-virtual-artwork{
+  z-index:-1;
+  object-fit:cover;
+  object-position:center 34%;
+  opacity:1;
+  filter:saturate(1.08) contrast(1.025) brightness(1.04);
+  transform:scale(1.015);
+  transition:transform .45s ease,filter .3s ease;
+}
+.home-copper-gallery .virtual-gallery-preview::after{
+  z-index:0;
+  background:
+    linear-gradient(180deg,
+      rgba(13,10,7,.015) 0%,
+      rgba(13,10,7,.025) 34%,
+      rgba(13,10,7,.12) 48%,
+      rgba(13,10,7,.48) 65%,
+      rgba(13,10,7,.88) 100%);
+}
+.home-copper-gallery .virtual-gallery-preview .vg3-preview-copy{
+  position:relative;
+  z-index:1;
+  gap:10px;
+  margin-top:auto;
+  padding:clamp(18px,5vw,24px);
+  background:linear-gradient(180deg,transparent 0%,rgba(18,13,8,.24) 14%,rgba(18,13,8,.70) 100%);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+.home-copper-gallery .virtual-gallery-preview .vg3-preview-copy>strong{
+  color:#fff7e7;
+  font-size:clamp(24px,6.5vw,29px);
+  line-height:1.35;
+  text-shadow:0 2px 14px rgba(0,0,0,.26);
+}
+.home-copper-gallery .virtual-gallery-preview .vg3-description{
+  max-width:34ch;
+  color:rgba(255,247,231,.9);
+  font-size:13px;
+  line-height:1.8;
+  text-shadow:0 1px 8px rgba(0,0,0,.28);
+}
+.home-copper-gallery .virtual-gallery-preview .vg3-kicker{
+  color:#f0cf83;
+  text-shadow:0 1px 8px rgba(0,0,0,.35);
+}
+.home-copper-gallery .virtual-gallery-preview .vg3-enter{
+  min-height:46px;
+  gap:18px;
+  margin-top:5px;
+  padding:12px 17px;
+  border:1px solid rgba(240,207,131,.78);
+  border-radius:13px;
+  color:#241a0b;
+  background:linear-gradient(135deg,#e4bd69,#c89537);
+  box-shadow:0 7px 20px rgba(0,0,0,.2);
+  text-shadow:none;
+}
+.home-copper-gallery .virtual-gallery-preview .vg3-enter:hover{
+  background:linear-gradient(135deg,#f0d38f,#d6a64b);
+}
+@media(max-width:767px){
+  .home-copper-gallery .virtual-gallery-preview{
+    min-height:clamp(430px,125vw,500px);
+    aspect-ratio:4/5;
+    border-radius:22px;
+  }
+  .home-copper-gallery .virtual-gallery-preview .home-virtual-artwork{
+    object-position:center 31%;
+  }
+  .home-copper-gallery .virtual-gallery-preview .vg3-preview-copy{
+    padding:20px 18px 22px;
+    gap:9px;
+  }
+  .home-copper-gallery .virtual-gallery-preview .vg3-description{
+    font-size:12.5px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .home-copper-gallery .virtual-gallery-preview .home-virtual-artwork{transition:none}
+}
