@@ -58,3 +58,12 @@ test('product option component stays scoped to its own component classes', () =>
   assert.match(css, /\.product-option-group/);
   assert.match(css, /\.product-option-card/);
 });
+
+
+test('light theme keeps clear borders and a persistent selected option highlight', () => {
+  assert.match(css, /:root\[data-theme="light"\] \.product-option-card-ui\{[^}]*border:1px solid #C8BDAA/s);
+  assert.match(css, /:root\[data-theme="light"\] \.product-option-input:checked \+ \.product-option-card-ui/);
+  assert.match(css, /border:2px solid #9B742D/);
+  assert.match(css, /background:#F4E8CE/);
+  assert.match(css, /:root\[data-theme="light"\] \.product-option-card\.selected \.product-option-card-ui/);
+});
