@@ -7620,3 +7620,10 @@ body{
 /* Keep responsive category sizing after removing the homepage hero action buttons. */
 @media(max-width:1023px){.home-categories .category-card strong{opacity:1;transform:none}}
 @media(max-width:359px){.home-categories .category-card{flex-basis:100px;min-width:100px}.home-categories .category-mark{width:58px;height:58px;flex-basis:58px}}
+
+/* Full-bleed homepage virtual gallery — desktop, tablet and mobile. */
+.home-copper-gallery>.home-hero{display:block!important;box-sizing:border-box;width:100vw!important;max-width:100vw!important;margin-inline:calc(50% - 50vw)!important;padding:0!important;}
+.home-copper-gallery>.home-hero>.virtual-gallery-preview{display:block;box-sizing:border-box;width:100%!important;max-width:none!important;min-height:clamp(300px,43vw,620px);height:clamp(300px,43vw,620px);max-height:none;border-radius:0!important;margin:0;}
+.home-copper-gallery>.home-hero>.virtual-gallery-preview .vg3-preview-copy{padding:clamp(18px,4vw,56px);}
+@media(min-width:768px) and (max-width:1199px){.home-copper-gallery>.home-hero>.virtual-gallery-preview{height:clamp(340px,48vw,560px);min-height:clamp(340px,48vw,560px)}}
+@media(max-width:767px){.home-copper-gallery>.home-hero>.virtual-gallery-preview{height:clamp(280px,76vw,430px);min-height:clamp(280px,76vw,430px)}.home-copper-gallery>.home-hero>.virtual-gallery-preview .vg3-preview-copy{padding:20px 16px}}
