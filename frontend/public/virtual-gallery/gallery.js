@@ -741,10 +741,10 @@ function bindControls() {
       for (const origin of apiOrigins) {
         try {
           const response = await fetch(origin + path, {
+            ...options,
             credentials: 'include',
             cache: 'no-store',
-            headers: { Accept: 'application/json', ...(options.headers || {}) },
-            ...options
+            headers: { Accept: 'application/json', ...(options.headers || {}) }
           });
           const raw = await response.text();
           let data = {};
