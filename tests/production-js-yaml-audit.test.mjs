@@ -19,6 +19,8 @@ test('thumbnail workflow includes every supported image extension and tolerates 
   assert.ok(workflow.includes('".jpg"'));
   assert.ok(!workflow.includes('len(expected) != 233'));
   assert.ok(workflow.includes('if git diff --cached --quiet; then echo "No thumbnail changes."'));
+  assert.ok(workflow.includes('on:\\n  workflow_dispatch:'));
+  assert.ok(!workflow.includes("'.github/workflows/create-thumbs.yml'"));
 });
 
 test('Pages workflow is not accidentally duplicated or truncated', () => {
