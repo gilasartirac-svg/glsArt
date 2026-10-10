@@ -7636,3 +7636,17 @@ body{
   :root[data-theme="light"] .ga-header-shell .ga-header-primary-nav#main-menu{background:var(--surface);color:var(--text);border-color:var(--border)}
   :root[data-theme="light"] .ga-header-shell .ga-header-settings{border-color:var(--border)}
 }
+
+
+/* Text and page-edge breathing room — prevent content from touching browser edges. */
+#main-content{box-sizing:border-box;padding-inline:var(--page-gutter,clamp(16px,3.2vw,36px))}
+#main-content>.wrap,#main-content .wrap{box-sizing:border-box;width:min(100%,var(--content-max,1240px));max-width:100%;margin-inline:auto}
+#main-content :where(.page-content,.legal-content,.article-content,.about-content,.contact-content,.policy-content,.cms-content){min-width:0;max-width:100%;padding-inline:clamp(0px,.35vw,6px)}
+#main-content :where(p,li,blockquote,dd){max-width:100%;text-wrap:pretty}
+@media(min-width:1200px){#main-content{padding-inline:clamp(28px,4vw,56px)}}
+@media(min-width:768px) and (max-width:1199px){#main-content{padding-inline:clamp(22px,3vw,36px)}}
+@media(max-width:767px){
+  #main-content{padding-inline:16px}
+  #main-content :where(.page-content,.legal-content,.article-content,.about-content,.contact-content,.policy-content,.cms-content){padding-inline:0}
+}
+@media(max-width:359px){#main-content{padding-inline:14px}}
