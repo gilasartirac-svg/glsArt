@@ -60,40 +60,6 @@ let selectedGalleryCategory = 'all';
 let galleryTextureLoader = null;
 const fallbackTitles = ['نقش و نگار','گرمای مس','روایت ایرانی','آرامش رنگ','هنر ماندگار','جزئیات هنر','طلایی گرم','بافت و فرم','گیلاس آرت','نقش ایرانی'];
 
-function makeCanvasTexture(index, title) {
-  const art = document.createElement('canvas');
-  art.width = 512; art.height = 640;
-  const ctx = art.getContext('2d');
-  const gradient = ctx.createLinearGradient(0, 0, 512, 640);
-  const palettes = [
-    ['#231a17','#9a633b','#e2bd78'],
-    ['#111a22','#42626a','#d9a441'],
-    ['#291c1d','#8f4536','#e5c18a'],
-    ['#17231e','#596f51','#d5ad5e'],
-    ['#211b2a','#67506c','#c49c61'],
-    ['#201a12','#8b7447','#e1c48b']
-  ];
-  const colors = palettes[index % palettes.length];
-  gradient.addColorStop(0, colors[0]); gradient.addColorStop(.62, colors[1]); gradient.addColorStop(1, colors[2]);
-  ctx.fillStyle = gradient; ctx.fillRect(0, 0, 512, 640);
-  ctx.globalAlpha = .8;
-  for (let i = 0; i < 7; i++) {
-    ctx.beginPath();
-    ctx.ellipse(256 + Math.sin(i * 1.7 + index) * 70, 310 + Math.cos(i * 1.3) * 90, 70 + i * 14, 150 - i * 9, i * .23, 0, Math.PI * 2);
-    ctx.strokeStyle = i % 2 ? '#f0d39b' : '#241b17'; ctx.lineWidth = 3 + (i % 3);
-    ctx.stroke();
-  }
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = 'rgba(7,8,10,.64)'; ctx.fillRect(0, 550, 512, 90);
-  ctx.fillStyle = '#f3dfb7'; ctx.font = 'bold 23px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText(title, 256, 594);
-  ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.font = '13px sans-serif'; ctx.fillText('GILASART · ART COLLECTION', 256, 619);
-  const texture = new THREE.CanvasTexture(art);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = renderer?.capabilities.getMaxAnisotropy?.() || 1;
-  return texture;
-}
-
 function addWallArt(x, z, rotation, index, title, imageUrl = '', product = null) {
   const group = new THREE.Group();
   group.position.set(x, 2.05, z);
