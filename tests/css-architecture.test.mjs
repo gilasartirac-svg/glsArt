@@ -96,11 +96,12 @@ test('day and night palettes have one canonical token definition per theme',()=>
   assert.doesNotMatch(css,/html\[data-theme="dark"\]\s*\{\s*--ui-bg:/);
 });
 
-test('browser theme metadata follows the selected theme and system preference',()=>{
+test('first-time visitors default to dark while saved theme and metadata stay synchronized',()=>{
   const html=read('frontend/src/index.html');
   const app=read('frontend/src/app.js');
   assert.equal((html.match(/<meta name="theme-color"/g)||[]).length,1);
-  assert.ok(html.includes('prefers-color-scheme: dark'));
+  assert.ok(html.includes('if(t!=="light"&&t!=="dark")t="dark";'));
+  assert.ok(!html.includes('prefers-color-scheme'));
   assert.ok(html.includes('meta[name="theme-color"]'));
   assert.ok(app.includes("const THEME_COLORS={light:'#f5f2ec',dark:'#0b0d11'};"));
   assert.ok(app.includes("meta.setAttribute('content',THEME_COLORS[t])"));
