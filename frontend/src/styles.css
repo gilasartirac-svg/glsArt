@@ -7846,8 +7846,8 @@ body{
 }
 
 
-/* Keep the open header stacking context above the page backdrop on small phones. */
-@media(max-width:1023px){
+/* Keep the open header stacking context above the page backdrop; disable backdrop-filter because it traps fixed navigation drawers inside the header after scrolling. */
+@media(max-width:1199px){
   .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="true"]){
     position:sticky!important;
     z-index:1101!important;
