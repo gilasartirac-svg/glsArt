@@ -185,3 +185,18 @@ test('cart UI uses scoped theme-aware responsive checkout styling',()=>{
   assert.ok(app.includes('class="cart-checkout-bar"'));
   assert.ok(app.includes('class="payment-method-list"'));
 });
+
+
+test('current mobile navigation drawer stays above backdrop and opens at scrolled positions',()=>{
+  const css=read('frontend/src/styles.css');
+  const app=read('frontend/src/app.js');
+  assert.ok(css.includes('.ga-header-shell .ga-header-primary-nav#main-menu.is-open'));
+  assert.ok(css.includes('z-index:1100'));
+  assert.ok(css.includes('z-index:1102'));
+  assert.ok(css.includes('body.mobile-nav-open::before'));
+  assert.ok(css.includes('pointer-events:auto'));
+  assert.ok(css.includes('overscroll-behavior:contain'));
+  assert.ok(app.includes('window.GilasArtMobileMenu.toggle(this)'));
+  assert.ok(app.includes("document.body.classList.toggle('mobile-nav-open',open)"));
+  assert.ok(app.includes("document.body.classList.remove('mobile-nav-open')"));
+});
