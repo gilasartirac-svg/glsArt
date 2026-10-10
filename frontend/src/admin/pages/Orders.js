@@ -98,7 +98,7 @@ export default function Orders(){
    detail.innerHTML='<div class="order-detail-loading">در حال دریافت جزئیات سفارش…</div>';
    try{
     const d=await admin.order(id),o=d.order||{},items=d.items||[],history=d.history||[],p=d.payment;
-    const receiptHtml=(p?.provider==='card_transfer'&&p?.receipt_status&&p.receipt_status!=='NONE')?'<section class="order-detail-section card-transfer-receipt-admin"><h4>فیش واریزی کارت به کارت</h4><div class="receipt-review-box"><div class="receipt-review-preview"><img src="'+ADMIN_API+'/api/admin/orders/'+encodeURIComponent(o.id)+'/payment-receipt" alt="فیش واریزی سفارش" loading="lazy"></div><div class="receipt-review-meta"><span>وضعیت: <b>'+esc(p.receipt_status)+'</b></span><span>حجم: '+money(p.receipt_size)+' بایت</span><span>ارسال: '+dateFa(p.receipt_uploaded_at)+'</span>'+(p.receipt_status==='PENDING_REVIEW'?'<div class="receipt-review-actions"><span class="receipt-review-pending">فیش آماده بررسی مدیر است.</span><button id="approve-card-receipt" class="btn primary" type="button">تأیید و ثبت پرداخت</button><button id="reject-card-receipt" class="btn ghost danger" type="button">رد فیش</button></div>':p.receipt_status==='APPROVED'?'<span class="ok">پرداخت تأیید شده است.</span>':p.receipt_status==='REJECTED'?'<div class="receipt-rejected"><span class="error">فیش رد شده است.</span><small>دلیل: '+esc(p.receipt_rejection_reason||'بدون توضیح')+'</small></div>':'<span>فیش در وضعیت '+esc(p.receipt_status)+'</span>')+'</div></div></section>':'';
+    const receiptHtml=(p?.provider==='card_transfer'&&p?.receipt_status&&p.receipt_status!=='NONE')?'<section class="order-detail-section card-transfer-receipt-admin"><h4>فیش واریزی کارت به کارت</h4><div class="receipt-review-box"><div class="receipt-review-preview" data-admin-receipt-preview="${esc(o.id)}" aria-live="polite"><span>در حال دریافت تصویر فیش…</span></div><div class="receipt-review-meta"><span>وضعیت: <b>'+esc(p.receipt_status)+'</b></span><span>حجم: '+money(p.receipt_size)+' بایت</span><span>ارسال: '+dateFa(p.receipt_uploaded_at)+'</span>'+(p.receipt_status==='PENDING_REVIEW'?'<div class="receipt-review-actions"><span class="receipt-review-pending">فیش آماده بررسی مدیر است.</span><button id="approve-card-receipt" class="btn primary" type="button">تأیید و ثبت پرداخت</button><button id="reject-card-receipt" class="btn ghost danger" type="button">رد فیش</button></div>':p.receipt_status==='APPROVED'?'<span class="ok">پرداخت تأیید شده است.</span>':p.receipt_status==='REJECTED'?'<div class="receipt-rejected"><span class="error">فیش رد شده است.</span><small>دلیل: '+esc(p.receipt_rejection_reason||'بدون توضیح')+'</small></div>':'<span>فیش در وضعیت '+esc(p.receipt_status)+'</span>')+'</div></div></section>':'';
     detail.innerHTML=`
      <div class="order-detail-head">
       <div><span class="order-detail-kicker">سفارش</span><h3>#${esc(String(o.id||'').slice(-8))}</h3><small>${esc(o.id||'')}</small></div>
@@ -114,6 +114,17 @@ export default function Orders(){
      <section class="order-detail-section"><h4>تاریخچه وضعیت</h4><div class="order-history">${history.length?history.map(h=>'<div class="order-history-row"><i></i><div><b>'+esc(statusLabel(h.to_status))+'</b><small>'+dateFa(h.changed_at)+(h.changed_by_name?' · توسط '+esc(h.changed_by_name):'')+'</small></div></div>').join(''):'<div class="order-empty">تاریخچه‌ای ثبت نشده است.</div>'}</div></section>
      ${receiptHtml}
      ${o.city||o.address?'<section class="order-detail-section"><h4>نشانی ارسال</h4><p class="order-address">'+esc([o.province,o.city,o.address].filter(Boolean).join('، '))+'</p></section>':''}`;
+    const receiptPreview=detail.querySelector('[data-admin-receipt-preview]');
+    if(receiptPreview){
+     try{
+      const response=await fetch(ADMIN_API+'/api/admin/orders/'+encodeURIComponent(o.id)+'/payment-receipt',{credentials:'include',cache:'no-store'});
+      if(!response.ok)throw new Error('receipt_preview_unavailable');
+      const blob=await response.blob();
+      if(!String(blob.type||'').startsWith('image/'))throw new Error('receipt_preview_invalid');
+      const image=document.createElement('img');image.alt='فیش واریزی سفارش';image.loading='lazy';image.src=URL.createObjectURL(blob);
+      receiptPreview.replaceChildren(image);
+     }catch{receiptPreview.textContent='تصویر فیش دریافت نشد؛ نشست مدیریت و دسترسی orders.read را بررسی کنید.';}
+    }
    }catch(e){detail.innerHTML='<div class="order-detail-empty"><strong>جزئیات سفارش دریافت نشد.</strong><p>'+esc(e.message||'خطای سرور')+'</p></div>';}
   }
   refresh.onclick=load;
