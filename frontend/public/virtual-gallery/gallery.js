@@ -45,6 +45,7 @@ let cameraTarget, cameraPosition, cameraVelocity, desiredVelocity;
 let yawVelocity = 0, pitchVelocity = 0;
 const joystickState = { lookX: 0, lookY: 0, moveX: 0, moveY: 0 };
 let clientClockTimer = 0;
+let lastClockSecond = -1;
 const bounds = { x: 6.6, zMin: -10.5, zMax: 8.5 };
 const movementTuning = { walkSpeed: 3.2, sprintSpeed: 6.2, acceleration: 8.5, damping: 4.2, turnDamping: 5.2, boundarySpring: 7.5 };
 const galleryArt = [];
@@ -521,13 +522,13 @@ function updateArtworkTextures() {
       }
     } else if (distance > 30 && record.imageLoaded && now - record.lastNearAt > 900) {
       const texture = record.artworkMaterial.map;
-      record.artworkMaterial.map = record.placeholderTexture;
-      record.artworkMaterial.color.set(0xffffff);
+      record.artworkMaterial.map = null;
+      record.artworkMaterial.color.set(0xf4efe6);
       record.artworkMaterial.needsUpdate = true;
       record.inner.geometry.dispose();
       record.inner.geometry = new THREE.PlaneGeometry(record.maxWidth, record.maxHeight);
       record.imageLoaded = false;
-      if (texture && texture !== record.placeholderTexture) texture.dispose();
+      if (texture) texture.dispose();
     }
   }
 }
@@ -535,7 +536,6 @@ function updateArtworkTextures() {
 function animate() {
   if (!entered) return;
   animationFrame = requestAnimationFrame(animate);
-  updateClientClock();
   const delta = clock.getDelta();
   updateMovement(delta);
   buildNearbyArtworkBatch();
@@ -556,6 +556,9 @@ function updateClientClock() {
   const node = $('client-clock');
   if (!node) return;
   const now = new Date();
+  const second = Math.floor(now.getTime() / 1000);
+  if (second === lastClockSecond) return;
+  lastClockSecond = second;
   node.dateTime = now.toISOString();
   node.textContent = new Intl.DateTimeFormat('fa-IR', {
     hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
