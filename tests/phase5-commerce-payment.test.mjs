@@ -32,6 +32,12 @@ test('phase 5 frontend supports all three payment branches and manual receipt fl
   assert.match(app, /payment-receipt-preview-image/);
   assert.match(worker, /WHERE o\.id=\? AND o\.user_id=\? AND p\.provider='card_transfer'/);
   assert.match(worker, /req\.method==='GET'[\s\S]*?receipt_not_found/);
+  assert.match(worker, /receipt_status,receipt_mime,receipt_size,receipt_uploaded_at,receipt_reviewed_at,receipt_rejection_reason FROM payments WHERE order_id=\?/);
+  assert.match(app, /data-order-receipt/);
+  assert.match(app, /customer-receipt-image/);
+  const adminOrders = readFileSync(new URL('../frontend/src/admin/pages/Orders.js', import.meta.url), 'utf8');
+  assert.match(adminOrders, /data-admin-receipt-preview/);
+  assert.match(adminOrders, /credentials:'include',cache:'no-store'/);
 });
 
 test('phase 5 frontend never uses its displayed checkout total as the payment authority', () => {
