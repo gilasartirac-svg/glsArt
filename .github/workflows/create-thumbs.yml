@@ -36,7 +36,6 @@ jobs:
           expected = files
 
           if not expected: raise SystemExit("No source images found")
-              raise SystemExit(f"Unexpected source image count: total={len(expected)} jpeg={sum(p.suffix.lower()=='.jpeg' for p in expected)} png={sum(p.suffix.lower()=='.png' for p in expected)}")
 
           report = []
           for p in expected:
