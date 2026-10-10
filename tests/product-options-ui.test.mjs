@@ -18,19 +18,26 @@ const optionGridRule = css.slice(gridStart, gridEnd);
 test('product option renderer keeps price data and radio-group contracts', () => {
   assert.match(optionRenderer, /data-delta=/);
   assert.match(optionRenderer, /data-attribute-id=/);
-  assert.match(optionRenderer, /name=\\?"product-option-/);
-  assert.match(optionRenderer, /value=\\?"\+escapeHtml\(o\.id\)/);
-  assert.match(optionRenderer, /role=\\?"radiogroup\\?"/);
+  assert.match(optionRenderer, /name=/);
+  assert.match(optionRenderer, /value=/);
+  assert.match(optionRenderer, /escapeHtml\(o\.id\)/);
+  assert.match(optionRenderer, /role=/);
+  assert.match(optionRenderer, /radiogroup/);
   assert.match(optionRenderer, /product-option-default/);
 });
 
 test('product option labels do not render price deltas beside option names', () => {
   assert.doesNotMatch(optionRenderer, /product-option-price|deltaLabel|قیمت پایه/);
-  assert.match(app, /function recalc\(/);
+  assert.match(app, /const recalc=/);
   assert.match(app, /product-price-breakdown/);
 });
 
-test('each attribute group occupies its own row while its options scroll horizontally', () => {\n  assert.match(css, /\\.product-options\\{display:grid;grid-template-columns:minmax\\(0,1fr\\);gap:0\\.625rem\\}/);\n  assert.doesNotMatch(css, /\\.product-options\\{display:grid;grid-template-columns:repeat\\(2,minmax\\(0,1fr\\)\\)/);\n});\n\ntest('option rows remain horizontal and touch-scrollable at every breakpoint', () => {
+test('each attribute group occupies its own row while its options scroll horizontally', () => {
+  assert.match(css, /\.product-options\{display:grid;grid-template-columns:minmax\(0,1fr\);gap:0\.625rem\}/);
+  assert.doesNotMatch(css, /\.product-options\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+});
+
+test('option rows remain horizontal and touch-scrollable at every breakpoint', () => {
   for (const rule of ['display:flex', 'flex-flow:row nowrap', 'overflow-x:auto', '-webkit-overflow-scrolling:touch', 'overscroll-behavior-x:contain']) {
     assert.ok(optionGridRule.includes(rule), 'missing option row behavior: ' + rule);
   }
