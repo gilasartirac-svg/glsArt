@@ -1,0 +1,36 @@
+name: Analyze Uploaded Artwork Orientation
+
+on:
+  push:
+    branches:
+      - analysis/uploaded-artwork-orientation
+    paths:
+      - 'scripts/analyze-uploaded-artwork-orientation.py'
+      - '.github/workflows/analyze-uploaded-artwork-orientation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uploaded-artwork-orientation
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install image metadata reader
+        run: python -m pip install --disable-pip-version-check Pillow
+      - name: Analyze original images in uploaded root
+        run: python scripts/analyze-uploaded-artwork-orientation.py
+      - name: Upload orientation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gilasart-uploaded-artwork-orientation-report
+          path: reports/uploaded-artwork-orientation/
+          if-no-files-found: error
+          retention-days: 14
