@@ -166,3 +166,22 @@ test('account and authentication components use scoped theme-aware responsive st
   assert.ok(app.includes('class="wrap page auth-page"'));
   assert.ok(app.includes('class="customer-order-card"'));
 });
+
+
+test('cart UI uses scoped theme-aware responsive checkout styling',()=>{
+  const css=read('frontend/src/styles.css');
+  const app=read('frontend/src/app.js');
+  for(const selector of ['.cart-page .cart-hero','.cart-page .cart-items-panel','.cart-page .cart-product-thumb','.cart-page .cart-qty-btn','.cart-page .cart-address-grid','.cart-page .cart-checkout-bar','.cart-page .cart-trust']){
+    assert.ok(css.includes(selector),selector+' must have dedicated cart styling');
+  }
+  for(const token of ['var(--ui-surface)','var(--ui-surface-2)','var(--ui-text)','var(--ui-muted)','var(--ui-line)','var(--ui-gold-strong)','var(--ui-focus)']){
+    assert.ok(css.includes(token),'cart UI should use shared theme token '+token);
+  }
+  for(const viewport of ['@media(max-width:900px)','@media(max-width:600px)','@media(max-width:359px)','@media(prefers-reduced-motion:reduce)']){
+    assert.ok(css.includes(viewport),'cart responsive/accessibility rule missing: '+viewport);
+  }
+  assert.ok(app.includes('class="wrap page cart-page"'));
+  assert.ok(app.includes('class="cartline"'));
+  assert.ok(app.includes('class="cart-checkout-bar"'));
+  assert.ok(app.includes('class="payment-method-list"'));
+});
