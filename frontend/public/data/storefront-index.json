@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-10T19:36:42.022Z",
+  "generatedAt": "2026-10-10T20:17:22.120Z",
   "products": [
     {
       "id": "xls_0270",
@@ -18,7 +18,7 @@
       "flash_sale_active": 0,
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
-      "view_count": 223,
+      "view_count": 224,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 1,
