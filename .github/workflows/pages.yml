@@ -250,12 +250,12 @@ jobs:
           if [ "$gallery_code" != "200" ] || ! grep -qi 'id="gallery-app"' /tmp/virtual-gallery.html; then
             echo "Published virtual gallery route verification failed: status=$gallery_code"; exit 1
           fi
-          if ! grep -qi 'data-joystick="look"' /tmp/virtual-gallery.html || ! grep -qi 'data-joystick="move"' /tmp/virtual-gallery.html || ! grep -qi 'id="client-clock"' /tmp/virtual-gallery.html; then
+          if ! grep -qi 'data-joystick="combined"' /tmp/virtual-gallery.html || grep -qi 'data-joystick="look"' /tmp/virtual-gallery.html || grep -qi 'data-joystick="move"' /tmp/virtual-gallery.html || ! grep -qi 'id="client-clock"' /tmp/virtual-gallery.html || ! grep -qi 'id="artwork-loading"' /tmp/virtual-gallery.html; then
             echo "Published virtual gallery controls or client clock are missing"; exit 1
           fi
-          curl -fsSL --retry 3 --retry-all-errors "https://gilasart.ir/virtual-gallery/gallery.js?v=16" -o /tmp/virtual-gallery.js
-          curl -fsSL --retry 3 --retry-all-errors "https://gilasart.ir/virtual-gallery/gallery.css?v=8" -o /tmp/virtual-gallery.css
-          if ! grep -q 'function bindJoysticks' /tmp/virtual-gallery.js || ! grep -q 'marble_01_diff_1k.jpg' /tmp/virtual-gallery.js || ! grep -q 'velour_velvet_diff_1k.jpg' /tmp/virtual-gallery.js || ! grep -q 'gilasart:cart:added' /tmp/virtual-gallery.js || ! grep -q '.joystick-controls' /tmp/virtual-gallery.css; then
+          curl -fsSL --retry 3 --retry-all-errors "https://gilasart.ir/virtual-gallery/gallery.js?v=17" -o /tmp/virtual-gallery.js
+          curl -fsSL --retry 3 --retry-all-errors "https://gilasart.ir/virtual-gallery/gallery.css?v=9" -o /tmp/virtual-gallery.css
+          if ! grep -q 'function bindJoysticks' /tmp/virtual-gallery.js || ! grep -q 'marble_01_diff_1k.jpg' /tmp/virtual-gallery.js || ! grep -q 'velour_velvet_diff_1k.jpg' /tmp/virtual-gallery.js || ! grep -q 'large_floor_tiles_02_diff_1k.png' /tmp/virtual-gallery.js || ! grep -q 'dark_wooden_planks_diff_1k.png' /tmp/virtual-gallery.js || ! grep -q 'function addGrandfatherClock' /tmp/virtual-gallery.js || ! grep -q 'function syncArtworkLoadingIndicator' /tmp/virtual-gallery.js || ! grep -q 'gilasart:cart:added' /tmp/virtual-gallery.js || ! grep -q '.joystick-controls' /tmp/virtual-gallery.css || ! grep -q '.artwork-loading__spinner' /tmp/virtual-gallery.css; then
             echo "Published virtual gallery assets are stale or incomplete"; exit 1
           fi
           echo "Published virtual gallery route, script, styles, joysticks and client clock verified"
