@@ -454,7 +454,7 @@ function productCard(p){
  const image=productThumbUrl(p.image),flash=Number(p.flash_sale_active||p.flashSaleActive)===1&&p.flash_sale_ends_at;
  const hasFlashPrice=flash&&p.flash_sale_price_irt!==null&&p.flash_sale_price_irt!==undefined;
  const shownIrt=hasFlashPrice?Number(p.flash_sale_price_irt):Number(p.price_irt||0);
- const shown=Math.max(0,Math.round(shownIrt));
+ const shown=Math.max(0,Math.round(shownIrt/10));
  const name=escapeHtml(p.name||t("product.artwork")),sku=escapeHtml(p.sku||""),href=productUrl(p.slug);
  const rating=Number(p.rating_avg||0),reviews=Number(p.review_count||0),sold=Number(p.sold_count||0);
  const socialProof=reviews>0||sold>0;
@@ -468,7 +468,7 @@ function productCard(p){
   <div class="product-card-heading"><div class="product-title-wrap"><span class="product-card-kicker">GILAS ART</span><h3>${name}</h3></div>${sku?`<span class="product-sku" dir="ltr">${sku}</span>`:""}</div>
   ${socialProof?`<div class="product-social-proof" aria-label="${t('product.buyerFeedback')}"><span class="product-rating"><b>★</b> ${ratingText}</span><span>${fa(reviews)} ${t('product.reviews')}</span>${sold?`<span>${fa(sold)} ${t('product.sales')}</span>`:""}</div>`:""}
   ${flash?`<div class="flash-timer product-card-timer" data-flash-end="${escapeHtml(p.flash_sale_ends_at)}" aria-label="${t('product.remaining')}"></div>`:""}
-  <div class="product-card-footer"><div class="product-price-group"><span class="product-price-label">${hasFlashPrice?t('product.specialPrice'):t('product.price')}</span><strong class="price product-card-price">${fa(shown)} <small>${t('product.rial')}</small></strong>${hasFlashPrice?`<span class="muted flash-old">${fa(Math.max(0,Math.round(Number(p.price_irt||0))))} ${t('product.rial')}</span>`:""}</div><span class="product-card-arrow" aria-hidden="true">←</span></div>
+  <div class="product-card-footer"><div class="product-price-group"><span class="product-price-label">${hasFlashPrice?t('product.specialPrice'):t('product.price')}</span><strong class="price product-card-price">${fa(shown)} <small>${t('product.toman')}</small></strong>${hasFlashPrice?`<span class="muted flash-old">${fa(Math.max(0,Math.round(Number(p.price_irt||0)/10)))} ${t('product.toman')}</span>`:""}</div><span class="product-card-arrow" aria-hidden="true">←</span></div>
  </div></a></article>`;
 }
 function jalaliDate(v){try{return new Intl.DateTimeFormat('fa-IR-u-ca-persian',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Tehran'}).format(new Date(v))}catch{return ''}}
