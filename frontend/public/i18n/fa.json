@@ -117,6 +117,7 @@
     "payment.invoice": "نمایش و چاپ فاکتور",
     "payment.manual": "پرداخت کارت به کارت",
     "payment.receipt": "ارسال فیش واریزی",
+    "admin.orders.receipt": "فیش واریزی",
     "common.search": "جستجو",
     "common.cancel": "انصراف",
     "common.close": "بستن",
