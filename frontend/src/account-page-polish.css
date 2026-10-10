@@ -1,0 +1,234 @@
+/* GilasArt account-page UI/UX refinement.
+ * Deliberately scoped to account and authentication routes.
+ * Uses existing production theme tokens; no business logic or markup changes.
+ */
+.account-page,
+.auth-page {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+
+.account-page {
+  padding-block: clamp(1.25rem, 3.5vw, 2.75rem) clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.account-page .profile-panel,
+.account-page .customer-order-card,
+.auth-page .login-panel {
+  min-width: 0;
+}
+
+.account-page .profile-panel {
+  isolation: isolate;
+}
+
+.account-page .profile-head {
+  align-items: center;
+}
+
+.account-page .profile-head .eyebrow,
+.auth-page .auth-brand .eyebrow {
+  display: inline-block;
+  color: var(--ui-gold-strong);
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  line-height: 1.7;
+}
+
+.account-page .profile-data > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .2rem;
+}
+
+.account-page .profile-data span {
+  color: var(--ui-muted);
+}
+
+.account-page .profile-data strong {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.account-page .profile-panel .toolbar .btn,
+.account-page .customer-order-actions .btn,
+.auth-page .auth-send,
+.auth-page .otp-verify,
+.auth-page .resend-btn {
+  min-height: 46px;
+  border-radius: 12px;
+  touch-action: manipulation;
+}
+
+.account-page .profile-panel .toolbar .btn:focus-visible,
+.account-page .customer-order-actions .btn:focus-visible,
+.account-page a:focus-visible,
+.auth-page button:focus-visible,
+.auth-page input:focus-visible,
+.auth-page a:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ui-gold) 55%, transparent);
+  outline-offset: 3px;
+}
+
+.account-page .orders-profile-section {
+  min-width: 0;
+}
+
+.account-page .orders-profile-section > .sectionhead {
+  align-items: center;
+}
+
+.account-page .customer-order-card {
+  overflow-wrap: anywhere;
+}
+
+.account-page .customer-order-head {
+  gap: .75rem;
+}
+
+.account-page .customer-order-actions {
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.account-page .customer-order-summary {
+  min-width: 0;
+}
+
+.account-page .empty-orders {
+  padding: clamp(1rem, 3vw, 1.75rem);
+  border: 1px dashed var(--ui-line);
+  border-radius: 16px;
+  background: var(--ui-surface-2);
+  color: var(--ui-muted);
+  line-height: 1.9;
+}
+
+.auth-page {
+  padding-inline: var(--page-gutter, 1rem);
+}
+
+.auth-page .login-panel {
+  width: min(100%, 560px);
+  margin-inline: auto;
+  border: 1px solid color-mix(in srgb, var(--ui-gold) 24%, var(--ui-line));
+}
+
+.auth-page .auth-form input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  color: var(--ui-text);
+  background: var(--theme-input, var(--ui-surface));
+  border: 1px solid var(--ui-line);
+}
+
+.auth-page .auth-form input::placeholder {
+  color: var(--ui-muted);
+  opacity: .85;
+}
+
+.auth-page .auth-form label {
+  line-height: 1.8;
+}
+
+.auth-page #otp-status {
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 1024px) {
+  .account-page .profile-data {
+    gap: 1rem;
+  }
+
+  .account-page .customer-order-card {
+    padding: clamp(1.125rem, 2vw, 1.625rem);
+  }
+}
+
+@media (max-width: 700px) {
+  .account-page {
+    padding-top: 1rem;
+  }
+
+  .account-page .profile-head {
+    align-items: flex-start;
+  }
+
+  .account-page .profile-data {
+    grid-template-columns: minmax(0, 1fr);
+    gap: .625rem;
+    margin-block: 1rem;
+  }
+
+  .account-page .profile-data > div {
+    padding: .875rem 1rem;
+  }
+
+  .account-page .profile-panel .toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .account-page .profile-panel .toolbar .btn {
+    width: 100%;
+  }
+
+  .account-page .orders-profile-section > .sectionhead {
+    align-items: flex-start;
+  }
+
+  .account-page .customer-order-actions {
+    justify-content: stretch;
+  }
+
+  .account-page .customer-order-actions .btn {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .auth-page {
+    padding-inline: .75rem;
+    padding-block: 1.25rem 2.5rem;
+  }
+
+  .auth-page .login-panel {
+    border-radius: 20px;
+  }
+}
+
+@media (max-width: 359px) {
+  .account-page .profile-head {
+    gap: .625rem;
+  }
+
+  .account-page .profile-avatar {
+    border-radius: 15px;
+  }
+
+  .account-page .profile-head h1 {
+    font-size: 1.375rem;
+    overflow-wrap: anywhere;
+  }
+
+  .account-page .orders-profile-section > .sectionhead {
+    flex-direction: column;
+  }
+
+  .auth-page .login-panel {
+    padding-inline: .875rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-page *,
+  .auth-page * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
