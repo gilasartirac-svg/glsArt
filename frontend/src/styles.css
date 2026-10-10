@@ -7846,6 +7846,15 @@ body{
 }
 
 
+/* Keep the open header stacking context above the page backdrop on small phones. */
+@media(max-width:1023px){
+  .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="true"]){
+    position:sticky!important;
+    z-index:1101!important;
+    isolation:isolate;
+  }
+}
+
 /* Mobile/tablet navigation regression fix — current ga-header markup, not legacy .top/.links selectors. */
 @media(max-width:1023px){
   .ga-header-shell{
