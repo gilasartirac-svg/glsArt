@@ -1429,7 +1429,11 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const sm=Object.fromEntries((seller.results||[]).map(x=>[x.key,x.value]));
   return json({order,items:items.results||[],history:history.results||[],payment,invoice:{sellerName:sm.invoice_seller_name||'فروشگاه صنایع دستی گیلاس آرت',economicCode:sm.invoice_economic_code||'',phone:sm.invoice_phone||'',mobile:sm.invoice_mobile||'',address:sm.invoice_address||'',logoPath:sm.invoice_logo_path||'',signaturePath:sm.invoice_signature_path||''}});
  }
- if(u.pathname==='/api/admin/orders'&&req.method==='GET'){if(!(await requirePermission(me,env,'orders.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT o.*,u.mobile FROM orders o JOIN users u ON u.id=o.user_id ORDER BY o.created_at DESC LIMIT 200').all();return json({items:r.results||[]})}
+ if(u.pathname==='/api/admin/orders'&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'orders.read')))return json({error:'forbidden'},403);
+  const r=await env.DB.prepare("SELECT o.*,u.mobile,p.provider,p.status payment_status,p.receipt_status,p.receipt_size,p.receipt_uploaded_at FROM orders o JOIN users u ON u.id=o.user_id LEFT JOIN payments p ON p.order_id=o.id ORDER BY o.created_at DESC LIMIT 200").all();
+  return json({items:r.results||[]});
+ }
  if(u.pathname==='/api/settings'&&req.method==='GET'){
   const publicKeys=['site_name','site_description','seo_title','seo_description','seo_keywords','og_image','footer_social_links','partner_logos','footer_enamad_code','site_rules_title','site_rules_body','loyalty_rules_title','loyalty_rules_body'];
   const r=await env.DB.prepare("SELECT key,value FROM site_settings WHERE key IN ("+publicKeys.map(()=>'?').join(',')+")").bind(...publicKeys).all();
