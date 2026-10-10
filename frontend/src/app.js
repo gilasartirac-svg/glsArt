@@ -543,12 +543,12 @@ function initHomeRoomMovement(){
  const scene=viewport?.querySelector('[data-ga-room-scene]');
  if(!viewport||!scene||viewport.dataset.roomReady==='1')return;
  viewport.dataset.roomReady='1';
- let yaw=0,startX=0,startYaw=0,dragging=false,lastInteraction=Date.now();
+ let yaw=0,startX=0,startYaw=0,dragging=false,dragMoved=false,lastInteraction=Date.now();
  const paint=()=>{scene.style.setProperty('--ga-room-yaw',yaw+'deg');scene.style.setProperty('--ga-room-shift',Math.max(-36,Math.min(36,yaw*.42))+'px')};
  const moveBy=delta=>{lastInteraction=Date.now();yaw=Math.max(-42,Math.min(42,yaw+delta));paint()};
- viewport.addEventListener('click',e=>{if(e.target.closest('.ga-room-shop-link'))return;location.href=routeUrl('/virtual-gallery/')});
+ viewport.addEventListener('click',e=>{if(dragMoved){dragMoved=false;return}if(e.target.closest('.ga-room-shop-link'))return;location.href=routeUrl('/virtual-gallery/')});
  viewport.addEventListener('pointerdown',e=>{if(e.target.closest('a,button'))return;lastInteraction=Date.now();dragging=true;startX=e.clientX;startYaw=yaw;viewport.setPointerCapture?.(e.pointerId);viewport.classList.add('is-dragging')});
- viewport.addEventListener('pointermove',e=>{if(!dragging)return;lastInteraction=Date.now();yaw=Math.max(-42,Math.min(42,startYaw+(e.clientX-startX)*.12));paint()});
+ viewport.addEventListener('pointermove',e=>{if(!dragging)return;if(Math.abs(e.clientX-startX)>6)dragMoved=true;lastInteraction=Date.now();yaw=Math.max(-42,Math.min(42,startYaw+(e.clientX-startX)*.12));paint()});
  const end=()=>{dragging=false;viewport.classList.remove('is-dragging')};
  viewport.addEventListener('pointerup',end);viewport.addEventListener('pointercancel',end);
  viewport.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){e.preventDefault();moveBy(-8)}else if(e.key==='ArrowRight'){e.preventDefault();moveBy(8)}else if(e.key==='Home'){e.preventDefault();yaw=0;paint()}});
