@@ -78,7 +78,8 @@ test('final selected product price is visually larger on desktop, tablet, and mo
 test('product page hides the price delta breakdown and redundant purchase disclaimer', () => {
   assert.match(app, /id="product-price-breakdown" hidden/);
   assert.doesNotMatch(app, /تغییر ویژگی‌ها<\/span>/);
-  assert.doesNotMatch(app, /product-purchase-messages/);
+  assert.match(app, /class="product-purchase-messages" id="product-purchase-messages" hidden/);
+  assert.doesNotMatch(app, /اطلاعات سفارش و قیمت نهایی بر اساس انتخاب ویژگی‌ها و موجودی واقعی محصول محاسبه می‌شود/);
   assert.match(css, /#product-price-breakdown\[hidden\]\{display:none!important\}/);
 });
 
