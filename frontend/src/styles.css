@@ -7390,3 +7390,6 @@ body{
 @media(max-width:47.99rem){:root{--card-gap:.75rem}}
 @media(min-width:48rem) and (max-width:63.99rem){:root{--card-gap:1rem}}
 @media(min-width:64rem){:root{--card-gap:1.5rem}}
+
+/* Product option cards: honor reduced-motion preference within this component. */
+@media(prefers-reduced-motion:reduce){.product-option-card-ui{transition:none}}
