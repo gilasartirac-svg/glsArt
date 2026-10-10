@@ -193,8 +193,18 @@ function addPillar(x, z) {
   trim.position.set(x, 3.8, z); scene.add(trim);
 }
 
-function addEntranceDoor(wallMaterial, doorMaterial) {
-  const wallZ = bounds.zMax + 3.5, doorZ = wallZ - .78;
+function addEntranceDoor(wallMaterial, doorMaterial, floorMaterial, ceilingMaterial) {
+  const wallZ = bounds.zMax + 2.6, doorZ = wallZ - .78;
+  const entranceDepth = wallZ - bounds.zMax;
+  const extensionFloor = new THREE.Mesh(new THREE.PlaneGeometry(18, entranceDepth), floorMaterial);
+  extensionFloor.rotation.x = -Math.PI / 2; extensionFloor.position.set(0, .006, (wallZ + bounds.zMax) / 2); scene.add(extensionFloor);
+  const extensionCeiling = new THREE.Mesh(new THREE.PlaneGeometry(18, entranceDepth), ceilingMaterial);
+  extensionCeiling.rotation.x = Math.PI / 2; extensionCeiling.position.set(0, 4.2, (wallZ + bounds.zMax) / 2); scene.add(extensionCeiling);
+  for (const side of [-1, 1]) {
+    const extension = new THREE.Mesh(new THREE.PlaneGeometry(entranceDepth, 4.2), wallMaterial);
+    extension.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2;
+    extension.position.set(side * 9, 2.1, (wallZ + bounds.zMax) / 2); scene.add(extension);
+  }
   const sideWidth = (18 - 3.7) / 2;
   for (const side of [-1, 1]) {
     const panel = new THREE.Mesh(new THREE.PlaneGeometry(sideWidth, 4.2), wallMaterial);
@@ -249,7 +259,7 @@ function addCeilingTileGrid(corridorLength, corridorCenter) {
 }
 function addGrandfatherClock(woodMaterial) {
   const root = new THREE.Group(); root.position.set(-7.75, .04, 4.15); root.rotation.y = Math.PI / 2; scene.add(root);
-  const wood = woodMaterial.clone(); if (woodMaterial.map) wood.map = woodMaterial.map.clone();
+  const wood = woodMaterial;
   const body = new THREE.Mesh(new THREE.BoxGeometry(.82, 2.82, .48), wood); body.position.set(0, 1.41, 0); root.add(body);
   const plinth = new THREE.Mesh(new THREE.BoxGeometry(1.02, .18, .62), wood); plinth.position.set(0, .09, .02); root.add(plinth);
   const crown = new THREE.Mesh(new THREE.BoxGeometry(1.04, .2, .62), wood); crown.position.set(0, 2.8, .02); root.add(crown);
@@ -452,7 +462,7 @@ function setupScene() {
   const clockWoodMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .5, metalness: .04 });
   loadSurfaceTexture(doorMaterial, woodTextureUrl, 1.2, 1, 0xffffff);
   loadSurfaceTexture(clockWoodMaterial, woodTextureUrl, 1.1, 1.2, 0xffffff);
-  addEntranceDoor(wallMaterial, doorMaterial);
+  addEntranceDoor(wallMaterial, doorMaterial, floorMaterial, ceilingMaterial);
   addGrandfatherClock(clockWoodMaterial);
   loadVelvetSurface(wallMaterial, Math.max(2, corridorLength / 9), 1.25);
   addGalleryDecor(corridorLength, corridorCenter);
@@ -952,7 +962,7 @@ async function enterGallery() {
     if (!THREE) THREE = await loadThreeModule();
     if (!cameraTarget) {
       cameraTarget = new THREE.Vector3(0, 1.65, 4.8);
-      cameraPosition = new THREE.Vector3(0, 1.65, 8.8);
+      cameraPosition = new THREE.Vector3(0, 1.65, 7.8);
       cameraVelocity = new THREE.Vector3();
       desiredVelocity = new THREE.Vector3();
     }
@@ -972,7 +982,7 @@ async function enterGallery() {
     focusTransition = null; focusReturn = null; activeArtwork = null;
     closeArtworkPanel();
     cameraTarget.set(0, 1.65, 4.8);
-    cameraPosition.set(0, 1.65, 8.8);
+    cameraPosition.set(0, 1.65, 7.8);
     cameraVelocity.set(0, 0, 0); desiredVelocity.set(0, 0, 0);
     yawVelocity = 0; pitchVelocity = 0;
     // Face the first left-wall artwork on entry; portrait mobile FOV otherwise hides side-wall art.
@@ -984,7 +994,7 @@ async function enterGallery() {
     statusText.textContent = 'از کنترل‌ها برای قدم‌زدن در گالری استفاده کنید.';
     titleText.textContent = 'گالری آثار گیلاس آرت';
     if (!prefersReducedMotion) {
-      cameraPosition.set(0, 2.15, 10.5);
+      cameraPosition.set(0, 2.15, 8.0);
       buildNearbyArtworkBatch();
       cameraTarget.set(0, 1.65, 4.8);
       cameraVelocity.set(0, 0, 0);
@@ -994,7 +1004,7 @@ async function enterGallery() {
         if (!entered) return;
         const t = Math.min(1, (performance.now() - start) / duration);
         const eased = 1 - Math.pow(1 - t, 4);
-        camera.position.set(0, 2.15 - .5 * eased, 10.5 - 5.7 * eased);
+        camera.position.set(0, 2.15 - .5 * eased, 8.0 - 3.2 * eased);
         camera.rotation.set(0, yaw * eased, 0, 'YXZ');
         renderer.render(scene, camera);
         if (t < 1) requestAnimationFrame(intro);
