@@ -47,13 +47,17 @@ test('gallery products use an API-ready normalized contract with static JSON as 
   assert.match(adapter, /payload\.products/);
 });
 
-test('add-to-cart button emits an integration intent without performing a real cart operation', () => {
+test('gallery add-to-cart uses the existing authenticated store API and CSRF token', () => {
   assert.match(markup, /id="artwork-panel-cart"/);
   assert.match(markup, /id="artwork-panel-cart-message"/);
   assert.match(markup, /aria-live="polite"/);
-  assert.match(script, /gilasart:cart:add/);
-  assert.match(script, /quantity: 1/);
-  assert.match(script, /اتصال سبد خرید هنوز فعال نشده است/);
+  assert.match(script, /https:\/\/api\.gilasart\.ir/);
+  assert.match(script, /request\('\/api\/me'\)/);
+  assert.match(script, /session\.csrfToken/);
+  assert.match(script, /request\('\/api\/cart',[\s\S]*?method: 'POST'/);
+  assert.match(script, /productId: product\.id, quantity: 1, options: \[\]/);
+  assert.match(script, /gilasart:cart:added/);
+  assert.doesNotMatch(script, /اتصال سبد خرید هنوز فعال نشده است/);
   assert.match(styles, /\.artwork-panel__cart/);
 });
 
@@ -64,7 +68,8 @@ test('gallery uses warm fixed lighting, real stone surfaces, and no direct artwo
   assert.match(script, /new THREE\.Fog\(0xf0e7d8, 38, 118\)/);
   assert.match(script, /marble_01_diff_1k\.jpg/);
   assert.match(script, /loadStoneSurface\(floorMaterial/);
-  assert.match(script, /loadStoneSurface\(wallMaterial/);
+  assert.match(script, /loadVelvetSurface\(wallMaterial/);
+  assert.match(script, /velour_velvet_diff_1k\.jpg/);
   assert.match(script, /roughness: \.68, metalness: 0/);
   assert.match(script, /new THREE\.MeshBasicMaterial\(\{ color: 0xf4efe6, side: THREE\.DoubleSide, toneMapped: false \}\)/);
   assert.doesNotMatch(script, /new THREE\.SpotLight/);
@@ -92,7 +97,7 @@ test('gallery has a bright stone finish, decorative rugs and vases, and a fixed 
   assert.match(script, /new THREE\.PerspectiveCamera\(57/);
   assert.match(script, /camera\.fov = 57/);
   assert.match(markup, /gallery\.css\?v=8/);
-  assert.match(markup, /gallery\.js\?v=15/);
+  assert.match(markup, /gallery\.js\?v=16/);
 });
 
 test('left and right controls navigate to a centered, front-facing artwork view',()=>{
@@ -163,6 +168,8 @@ test('mobile and tablet use separate look and movement joysticks plus the client
   assert.match(markup, /data-joystick="move"/);
   assert.match(markup, /id="client-clock"/);
   assert.match(script, /function bindJoysticks\(/);
+  assert.match(markup, /جوی‌استیک سمت چپ برای چرخش و نگاه ۳۶۰ درجه است/);
+  assert.match(markup, /جوی‌استیک سمت راست برای حرکت جلو و عقب/);
   assert.match(script, /joystickState\.lookX/);
   assert.match(script, /joystickState\.moveY/);
   assert.match(script, /new Intl\.DateTimeFormat\('fa-IR'/);
