@@ -7553,6 +7553,10 @@ body{
 .home-copper-gallery .vg3-plant::before{content:"";position:absolute;left:7px;top:-35px;width:8px;height:38px;border-radius:100% 0 100% 0;background:linear-gradient(90deg,#2c4930,#76965b);transform:rotate(-20deg);box-shadow:-10px 10px 0 -2px #48683b,10px 4px 0 -2px #547b45}
 .home-copper-gallery .vg3-plant-a{left:8%}
 .home-copper-gallery .vg3-plant-b{right:9%;transform:scale(.82)}
+
+/* Reuse the same real Poly Haven surface textures as the full 3D gallery; procedural layers remain as visual fallback. */
+.home-copper-gallery .vg3-side-wall,.home-copper-gallery .vg3-back-wall{background-image:linear-gradient(90deg,rgba(35,22,14,.48),rgba(114,79,49,.22) 48%,rgba(27,17,11,.55)),url('https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/velour_velvet/velour_velvet_diff_1k.jpg');background-size:cover,360px 360px;background-position:center,center;background-repeat:no-repeat,repeat;background-blend-mode:soft-light,normal}
+.home-copper-gallery .vg3-floor{background-image:linear-gradient(180deg,rgba(65,43,25,.24),rgba(25,17,11,.38)),url('https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/marble_01/marble_01_diff_1k.jpg');background-size:cover,420px 420px;background-position:center,center;background-repeat:no-repeat,repeat;background-blend-mode:soft-light,normal}
 .home-copper-gallery .vg3-bench{position:absolute;z-index:2;bottom:10%;left:47%;width:76px;height:13px;border-radius:3px;background:linear-gradient(#926c45,#4d3320);box-shadow:0 4px 0 #2b1b10,0 12px 0 -4px #24170f,0 12px 0 -2px #24170f}
 @keyframes vg3-light-breathe{from{opacity:.65}to{opacity:1}}
 @keyframes vg3-human-walk{0%,100%{translate:-5px 0}50%{translate:8px 0}}
