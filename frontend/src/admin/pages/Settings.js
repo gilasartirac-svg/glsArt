@@ -157,7 +157,7 @@ export async function mount(){
  function filterPartnerLibrary(){renderPartnerLibrary()}
  async function savePartnerLogos(){
   const rows=[...document.querySelectorAll('.partner-selected-row')].map((row,sort)=>({label:row.querySelector('[data-field="label"]').value.trim(),path:row.dataset.path,active:row.querySelector('[data-field="active"]').checked,sort}));if(rows.some(x=>!x.label||!/^\/uploaded\/thumb\/[A-Za-z0-9._/-]+\.(?:png|jpe?g|webp|svg)$/i.test(x.path)||x.path.includes('..'))){alert('نام و مسیر معتبر برای تمام لوگوها الزامی است.');return}
-  try{await api('/api/admin/settings',{method:'PUT',body:JSON.stringify({partner_logos:JSON.stringify(rows)})});alert('لوگوهای سازمانی ذخیره شد. پس از انتشار تنظیمات، لوگوهای فعال در صفحه اصلی نمایش داده می‌شوند.')}catch(error){alert(error.message||'ذخیره لوگوها ناموفق بود.')}
+  try{const value=JSON.stringify(rows);await api('/api/admin/settings',{method:'PUT',body:JSON.stringify({partner_logos:value})});try{sessionStorage.setItem('gilasart-partner-logos',JSON.stringify({expiresAt:Date.now()+5*60*1000,value}))}catch{}alert('لوگوهای سازمانی ذخیره شد. لوگوهای فعال در صفحه اصلی نمایش داده می‌شوند.')}catch(error){alert(error.message||'ذخیره لوگوها ناموفق بود.')}
  }
  function addSocialRow(item){
   const box=document.querySelector('#social-links-list');if(!box)return;
