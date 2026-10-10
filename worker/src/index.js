@@ -111,7 +111,7 @@ function flashSaleValues(b,before={}){
  return {active:active?1:0,end:active?new Date(String(end)).toISOString():null,price:p};
 }
 function otpSmsMessage(env,code,template){
- const host=new URL(frontend(env)).hostname.toLowerCase().replace(/^www\\./,'');
+ const host=new URL(frontend(env)).hostname.toLowerCase().replace(/^www\./,'');
  const raw=String(template||'<#> گیلاس آرت\\nکد ورود شما: {code}')
   .replaceAll('\\\\r\\\\n','\\n')
   .replaceAll('\\\\n','\\n')
@@ -325,7 +325,7 @@ async function buildStorefrontSnapshot(env){
     env.DB.prepare(`SELECT r.id,r.product_id,r.rating,r.body,r.created_at,u.name,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='like'),0) like_count,COALESCE((SELECT COUNT(*) FROM review_reactions rr WHERE rr.review_id=r.id AND rr.reaction='dislike'),0) dislike_count FROM reviews r JOIN users u ON u.id=r.user_id JOIN products p ON p.id=r.product_id AND p.active=1 WHERE r.approved=1 ORDER BY r.product_id,r.created_at DESC`).all(),
     env.DB.prepare(`SELECT id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE active=1 AND section IN ('about','contact','news','articles') ORDER BY section,published_at DESC,created_at DESC`).all(),
     env.DB.prepare(`SELECT id,question,answer,sort_order,created_at,updated_at FROM faq_entries WHERE active=1 ORDER BY sort_order ASC,created_at ASC`).all(),
-    env.DB.prepare(`SELECT key,value,updated_at FROM site_settings WHERE key IN ('site_name','site_description','seo_title','seo_description','seo_keywords','og_image','footer_social_links','footer_enamad_code','site_rules_title','site_rules_body','loyalty_rules_title','loyalty_rules_body') ORDER BY key`).all()
+    env.DB.prepare(`SELECT key,value,updated_at FROM site_settings WHERE key IN ('site_name','site_description','seo_title','seo_description','seo_keywords','og_image','footer_social_links','partner_logos','footer_enamad_code','site_rules_title','site_rules_body','loyalty_rules_title','loyalty_rules_body') ORDER BY key`).all()
   ]);
   const products=(productsR.results||[]).map(x=>({...x,price_irt:Number(x.price_irt||0),view_count:Number(x.view_count||0),review_count:Number(x.review_count||0),rating_avg:Number(x.rating_avg||0),favorite_count:Number(x.favorite_count||0),sold_count:Number(x.sold_count||0)}));
   const imagesBy=new Map(),categoriesByProduct=new Map(),attrsBy=new Map(),reviewsBy=new Map();
@@ -1423,7 +1423,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
  }
  if(u.pathname==='/api/admin/orders'&&req.method==='GET'){if(!(await requirePermission(me,env,'orders.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT o.*,u.mobile FROM orders o JOIN users u ON u.id=o.user_id ORDER BY o.created_at DESC LIMIT 200').all();return json({items:r.results||[]})}
  if(u.pathname==='/api/settings'&&req.method==='GET'){
-  const publicKeys=['site_name','site_description','seo_title','seo_description','seo_keywords','og_image','footer_social_links','footer_enamad_code','site_rules_title','site_rules_body','loyalty_rules_title','loyalty_rules_body'];
+  const publicKeys=['site_name','site_description','seo_title','seo_description','seo_keywords','og_image','footer_social_links','partner_logos','footer_enamad_code','site_rules_title','site_rules_body','loyalty_rules_title','loyalty_rules_body'];
   const r=await env.DB.prepare("SELECT key,value FROM site_settings WHERE key IN ("+publicKeys.map(()=>'?').join(',')+")").bind(...publicKeys).all();
   const out={};for(const x of (r.results||[]))out[x.key]=x.value;return json({settings:out});
 }
@@ -1510,10 +1510,23 @@ if(u.pathname==='/api/admin/settings'&&req.method==='GET'){if(!(await requirePer
 if(u.pathname==='/api/admin/settings'&&req.method==='PUT'){
  if(!(await requirePermission(me,env,'settings.write'))||!requireCsrf(req))return json({error:'forbidden'},403);
  const b=await body(req);if(b.auth_session_ttl_days!==undefined){const n=Number(b.auth_session_ttl_days);if(!Number.isInteger(n)||n<1||n>90)return json({error:'invalid_session_duration'},400)}
- const allowed=['site_name','site_description','seo_title','seo_description','seo_keywords','og_image','footer_social_links','footer_enamad_code','invoice_store_name','invoice_national_id','invoice_economic_code','invoice_registration_number','invoice_phone','invoice_mobile','invoice_postal_code','invoice_address','invoice_logo_path','invoice_signature_path','auth_session_ttl_days'];
+ const allowed=['site_name','site_description','seo_title','seo_description','seo_keywords','og_image','footer_social_links','partner_logos','footer_enamad_code','invoice_store_name','invoice_national_id','invoice_economic_code','invoice_registration_number','invoice_phone','invoice_mobile','invoice_postal_code','invoice_address','invoice_logo_path','invoice_signature_path','auth_session_ttl_days'];
  for(const key of allowed){
   if(!Object.prototype.hasOwnProperty.call(b,key))continue;
-  let value=String(b[key]??'').slice(0,2000);
+  let value=String(b[key]??'').slice(0,key==='partner_logos'?8000:2000);
+  if(key==='partner_logos'){
+   try{
+    const logos=JSON.parse(value);
+    if(!Array.isArray(logos)||logos.length>24)throw new Error();
+    const clean=logos.map((x,i)=>{
+     const label=String(x?.label||'').trim().slice(0,80);
+     const path=String(x?.path||'').trim();
+     if(!label||!/^\/uploaded\/thumb\/[A-Za-z0-9._/-]+\.(?:png|jpe?g|webp|svg)$/i.test(path)||path.includes('..'))throw new Error();
+     return {label,path,active:x?.active!==false,sort:Number.isFinite(Number(x?.sort))?Math.max(0,Math.min(99,Number(x.sort))):i};
+    });
+    value=JSON.stringify(clean.slice(0,24));
+   }catch{return json({error:'invalid_partner_logos'},400)}
+  }
   if(key==='footer_social_links'){
    try{
     const links=JSON.parse(value);
