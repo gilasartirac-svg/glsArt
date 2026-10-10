@@ -86,7 +86,7 @@ test('product page hides the price delta breakdown and redundant purchase discla
 test('stock messaging never reveals exact inventory above three and highlights low stock', () => {
   assert.match(app, /stock<=3\)stockEl\.innerHTML=.*product-stock-remaining/s);
   assert.match(app, /تنها '\+fa\(stock\)\+' عدد در انبار باقی مانده است/);
-  assert.match(app, /موجودی: بیش از <strong>۳<\\/strong> عدد/);
+  assert.match(app, /موجودی: بیش از <strong>۳<\/strong> عدد/);
   assert.match(css, /\.product-stock-remaining\{[^}]*border:1px solid/s);
   assert.match(css, /\.product-stock-fire\{[^}]*font-size:1\.125rem/s);
 });
