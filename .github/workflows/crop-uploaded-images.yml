@@ -57,7 +57,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add frontend/public/uploaded/*.jpg frontend/public/uploaded/*.jpeg frontend/public/uploaded/*.png frontend/public/uploaded/.crop-verification.txt frontend/public/uploaded/thumb/*.jpg frontend/public/uploaded/thumb/*.jpeg frontend/public/uploaded/thumb/*.png
+          git add -A -- frontend/public/uploaded
           if git diff --cached --quiet; then echo "No image changes."; exit 0; fi
           git commit -m "perf: crop product images to artwork bounds"
           git push
