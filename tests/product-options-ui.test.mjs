@@ -30,7 +30,7 @@ test('product option labels do not render price deltas beside option names', () 
   assert.match(app, /product-price-breakdown/);
 });
 
-test('option rows remain horizontal and touch-scrollable at every breakpoint', () => {
+test('each attribute group occupies its own row while its options scroll horizontally', () => {\n  assert.match(css, /\\.product-options\\{display:grid;grid-template-columns:minmax\\(0,1fr\\);gap:0\\.625rem\\}/);\n  assert.doesNotMatch(css, /\\.product-options\\{display:grid;grid-template-columns:repeat\\(2,minmax\\(0,1fr\\)\\)/);\n});\n\ntest('option rows remain horizontal and touch-scrollable at every breakpoint', () => {
   for (const rule of ['display:flex', 'flex-flow:row nowrap', 'overflow-x:auto', '-webkit-overflow-scrolling:touch', 'overscroll-behavior-x:contain']) {
     assert.ok(optionGridRule.includes(rule), 'missing option row behavior: ' + rule);
   }
