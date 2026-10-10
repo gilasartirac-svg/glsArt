@@ -13,7 +13,6 @@ test('homepage brand and navigation expose copper marquetry and the virtual gall
  assert.ok(app.indexOf(`data-menu-icon="gallery"`)<app.indexOf(`data-menu-icon="about"`));
  assert.ok(!app.includes('home-primary-actions'));
  assert.ok(app.includes('routeUrl(\'/virtual-gallery/\')'));
- assert.ok(app.includes('routeUrl(\'/virtual-gallery/\')'));
  assert.ok(app.includes('vg3-scene'));
  assert.ok(app.includes('vg3-human'));
  assert.ok(app.includes('partner-logo-strip'));
