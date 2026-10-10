@@ -7952,3 +7952,52 @@ body{
 @media(prefers-reduced-motion:reduce){
   .ga-header-shell .ga-header-primary-nav#main-menu{transition:none}
 }
+
+
+/* Homepage luxury HTML5 room — wallpapered room with draggable viewpoint and untouched source artwork. */
+.home-copper-gallery>.home-hero{width:100%;max-width:none;margin:0;padding:0}
+.home-copper-gallery .ga-home-room{width:100%;max-width:none;margin:0;overflow:hidden;background:#251b16}
+.ga-home-room .ga-room-viewport{position:relative;width:100%;height:clamp(390px,54vw,650px);min-height:390px;overflow:hidden;isolation:isolate;touch-action:pan-y;cursor:grab;background:linear-gradient(180deg,#d7c6a9 0%,#a98d6b 65%,#4e3829 100%)}
+.ga-home-room .ga-room-viewport.is-dragging{cursor:grabbing;touch-action:none}
+.ga-home-room .ga-room-scene{--ga-room-yaw:0deg;--ga-room-shift:0px;position:absolute;inset:0;transform:perspective(1100px) rotateY(calc(var(--ga-room-yaw)*-.12)) translateX(var(--ga-room-shift));transform-origin:50% 58%;transition:transform .12s ease-out;will-change:transform}
+.ga-home-room .ga-room-back-wall{position:absolute;inset:0 12% 16%;overflow:hidden;border-inline:clamp(8px,1.8vw,24px) solid #8d633b;background:linear-gradient(90deg,rgba(49,31,22,.22),transparent 16%,transparent 84%,rgba(49,31,22,.22)),linear-gradient(180deg,#e9dcc7,#cdb79a);box-shadow:inset 0 0 0 5px rgba(255,230,178,.48),inset 0 -24px 40px rgba(64,39,23,.17)}
+.ga-home-room .ga-room-wallpaper{position:absolute;inset:0;background-color:#d9c7a9;background-image:radial-gradient(ellipse at center,rgba(155,116,45,.22) 0 2px,transparent 3px),radial-gradient(ellipse at center,transparent 0 12px,rgba(125,82,47,.17) 13px 14px,transparent 15px),linear-gradient(45deg,transparent 47%,rgba(255,249,228,.22) 48% 51%,transparent 52%);background-size:44px 44px,44px 44px,22px 22px;opacity:.94}
+.ga-home-room .ga-room-artwork-frame{position:absolute;left:50%;top:13%;height:min(64%,420px);width:min(35%,440px);transform:translateX(-50%);display:flex;align-items:center;justify-content:center;padding:clamp(8px,1.25vw,17px);background:linear-gradient(135deg,#f1d28a,#8c5d25 24%,#d5a951 42%,#71451f 65%,#e4c276);border:1px solid #f3dba2;box-shadow:0 18px 35px rgba(35,20,12,.42),inset 0 0 0 3px rgba(255,235,174,.65);z-index:2}
+.ga-home-room .ga-room-artwork-link{display:flex;align-items:center;justify-content:center;max-width:100%;max-height:100%;padding:clamp(4px,.7vw,9px);background:#211b16;box-shadow:inset 0 0 0 1px #d8b77a;line-height:0}
+.ga-home-room .ga-room-artwork{display:block;width:auto;height:auto;max-width:100%;max-height:clamp(170px,35vw,390px);object-fit:contain;object-position:center;image-rendering:auto}
+.ga-home-room .ga-room-wall-plaque{position:absolute;left:50%;top:calc(13% + min(64%,420px) + 18px);transform:translateX(-50%);color:#684522;font:700 clamp(8px,.85vw,12px)/1.5 Vazirmatn,Tahoma,sans-serif;letter-spacing:.16em;white-space:nowrap}
+.ga-home-room .ga-room-side-wall{position:absolute;top:0;bottom:16%;width:28%;overflow:hidden;background:linear-gradient(90deg,#765137,#ddc7a5 50%,#9a7653);border-bottom:clamp(8px,1.6vw,20px) solid #765034}
+.ga-home-room .ga-room-side-wall-left{left:-8%;transform:skewY(8deg);transform-origin:right top;clip-path:polygon(0 0,100% 0,100% 100%,0 88%)}
+.ga-home-room .ga-room-side-wall-right{right:-8%;transform:skewY(-8deg);transform-origin:left top;clip-path:polygon(0 0,100% 0,100% 88%,0 100%)}
+.ga-home-room .ga-room-side-wall .ga-room-wallpaper{background-color:#c7ad88}
+.ga-home-room .ga-room-floor{position:absolute;left:-8%;right:-8%;bottom:-1%;height:27%;background:repeating-linear-gradient(90deg,transparent 0 17%,rgba(47,28,18,.26) 17.2% 17.6%),repeating-linear-gradient(0deg,#65442e 0 7px,#99704a 8px 11px,#785234 12px 44px);clip-path:polygon(18% 0,82% 0,100% 100%,0 100%);box-shadow:inset 0 20px 25px rgba(29,18,12,.35)}
+.ga-home-room .ga-room-ceiling{position:absolute;top:-8%;left:12%;right:12%;height:19%;background:linear-gradient(180deg,#4a3425,#d4bc97);clip-path:polygon(0 0,100% 0,82% 100%,18% 100%);opacity:.92}
+.ga-home-room .ga-room-light{position:absolute;top:4%;width:22%;height:55%;background:radial-gradient(ellipse at top,rgba(255,238,184,.42),transparent 70%);pointer-events:none;mix-blend-mode:screen}
+.ga-home-room .ga-room-light-one{left:20%}.ga-home-room .ga-room-light-two{right:20%}
+.ga-home-room .ga-room-brand-copy{position:absolute;z-index:5;right:clamp(20px,6vw,90px);top:50%;transform:translateY(-42%);width:min(32%,390px);padding:clamp(18px,3vw,42px);text-align:right;direction:rtl;color:#fff3dc;background:linear-gradient(135deg,rgba(42,27,19,.9),rgba(69,43,27,.78));border:1px solid rgba(218,177,102,.68);box-shadow:0 18px 45px rgba(26,15,9,.32);backdrop-filter:blur(3px)}
+.ga-home-room .ga-room-brand-kicker{display:block;color:#e3c17d;font:600 clamp(11px,1.1vw,14px)/1.8 Vazirmatn,Tahoma,sans-serif;letter-spacing:.04em}
+.ga-home-room .ga-room-brand-copy h2{margin:.35rem 0 .65rem;font:800 clamp(28px,4vw,54px)/1.55 Vazirmatn,Tahoma,sans-serif;letter-spacing:-.035em;color:#fff4dd}
+.ga-home-room .ga-room-brand-copy p{margin:0 0 1.25rem;color:#ead8b7;font:500 clamp(13px,1.3vw,17px)/1.9 Vazirmatn,Tahoma,sans-serif}
+.ga-home-room .ga-room-shop-link{display:inline-flex;align-items:center;gap:.75rem;min-height:44px;padding:.6rem 1rem;border:1px solid #d5ad62;color:#fff0d0;text-decoration:none;font:700 14px/1.6 Vazirmatn,Tahoma,sans-serif}
+.ga-home-room .ga-room-shop-link:hover{background:rgba(213,173,98,.16)}
+.ga-home-room .ga-room-controls{position:absolute;z-index:6;left:clamp(12px,2vw,28px);bottom:clamp(12px,2vw,26px);display:flex;align-items:center;gap:.65rem;padding:.35rem .6rem;border:1px solid rgba(230,203,153,.42);background:rgba(39,26,19,.78);color:#f7e7c8;font:500 12px/1.6 Vazirmatn,Tahoma,sans-serif}
+.ga-home-room .ga-room-controls button{display:grid;place-items:center;width:36px;height:36px;border:1px solid rgba(230,203,153,.55);background:transparent;color:#f7e7c8;font-size:26px;cursor:pointer}
+.ga-home-room .ga-room-controls button:focus-visible,.ga-home-room a:focus-visible,.ga-home-room .ga-room-viewport:focus-visible{outline:3px solid #f3d38d;outline-offset:3px}
+@media(max-width:760px){
+ .ga-home-room .ga-room-viewport{height:clamp(520px,145vw,680px);min-height:520px}
+ .ga-home-room .ga-room-back-wall{inset:0 5% 25%}
+ .ga-home-room .ga-room-side-wall{bottom:25%;width:22%}
+ .ga-home-room .ga-room-side-wall-left{left:-8%}.ga-home-room .ga-room-side-wall-right{right:-8%}
+ .ga-home-room .ga-room-floor{height:31%}
+ .ga-home-room .ga-room-artwork-frame{top:11%;height:40%;width:min(45%,320px);padding:9px}
+ .ga-home-room .ga-room-artwork{max-height:clamp(160px,45vw,270px)}
+ .ga-home-room .ga-room-wall-plaque{top:calc(11% + 40% + 10px);font-size:8px}
+ .ga-home-room .ga-room-brand-copy{top:auto;bottom:72px;right:7%;width:86%;box-sizing:border-box;transform:none;padding:16px 18px}
+ .ga-home-room .ga-room-brand-copy h2{font-size:clamp(27px,8vw,39px);margin:.1rem 0 .25rem}
+ .ga-home-room .ga-room-brand-copy p{margin-bottom:.65rem}
+ .ga-home-room .ga-room-shop-link{min-height:40px}
+ .ga-home-room .ga-room-controls{left:10px;bottom:10px;gap:.4rem}
+ .ga-home-room .ga-room-controls span{font-size:10px}
+ .ga-home-room .ga-room-controls button{width:32px;height:32px}
+}
+@media(prefers-reduced-motion:reduce){.ga-home-room .ga-room-scene{transition:none}}
