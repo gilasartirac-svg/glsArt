@@ -9,7 +9,7 @@
   <link rel="canonical" href="https://gilasart.ir/virtual-gallery/">
   <link rel="icon" href="/invoice/logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
-  <link rel="stylesheet" href="./gallery.css?v=8">
+  <link rel="stylesheet" href="./gallery.css?v=9">
   <title>گالری مجازی سه‌بعدی | GilasArt</title>
 </head>
 <body>
@@ -38,20 +38,14 @@
         <div class="gallery-header__actions"><span class="live-indicator"><i></i> فضای تعاملی</span><time id="client-clock" class="client-clock" aria-label="ساعت محلی دستگاه">--:--:--</time><button id="help-toggle" class="icon-button" type="button" aria-expanded="false" aria-controls="help-panel" aria-label="راهنمای حرکت">؟</button><button id="exit-gallery" class="icon-button" type="button" aria-label="خروج از گالری">×</button></div>
       </header>
       <aside id="help-panel" class="help-panel" hidden>
-        <strong>چطور حرکت کنم؟</strong><p>در موبایل و تبلت، جوی‌استیک سمت چپ برای چرخش و نگاه ۳۶۰ درجه است؛ جوی‌استیک سمت راست برای حرکت جلو و عقب و جابه‌جایی جانبی استفاده می‌شود.</p>
+        <strong>چطور حرکت کنم؟</strong><p>جوی‌استیک را به چپ و راست بکشید تا ۳۶۰ درجه بچرخید؛ آن را به جلو و عقب بکشید تا در راهرو حرکت کنید. در دسکتاپ نیز از W A S D یا کلیدهای جهت‌دار و کشیدن ماوس استفاده کنید.</p>
         <p class="help-panel__note">در دسکتاپ از W A S D یا کلیدهای جهت‌دار برای حرکت و از کشیدن ماوس برای نگاه‌کردن اطراف استفاده کنید.</p>
       </aside>
       <div class="scene-caption"><span class="scene-caption__eyebrow">THE GALLERY</span><strong id="scene-title">گالری آثار گیلاس آرت</strong><span id="scene-status">برای شروع، به‌آرامی حرکت کنید.</span></div>
-      <div class="movement-controls" aria-label="کنترل حرکت">
-        <button class="move move--forward" data-move="forward" type="button" aria-label="حرکت به جلو">▲</button>
-        <button class="move move--left" data-move="left" type="button" aria-label="حرکت به چپ">◀</button>
-        <button class="move move--back" data-move="back" type="button" aria-label="حرکت به عقب">▼</button>
-        <button class="move move--right" data-move="right" type="button" aria-label="حرکت به راست">▶</button>
+      <div class="joystick-controls" aria-label="کنترل تعاملی گالری">
+        <div class="joystick" data-joystick="combined" role="application" aria-label="جوی‌استیک؛ جلو و عقب رفتن و چرخش ۳۶۰ درجه"><span class="joystick__label">حرکت و چرخش ۳۶۰°</span><span class="joystick__knob" aria-hidden="true"></span></div>
       </div>
-      <div class="joystick-controls" aria-label="کنترل‌های لمسی گالری">
-        <div class="joystick" data-joystick="look" role="application" aria-label="جوی‌استیک سمت چپ؛ چرخش و نگاه به اطراف"><span class="joystick__label">نگاه ۳۶۰°</span><span class="joystick__knob" aria-hidden="true"></span></div>
-        <div class="joystick" data-joystick="move" role="application" aria-label="جوی‌استیک سمت راست؛ حرکت جلو و عقب"><span class="joystick__label">حرکت</span><span class="joystick__knob" aria-hidden="true"></span></div>
-      </div>
+      <div id="artwork-loading" class="artwork-loading" role="status" aria-live="polite" hidden><span class="artwork-loading__spinner" aria-hidden="true"></span><span id="artwork-loading-text">در حال بارگذاری تصویر اثر...</span></div>
       <aside id="artwork-panel" class="artwork-panel" aria-labelledby="artwork-panel-title" aria-hidden="true" hidden>
         <button id="artwork-panel-close" class="artwork-panel__close" type="button" aria-label="بستن جزئیات اثر">×</button>
         <img id="artwork-panel-image" class="artwork-panel__image" alt="" hidden>
@@ -70,6 +64,6 @@
       <div id="gallery-error" class="gallery-error" role="status" hidden>بارگذاری فضای سه‌بعدی انجام نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.</div>
     </div>
   </main>
-  <script type="module" src="./gallery.js?v=16"></script>
+  <script type="module" src="./gallery.js?v=17"></script>
 </body>
 </html>
