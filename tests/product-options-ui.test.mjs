@@ -104,3 +104,11 @@ test('final price is prominent on desktop, tablet, and mobile in both themes', (
   assert.doesNotMatch(css, /:root\[data-theme="dark"\] #product-live-price/);
   assert.doesNotMatch(css, /:root\[data-theme="light"\] #product-live-price/);
 });
+
+test('quantity discount panel uses the dark-theme structure with dedicated warm light-theme surfaces and borders', () => {
+  assert.match(css, /:root\[data-theme="light"\] \.quantity-discount-card\{[^}]*border:1px solid #C6A96B/s);
+  assert.match(css, /:root\[data-theme="light"\] \.quantity-discount-card\{[^}]*background:linear-gradient\(135deg,#FFF9EC 0%,#F8F1E4 58%,#FFFCF7 100%\)/s);
+  assert.match(css, /:root\[data-theme="light"\] \.quantity-discount-card \.quantity-discount-tiers span\{[^}]*border:1px solid #D9C59D/s);
+  assert.match(css, /:root\[data-theme="light"\] \.quantity-discount-card \.quantity-discount-tiers em\{[^}]*color:#76551E/s);
+  assert.doesNotMatch(css, /:root\[data-theme="dark"\] \.quantity-discount-card\{/);
+});
