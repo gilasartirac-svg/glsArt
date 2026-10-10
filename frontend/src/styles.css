@@ -8019,3 +8019,14 @@ body{
 .ga-home-room .ga-room-brand-copy p{max-width:100%;margin-bottom:1.25rem}
 .ga-home-room .ga-room-shop-link{cursor:pointer}
 @media(max-width:760px){.ga-home-room .ga-room-artwork{max-height:clamp(160px,45vw,270px)}}
+
+
+/* Customer card-transfer receipt confirmation and private image preview. */
+.payment-receipt-success-panel{max-width:760px;margin-inline:auto;text-align:center}
+.payment-receipt-success-icon{display:grid;place-items:center;width:76px;height:76px;margin:0 auto 18px;border:1px solid var(--ui-gold);border-radius:50%;color:var(--ui-gold);font-size:48px;line-height:1;background:var(--ui-hover)}
+.payment-receipt-success-panel h1{margin:12px 0 18px}
+.payment-receipt-success-panel>p{line-height:1.9}
+.payment-receipt-preview{display:grid;place-items:center;min-height:100px;margin:24px auto;padding:14px;border:1px solid var(--ui-line);border-radius:var(--ui-radius);background:var(--ui-surface-2);overflow:hidden}
+.payment-receipt-preview-image{display:block;width:auto;max-width:100%;max-height:65vh;object-fit:contain;border-radius:10px;box-shadow:var(--ui-shadow-soft)}
+.payment-receipt-success-panel .cart-checkout-bar{justify-content:center;flex-wrap:wrap}
+@media(max-width:480px){.payment-receipt-success-icon{width:64px;height:64px;font-size:40px}.payment-receipt-preview{padding:8px}.payment-receipt-success-panel .cart-checkout-bar>*{width:100%}}
