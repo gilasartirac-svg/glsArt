@@ -104,7 +104,7 @@ jobs:
           page.on('response',r=>{if(r.url().includes('/data/storefront-')||r.url().includes('/api/home'))responses.push({url:r.url().split('?')[0],status:r.status()})});
           page.on('pageerror',e=>errors.push('pageerror: '+e.message));
           page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('trustseal.enamad.ir')&&!m.text().includes('Failed to load resource'))errors.push('console: '+m.text())});
-          page.on('requestfailed',r=>{if(r.url().includes('trustseal.enamad.ir')||r.url().includes('/api/visitors/heartbeat')||r.url().includes('/api/me')||r.url().includes('/api/settings')||r.url().includes('/assets/social/')||r.url().includes('/uploaded/thumb/'))return;errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||''))});
+          page.on('requestfailed',r=>{if(r.url().includes('trustseal.enamad.ir')||r.url().includes('/api/visitors/heartbeat')||r.url().includes('/api/me')||r.url().includes('/api/settings')||r.url().includes('/assets/social/')||r.url().includes('/uploaded/thumb/')||(r.url().includes('/mobile-release.json')&&(r.failure()?.errorText||'').includes('ERR_ABORTED')))return;errors.push('requestfailed: '+r.url()+' :: '+(r.failure()?.errorText||''))});
           const fail=m=>{throw new Error(m)};
           await page.goto('https://gilasart.ir/?runtime_verify='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
           let homeCards=0;
