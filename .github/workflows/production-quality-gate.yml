@@ -131,7 +131,7 @@ jobs:
           const i=app.indexOf('async function home()'),j=app.indexOf('async function shop()',i);
           if(i<0||j<0)throw new Error('home function boundaries missing');
           const home=app.slice(i,j);
-          const required=['home.copperEyebrow','home.copperTitle','home.copperText','home.collectionsEyebrow','home.collections','home.collectionsText','home.viewAll','home.categoryView','home.galleryArt','home.virtualGalleryTitle','home.virtualGalleryText','home.virtualGalleryCta','home.virtualGalleryLabel','home.latestEyebrow','home.latest','home.latestActive','home.allWorks','home.copperLatestText','home.noActive'];
+          const required=['home.collectionsEyebrow','home.collections','home.collectionsText','home.viewAll','home.categoryView','home.galleryArt','home.virtualGalleryTitle','home.virtualGalleryText','home.virtualGalleryCta','home.virtualGalleryLabel','home.latestEyebrow','home.latest','home.latestActive','home.allWorks','home.copperLatestText','home.noActive'];
           for(const key of required)if(!home.includes("t('"+key+"')"))throw new Error('Home UI is not localized: '+key);
           const d=JSON.parse(fs.readFileSync('frontend/public/i18n/fa.json','utf8'));for(const key of required)if(typeof d.strings?.[key]!=='string'||!d.strings[key].trim())throw new Error('missing Home Persian key '+key);
           for(const raw of ['مجموعه‌های گالری','پیشنهاد شگفت‌انگیز','آثاری برای خانه‌هایی که داستان دارند.','انتخاب اثر، بخشی از زیبایی آن است.','هنرکده گیلاس آرت','کشف','انتخاب','سفارش','تولید کننده ی برتر تابلو های معرق مس در ایران'])if(home.includes(raw))throw new Error('hard-coded obsolete Home UI text remains: '+raw);
