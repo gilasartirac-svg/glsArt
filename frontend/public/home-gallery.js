@@ -1,6 +1,6 @@
 (() => {
   const MODULES=['https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js','https://unpkg.com/three@0.180.0/build/three.module.js'];
-  const TEXTURES={wall:'https://threejs.org/examples/textures/brick_diffuse.jpg',floor:'https://threejs.org/examples/textures/hardwood2_diffuse.jpg',ceiling:'https://threejs.org/examples/textures/uv_grid_opengl.jpg'};
+  const TEXTURES={wall:'https://threejs.org/examples/textures/brick_diffuse.jpg',floor:'https://threejs.org/examples/textures/hardwood2_diffuse.jpg',ceiling:'https://threejs.org/examples/textures/brick_diffuse.jpg'};
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pick=list=>{const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a.slice(0,4)};
   async function loadThree(){let error;for(const url of MODULES){try{return await import(url)}catch(e){error=e}}throw error||new Error('three unavailable')}
