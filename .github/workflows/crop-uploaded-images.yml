@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - 'scripts/crop-uploaded-images.py'
-      - '.github/workflows/crop-uploaded-images.yml'
   workflow_dispatch:
 
 concurrency:
