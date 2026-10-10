@@ -7417,16 +7417,16 @@ body{
 }
 
 
-/* Product detail polish: make the live final price the primary visual anchor. */
+/* Product detail polish: the live total is the strongest price element in every theme and viewport. */
 #product-live-price.product-live-price{
   display:block;
   width:fit-content;
   max-width:100%;
   margin-block:1rem .5rem;
-  font-size:clamp(1.625rem,2.5vw,2.125rem);
+  font-size:clamp(1.875rem,3vw,2.375rem);
   font-weight:900;
-  line-height:1.5;
-  letter-spacing:-.02em;
+  line-height:1.45;
+  letter-spacing:-.025em;
   font-variant-numeric:tabular-nums;
 }
 #product-price-breakdown[hidden]{display:none!important}
@@ -7458,9 +7458,9 @@ body{
 :root[data-theme="light"] .quantity-discount-card .quantity-discount-head strong{color:#3D2C12}
 
 @media(min-width:621px) and (max-width:1024px){
-  #product-live-price.product-live-price{font-size:1.875rem}
+  #product-live-price.product-live-price{font-size:2.125rem}
 }
 @media(max-width:620px){
-  #product-live-price.product-live-price{font-size:1.625rem;margin-block:.875rem .375rem}
+  #product-live-price.product-live-price{font-size:1.875rem;margin-block:.875rem .375rem}
   .product-stock-remaining{padding:.5625rem .75rem;font-size:.875rem}
 }
