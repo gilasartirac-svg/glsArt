@@ -193,6 +193,8 @@ test('current mobile navigation drawer stays above backdrop and opens at scrolle
   assert.ok(css.includes('.ga-header-shell .ga-header-primary-nav#main-menu.is-open'));
   assert.ok(css.includes('z-index:1100'));
   assert.ok(css.includes('z-index:1102'));
+  assert.ok(css.includes('.ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="true"])'));
+  assert.ok(css.includes('z-index:1101!important'));
   assert.ok(css.includes('body.mobile-nav-open::before'));
   assert.ok(css.includes('pointer-events:auto'));
   assert.ok(css.includes('overscroll-behavior:contain'));
