@@ -32,14 +32,14 @@
     </section>
 
     <div id="scene-shell" class="scene-shell" hidden>
-      <canvas id="gallery-canvas" aria-label="نمای سه‌بعدی گالری؛ از کلیدهای جهت‌دار یا کنترل‌های صفحه برای حرکت استفاده کنید."></canvas>
+      <canvas id="gallery-canvas" aria-label="نمای سه‌بعدی گالری؛ در موبایل و تبلت از جوی‌استیک‌ها و در دسکتاپ از صفحه‌کلید یا کشیدن ماوس استفاده کنید."></canvas>
       <header class="gallery-header">
         <a class="gallery-brand" href="/"><img src="/invoice/logo.svg" alt=""><span>GilasArt<small>گالری مجازی</small></span></a>
         <div class="gallery-header__actions"><span class="live-indicator"><i></i> فضای تعاملی</span><time id="client-clock" class="client-clock" aria-label="ساعت محلی دستگاه">--:--:--</time><button id="help-toggle" class="icon-button" type="button" aria-expanded="false" aria-controls="help-panel" aria-label="راهنمای حرکت">؟</button><button id="exit-gallery" class="icon-button" type="button" aria-label="خروج از گالری">×</button></div>
       </header>
       <aside id="help-panel" class="help-panel" hidden>
-        <strong>چطور حرکت کنم؟</strong><p>دکمه‌های روی صفحه یا کلیدهای جهت‌دار را لمس کنید. در دسکتاپ از W A S D نیز می‌توانید استفاده کنید. برای نگاه‌کردن اطراف، روی تصویر بکشید.</p>
-        <p class="help-panel__note">حرکت آهسته و پیوسته طراحی شده است؛ روی موبایل از کنترل‌های پایین صفحه استفاده کنید.</p>
+        <strong>چطور حرکت کنم؟</strong><p>در موبایل و تبلت، جوی‌استیک سمت چپ برای چرخش و نگاه ۳۶۰ درجه است؛ جوی‌استیک سمت راست برای حرکت جلو و عقب و جابه‌جایی جانبی استفاده می‌شود.</p>
+        <p class="help-panel__note">در دسکتاپ از W A S D یا کلیدهای جهت‌دار برای حرکت و از کشیدن ماوس برای نگاه‌کردن اطراف استفاده کنید.</p>
       </aside>
       <div class="scene-caption"><span class="scene-caption__eyebrow">THE GALLERY</span><strong id="scene-title">گالری آثار گیلاس آرت</strong><span id="scene-status">برای شروع، به‌آرامی حرکت کنید.</span></div>
       <div class="movement-controls" aria-label="کنترل حرکت">
@@ -70,6 +70,6 @@
       <div id="gallery-error" class="gallery-error" role="status" hidden>بارگذاری فضای سه‌بعدی انجام نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.</div>
     </div>
   </main>
-  <script type="module" src="./gallery.js?v=15"></script>
+  <script type="module" src="./gallery.js?v=16"></script>
 </body>
 </html>
