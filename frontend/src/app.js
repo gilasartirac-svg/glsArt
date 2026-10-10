@@ -799,7 +799,7 @@ async function product(slug){
    if(!productCartControl)return;
    if(productCartQuantity<=0){
      productCartControl.innerHTML='<button class="btn primary product-add-btn" id="add" type="button">افزودن به سبد</button>';
-     document.querySelector('#add').onclick=async()=>{try{const btn=document.querySelector('#add');if(btn?.disabled)return;if(!state.user){navigate('/account');return}btn?.setAttribute('disabled','disabled');const token=csrf();if(!token)throw new Error('جلسه خرید منقضی شده است؛ لطفاً دوباره وارد حساب شوید.');await api('/api/cart',{method:'POST',body:JSON.stringify({productId:p.id,quantity:1,options:selections()}),headers:{'x-csrf-token':token}});updateCartBadge(Math.max(0,state.cartCount-Number(productCartQuantity||0)+1));productCartQuantity=1;renderProductCartControl(1);alert('به سبد خرید اضافه شد')}catch(e){const msg=String(e?.message||'');alert(msg==='cart_add_failed'?'افزودن به سبد خرید در حال حاضر انجام نشد؛ لطفاً دوباره تلاش کنید.':msg||'افزودن به سبد خرید انجام نشد.')}finally{document.querySelector('#add')?.removeAttribute('disabled')}};
+     document.querySelector('#add').onclick=async()=>{try{const btn=document.querySelector('#add');if(btn?.disabled)return;if(!state.user){navigate('/account');return}btn?.setAttribute('disabled','disabled');const token=csrf();if(!token)throw new Error('جلسه خرید منقضی شده است؛ لطفاً دوباره وارد حساب شوید.');await api('/api/cart',{method:'POST',body:JSON.stringify({productId:p.id,quantity:1,options:selections()}),headers:{'x-csrf-token':token}});updateCartBadge(state.cartCount+1);productCartQuantity=1;syncCartBadge().catch(()=>{});renderProductCartControl(1);alert('به سبد خرید اضافه شد')}catch(e){const msg=String(e?.message||'');alert(msg==='cart_add_failed'?'افزودن به سبد خرید در حال حاضر انجام نشد؛ لطفاً دوباره تلاش کنید.':msg||'افزودن به سبد خرید انجام نشد.')}finally{document.querySelector('#add')?.removeAttribute('disabled')}};
      return;
    }
    productCartControl.innerHTML='<div class="product-qty-control" role="group" aria-label="تعداد این تابلو در سبد خرید"><button class="product-qty-btn product-qty-minus" id="product-qty-minus" type="button" aria-label="کاهش تعداد">−</button><div class="product-qty-summary"><span>افزودن به سبد</span><strong>'+fa(productCartQuantity)+'</strong><small>تعداد انتخاب‌شده</small></div><button class="product-qty-btn product-qty-plus" id="product-qty-plus" type="button" aria-label="افزایش تعداد">+</button></div>';
@@ -814,6 +814,7 @@ async function product(slug){
        }
        updateCartBadge(Math.max(0,state.cartCount+(target-Number(productCartQuantity||0))));
        productCartQuantity=target;
+       syncCartBadge().catch(()=>{});
        renderProductCartControl(target);
      }catch(e){
        buttons.forEach(b=>b.disabled=false);
@@ -943,12 +944,12 @@ async function cart(){
   document.querySelectorAll('.cart-qty-btn').forEach(b=>b.onclick=async()=>{
    if(b.disabled)return;
    b.disabled=true;
-   try{await api('/api/cart',{method:'POST',body:JSON.stringify({productId:b.dataset.id,quantity:Number(b.dataset.qty)}),headers:{'x-csrf-token':csrf()}});await cart()}catch(e){b.disabled=false;alert(e.message||'تغییر تعداد انجام نشد.')}
+   try{await api('/api/cart',{method:'POST',body:JSON.stringify({productId:b.dataset.id,quantity:Number(b.dataset.qty)}),headers:{'x-csrf-token':csrf()}});updateCartBadge(state.cartCount+(Number(b.dataset.qty)-Number((state.cart?.items||[]).find(x=>String(x.product_id)===String(b.dataset.id))?.quantity||0)));syncCartBadge().catch(()=>{});await cart()}catch(e){b.disabled=false;alert(e.message||'تغییر تعداد انجام نشد.')}
   });
   document.querySelectorAll('.del').forEach(b=>b.onclick=async()=>{
    if(b.disabled)return;
    b.disabled=true;
-   try{await api('/api/cart?productId='+encodeURIComponent(b.dataset.id),{method:'DELETE',headers:{'x-csrf-token':csrf()}});await cart()}catch(e){b.disabled=false;alert(e.message||'حذف محصول انجام نشد.')}
+   try{await api('/api/cart?productId='+encodeURIComponent(b.dataset.id),{method:'DELETE',headers:{'x-csrf-token':csrf()}});const removed=Number((state.cart?.items||[]).find(x=>String(x.product_id)===String(b.dataset.id))?.quantity||0);updateCartBadge(Math.max(0,state.cartCount-removed));syncCartBadge().catch(()=>{});await cart()}catch(e){b.disabled=false;alert(e.message||'حذف محصول انجام نشد.')}
   });
   document.querySelector('#apply-coupon')?.addEventListener('click',async()=>{
    const input=document.querySelector('#coupon-code'),code=String(input?.value||'').trim();
