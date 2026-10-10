@@ -1014,7 +1014,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const ids=orders.map(x=>x.id),marks=ids.map(()=>'?').join(',');
   const items=(await env.DB.prepare('SELECT * FROM order_items WHERE order_id IN ('+marks+') ORDER BY order_id,id').bind(...ids).all()).results||[];
   const history=(await env.DB.prepare('SELECT * FROM order_status_history WHERE order_id IN ('+marks+') ORDER BY changed_at ASC').bind(...ids).all()).results||[];
-  const payments=(await env.DB.prepare('SELECT status,provider,amount_irt,ref_id,authority,paid_at,created_at,updated_at,order_id FROM payments WHERE order_id IN ('+marks+')').bind(...ids).all()).results||[];
+  const payments=(await env.DB.prepare('SELECT status,provider,amount_irt,ref_id,authority,paid_at,created_at,updated_at,order_id,receipt_status,receipt_mime,receipt_size,receipt_uploaded_at,receipt_reviewed_at,receipt_rejection_reason FROM payments WHERE order_id IN ('+marks+')').bind(...ids).all()).results||[];
   const by=(arr,key)=>arr.reduce((m,x)=>{(m[x[key]]??=[]).push(x);return m},Object.create(null));
   const im=by(items,'order_id'),hm=by(history,'order_id'),pm=by(payments,'order_id');
   return json({items:orders.map(o=>({...o,items:im[o.id]||[],history:hm[o.id]||[],payment:(pm[o.id]||[])[0]||null})),invoice});
@@ -1429,7 +1429,11 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const sm=Object.fromEntries((seller.results||[]).map(x=>[x.key,x.value]));
   return json({order,items:items.results||[],history:history.results||[],payment,invoice:{sellerName:sm.invoice_seller_name||'فروشگاه صنایع دستی گیلاس آرت',economicCode:sm.invoice_economic_code||'',phone:sm.invoice_phone||'',mobile:sm.invoice_mobile||'',address:sm.invoice_address||'',logoPath:sm.invoice_logo_path||'',signaturePath:sm.invoice_signature_path||''}});
  }
- if(u.pathname==='/api/admin/orders'&&req.method==='GET'){if(!(await requirePermission(me,env,'orders.read')))return json({error:'forbidden'},403);const r=await env.DB.prepare('SELECT o.*,u.mobile FROM orders o JOIN users u ON u.id=o.user_id ORDER BY o.created_at DESC LIMIT 200').all();return json({items:r.results||[]})}
+ if(u.pathname==='/api/admin/orders'&&req.method==='GET'){
+  if(!(await requirePermission(me,env,'orders.read')))return json({error:'forbidden'},403);
+  const r=await env.DB.prepare("SELECT o.*,u.mobile,p.provider,p.status payment_status,p.receipt_status,p.receipt_size,p.receipt_uploaded_at FROM orders o JOIN users u ON u.id=o.user_id LEFT JOIN payments p ON p.order_id=o.id ORDER BY o.created_at DESC LIMIT 200").all();
+  return json({items:r.results||[]});
+ }
  if(u.pathname==='/api/settings'&&req.method==='GET'){
   const publicKeys=['site_name','site_description','seo_title','seo_description','seo_keywords','og_image','footer_social_links','partner_logos','footer_enamad_code','site_rules_title','site_rules_body','loyalty_rules_title','loyalty_rules_body'];
   const r=await env.DB.prepare("SELECT key,value FROM site_settings WHERE key IN ("+publicKeys.map(()=>'?').join(',')+")").bind(...publicKeys).all();

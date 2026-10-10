@@ -33,8 +33,8 @@ export default function Orders(){
     <div class="orders-master-head"><div><strong>آخرین سفارش‌ها</strong><small>برای مشاهده جزئیات، یک ردیف را انتخاب کنید.</small></div><span id="orders-count" class="orders-count">۰ سفارش</span></div>
     <div class="orders-table-wrap">
      <table class="admin-table orders-table">
-      <thead><tr><th>سفارش</th><th>مشتری</th><th>مبلغ</th><th>وضعیت</th><th>ثبت</th><th>فاکتور</th></tr></thead>
-      <tbody id="orders-grid"><tr><td colspan="6">در حال دریافت...</td></tr></tbody>
+      <thead><tr><th>سفارش</th><th>مشتری</th><th>مبلغ</th><th>وضعیت</th><th>فیش واریزی</th><th>ثبت</th><th>فاکتور</th></tr></thead>
+      <tbody id="orders-grid"><tr><td colspan="7">در حال دریافت...</td></tr></tbody>
      </table>
     </div>
    </section>
@@ -54,7 +54,7 @@ export default function Orders(){
   const refresh=liveRoot.querySelector('#orders-refresh');
   async function load(){
    error.textContent='';
-   grid.innerHTML='<tr><td colspan="6">در حال دریافت سفارش‌ها...</td></tr>';
+   grid.innerHTML='<tr><td colspan="7">در حال دریافت سفارش‌ها...</td></tr>';
    try{
     const d=await admin.orders();
     rows=d.items||[];
@@ -65,19 +65,21 @@ export default function Orders(){
       <td><strong>${esc(o.mobile||'-')}</strong><small>${esc(o.name||'مشتری')}</small></td>
       <td><strong>${money(o.total_irt)}</strong><small>تومان</small></td>
       <td><select class="order-status" data-id="${esc(o.id)}" aria-label="وضعیت سفارش">${optionHtml(o.status)}</select></td>
+      <td>${o.provider==='card_transfer'&&o.receipt_status&&o.receipt_status!=='NONE'?'<button type="button" class="btn primary order-receipt-btn" data-id="'+esc(o.id)+'">مشاهده فیش · '+esc(o.receipt_status)+'</button>':'<span class="muted">—</span>'}</td>
       <td><span class="order-date">${dateFa(o.created_at)}</span></td>
       <td><button type="button" class="btn ghost order-invoice-btn" data-id="${esc(o.id)}">${String(o.status)==='PENDING'?'پیش‌فاکتور':'فاکتور'}</button></td>
-     </tr>`).join('')||'<tr><td colspan="6">سفارشی وجود ندارد.</td></tr>';
+     </tr>`).join('')||'<tr><td colspan="7">سفارشی وجود ندارد.</td></tr>';
     if(!grid.closest('table').dataset.gridReady)setupDataGrid(grid.closest('table').querySelector('tbody').id,{dateColumns:[]});
     bindRows();
     if(selectedId&&rows.some(x=>x.id===selectedId))await showDetail(selectedId);
-   }catch(e){grid.innerHTML='<tr><td colspan="6" class="error-cell">دریافت سفارش‌ها انجام نشد.</td></tr>';error.textContent=e.message||'خطا در دریافت اطلاعات';}
+   }catch(e){grid.innerHTML='<tr><td colspan="7" class="error-cell">دریافت سفارش‌ها انجام نشد.</td></tr>';error.textContent=e.message||'خطا در دریافت اطلاعات';}
   }
   function bindRows(){
    grid.querySelectorAll('.order-master-row').forEach(row=>row.onclick=async e=>{
     if(e.target.closest('select,button,a'))return;
     await showDetail(row.dataset.id);
    });
+   grid.querySelectorAll('.order-receipt-btn').forEach(btn=>btn.onclick=async e=>{e.stopPropagation();await showDetail(btn.dataset.id);detail.scrollIntoView({behavior:'smooth',block:'nearest'});});
    grid.querySelectorAll('.order-invoice-btn').forEach(btn=>btn.onclick=async e=>{e.stopPropagation();const w=window.open('about:blank','_blank','width=1000,height=900');try{const d=await admin.order(btn.dataset.id);openInvoice({...d.order,items:d.items||[]},d.invoice||{},w);}catch(err){try{w?.close()}catch{}error.textContent=err.message||'فاکتور دریافت نشد.';}});
    grid.querySelectorAll('.order-status').forEach(sel=>sel.onchange=async e=>{
     e.stopPropagation();
