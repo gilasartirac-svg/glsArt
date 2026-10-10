@@ -6,9 +6,10 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 
 test('Pages deployment gate uses real file-path regex escapes', () => {
   const workflow = read('../.github/workflows/pages.yml');
-  assert.ok(workflow.includes(String.raw`service-status\.json`));
-  assert.ok(workflow.includes(String.raw`cloudflare-usage-guard\.yml`));
-  assert.ok(!workflow.includes(String.raw`service-status\\.json`));
+  const slash = String.fromCharCode(92);
+  assert.ok(workflow.includes('service-status' + slash + '.json'));
+  assert.ok(workflow.includes('cloudflare-usage-guard' + slash + '.yml'));
+  assert.ok(!workflow.includes('service-status' + slash + slash + '.json'));
 });
 
 test('image crop workflow stages outputs without extension-specific globs', () => {
