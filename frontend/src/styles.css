@@ -5394,6 +5394,7 @@ body{font-family:"Vazirmatn"!important}
     border-color:color-mix(in srgb,var(--ui-gold) 22%,var(--ui-line));
   }
   .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="shop"]::before{content:"◈"}
+  .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="gallery"]::before{content:"▧"}
   .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="about"]::before{content:"✦"}
   .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="contact"]::before{content:"☎"}
   .ga-header-primary-nav .ga-header-nav-item[data-menu-icon="news"]::before{content:"▤"}
