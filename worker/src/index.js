@@ -1019,6 +1019,14 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const im=by(items,'order_id'),hm=by(history,'order_id'),pm=by(payments,'order_id');
   return json({items:orders.map(o=>({...o,items:im[o.id]||[],history:hm[o.id]||[],payment:(pm[o.id]||[])[0]||null})),invoice});
  }
+ if(u.pathname.startsWith('/api/orders/')&&u.pathname.endsWith('/payment-receipt')&&req.method==='GET'){
+  if(!me)return json({error:'unauthorized'},401);
+  const oid=u.pathname.split('/')[3];
+  if(!oid)return json({error:'not_found'},404);
+  const receipt=await env.DB.prepare("SELECT p.receipt_status,p.receipt_mime,p.receipt_size,p.receipt_data FROM payments p JOIN orders o ON o.id=p.order_id WHERE o.id=? AND o.user_id=? AND p.provider='card_transfer'").bind(oid,me.id).first();
+  if(!receipt||!receipt.receipt_data||receipt.receipt_status==='NONE')return json({error:'receipt_not_found'},404);
+  return new Response(receipt.receipt_data,{status:200,headers:{'content-type':receipt.receipt_mime||'image/jpeg','content-length':String(receipt.receipt_size||receipt.receipt_data.length),'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
+ }
  if(u.pathname.startsWith('/api/orders/')&&u.pathname.endsWith('/payment-receipt')&&req.method==='POST'){
   if(!me||!requireCsrf(req))return json({error:'unauthorized'},401);
   const parts=u.pathname.split('/'),oid=parts[3];
