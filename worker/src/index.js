@@ -1411,8 +1411,8 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
  if(u.pathname.startsWith('/api/admin/orders/')&&u.pathname.endsWith('/payment-receipt')&&req.method==='GET'){
   if(!(await requirePermission(me,env,'orders.read')))return json({error:'forbidden'},403);
   const id=u.pathname.split('/')[4];if(!id)return json({error:'not_found'},404);
-  const p=await env.DB.prepare("SELECT receipt_status,receipt_mime,receipt_size,receipt_data FROM payments WHERE order_id=?").bind(id).first();
-  if(!p||p.receipt_status==='NONE'||!p.receipt_data)return json({error:'receipt_not_found'},404);
+  const p=await env.DB.prepare("SELECT provider,receipt_status,receipt_mime,receipt_size,receipt_data FROM payments WHERE order_id=?").bind(id).first();
+  if(!p||p.provider!=='card_transfer'||p.receipt_status==='NONE'||!p.receipt_data)return json({error:'receipt_not_found'},404);
   return new Response(p.receipt_data,{status:200,headers:{'content-type':p.receipt_mime||'image/jpeg','content-length':String(p.receipt_size||p.receipt_data.length),'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
  }
  if(u.pathname.startsWith('/api/admin/orders/') && req.method==='GET'){
@@ -1423,7 +1423,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const [items,history,payment,seller]=await Promise.all([
    env.DB.prepare('SELECT id,product_id,sku,name,unit_price_irt,quantity,line_total_irt,options_json FROM order_items WHERE order_id=? ORDER BY id').bind(id).all(),
    env.DB.prepare('SELECT h.*,u.name changed_by_name,u.mobile changed_by_mobile FROM order_status_history h LEFT JOIN users u ON u.id=h.changed_by_user_id WHERE h.order_id=? ORDER BY h.changed_at DESC').bind(id).all(),
-   env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at,provider,receipt_status,receipt_mime,receipt_size,receipt_uploaded_at,receipt_reviewed_at,receipt_reviewed_by FROM payments WHERE order_id=?').bind(id).first(),
+   env.DB.prepare('SELECT status,amount_irt,ref_id,authority,paid_at,created_at,updated_at,provider,receipt_status,receipt_mime,receipt_size,receipt_uploaded_at,receipt_reviewed_at,receipt_reviewed_by,receipt_rejection_reason FROM payments WHERE order_id=?').bind(id).first(),
    env.DB.prepare("SELECT key,value FROM site_settings WHERE key IN ('invoice_seller_name','invoice_economic_code','invoice_phone','invoice_mobile','invoice_address')").all()
   ]);
   const sm=Object.fromEntries((seller.results||[]).map(x=>[x.key,x.value]));
