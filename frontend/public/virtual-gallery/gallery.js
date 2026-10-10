@@ -43,6 +43,9 @@ let dragMoved = false;
 let panelCloseTimer = 0;
 let cameraTarget, cameraPosition, cameraVelocity, desiredVelocity;
 let yawVelocity = 0, pitchVelocity = 0;
+const joystickState = { lookX: 0, lookY: 0, moveX: 0, moveY: 0 };
+let clientClockTimer = 0;
+let lastClockSecond = -1;
 const bounds = { x: 6.6, zMin: -10.5, zMax: 8.5 };
 const movementTuning = { walkSpeed: 3.2, sprintSpeed: 6.2, acceleration: 8.5, damping: 4.2, turnDamping: 5.2, boundarySpring: 7.5 };
 const galleryArt = [];
@@ -57,60 +60,21 @@ let selectedGalleryCategory = 'all';
 let galleryTextureLoader = null;
 const fallbackTitles = ['نقش و نگار','گرمای مس','روایت ایرانی','آرامش رنگ','هنر ماندگار','جزئیات هنر','طلایی گرم','بافت و فرم','گیلاس آرت','نقش ایرانی'];
 
-function makeCanvasTexture(index, title) {
-  const art = document.createElement('canvas');
-  art.width = 512; art.height = 640;
-  const ctx = art.getContext('2d');
-  const gradient = ctx.createLinearGradient(0, 0, 512, 640);
-  const palettes = [
-    ['#231a17','#9a633b','#e2bd78'],
-    ['#111a22','#42626a','#d9a441'],
-    ['#291c1d','#8f4536','#e5c18a'],
-    ['#17231e','#596f51','#d5ad5e'],
-    ['#211b2a','#67506c','#c49c61'],
-    ['#201a12','#8b7447','#e1c48b']
-  ];
-  const colors = palettes[index % palettes.length];
-  gradient.addColorStop(0, colors[0]); gradient.addColorStop(.62, colors[1]); gradient.addColorStop(1, colors[2]);
-  ctx.fillStyle = gradient; ctx.fillRect(0, 0, 512, 640);
-  ctx.globalAlpha = .8;
-  for (let i = 0; i < 7; i++) {
-    ctx.beginPath();
-    ctx.ellipse(256 + Math.sin(i * 1.7 + index) * 70, 310 + Math.cos(i * 1.3) * 90, 70 + i * 14, 150 - i * 9, i * .23, 0, Math.PI * 2);
-    ctx.strokeStyle = i % 2 ? '#f0d39b' : '#241b17'; ctx.lineWidth = 3 + (i % 3);
-    ctx.stroke();
-  }
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = 'rgba(7,8,10,.64)'; ctx.fillRect(0, 550, 512, 90);
-  ctx.fillStyle = '#f3dfb7'; ctx.font = 'bold 23px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText(title, 256, 594);
-  ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.font = '13px sans-serif'; ctx.fillText('GILASART · ART COLLECTION', 256, 619);
-  const texture = new THREE.CanvasTexture(art);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = renderer?.capabilities.getMaxAnisotropy?.() || 1;
-  return texture;
-}
-
 function addWallArt(x, z, rotation, index, title, imageUrl = '', product = null) {
   const group = new THREE.Group();
   group.position.set(x, 2.05, z);
   group.rotation.y = rotation;
   const maxWidth = 1.82, maxHeight = 2.08;
-  // Always keep a visible local artwork texture while the real product image loads or if its URL fails.
-  const placeholderTexture = makeCanvasTexture(index, title);
-  const artworkMaterial = new THREE.MeshStandardMaterial({
-    map: placeholderTexture, color: imageUrl ? 0xf4efe6 : 0xffffff,
-    roughness: .86, metalness: .01, side: THREE.DoubleSide
-  });
+  // Use an untinted, unlit surface: product images keep their original color and aspect ratio.
+  const artworkMaterial = new THREE.MeshBasicMaterial({ color: 0xf4efe6, side: THREE.DoubleSide, toneMapped: false });
   const inner = new THREE.Mesh(new THREE.PlaneGeometry(maxWidth, maxHeight), artworkMaterial);
   inner.position.z = .025;
   group.add(inner);
-  // No per-artwork spotlights: keep image surfaces evenly lit and free of glare.
   scene.add(group);
   const record = {
     group, title, index, product, hitMeshes: [inner], inner,
     imageUrl: imageUrl ? galleryImageUrl(imageUrl) : '',
-    placeholderTexture, artworkMaterial, imageLoaded: false, imageLoading: false,
+    artworkMaterial, imageLoaded: false, imageLoading: false,
     maxWidth, maxHeight, lastNearAt: 0
   };
   record.hitMeshes.forEach(mesh => { mesh.userData.galleryArtwork = record; });
@@ -227,6 +191,58 @@ function addPillar(x, z) {
   trim.position.set(x, 3.8, z); scene.add(trim);
 }
 
+function addGalleryDecor(corridorLength, corridorCenter) {
+  const rugCanvas = document.createElement('canvas'); rugCanvas.width = 256; rugCanvas.height = 512;
+  const rc = rugCanvas.getContext('2d');
+  rc.fillStyle = '#681c25'; rc.fillRect(0, 0, 256, 512);
+  rc.fillStyle = '#7e2630'; rc.fillRect(14, 14, 228, 484);
+  rc.strokeStyle = '#c7a05c'; rc.lineWidth = 5; rc.strokeRect(20, 20, 216, 472);
+  rc.lineWidth = 1.5; rc.strokeRect(30, 30, 196, 452);
+  for (let y = 44; y < 480; y += 24) {
+    rc.beginPath(); rc.moveTo(36, y); rc.lineTo(220, y);
+    rc.strokeStyle = 'rgba(224,187,119,.24)'; rc.lineWidth = 1; rc.stroke();
+    rc.fillStyle = '#d9b875'; rc.fillRect(26, y - 3, 4, 6); rc.fillRect(226, y - 3, 4, 6);
+  }
+  const rugTexture = new THREE.CanvasTexture(rugCanvas); rugTexture.colorSpace = THREE.SRGBColorSpace;
+  const rugMaterial = new THREE.MeshStandardMaterial({ map: rugTexture, roughness: .98, metalness: 0, side: THREE.DoubleSide });
+  const rugCount = Math.min(7, Math.max(2, Math.floor(corridorLength / 9)));
+  for (let i = 0; i < rugCount; i++) {
+    const z = Math.max(bounds.zMin + 3.4, 3.6 - i * 8.2);
+    const rug = new THREE.Mesh(new THREE.PlaneGeometry(3.1, 4.8), rugMaterial);
+    rug.rotation.x = -Math.PI / 2; rug.position.set(0, .025, z); scene.add(rug);
+    const edgeMaterial = new THREE.MeshStandardMaterial({ color: 0x9b742d, roughness: .76, metalness: .08 });
+    for (const side of [-1, 1]) {
+      const edge = new THREE.Mesh(new THREE.BoxGeometry(.035, .012, 4.8), edgeMaterial);
+      edge.position.set(side * 1.53, .03, z); scene.add(edge);
+    }
+  }
+  const ceramic = new THREE.MeshStandardMaterial({ color: 0x9a4b32, roughness: .32, metalness: .04 });
+  const ceramicAccent = new THREE.MeshStandardMaterial({ color: 0xd0ad70, roughness: .42, metalness: .45 });
+  const vaseGeometry = new THREE.LatheGeometry([
+    new THREE.Vector2(0, 0), new THREE.Vector2(.18, .03), new THREE.Vector2(.28, .18),
+    new THREE.Vector2(.3, .42), new THREE.Vector2(.22, .62), new THREE.Vector2(.12, .72),
+    new THREE.Vector2(.1, .82), new THREE.Vector2(.14, .88), new THREE.Vector2(.11, .91)
+  ], 20);
+  for (let z = 2.5, i = 0; z > bounds.zMin + 2.5; z -= 10.2, i++) {
+    const x = i % 2 ? 6.8 : -6.8;
+    const vase = new THREE.Mesh(vaseGeometry, ceramic);
+    vase.position.set(x, .04, z); vase.scale.set(1.05, 1.18, 1.05); scene.add(vase);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(.125, .018, 6, 24), ceramicAccent);
+    ring.rotation.x = Math.PI / 2; ring.position.set(x, .88, z); scene.add(ring);
+    for (let leaf = 0; leaf < 4; leaf++) {
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(.012, .018, .48 + leaf * .08, 5),
+        new THREE.MeshStandardMaterial({ color: 0x586747, roughness: .95 }));
+      stem.position.set(x + Math.sin(leaf * 1.7) * .12, 1.28 + leaf * .025, z + Math.cos(leaf * 1.7) * .1);
+      stem.rotation.z = (leaf - 1.5) * .18; scene.add(stem);
+      const leafMesh = new THREE.Mesh(new THREE.SphereGeometry(.11, 7, 5),
+        new THREE.MeshStandardMaterial({ color: leaf % 2 ? 0x75845b : 0x4e6845, roughness: .98 }));
+      leafMesh.scale.set(1.8, .45, .72);
+      leafMesh.position.set(stem.position.x + Math.sin(leaf) * .14, stem.position.y + .18, stem.position.z + Math.cos(leaf) * .12);
+      leafMesh.rotation.z = stem.rotation.z; scene.add(leafMesh);
+    }
+  }
+}
+
 function setupScene() {
   const rows = Math.max(5, Math.ceil(galleryProducts.length / 2));
   const corridorLength = Math.max(30, (rows - 1) * 3.1 + 12);
@@ -235,8 +251,9 @@ function setupScene() {
   galleryArt.length = 0;
   scene = new THREE.Scene();
   sceneCategory = selectedGalleryCategory;
-  scene.background = new THREE.Color(0x211d1a);
-  scene.fog = new THREE.Fog(0x211d1a, 28, 105);
+  // Fixed exhibition ambience: independent of real-world time and the website theme.
+  scene.background = new THREE.Color(0xf0e7d8);
+  scene.fog = new THREE.Fog(0xf0e7d8, 38, 118);
   camera = new THREE.PerspectiveCamera(57, window.innerWidth / window.innerHeight, .1, 90);
   camera.position.copy(cameraPosition);
   camera.rotation.order = 'YXZ';
@@ -252,7 +269,7 @@ function setupScene() {
   marbleCanvas.width = 768; marbleCanvas.height = 768;
   const marbleContext = marbleCanvas.getContext('2d');
   const marbleBase = marbleContext.createLinearGradient(0, 0, 768, 768);
-  marbleBase.addColorStop(0, '#252523'); marbleBase.addColorStop(.48, '#4a4742'); marbleBase.addColorStop(1, '#302e2a');
+  marbleBase.addColorStop(0, '#e8ddca'); marbleBase.addColorStop(.48, '#d6c8b1'); marbleBase.addColorStop(1, '#f3eadb');
   marbleContext.fillStyle = marbleBase; marbleContext.fillRect(0, 0, 768, 768);
   let marbleSeed = 4317;
   const marbleRandom = () => { marbleSeed = (marbleSeed * 16807) % 2147483647; return (marbleSeed - 1) / 2147483646; };
@@ -266,7 +283,7 @@ function setupScene() {
       x += (marbleRandom() - .5) * 90; y += 35 + marbleRandom() * 70;
       marbleContext.quadraticCurveTo(bendX, bendY, x, y);
     }
-    marbleContext.strokeStyle = vein % 5 === 0 ? 'rgba(190,157,112,.25)' : 'rgba(205,201,192,.12)';
+    marbleContext.strokeStyle = vein % 5 === 0 ? 'rgba(142,111,73,.24)' : 'rgba(132,119,100,.13)';
     marbleContext.lineWidth = vein % 5 === 0 ? 2.1 : .9;
     marbleContext.stroke();
     marbleContext.strokeStyle = 'rgba(255,255,255,.72)'; marbleContext.lineWidth = .7; marbleContext.stroke();
@@ -277,13 +294,13 @@ function setupScene() {
   marbleTexture.repeat.set(2, 5);
   marbleTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
   // Warm room-wide illumination; no concentrated beam is aimed at artwork faces.
-  const ambient = new THREE.AmbientLight(0xffe7c7, .78); scene.add(ambient);
-  const hemisphere = new THREE.HemisphereLight(0xf8e9d2, 0x33251d, .72); scene.add(hemisphere);
-  const galleryFill = new THREE.DirectionalLight(0xffd9a6, .48); galleryFill.position.set(-3, 7, 5); scene.add(galleryFill);
-  const ceilingMaterial = new THREE.MeshStandardMaterial({ color: 0x302820, roughness: .94, metalness: 0, side: THREE.DoubleSide });
+  const ambient = new THREE.AmbientLight(0xfff0d8, 1.05); scene.add(ambient);
+  const hemisphere = new THREE.HemisphereLight(0xfff7e9, 0x81705b, .88); scene.add(hemisphere);
+  const galleryFill = new THREE.DirectionalLight(0xffe6bf, .24); galleryFill.position.set(-3, 7, 5); galleryFill.castShadow = false; scene.add(galleryFill);
+  const ceilingMaterial = new THREE.MeshStandardMaterial({ color: 0xf2e7d5, roughness: .98, metalness: 0, side: THREE.DoubleSide });
   const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(18, corridorLength), ceilingMaterial);
   ceiling.rotation.x = Math.PI / 2; ceiling.position.set(0, 4.2, corridorCenter); scene.add(ceiling);
-  const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xc7c0b4, map: marbleTexture, roughness: .34, metalness: .025, side: THREE.DoubleSide });
+  const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: marbleTexture, roughness: .68, metalness: 0, side: THREE.DoubleSide });
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(18, corridorLength), floorMaterial);
   floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, corridorCenter); scene.add(floor);
   const floorGrid = new THREE.GridHelper(18, 48, 0x8b6a45, 0x5b554e);
@@ -306,7 +323,7 @@ function setupScene() {
   const velvetTexture = new THREE.CanvasTexture(velvetCanvas);
   velvetTexture.wrapS = velvetTexture.wrapT = THREE.RepeatWrapping;
   velvetTexture.repeat.set(Math.max(2, corridorLength / 8), 1); velvetTexture.colorSpace = THREE.SRGBColorSpace;
-  const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: velvetTexture, roughness: .97, metalness: 0, side: THREE.DoubleSide });
+  const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xf4ead8, map: velvetTexture, roughness: .98, metalness: 0, side: THREE.DoubleSide });
   const backWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 4.2), wallMaterial);
   backWall.position.set(0, 2.1, bounds.zMin - 2); scene.add(backWall);
   const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(corridorLength, 4.2), wallMaterial);
@@ -319,6 +336,21 @@ function setupScene() {
   const ceilingTrim = new THREE.Mesh(new THREE.BoxGeometry(18, .045, .045), baseTrimMaterial);
   ceilingTrim.position.set(0, 4.02, -2); scene.add(ceilingTrim);
 
+  // Real CC0 marble texture from Poly Haven; procedural stone remains the offline fallback.
+  const surfaceLoader = new THREE.TextureLoader();
+  surfaceLoader.setCrossOrigin('anonymous');
+  const stoneTextureUrl = 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/marble_01/marble_01_diff_1k.jpg';
+  const loadStoneSurface = (material, repeatX, repeatY) => surfaceLoader.load(stoneTextureUrl, texture => {
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(repeatX, repeatY);
+    texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy() || 1);
+    material.map = texture; material.needsUpdate = true;
+  }, undefined, () => { /* Keep the local fallback if the texture host is unavailable. */ });
+  loadStoneSurface(floorMaterial, 2.4, Math.max(4, corridorLength / 5));
+  loadStoneSurface(wallMaterial, Math.max(2, corridorLength / 9), 1.25);
+  addGalleryDecor(corridorLength, corridorCenter);
+
   artworkQueue.length = 0; nextArtworkIndex = 0;
   galleryProducts.forEach((product, index) => {
     const row = Math.floor(index / 2), left = index % 2 === 0;
@@ -326,7 +358,7 @@ function setupScene() {
   });
   // Wider architectural piers break up the long-hall rhythm.
   for (let i = 0; i < rows; i += 4) { const z = -2.2 - i * 3.1; addPillar(-7.25, z); addPillar(7.25, z - 1.45); }
-  const endGlow = new THREE.PointLight(0x8d512b, 2.2, 16, 1.8); endGlow.position.set(0, 2.4, bounds.zMin + 1.5); scene.add(endGlow);
+  const endGlow = new THREE.PointLight(0xffe3b8, .65, 16, 1.8); endGlow.position.set(0, 2.4, bounds.zMin + 1.5); scene.add(endGlow);
   galleryTextureLoader = new THREE.TextureLoader();
   clock = new THREE.Clock();
 }
@@ -361,11 +393,15 @@ function updateMovement(delta) {
 
   forward.set(-Math.sin(yaw), 0, -Math.cos(yaw)).normalize();
   right.set(Math.cos(yaw), 0, -Math.sin(yaw)).normalize();
+  if (Math.abs(joystickState.lookX) > .08) yawVelocity = -joystickState.lookX * 1.9;
+  if (Math.abs(joystickState.lookY) > .12) pitchVelocity = joystickState.lookY * .85;
   moveVector.set(0, 0, 0);
   if (held.has('forward') || held.has('w') || held.has('arrowup')) moveVector.add(forward);
   if (held.has('back') || held.has('s') || held.has('arrowdown')) moveVector.sub(forward);
   if (held.has('right') || held.has('d') || held.has('arrowright')) moveVector.add(right);
   if (held.has('left') || held.has('a') || held.has('arrowleft')) moveVector.sub(right);
+  if (Math.abs(joystickState.moveY) > .08) moveVector.addScaledVector(forward, -joystickState.moveY);
+  if (Math.abs(joystickState.moveX) > .12) moveVector.addScaledVector(right, joystickState.moveX * .7);
 
   const maxSpeed = held.has('shift') ? movementTuning.sprintSpeed : movementTuning.walkSpeed;
   if (moveVector.lengthSq() > 0) {
@@ -452,13 +488,13 @@ function updateArtworkTextures() {
       }
     } else if (distance > 30 && record.imageLoaded && now - record.lastNearAt > 900) {
       const texture = record.artworkMaterial.map;
-      record.artworkMaterial.map = record.placeholderTexture;
-      record.artworkMaterial.color.set(0xffffff);
+      record.artworkMaterial.map = null;
+      record.artworkMaterial.color.set(0xf4efe6);
       record.artworkMaterial.needsUpdate = true;
       record.inner.geometry.dispose();
       record.inner.geometry = new THREE.PlaneGeometry(record.maxWidth, record.maxHeight);
       record.imageLoaded = false;
-      if (texture && texture !== record.placeholderTexture) texture.dispose();
+      if (texture) texture.dispose();
     }
   }
 }
@@ -482,6 +518,62 @@ function onResize() {
   renderer.setSize(window.innerWidth, window.innerHeight, false);
 }
 
+function updateClientClock() {
+  const node = $('client-clock');
+  if (!node) return;
+  const now = new Date();
+  const second = Math.floor(now.getTime() / 1000);
+  if (second === lastClockSecond) return;
+  lastClockSecond = second;
+  node.dateTime = now.toISOString();
+  node.textContent = new Intl.DateTimeFormat('fa-IR', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+  }).format(now);
+}
+function startClientClock() {
+  clearInterval(clientClockTimer);
+  updateClientClock();
+  clientClockTimer = window.setInterval(updateClientClock, 1000);
+}
+function bindJoysticks() {
+  document.querySelectorAll('[data-joystick]').forEach(base => {
+    const kind = base.dataset.joystick;
+    const knob = base.querySelector('.joystick__knob');
+    if (!knob || base.dataset.bound === 'true') return;
+    base.dataset.bound = 'true';
+    let pointerId = null;
+    const update = event => {
+      if (pointerId !== event.pointerId) return;
+      event.preventDefault();
+      const rect = base.getBoundingClientRect();
+      const radius = Math.min(rect.width, rect.height) * .34;
+      let dx = event.clientX - (rect.left + rect.width / 2);
+      let dy = event.clientY - (rect.top + rect.height / 2);
+      const length = Math.hypot(dx, dy);
+      if (length > radius) { dx = dx / length * radius; dy = dy / length * radius; }
+      const nx = dx / radius, ny = dy / radius;
+      knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+      if (kind === 'look') { joystickState.lookX = nx; joystickState.lookY = ny; }
+      else { joystickState.moveX = nx; joystickState.moveY = ny; }
+    };
+    const release = event => {
+      if (pointerId !== event.pointerId) return;
+      pointerId = null;
+      try { base.releasePointerCapture(event.pointerId); } catch {}
+      knob.style.transform = 'translate(0,0)';
+      if (kind === 'look') { joystickState.lookX = 0; joystickState.lookY = 0; }
+      else { joystickState.moveX = 0; joystickState.moveY = 0; }
+    };
+    base.addEventListener('pointerdown', event => {
+      event.preventDefault(); pointerId = event.pointerId;
+      try { base.setPointerCapture(pointerId); } catch {}
+      update(event);
+    });
+    base.addEventListener('pointermove', update);
+    ['pointerup','pointercancel','lostpointercapture'].forEach(type => base.addEventListener(type, release));
+    base.addEventListener('contextmenu', event => event.preventDefault());
+  });
+}
 function setHeld(name, on) {
   if (on) held.add(name); else held.delete(name);
   document.querySelectorAll('[data-move="' + name + '"]').forEach(button => button.classList.toggle('is-active', on));
@@ -520,6 +612,8 @@ function navigateToWallArtwork(side) {
 function bindControls() {
   if (controlsBound) return;
   controlsBound = true;
+  bindJoysticks();
+  startClientClock();
   document.querySelectorAll('[data-move]').forEach(button => {
     const name = button.dataset.move;
     const down = (event) => {
@@ -656,6 +750,7 @@ function bindControls() {
 
 function exitGallery() {
   entered = false; cancelAnimationFrame(animationFrame); held.clear();
+  joystickState.lookX = joystickState.lookY = joystickState.moveX = joystickState.moveY = 0;
   focusTransition = null; focusReturn = null; activeArtwork = null;
   const panel = $('artwork-panel');
   if (panel) { panel.hidden = true; panel.classList.remove('is-open'); panel.setAttribute('aria-hidden', 'true'); }
