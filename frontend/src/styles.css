@@ -7464,3 +7464,34 @@ body{
   #product-live-price.product-live-price{font-size:1.875rem;margin-block:.875rem .375rem}
   .product-stock-remaining{padding:.5625rem .75rem;font-size:.875rem}
 }
+
+
+/* Quantity-discount card — warm, legible day-theme treatment; dark theme keeps its existing tokens. */
+:root[data-theme="light"] .quantity-discount-card{
+  border:1px solid #C6A96B;
+  border-radius:16px;
+  background:linear-gradient(135deg,#FFF9EC 0%,#F8F1E4 58%,#FFFCF7 100%);
+  color:#30271D;
+  box-shadow:0 5px 18px rgba(105,75,28,.08),inset 0 0 0 1px rgba(198,169,107,.16);
+}
+:root[data-theme="light"] .quantity-discount-card .quantity-discount-icon{
+  background:#9B742D;
+  color:#FFFCF7;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);
+}
+:root[data-theme="light"] .quantity-discount-card .quantity-discount-head strong{
+  color:#3D2C12;
+}
+:root[data-theme="light"] .quantity-discount-card .quantity-discount-head small,
+:root[data-theme="light"] .quantity-discount-card .quantity-discount-note{
+  color:#655743;
+}
+:root[data-theme="light"] .quantity-discount-card .quantity-discount-tiers span{
+  border:1px solid #D9C59D;
+  background:#FFFCF7;
+  color:#30271D;
+  box-shadow:0 1px 3px rgba(105,75,28,.05);
+}
+:root[data-theme="light"] .quantity-discount-card .quantity-discount-tiers em{
+  color:#76551E;
+}
