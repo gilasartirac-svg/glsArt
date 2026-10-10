@@ -4,11 +4,15 @@ import {readFileSync} from 'node:fs';
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
-test('homepage brand and calls to action describe copper marquetry and the virtual gallery',()=>{
+test('homepage brand and navigation expose copper marquetry and the virtual gallery without hero buttons',()=>{
  const locale=JSON.parse(read('frontend/public/i18n/fa.json'));
  assert.equal(locale.strings['home.copperTitle'],'هنر معرق مس، باوقار و ماندگار');
  const app=read('frontend/src/app.js');
- assert.ok(app.includes('home-primary-actions'));
+ assert.ok(app.includes(`data-menu-icon="gallery"`));
+ assert.ok(app.indexOf(`data-menu-icon="shop"`)<app.indexOf(`data-menu-icon="gallery"`));
+ assert.ok(app.indexOf(`data-menu-icon="gallery"`)<app.indexOf(`data-menu-icon="about"`));
+ assert.ok(!app.includes('home-primary-actions'));
+ assert.ok(app.includes('routeUrl(\'/virtual-gallery/\')'));
  assert.ok(app.includes('routeUrl(\'/virtual-gallery/\')'));
  assert.ok(app.includes('vg3-scene'));
  assert.ok(app.includes('vg3-human'));
@@ -41,7 +45,8 @@ test('long public text, horizontal categories and footer dividers have shared de
  const css=read('frontend/src/styles.css');
  assert.ok(css.includes('#main-content p:not(.eyebrow):not(.vg3-kicker):not(.product-card-kicker)'));
  assert.ok(css.includes('.home-categories .category-grid{display:flex'));
- assert.ok(css.includes('.home-primary-actions{display:flex'));
+ assert.ok(!css.includes('.home-primary-actions'));
+ assert.ok(!css.includes('.home-hero-gallery-link'));
  assert.ok(css.includes('.partner-logo-track{display:flex'));
  assert.ok(css.includes('.footer-grid-refined>:is(nav,section)'));
 });
