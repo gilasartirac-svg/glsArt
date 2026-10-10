@@ -328,7 +328,7 @@ function addGalleryDecor(corridorLength, corridorCenter) {
   const rugTexture = new THREE.CanvasTexture(rugCanvas); rugTexture.colorSpace = THREE.SRGBColorSpace;
   const rugMaterial = new THREE.MeshStandardMaterial({ map: rugTexture, roughness: .98, metalness: 0, side: THREE.DoubleSide });
   // Continuous Persian-red carpet from the entrance to the far end of the corridor.
-  const carpetLength = Math.max(8, corridorLength - .45);
+  const carpetLength = Math.max(8, bounds.zMax - bounds.zMin + .25);
   const carpet = new THREE.Mesh(new THREE.PlaneGeometry(3.6, carpetLength), rugMaterial);
   carpet.rotation.x = -Math.PI / 2; carpet.position.set(0, .025, corridorCenter); scene.add(carpet);
   const carpetEdgeMaterial = new THREE.MeshStandardMaterial({ color: 0xb18a46, roughness: .76, metalness: .12 });
