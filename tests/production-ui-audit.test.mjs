@@ -24,7 +24,7 @@ test('route recovery UI has no inline presentation styles',()=>{
  assert.ok(!js.includes('class="panel" style="text-align:center;padding:48px 20px"'));
  assert.ok(!js.includes('class="cart-checkout-bar" style="justify-content:center"'));
  const css=read('frontend/src/styles.css');
- assert.ok(css.includes('.route-error-state{text-align:center;padding:48px 20px}'));
+ assert.ok(css.includes('.route-error-state{text-align:center;padding:3rem 1.25rem}'));
 });
 
 test('public/admin theme architecture remains token-based at key shared controls',()=>{
@@ -183,8 +183,8 @@ test('homepage mobile product cards prioritize readable title and price without 
  const mobile=css.slice(i);
  assert.ok(mobile.includes('@media (max-width:767px)'));
  assert.ok(mobile.includes('.home-latest .product-card-link{\n    display:flex;\n    flex-direction:column;'));
- assert.ok(mobile.includes('font-size:17px!important;'));
- assert.ok(mobile.includes('font-size:clamp(20px,5.4vw,24px)!important;'));
+ assert.ok(mobile.includes('font-size:1.0625rem!important;'));
+ assert.ok(mobile.includes('font-size:clamp(1.25rem,5.4vw,1.5rem)!important;'));
  assert.ok(mobile.includes('.home-latest .product-sku{display:none}'));
  assert.ok(!mobile.includes('.shop-page .product-card'));
 });
