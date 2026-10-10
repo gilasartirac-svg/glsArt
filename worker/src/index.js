@@ -111,7 +111,7 @@ function flashSaleValues(b,before={}){
  return {active:active?1:0,end:active?new Date(String(end)).toISOString():null,price:p};
 }
 function otpSmsMessage(env,code,template){
- const host=new URL(frontend(env)).hostname.toLowerCase().replace(/^www\\./,'');
+ const host=new URL(frontend(env)).hostname.toLowerCase().replace(/^www\./,'');
  const raw=String(template||'<#> گیلاس آرت\\nکد ورود شما: {code}')
   .replaceAll('\\\\r\\\\n','\\n')
   .replaceAll('\\\\n','\\n')
@@ -1521,7 +1521,7 @@ if(u.pathname==='/api/admin/settings'&&req.method==='PUT'){
     const clean=logos.map((x,i)=>{
      const label=String(x?.label||'').trim().slice(0,80);
      const path=String(x?.path||'').trim();
-     if(!label||!/^\\/uploaded\\/thumb\\/[A-Za-z0-9._/-]+\\.(?:png|jpe?g|webp|svg)$/i.test(path)||path.includes('..'))throw new Error();
+     if(!label||!/^\/uploaded\/thumb\/[A-Za-z0-9._/-]+\.(?:png|jpe?g|webp|svg)$/i.test(path)||path.includes('..'))throw new Error();
      return {label,path,active:x?.active!==false,sort:Number.isFinite(Number(x?.sort))?Math.max(0,Math.min(99,Number(x.sort))):i};
     });
     value=JSON.stringify(clean.slice(0,24));
