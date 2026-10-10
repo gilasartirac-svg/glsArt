@@ -31,7 +31,7 @@ test('admin can select, reorder, activate and persist partner logos from uploade
  assert.ok(settings.includes('partner-library-load'));
  assert.ok(settings.includes('frontend/public/uploaded/thumb'));
  assert.ok(settings.includes('partner-logos-save'));
- assert.ok(settings.includes("partner_logos:JSON.stringify(rows)"));
+ assert.ok(settings.includes("partner_logos:value"));
  assert.ok(worker.includes("'partner_logos'"));
  assert.ok(worker.includes('invalid_partner_logos'));
  assert.ok(worker.includes("'footer_social_links','partner_logos','footer_enamad_code'"));
