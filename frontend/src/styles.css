@@ -7616,3 +7616,7 @@ body{
   #main-content :where(.page-content,.legal-content,.article-content,.about-content,.contact-content,.policy-content,.cms-content){padding-inline:0}
 }
 @media(max-width:359px){#main-content{padding-inline:14px}}
+
+/* Keep responsive category sizing after removing the homepage hero action buttons. */
+@media(max-width:1023px){.home-categories .category-card strong{opacity:1;transform:none}}
+@media(max-width:359px){.home-categories .category-card{flex-basis:100px;min-width:100px}.home-categories .category-mark{width:58px;height:58px;flex-basis:58px}}
