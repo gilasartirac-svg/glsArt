@@ -7393,3 +7393,25 @@ body{
 
 /* Product option cards: honor reduced-motion preference within this component. */
 @media(prefers-reduced-motion:reduce){.product-option-card-ui{transition:none}}
+
+
+/* Light theme: explicit option boundaries and persistent checked-state highlight. */
+:root[data-theme="light"] .product-option-card-ui{
+  border:1px solid #C8BDAA;
+  background:#FFFCF7;
+  color:#30271D;
+}
+:root[data-theme="light"] .product-option-card:hover .product-option-card-ui{
+  border-color:#A88645;
+}
+:root[data-theme="light"] .product-option-card.selected .product-option-card-ui,
+:root[data-theme="light"] .product-option-input:checked + .product-option-card-ui{
+  border:2px solid #9B742D;
+  background:#F4E8CE;
+  color:#3D2C12;
+  box-shadow:inset 0 0 0 1px rgba(155,116,45,.18),0 3px 12px rgba(105,75,28,.14);
+}
+:root[data-theme="light"] .product-option-input:focus-visible + .product-option-card-ui{
+  outline:2px solid #9B742D;
+  outline-offset:2px;
+}
