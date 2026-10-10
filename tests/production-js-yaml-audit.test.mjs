@@ -12,6 +12,23 @@ test('Pages deployment gate uses real file-path regex escapes', () => {
   assert.ok(!workflow.includes('service-status' + slash + slash + '.json'));
 });
 
+
+test('thumbnail workflow includes every supported image extension and tolerates no-op runs', () => {
+  const workflow = read('../.github/workflows/create-thumbs.yml');
+  assert.ok(workflow.includes('expected = files'));
+  assert.ok(workflow.includes('".jpg"'));
+  assert.ok(!workflow.includes('len(expected) != 233'));
+  assert.ok(workflow.includes('if git diff --cached --quiet; then echo "No thumbnail changes."'));
+  assert.ok(workflow.includes('workflow_dispatch:'));
+  assert.ok(!workflow.includes("'.github/workflows/create-thumbs.yml'"));
+});
+
+test('Pages workflow is not accidentally duplicated or truncated', () => {
+  const workflow = read('../.github/workflows/pages.yml');
+  assert.equal(workflow.split('blocked=$(printf').length - 1, 1);
+  assert.equal(workflow.split('\n').length, 262);
+});
+
 test('image crop workflow stages outputs without extension-specific globs', () => {
   const workflow = read('../.github/workflows/crop-uploaded-images.yml');
   assert.ok(workflow.includes('git add -A -- frontend/public/uploaded'));

@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - 'scripts/crop-uploaded-images.py'
-      - '.github/workflows/crop-uploaded-images.yml'
   workflow_dispatch:
 
 concurrency:
@@ -32,7 +31,7 @@ jobs:
           from PIL import Image
           src=Path("frontend/public/uploaded"); dst=src/"thumb"; dst.mkdir(parents=True,exist_ok=True)
           files=sorted(p for p in src.iterdir() if p.is_file() and p.suffix.lower() in {".jpg",".jpeg",".png"})
-          if len(files)!=233: raise SystemExit(f"Unexpected source image count: {len(files)}")
+          if not files: raise SystemExit("No source images found")
           for p in files:
               with Image.open(p) as im:
                   w,h=im.size; nw,nh=max(1,w//2),max(1,h//2); out=dst/p.name
@@ -48,7 +47,7 @@ jobs:
           root=Path("frontend/public/uploaded")
           src=[p for p in root.iterdir() if p.is_file() and p.suffix.lower() in {".jpg",".jpeg",".png"}]
           thumbs=[p for p in (root/"thumb").iterdir() if p.is_file() and p.suffix.lower() in {".jpg",".jpeg",".png"}]
-          if len(src)!=233 or len(thumbs)!=233: raise SystemExit(f"Unexpected image count: source={len(src)} thumb={len(thumbs)}")
+          if not src or not thumbs: raise SystemExit(f"No source images or thumbnails: source={len(src)} thumb={len(thumbs)}")
           if {p.name for p in src}!={p.name for p in thumbs}: raise SystemExit("Thumbnail filenames do not exactly match source filenames.")
           print(f"Verified {len(src)} source images and {len(thumbs)} matching thumbnails.")
           PY
