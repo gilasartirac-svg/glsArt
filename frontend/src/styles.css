@@ -6744,19 +6744,6 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
 }
 
 /* Home mobile art-direction polish — scoped to the homepage only. */
-.home-copper-gallery .home-hero{
-  align-items:center;
-  gap:clamp(1.25rem,3vw,2.625rem);
-}
-.home-copper-gallery .hero-copy h1{
-  max-width:13ch;
-  text-wrap:balance;
-  line-height:1.42;
-}
-.home-copper-gallery .hero-copy>p{
-  max-width:48ch;
-  color:var(--ui-muted);
-}
 .home-copper-gallery .virtual-gallery-preview{
   min-height:clamp(245px,29vw,360px);
   border-radius:22px;
@@ -6840,18 +6827,6 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
     gap:1.125rem;
     padding-top:1.375rem;
   }
-  .home-copper-gallery .hero-copy h1{
-    max-width:16ch;
-    margin-block:0.5rem 0.625rem;
-    font-size:clamp(1.6875rem,7.5vw,2.25rem);
-    line-height:1.48;
-  }
-  .home-copper-gallery .hero-copy>p{
-    max-width:42ch;
-    margin-block:0 1rem;
-    font-size:0.875rem;
-    line-height:1.95;
-  }
   .home-copper-gallery .virtual-gallery-preview{
     min-height:190px;
     max-height:220px;
@@ -6880,13 +6855,11 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
 }
 @media(max-width:380px){
   .home-copper-gallery .home-hero{padding-top:1rem}
-  .home-copper-gallery .hero-copy .toolbar .btn{font-size:0.875rem}
   .home-copper-gallery .virtual-gallery-preview{min-height:176px;max-height:190px}
   .home-copper-gallery .category-grid{gap:0.5625rem}
   .home-copper-gallery .category-card{min-height:158px;padding:0.625rem}
 }
 @media(min-width:701px) and (max-width:1023px){
-  .home-copper-gallery .home-hero{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:1.5rem}
   .home-copper-gallery .home-latest .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .home-copper-gallery .category-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:0.875rem}
   .home-copper-gallery .category-card{min-height:220px}
