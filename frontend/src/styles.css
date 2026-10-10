@@ -6757,22 +6757,6 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
   max-width:48ch;
   color:var(--ui-muted);
 }
-.home-copper-gallery .hero-copy .toolbar{
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:0.625rem;
-}
-.home-copper-gallery .home-hero .btn.primary{
-  min-height:48px;
-  padding-inline:1.375rem;
-  box-shadow:0 9px 24px color-mix(in srgb,var(--ui-gold) 18%,transparent);
-}
-.home-copper-gallery .home-hero .home-hero-secondary{
-  border-color:color-mix(in srgb,var(--ui-gold) 16%,var(--ui-line));
-  color:var(--ui-muted);
-  background:transparent;
-}
 .home-copper-gallery .virtual-gallery-preview{
   min-height:clamp(245px,29vw,360px);
   border-radius:22px;
@@ -6867,16 +6851,6 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
     margin-block:0 1rem;
     font-size:0.875rem;
     line-height:1.95;
-  }
-  .home-copper-gallery .hero-copy .toolbar{gap:0.5rem}
-  .home-copper-gallery .home-hero .btn.primary{
-    min-height:46px;
-    padding-inline:1.125rem;
-  }
-  .home-copper-gallery .home-hero .home-hero-secondary{
-    min-height:42px;
-    padding:0.4375rem 0.75rem;
-    font-size:0.875rem;
   }
   .home-copper-gallery .virtual-gallery-preview{
     min-height:190px;
@@ -7025,7 +6999,6 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
   transform:translateY(-1px);
 }
 :root[data-theme="light"] .home-copper-gallery .home-hero .btn.ghost,
-:root[data-theme="light"] .home-copper-gallery .home-hero .home-hero-secondary,
 :root[data-theme="light"] .btn.ghost,
 :root[data-theme="light"] a.btn:not(.primary){
   color:#76551E;
@@ -7034,7 +7007,6 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
   box-shadow:0 3px 12px rgba(28,25,21,.035);
 }
 :root[data-theme="light"] .home-copper-gallery .home-hero .btn.ghost:hover,
-:root[data-theme="light"] .home-copper-gallery .home-hero .home-hero-secondary:hover,
 :root[data-theme="light"] .btn.ghost:hover,
 :root[data-theme="light"] a.btn:not(.primary):hover{
   color:#1C1915;
@@ -7512,10 +7484,6 @@ body{
 :root[data-theme="light"] .ga-theme-switch__moon{opacity:.55}
 :root[data-theme="dark"] .ga-theme-switch__sun{opacity:.55}
 :root[data-theme="dark"] .ga-theme-switch__moon{opacity:1}
-.home-primary-actions{display:flex;flex-wrap:wrap;gap:10px}
-.home-primary-actions .btn{min-width:0;min-height:46px;white-space:nowrap}
-.home-hero .home-primary-actions .btn{min-width:0}
-.home-hero-gallery-link{border-color:color-mix(in srgb,var(--ui-gold) 28%,var(--ui-line))}
 .home-categories .category-grid{display:flex;gap:12px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;padding:4px 2px 12px;scrollbar-width:thin;scrollbar-color:var(--ui-gold) transparent}
 .home-categories .category-card{position:relative;flex:0 0 clamp(104px,11vw,132px);min-width:104px;min-height:126px;height:126px;padding:12px 8px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;scroll-snap-align:start;border-radius:16px;background:linear-gradient(145deg,var(--ui-surface),var(--ui-surface-2));box-shadow:var(--ui-shadow-soft);text-align:center}
 .home-categories .category-card::after{content:none}
@@ -7562,8 +7530,6 @@ body{
 @keyframes vg3-human-walk{0%,100%{translate:-5px 0}50%{translate:8px 0}}
 @keyframes vg3-legs{from{transform:rotate(18deg)}to{transform:rotate(-18deg)}}
 .home-copper-gallery .vg3-preview-copy,.home-copper-gallery .vg3-live-badge{z-index:2}
-@media(max-width:1023px){.home-primary-actions{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:none}.home-primary-actions::-webkit-scrollbar{display:none}.home-primary-actions .btn{flex:0 0 auto;min-height:44px;padding-inline:12px;font-size:12px}.home-categories .category-card strong{opacity:1;transform:none}}
-@media(max-width:359px){.home-primary-actions .btn{font-size:11px;padding-inline:9px}.home-categories .category-card{flex-basis:100px;min-width:100px}.home-categories .category-mark{width:58px;height:58px;flex-basis:58px}}
 @media(prefers-reduced-motion:reduce){.home-copper-gallery .vg3-hall,.home-copper-gallery .vg3-human,.home-copper-gallery .vg3-human::after,.home-copper-gallery .vg3-spotlight-b,.home-copper-gallery .vg3-frame{animation:none!important;transition:none!important}}
 
 .partner-logo-strip{margin-block:clamp(18px,3vw,32px);padding-block:14px 16px;border-block:1px solid color-mix(in srgb,var(--ui-gold) 30%,var(--ui-line));background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--ui-gold) 4%,var(--ui-surface)),transparent)}
