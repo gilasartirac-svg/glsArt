@@ -46,6 +46,8 @@ let yawVelocity = 0, pitchVelocity = 0;
 const joystickState = { lookX: 0, lookY: 0, moveX: 0, moveY: 0 };
 let clientClockTimer = 0;
 let lastClockSecond = -1;
+let grandfatherClock = null;
+let artworkLoadingHideTimer = 0;
 const bounds = { x: 6.6, zMin: -10.5, zMax: 8.5 };
 const movementTuning = { walkSpeed: 3.2, sprintSpeed: 6.2, acceleration: 8.5, damping: 4.2, turnDamping: 5.2, boundarySpring: 7.5 };
 const galleryArt = [];
@@ -74,7 +76,7 @@ function addWallArt(x, z, rotation, index, title, imageUrl = '', product = null)
   const record = {
     group, title, index, product, hitMeshes: [inner], inner,
     imageUrl: imageUrl ? galleryImageUrl(imageUrl) : '',
-    artworkMaterial, imageLoaded: false, imageLoading: false,
+    artworkMaterial, imageLoaded: false, imageLoading: false, imageLoadFailed: false,
     maxWidth, maxHeight, lastNearAt: 0
   };
   record.hitMeshes.forEach(mesh => { mesh.userData.galleryArtwork = record; });
@@ -191,6 +193,97 @@ function addPillar(x, z) {
   trim.position.set(x, 3.8, z); scene.add(trim);
 }
 
+function addEntranceDoor(wallMaterial, doorMaterial) {
+  const wallZ = bounds.zMax + 3.5, doorZ = wallZ - .78;
+  const sideWidth = (18 - 3.7) / 2;
+  for (const side of [-1, 1]) {
+    const panel = new THREE.Mesh(new THREE.PlaneGeometry(sideWidth, 4.2), wallMaterial);
+    panel.position.set(side * (1.85 + sideWidth / 2), 2.1, wallZ); scene.add(panel);
+  }
+  const upperPanel = new THREE.Mesh(new THREE.PlaneGeometry(3.7, .62), wallMaterial);
+  upperPanel.position.set(0, 3.89, wallZ); scene.add(upperPanel);
+  const gold = new THREE.MeshStandardMaterial({ color: 0x9b6b31, metalness: .62, roughness: .32 });
+  for (const side of [-1, 1]) {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(.19, 3.78, .16), gold);
+    post.position.set(side * 1.82, 1.89, doorZ); scene.add(post);
+    const capital = new THREE.Mesh(new THREE.BoxGeometry(.34, .16, .23), gold);
+    capital.position.set(side * 1.82, 3.78, doorZ); scene.add(capital);
+  }
+  const lintel = new THREE.Mesh(new THREE.BoxGeometry(3.82, .22, .18), gold);
+  lintel.position.set(0, 3.78, doorZ); scene.add(lintel);
+  const crown = new THREE.Mesh(new THREE.BoxGeometry(4.05, .12, .24), gold);
+  crown.position.set(0, 3.94, doorZ); scene.add(crown);
+  const leaf = new THREE.Group();
+  leaf.position.set(-1.72, 0, doorZ - .03); leaf.rotation.y = -.58; scene.add(leaf);
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(3.28, 3.52, .14), doorMaterial);
+  slab.position.set(1.64, 1.76, 0); leaf.add(slab);
+  for (const y of [.62, 1.78, 2.82]) {
+    const h = y === 1.78 ? .78 : .62;
+    const trim = new THREE.Mesh(new THREE.BoxGeometry(2.68, h, .035), gold);
+    trim.position.set(1.64, y, .09); leaf.add(trim);
+    const inset = new THREE.Mesh(new THREE.BoxGeometry(2.5, h - .16, .04), doorMaterial);
+    inset.position.set(1.64, y, .115); leaf.add(inset);
+  }
+  for (const x of [.25, 3.03]) {
+    const stile = new THREE.Mesh(new THREE.BoxGeometry(.07, 3.35, .04), gold);
+    stile.position.set(x, 1.76, .105); leaf.add(stile);
+  }
+  const knob = new THREE.Mesh(new THREE.SphereGeometry(.095, 16, 12), new THREE.MeshStandardMaterial({ color: 0xe1bd68, metalness: .78, roughness: .2 }));
+  knob.position.set(2.92, 1.72, .18); leaf.add(knob);
+  const rosette = new THREE.Mesh(new THREE.TorusGeometry(.14, .025, 8, 24), gold);
+  rosette.position.set(2.92, 1.72, .17); leaf.add(rosette);
+  const light = new THREE.PointLight(0xffd99a, .42, 8, 1.8);
+  light.position.set(0, 3.15, doorZ - .35); scene.add(light);
+}
+function addCeilingTileGrid(corridorLength, corridorCenter) {
+  const grout = new THREE.MeshStandardMaterial({ color: 0x8c785c, roughness: .88, metalness: .02, transparent: true, opacity: .68 });
+  const y = 4.16;
+  for (let x = -8.25; x <= 8.25; x += 1.5) {
+    const line = new THREE.Mesh(new THREE.BoxGeometry(.018, .025, corridorLength), grout);
+    line.position.set(x, y, corridorCenter); scene.add(line);
+  }
+  for (let z = bounds.zMin + .5; z < bounds.zMax; z += 1.5) {
+    const line = new THREE.Mesh(new THREE.BoxGeometry(18, .025, .018), grout);
+    line.position.set(0, y, z); scene.add(line);
+  }
+}
+function addGrandfatherClock(woodMaterial) {
+  const root = new THREE.Group(); root.position.set(-7.75, .04, 4.15); root.rotation.y = Math.PI / 2; scene.add(root);
+  const wood = woodMaterial.clone(); if (woodMaterial.map) wood.map = woodMaterial.map.clone();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(.82, 2.82, .48), wood); body.position.set(0, 1.41, 0); root.add(body);
+  const plinth = new THREE.Mesh(new THREE.BoxGeometry(1.02, .18, .62), wood); plinth.position.set(0, .09, .02); root.add(plinth);
+  const crown = new THREE.Mesh(new THREE.BoxGeometry(1.04, .2, .62), wood); crown.position.set(0, 2.8, .02); root.add(crown);
+  const arch = new THREE.Mesh(new THREE.SphereGeometry(.48, 24, 14, 0, Math.PI * 2, 0, Math.PI / 2), wood);
+  arch.scale.set(1, .55, .65); arch.position.set(0, 2.88, .02); root.add(arch);
+  const brass = new THREE.MeshStandardMaterial({ color: 0xc7a15c, metalness: .72, roughness: .28 });
+  const face = new THREE.Mesh(new THREE.CircleGeometry(.3, 40), new THREE.MeshStandardMaterial({ color: 0xf0e5cd, roughness: .78 }));
+  face.position.set(0, 2.28, .255); root.add(face);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(.32, .035, 10, 48), brass); rim.position.set(0, 2.28, .26); root.add(rim);
+  for (let i = 0; i < 12; i++) {
+    const a = i * Math.PI / 6, mark = new THREE.Mesh(new THREE.BoxGeometry(.018, .055, .012), brass);
+    mark.position.set(Math.sin(a) * .245, 2.28 + Math.cos(a) * .245, .272); mark.rotation.z = -a; root.add(mark);
+  }
+  const hand = (length, width, color, z) => {
+    const g = new THREE.Group(); g.position.set(0, 2.28, z);
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, length, .012), new THREE.MeshStandardMaterial({ color, metalness: .35, roughness: .38 }));
+    mesh.position.y = length / 2; g.add(mesh); root.add(g); return g;
+  };
+  const hourHand = hand(.16, .025, 0x5c3820, .29), minuteHand = hand(.22, .018, 0x4a3323, .30), secondHand = hand(.245, .008, 0x9d422f, .31);
+  const pendulum = new THREE.Group(); pendulum.position.set(0, 1.73, .255); root.add(pendulum);
+  const rod = new THREE.Mesh(new THREE.BoxGeometry(.025, .62, .025), brass); rod.position.y = -.32; pendulum.add(rod);
+  const bob = new THREE.Mesh(new THREE.SphereGeometry(.135, 20, 16), brass); bob.scale.set(1, 1.18, .38); bob.position.y = -.66; pendulum.add(bob);
+  const glass = new THREE.Mesh(new THREE.PlaneGeometry(.62, 1), new THREE.MeshPhysicalMaterial({ color: 0x9b8667, transparent: true, opacity: .12, roughness: .1 }));
+  glass.position.set(0, 1.05, .27); root.add(glass);
+  grandfatherClock = { root, pendulum, hourHand, minuteHand, secondHand }; updateGrandfatherClockHands(new Date());
+}
+function updateGrandfatherClockHands(now = new Date()) {
+  if (!grandfatherClock) return;
+  const seconds = now.getSeconds() + now.getMilliseconds() / 1000, minutes = now.getMinutes() + seconds / 60, hours = (now.getHours() % 12) + minutes / 60;
+  grandfatherClock.secondHand.rotation.z = -(seconds / 60) * Math.PI * 2;
+  grandfatherClock.minuteHand.rotation.z = -(minutes / 60) * Math.PI * 2;
+  grandfatherClock.hourHand.rotation.z = -(hours / 12) * Math.PI * 2;
+}
+
 function addGalleryDecor(corridorLength, corridorCenter) {
   const rugCanvas = document.createElement('canvas'); rugCanvas.width = 256; rugCanvas.height = 512;
   const rc = rugCanvas.getContext('2d');
@@ -205,16 +298,14 @@ function addGalleryDecor(corridorLength, corridorCenter) {
   }
   const rugTexture = new THREE.CanvasTexture(rugCanvas); rugTexture.colorSpace = THREE.SRGBColorSpace;
   const rugMaterial = new THREE.MeshStandardMaterial({ map: rugTexture, roughness: .98, metalness: 0, side: THREE.DoubleSide });
-  const rugCount = Math.min(7, Math.max(2, Math.floor(corridorLength / 9)));
-  for (let i = 0; i < rugCount; i++) {
-    const z = Math.max(bounds.zMin + 3.4, 3.6 - i * 8.2);
-    const rug = new THREE.Mesh(new THREE.PlaneGeometry(3.1, 4.8), rugMaterial);
-    rug.rotation.x = -Math.PI / 2; rug.position.set(0, .025, z); scene.add(rug);
-    const edgeMaterial = new THREE.MeshStandardMaterial({ color: 0x9b742d, roughness: .76, metalness: .08 });
-    for (const side of [-1, 1]) {
-      const edge = new THREE.Mesh(new THREE.BoxGeometry(.035, .012, 4.8), edgeMaterial);
-      edge.position.set(side * 1.53, .03, z); scene.add(edge);
-    }
+  // Continuous Persian-red carpet from the entrance to the far end of the corridor.
+  const carpetLength = Math.max(8, corridorLength - .45);
+  const carpet = new THREE.Mesh(new THREE.PlaneGeometry(3.6, carpetLength), rugMaterial);
+  carpet.rotation.x = -Math.PI / 2; carpet.position.set(0, .025, corridorCenter); scene.add(carpet);
+  const carpetEdgeMaterial = new THREE.MeshStandardMaterial({ color: 0xb18a46, roughness: .76, metalness: .12 });
+  for (const side of [-1, 1]) {
+    const edge = new THREE.Mesh(new THREE.BoxGeometry(.035, .012, carpetLength), carpetEdgeMaterial);
+    edge.position.set(side * 1.82, .03, corridorCenter); scene.add(edge);
   }
   const ceramic = new THREE.MeshStandardMaterial({ color: 0x9a4b32, roughness: .32, metalness: .04 });
   const ceramicAccent = new THREE.MeshStandardMaterial({ color: 0xd0ad70, roughness: .42, metalness: .45 });
@@ -353,7 +444,16 @@ function setupScene() {
   const loadStoneSurface = (material, repeatX, repeatY) => loadSurfaceTexture(material, stoneTextureUrl, repeatX, repeatY);
   const loadVelvetSurface = (material, repeatX, repeatY) => loadSurfaceTexture(material, velvetTextureUrl, repeatX, repeatY, 0x98745d);
   loadStoneSurface(floorMaterial, 2.4, Math.max(4, corridorLength / 5));
-  // Keep the wall's real velvet material separate from the natural-stone floor texture.
+  const ceilingTilesUrl = 'https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/large_floor_tiles_02/large_floor_tiles_02_diff_1k.png';
+  loadSurfaceTexture(ceilingMaterial, ceilingTilesUrl, 4, Math.max(5, corridorLength / 2.2), 0xf2e7d5);
+  addCeilingTileGrid(corridorLength, corridorCenter);
+  const woodTextureUrl = 'https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/dark_wooden_planks/dark_wooden_planks_diff_1k.png';
+  const doorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .42, metalness: .08, side: THREE.DoubleSide });
+  const clockWoodMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .5, metalness: .04 });
+  loadSurfaceTexture(doorMaterial, woodTextureUrl, 1.2, 1, 0xffffff);
+  loadSurfaceTexture(clockWoodMaterial, woodTextureUrl, 1.1, 1.2, 0xffffff);
+  addEntranceDoor(wallMaterial, doorMaterial);
+  addGrandfatherClock(clockWoodMaterial);
   loadVelvetSurface(wallMaterial, Math.max(2, corridorLength / 9), 1.25);
   addGalleryDecor(corridorLength, corridorCenter);
 
@@ -462,6 +562,15 @@ function buildNearbyArtworkBatch() {
   }
 }
 
+function syncArtworkLoadingIndicator(message = '') {
+  const node = $('artwork-loading'); if (!node) return;
+  clearTimeout(artworkLoadingHideTimer);
+  const count = galleryArt.filter(record => record.imageLoading).length, label = $('artwork-loading-text');
+  if (count) { node.hidden = false; if (label) label.textContent = count === 1 ? 'در حال بارگذاری تصویر اثر...' : 'در حال بارگذاری ' + count + ' تصویر...'; }
+  else if (message) { node.hidden = false; if (label) label.textContent = message; artworkLoadingHideTimer = window.setTimeout(() => { node.hidden = true; }, 2200); }
+  else node.hidden = true;
+}
+
 function updateArtworkTextures() {
   if (!cameraPosition || !galleryTextureLoader) return;
   const now = performance.now();
@@ -470,10 +579,10 @@ function updateArtworkTextures() {
     const distance = Math.hypot(record.group.position.x - cameraPosition.x, record.group.position.z - cameraPosition.z);
     if (distance <= 16) {
       record.lastNearAt = now;
-      if (!record.imageLoaded && !record.imageLoading) {
-        record.imageLoading = true;
+      if (!record.imageLoaded && !record.imageLoading && !record.imageLoadFailed) {
+        record.imageLoading = true; syncArtworkLoadingIndicator();
         galleryTextureLoader.load(record.imageUrl, texture => {
-          record.imageLoading = false;
+          record.imageLoading = false; syncArtworkLoadingIndicator();
           if (!renderer || !scene) { texture.dispose(); return; }
           const currentDistance = Math.hypot(record.group.position.x - cameraPosition.x, record.group.position.z - cameraPosition.z);
           if (currentDistance > 28) { texture.dispose(); return; }
@@ -490,8 +599,10 @@ function updateArtworkTextures() {
           record.artworkMaterial.color.set(0xffffff);
           record.artworkMaterial.needsUpdate = true;
           record.imageLoaded = true;
-        }, undefined, () => { record.imageLoading = false; });
+        }, undefined, () => { record.imageLoading = false; record.imageLoadFailed = true; syncArtworkLoadingIndicator('بارگذاری تصویر این اثر انجام نشد.'); });
       }
+    } else if (distance > 30 && record.imageLoadFailed) {
+      record.imageLoadFailed = false;
     } else if (distance > 30 && record.imageLoaded && now - record.lastNearAt > 900) {
       const texture = record.artworkMaterial.map;
       record.artworkMaterial.map = null;
@@ -509,6 +620,7 @@ function animate() {
   if (!entered) return;
   animationFrame = requestAnimationFrame(animate);
   const delta = clock.getDelta();
+  if (grandfatherClock?.pendulum) grandfatherClock.pendulum.rotation.z = Math.sin(performance.now() * .00165) * .22;
   updateMovement(delta);
   buildNearbyArtworkBatch();
   updateArtworkTextures();
@@ -535,6 +647,7 @@ function updateClientClock() {
   node.textContent = new Intl.DateTimeFormat('fa-IR', {
     hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
   }).format(now);
+  updateGrandfatherClockHands(now);
 }
 function startClientClock() {
   clearInterval(clientClockTimer);
@@ -559,7 +672,8 @@ function bindJoysticks() {
       if (length > radius) { dx = dx / length * radius; dy = dy / length * radius; }
       const nx = dx / radius, ny = dy / radius;
       knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
-      if (kind === 'look') { joystickState.lookX = nx; joystickState.lookY = ny; }
+      if (kind === 'combined') { joystickState.lookX = nx; joystickState.lookY = 0; joystickState.moveX = 0; joystickState.moveY = ny; }
+      else if (kind === 'look') { joystickState.lookX = nx; joystickState.lookY = ny; }
       else { joystickState.moveX = nx; joystickState.moveY = ny; }
     };
     const release = event => {
@@ -567,7 +681,8 @@ function bindJoysticks() {
       pointerId = null;
       try { base.releasePointerCapture(event.pointerId); } catch {}
       knob.style.transform = 'translate(0,0)';
-      if (kind === 'look') { joystickState.lookX = 0; joystickState.lookY = 0; }
+      if (kind === 'combined') { joystickState.lookX = 0; joystickState.lookY = 0; joystickState.moveX = 0; joystickState.moveY = 0; }
+      else if (kind === 'look') { joystickState.lookX = 0; joystickState.lookY = 0; }
       else { joystickState.moveX = 0; joystickState.moveY = 0; }
     };
     base.addEventListener('pointerdown', event => {
