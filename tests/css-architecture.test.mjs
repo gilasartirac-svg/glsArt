@@ -148,3 +148,21 @@ test('theme accent text meets WCAG AA contrast on its surfaces',()=>{
     }
   }
 });
+
+
+test('account and authentication components use scoped theme-aware responsive styles',()=>{
+  const css=read('frontend/src/styles.css');
+  const app=read('frontend/src/app.js');
+  for(const selector of ['.account-page>.profile-panel','.account-page .customer-order-card','.account-page .customer-order-timeline','.auth-page .login-panel','.auth-page .otp-digit']){
+    assert.ok(css.includes(selector),selector+' must have dedicated account-page styling');
+  }
+  for(const token of ['var(--ui-bg)','var(--ui-surface)','var(--ui-surface-2)','var(--ui-text)','var(--ui-muted)','var(--ui-line)','var(--ui-gold)','var(--ui-focus)']){
+    assert.ok(css.includes(token),'account UI should use shared theme token '+token);
+  }
+  for(const viewport of ['@media(max-width:850px)','@media(max-width:600px)','@media(max-width:359px)','@media(prefers-reduced-motion:reduce)']){
+    assert.ok(css.includes(viewport),'account responsive/accessibility rule missing: '+viewport);
+  }
+  assert.ok(app.includes('class="wrap page account-page"'));
+  assert.ok(app.includes('class="wrap page auth-page"'));
+  assert.ok(app.includes('class="customer-order-card"'));
+});
