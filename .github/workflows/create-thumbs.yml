@@ -1,9 +1,7 @@
 name: Create 50 Percent Thumbnail Copies
 
 on:
-  push:
-    paths:
-      - '.github/workflows/create-thumbs.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
