@@ -8030,3 +8030,17 @@ body{
 .payment-receipt-preview-image{display:block;width:auto;max-width:100%;max-height:65vh;object-fit:contain;border-radius:10px;box-shadow:var(--ui-shadow-soft)}
 .payment-receipt-success-panel .cart-checkout-bar{justify-content:center;flex-wrap:wrap}
 @media(max-width:480px){.payment-receipt-success-icon{width:64px;height:64px;font-size:40px}.payment-receipt-preview{padding:8px}.payment-receipt-success-panel .cart-checkout-bar>*{width:100%}}
+
+
+/* Customer account receipt visibility: private, responsive image preview. */
+.customer-receipt-box{margin:18px 0 8px;padding:16px;border:1px solid var(--ui-line);border-radius:var(--ui-radius);background:var(--ui-surface-2)}
+.customer-receipt-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.customer-receipt-head strong{font-size:1rem}
+.receipt-status-label{display:inline-flex;align-items:center;border-radius:999px;padding:5px 10px;font-size:.875rem;background:var(--ui-hover);color:var(--ui-text)}
+.receipt-status-pending_review{border:1px solid var(--ui-gold)}
+.receipt-status-approved{border:1px solid #3b8c64}
+.receipt-status-rejected{border:1px solid #b34b4b}
+.customer-receipt-preview{display:grid;place-items:center;min-height:80px;padding:10px;border:1px solid var(--ui-line);border-radius:10px;background:var(--ui-surface);overflow:hidden}
+.customer-receipt-image{display:block;width:auto;max-width:100%;max-height:420px;object-fit:contain;border-radius:8px}
+.receipt-review-preview img{display:block;width:auto;max-width:100%;max-height:520px;object-fit:contain}
+@media(max-width:480px){.customer-receipt-box{padding:12px}.customer-receipt-image{max-height:65vh}.customer-receipt-head{align-items:flex-start;flex-direction:column}}
