@@ -22,11 +22,9 @@
   
   --content-max:1240px;
   
-  --page-gutter:clamp(12px,2.4vw,32px);
+  --page-gutter:clamp(1rem,3vw,4rem);
   
-  --section-gap:clamp(1.75rem,5vw,4.5rem);
   
-  --control-min-height:44px;
   
 }
 :root[data-theme="dark"]{
@@ -7294,7 +7292,6 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
   --space-5:3rem;
   --space-6:4rem;
   --space-7:5rem;
-  --page-gutter:clamp(1rem,2.4vw,2rem);
   --section-gap:clamp(2.5rem,5vw,5rem);
   --card-gap:clamp(.75rem,1.6vw,1.5rem);
   --control-min-height:2.875rem;
@@ -7355,12 +7352,6 @@ body{
   font-size:1rem;
   line-height:1.8;
 }
-@media(max-width:47.99rem){
-  :root{--page-gutter:1rem;--section-gap:2.5rem;--card-gap:.75rem}
-}
-@media(min-width:48rem) and (max-width:63.99rem){
-  :root{--page-gutter:1.5rem;--section-gap:3rem;--card-gap:1rem}
-}
-@media(min-width:64rem){
-  :root{--page-gutter:clamp(2rem,4vw,4rem);--section-gap:clamp(4rem,5vw,5rem);--card-gap:1.5rem}
-}
+@media(max-width:47.99rem){:root{--card-gap:.75rem}}
+@media(min-width:48rem) and (max-width:63.99rem){:root{--card-gap:1rem}}
+@media(min-width:64rem){:root{--card-gap:1.5rem}}
