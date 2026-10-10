@@ -67,3 +67,30 @@ test('light theme keeps clear borders and a persistent selected option highlight
   assert.match(css, /background:#F4E8CE/);
   assert.match(css, /:root\[data-theme="light"\] \.product-option-card\.selected \.product-option-card-ui/);
 });
+
+
+test('final selected product price is visually larger on desktop, tablet, and mobile', () => {
+  assert.match(css, /#product-live-price\.product-live-price\{[^}]*font-size:clamp\(1\.625rem,2\.5vw,2\.125rem\)/s);
+  assert.match(css, /@media\(min-width:621px\) and \(max-width:1024px\)\{\s*#product-live-price\.product-live-price\{font-size:1\.875rem\}/);
+  assert.match(css, /@media\(max-width:620px\)\{\s*#product-live-price\.product-live-price\{font-size:1\.625rem/);
+});
+
+test('product page hides the price delta breakdown and redundant purchase disclaimer', () => {
+  assert.match(app, /id="product-price-breakdown" hidden/);
+  assert.doesNotMatch(app, /تغییر ویژگی‌ها<\/span>/);
+  assert.doesNotMatch(app, /product-purchase-messages/);
+  assert.match(css, /#product-price-breakdown\[hidden\]\{display:none!important\}/);
+});
+
+test('stock messaging never reveals exact inventory above three and highlights low stock', () => {
+  assert.match(app, /stock<=3\)stockEl\.innerHTML=.*product-stock-remaining/s);
+  assert.match(app, /تنها '\+fa\(stock\)\+' عدد در انبار باقی مانده است/);
+  assert.match(app, /بیش از ۳ عدد در انبار موجود است/);
+  assert.match(css, /\.product-stock-remaining\{[^}]*border:1px solid/s);
+  assert.match(css, /\.product-stock-fire\{[^}]*font-size:1\.125rem/s);
+});
+
+test('light theme quantity discount panel has a refined border without changing dark theme', () => {
+  assert.match(css, /:root\[data-theme="light"\] \.quantity-discount-card\{[^}]*border:1px solid #C6A96B/s);
+  assert.doesNotMatch(css, /:root\[data-theme="dark"\] \.quantity-discount-card\{/);
+});
