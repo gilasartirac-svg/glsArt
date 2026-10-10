@@ -1014,7 +1014,7 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   const ids=orders.map(x=>x.id),marks=ids.map(()=>'?').join(',');
   const items=(await env.DB.prepare('SELECT * FROM order_items WHERE order_id IN ('+marks+') ORDER BY order_id,id').bind(...ids).all()).results||[];
   const history=(await env.DB.prepare('SELECT * FROM order_status_history WHERE order_id IN ('+marks+') ORDER BY changed_at ASC').bind(...ids).all()).results||[];
-  const payments=(await env.DB.prepare('SELECT status,provider,amount_irt,ref_id,authority,paid_at,created_at,updated_at,order_id FROM payments WHERE order_id IN ('+marks+')').bind(...ids).all()).results||[];
+  const payments=(await env.DB.prepare('SELECT status,provider,amount_irt,ref_id,authority,paid_at,created_at,updated_at,order_id,receipt_status,receipt_mime,receipt_size,receipt_uploaded_at,receipt_reviewed_at,receipt_rejection_reason FROM payments WHERE order_id IN ('+marks+')').bind(...ids).all()).results||[];
   const by=(arr,key)=>arr.reduce((m,x)=>{(m[x[key]]??=[]).push(x);return m},Object.create(null));
   const im=by(items,'order_id'),hm=by(history,'order_id'),pm=by(payments,'order_id');
   return json({items:orders.map(o=>({...o,items:im[o.id]||[],history:hm[o.id]||[],payment:(pm[o.id]||[])[0]||null})),invoice});
