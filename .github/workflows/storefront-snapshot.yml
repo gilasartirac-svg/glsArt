@@ -11,6 +11,7 @@ on:
       - 'worker/src/index.js'
       - '.github/workflows/storefront-snapshot.yml'
 
+# Production D1 category correction: refresh the public snapshot on this workflow change.
 permissions:
   contents: write
 
