@@ -7604,7 +7604,7 @@ body{
 @media(max-width:767px){.home-copper-gallery>.home-hero>.virtual-gallery-preview{height:clamp(280px,76vw,430px);min-height:clamp(280px,76vw,430px)}.home-copper-gallery>.home-hero>.virtual-gallery-preview .vg3-preview-copy{padding:20px 16px}}
 
 /* Real-time 3D homepage gallery preview */
-.home-hero .vg3-home-preview{position:relative;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(250px,.75fr);min-height:clamp(330px,39vw,510px);overflow:hidden;isolation:isolate;background:#211b16;border:1px solid rgba(185,139,74,.24);border-radius:18px}
+.home-hero .vg3-home-preview{position:relative;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(250px,.75fr);min-height:clamp(330px,39vw,510px);overflow:hidden;isolation:isolate;background:#211b16;border:1px solid rgba(185,139,74,.24);border-radius:18px;color:inherit;text-decoration:none;cursor:pointer;transition:border-color .2s ease,box-shadow .2s ease}.home-hero .vg3-home-preview:hover,.home-hero .vg3-home-preview:focus-visible{border-color:rgba(217,164,65,.72);box-shadow:0 12px 34px rgba(0,0,0,.16)}.home-hero .vg3-home-preview:focus-visible{outline:3px solid #d9a441;outline-offset:3px}
 .home-hero .vg3-home-stage{position:relative;min-width:0;min-height:330px;overflow:hidden;background:radial-gradient(ellipse at 50% 35%,#6b4c34,#211b16 72%)}
 .home-hero .vg3-home-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:pointer}
 .home-hero .vg3-home-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px;background:#211b16;color:#f2dfbf;font-size:14px;z-index:2}
