@@ -239,6 +239,38 @@ jobs:
           console.log(JSON.stringify({productCount:i.products.length,generatedAt:m.generatedAt,version:m.version}));
           NODE
 
+          echo "Checking published Torob XML sitemap contains only active product URLs"
+          sitemap_code=$(curl -L -sS -o /tmp/sitemap.xml -w '%{http_code}' --retry 3 --retry-all-errors "https://gilasart.ir/sitemap.xml?verify=$GITHUB_SHA" || true)
+          if [ "$sitemap_code" != "200" ]; then echo "Published sitemap is unavailable: HTTP $sitemap_code"; exit 1; fi
+          node - <<'NODE'
+          const fs=require('fs');
+          const sitemap=fs.readFileSync('/tmp/sitemap.xml','utf8');
+          const snapshot=JSON.parse(fs.readFileSync('/tmp/storefront-index.json','utf8'));
+          if(!/^<\?xml version="1\.0" encoding="UTF-8"\?>/.test(sitemap))throw new Error('sitemap XML declaration missing');
+          if(!sitemap.includes('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'))throw new Error('sitemap urlset namespace invalid');
+          const locs=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
+          const expected=snapshot.products.filter(p=>p&&Number(p.active)===1&&p.slug&&p.name&&Number.isFinite(Number(p.price_irt))&&Number(p.price_irt)>=0&&p.image&&/^[A-Za-z0-9_-]+$/.test(String(p.slug))).map(p=>'https://gilasart.ir/'+encodeURIComponent(String(p.slug))+'/').sort();
+          if(!locs.length)throw new Error('sitemap has no product URLs');
+          if(locs.length!==expected.length)throw new Error('sitemap product count mismatch: expected '+expected.length+', actual '+locs.length);
+          if(locs.some(url=>!expected.includes(url)))throw new Error('sitemap contains a URL that is not an active product URL');
+          if(locs.some(url=>!/^https:\/\/gilasart\.ir\/[A-Za-z0-9_-]+\/$/.test(url)))throw new Error('sitemap contains a non-product or invalid URL');
+          const slug=String(snapshot.products.find(p=>p&&Number(p.active)===1&&p.slug&&p.name&&Number.isFinite(Number(p.price_irt))&&Number(p.price_irt)>=0&&p.image&&/^[A-Za-z0-9_-]+$/.test(String(p.slug))).slug);
+          fs.writeFileSync('/tmp/torob-sitemap-sample-slug.txt',slug);
+          console.log(JSON.stringify({sitemapUrlCount:locs.length,sampleProductUrl:locs[0]}));
+          NODE
+          sample_slug=$(cat /tmp/torob-sitemap-sample-slug.txt)
+          product_code=$(curl -L -sS -o /tmp/torob-product.html -w '%{http_code}' --retry 3 --retry-all-errors "https://gilasart.ir/$sample_slug/?verify=$GITHUB_SHA" || true)
+          if [ "$product_code" != "200" ]; then echo "Sample crawlable product page unavailable: $sample_slug HTTP $product_code"; exit 1; fi
+          node - <<'NODE'
+          const fs=require('fs');
+          const html=fs.readFileSync('/tmp/torob-product.html','utf8');
+          if(!html.includes('id="crawlable-product"'))throw new Error('product HTML has no crawlable initial content');
+          if(!/<h1>[^<]+<\/h1>/.test(html))throw new Error('product HTML initial title is missing');
+          if(!html.includes('ریال'))throw new Error('product HTML initial price currency label is missing');
+          if(!/<img[^>]+src="https:\/\/gilasart\.ir\//.test(html))throw new Error('product HTML initial image is missing');
+          console.log('PASS: published sample product has crawlable title, price and image without JavaScript');
+          NODE
+
           echo "Checking homepage product image asset"
           image_path=$(node -e "const d=require('./dist/data/home.json');process.stdout.write(String(d.products?.[0]?.image||''))")
           if [ -z "$image_path" ]; then echo "Homepage image path missing from snapshot"; exit 1; fi
