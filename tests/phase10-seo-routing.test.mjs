@@ -29,16 +29,18 @@ test('phase 10: private application routes are noindex',()=>{
  assert.match(app,/applyRouteSeoPolicy\(p\)/);
 });
 
-test('phase 10: sitemap is generated at build time from locale routes and published storefront records',()=>{
+test('phase 10: Torob sitemap lists only active product URLs from the offline storefront snapshot',()=>{
  assert.match(build,/const locales=\['fa','en','tr','ar'\]/);
- assert.match(build,/publicRoutes=\[/);
- assert.match(build,/snapshot\?\.products/);
- assert.match(build,/snapshot\?\.articles/);
- assert.match(build,/snapshot\?\.news/);
+ assert.match(build,/storefront-index\.json/);
+ assert.match(build,/const productPages=\(snapshot\.products\|\|\[\]\)\.filter/);
+ assert.match(build,/Number\(p\.active\)===1/);
  assert.match(build,/dist\/sitemap\.xml/);
  assert.match(build,/siteOrigin='https:\/\/gilasart\.ir'/);
+ assert.match(build,/const loc=siteOrigin\+'\/'\+encodeURIComponent\(slug\)\+'\/'/);
+ assert.doesNotMatch(build,/publicRoutes=\[/);
+ assert.doesNotMatch(build,/snapshot\?\.articles|snapshot\?\.news/);
+ assert.match(build,/Could not prepare crawlable product HTML/);
 });
-
 test('phase 10: robots points to the canonical production sitemap and protects private paths',()=>{
  assert.match(robots,/Disallow: \/admin/);
  assert.match(robots,/Disallow: \/account/);
