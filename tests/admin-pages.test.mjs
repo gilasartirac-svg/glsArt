@@ -25,8 +25,19 @@ test('admin grids provide Persian date formatting, sorting and filtering',()=>{
   assert.match(table,/data-grid-search/);
   assert.match(table,/sortDir/);
   assert.match(table,/tagName==='TBODY'/,'data grids must resolve tbody ids to their parent table');
-  for(const file of files.filter(x=>!['Dashboard.js','Settings.js','SmsSettings.js','PaymentSettings.js','SiteRules.js','InvoiceSettings.js','StorefrontSnapshot.js'].includes(x))){
+  for(const file of files.filter(x=>!['Dashboard.js','Settings.js','SmsSettings.js','PaymentSettings.js','SiteRules.js','InvoiceSettings.js','StorefrontSnapshot.js','ProductAttributes.js'].includes(x))){
     const src=readFileSync(resolve(dir,file),'utf8');
     assert.match(src,/setupDataGrid\(/,file+' must initialize a data grid');
   }
+});
+
+
+test('dedicated product-attributes page manages attributes and options independently',()=>{
+  const src=readFileSync(resolve(dir,'ProductAttributes.js'),'utf8');
+  assert.match(src,/attributes-manager/);
+  assert.match(src,/attribute-card/);
+  assert.match(src,/\/api\/admin\/product-attributes/);
+  assert.match(src,/priceDeltaIrt:Number\(x\.get\('price'\)\|\|0\)/);
+  assert.match(src,/\/api\/admin\/product-attribute-options/);
+  assert.match(src,/method:'DELETE'/);
 });
