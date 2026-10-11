@@ -8046,27 +8046,38 @@ body{
 @media(max-width:480px){.customer-receipt-box{padding:12px}.customer-receipt-image{max-height:65vh}.customer-receipt-head{align-items:flex-start;flex-direction:column}}
 
 
-/* Desktop storefront recovery: prevent the product collection from shrinking
-   to its intrinsic content width; tablet/mobile layout rules remain untouched. */
+/* Desktop storefront recovery: use the full available row for the collection.
+   The search/filter controls are already above the results; no empty desktop
+   filter column should consume space beside the product grid. */
 @media (min-width:1200px){
-  .shop-page .gallery-workspace,
+  .shop-page .gallery-workspace{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    grid-template-columns:minmax(0,1fr)!important;
+  }
   .shop-page .gallery-results{
-    display:block;
-    width:100%;
-    min-width:0;
-    max-width:none;
+    display:block!important;
+    float:none!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    grid-column:1 / -1!important;
   }
   .shop-page .product-stream{
-    display:grid;
-    width:100%;
-    min-width:0;
-    grid-template-columns:repeat(4,minmax(0,1fr));
+    display:grid!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
     grid-auto-flow:row;
     align-items:stretch;
+    gap:1.5rem;
   }
   .shop-page .product-stream>.product-card{
-    width:100%;
-    min-width:0;
-    max-width:none;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
   }
 }
