@@ -590,6 +590,9 @@
     "admin.partnerLogos.searchPlaceholder": "نام فایل یا لوگو...",
     "admin.partnerLogos.libraryLabel": "کتابخانه تصاویر Repository",
     "admin.partnerLogos.invalid": "نام و مسیر معتبر برای تمام لوگوها الزامی است.",
-    "admin.partnerLogos.saved": "لوگوهای سازمانی ذخیره شد. لوگوهای فعال در صفحه اصلی نمایش داده می‌شوند."
+    "admin.partnerLogos.saved": "لوگوهای سازمانی ذخیره شد. لوگوهای فعال در صفحه اصلی نمایش داده می‌شوند.",
+    "admin.orders.modalTitle": "جزئیات سفارش مشتری",
+    "admin.orders.modalLoading": "در حال آماده‌سازی جزئیات سفارش…",
+    "admin.orders.modalClose": "بستن پنجره جزئیات"
   }
 }
