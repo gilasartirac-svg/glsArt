@@ -8044,3 +8044,29 @@ body{
 .customer-receipt-image{display:block;width:auto;max-width:100%;max-height:420px;object-fit:contain;border-radius:8px}
 .receipt-review-preview img{display:block;width:auto;max-width:100%;max-height:520px;object-fit:contain}
 @media(max-width:480px){.customer-receipt-box{padding:12px}.customer-receipt-image{max-height:65vh}.customer-receipt-head{align-items:flex-start;flex-direction:column}}
+
+
+/* Desktop storefront recovery: prevent the product collection from shrinking
+   to its intrinsic content width; tablet/mobile layout rules remain untouched. */
+@media (min-width:1200px){
+  .shop-page .gallery-workspace,
+  .shop-page .gallery-results{
+    display:block;
+    width:100%;
+    min-width:0;
+    max-width:none;
+  }
+  .shop-page .product-stream{
+    display:grid;
+    width:100%;
+    min-width:0;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-auto-flow:row;
+    align-items:stretch;
+  }
+  .shop-page .product-stream>.product-card{
+    width:100%;
+    min-width:0;
+    max-width:none;
+  }
+}
