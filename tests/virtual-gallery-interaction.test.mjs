@@ -184,6 +184,7 @@ test('mobile and tablet use one combined movement and 360-degree joystick plus t
   assert.match(script, /new Intl\.DateTimeFormat\('fa-IR'/);
   assert.match(styles, /\.joystick-controls\{display:none/);
   assert.match(styles, /@media\(max-width:1024px\)/);
+  assert.match(styles, /@media \(min-width:1025px\)\{\.joystick-controls\{display:flex/);
   assert.match(styles, /\.artwork-loading__spinner/);
 });
 
