@@ -34,7 +34,6 @@ export default function Products(){
    attributes=[];
    const el=document.querySelector('#products-error');if(el)el.textContent='ویژگی‌های محصول هنوز در دسترس نیست؛ فهرست محصولات همچنان قابل استفاده است.';
   }
-  renderAttributeManager();
   renderAttributeChoices();
  };
  setTimeout(async()=>{
@@ -79,31 +78,11 @@ el.querySelectorAll('.edit').forEach(b=>b.onclick=()=>edit(items.find(x=>x.id===
   box.querySelectorAll('.attribute-configure').forEach(btn=>btn.addEventListener('click',()=>openAttributeOptionModal(btn.dataset.attribute)));
  }
  function selectedAttributeIds(){return [...document.querySelectorAll('#product-attributes input[type=checkbox]:checked')].map(x=>x.value)}
- function renderAttributeManager(){
-  const box=document.querySelector('#attributes-manager');if(!box)return;
-  box.innerHTML=attributes.map(a=>`<div class="attribute-card">
-   <div class="attribute-card-head"><div><strong>${esc(a.name)}</strong><span class="pill">${a.active?'فعال':'غیرفعال'}</span></div><button class="btn ghost toggle-attr" data-id="${esc(a.id)}" data-active="${a.active?'1':'0'}">${a.active?'غیرفعال کردن':'فعال کردن'}</button></div>
-   <div class="attribute-options">${(a.options||[]).map(o=>`<div class="attribute-option-row" data-option="${esc(o.id)}">
-     <input class="opt-name" value="${esc(o.name)}" aria-label="نام گزینه">
-     <label><input class="opt-active" type="checkbox" ${o.active?'checked':''}> فعال</label>
-     <label><input class="opt-default" type="checkbox" ${o.is_default?'checked':''}> پیش‌فرض</label>
-     <input class="opt-price" type="number" min="0" value="${Number(o.price_delta_irt||0)}" aria-label="افزایش قیمت">
-     <button class="btn ghost save-opt" data-id="${esc(o.id)}">ذخیره</button>
-     <button class="btn danger delete-opt" data-id="${esc(o.id)}">حذف</button>
-   </div>`).join('')||'<div class="muted">هنوز گزینه‌ای ثبت نشده است.</div>'}</div>
-   <form class="inline-option-form" data-attribute="${esc(a.id)}"><input name="name" required placeholder="گزینه جدید"><input name="price" type="number" min="0" value="0" placeholder="افزایش قیمت"><label><input name="active" type="checkbox" checked> فعال</label><label><input name="default" type="checkbox"> پیش‌فرض</label><button class="btn primary">افزودن گزینه</button></form>
-  </div>`).join('')||'<div class="muted">برای شروع یک ویژگی مثل «رنگ قاب» ایجاد کنید.</div>';
-  box.querySelectorAll('.toggle-attr').forEach(b=>b.onclick=async()=>{try{await api('/api/admin/product-attributes/'+encodeURIComponent(b.dataset.id),{method:'PUT',body:JSON.stringify({active:b.dataset.active!=='1'})});await load()}catch(e){alert(e.message)}});
-  box.querySelectorAll('.inline-option-form').forEach(f=>f.onsubmit=async e=>{e.preventDefault();const x=new FormData(f);try{await api('/api/admin/product-attributes/'+encodeURIComponent(f.dataset.attribute)+'/options',{method:'POST',body:JSON.stringify({name:x.get('name'),priceDeltaIrt:Number(x.get('price')||0),active:x.get('active')==='on',isDefault:x.get('default')==='on'})});await load()}catch(err){alert(err.message)}});
-  box.querySelectorAll('.save-opt').forEach(b=>b.onclick=async()=>{const row=b.closest('.attribute-option-row');try{await api('/api/admin/product-attribute-options/'+encodeURIComponent(b.dataset.id),{method:'PUT',body:JSON.stringify({name:row.querySelector('.opt-name').value,active:row.querySelector('.opt-active').checked,isDefault:row.querySelector('.opt-default').checked,priceDeltaIrt:Number(row.querySelector('.opt-price').value||0)})});await load()}catch(e){alert(e.message)}});
-  box.querySelectorAll('.delete-opt').forEach(b=>b.onclick=async()=>{if(!confirm('این گزینه حذف شود؟'))return;try{await api('/api/admin/product-attribute-options/'+encodeURIComponent(b.dataset.id),{method:'DELETE'});await load()}catch(e){alert(e.message)}});
- }
+
  function openAttributeOptionModal(attributeId){const p=JSON.parse(document.querySelector('#product-form')?.dataset.productJson||'{}'),a=attributes.find(x=>String(x.id)===String(attributeId));if(!a)return;const overrides=new Map((p.attribute_options||[]).map(x=>[String(x.optionId),x]));const list=document.querySelector('#attribute-option-list');document.querySelector('#attribute-modal-title').textContent='تنظیم '+a.name;document.querySelector('#attribute-modal-subtitle').textContent='تنظیمات این ویژگی فقط برای «'+(p.name||'این محصول')+'» ذخیره می‌شود.';list.innerHTML=(a.options||[]).map(o=>{const v=overrides.get(String(o.id));const active=v?v.active:o.active,def=v?v.isDefault:o.is_default,price=v?Number(v.priceDeltaIrt||0):Number(o.price_delta_irt||0);return '<div class="attribute-option-editor-row" data-option-id="'+esc(o.id)+'"><div><strong>'+esc(o.name)+'</strong><small>قیمت عمومی: '+money(o.price_delta_irt||0)+' ریال</small></div><label><input class="product-option-active" type="checkbox" '+(active?'checked':'')+'> فعال</label><label><input class="product-option-default" type="checkbox" '+(def?'checked':'')+'> پیش‌فرض</label><label class="product-option-price">افزایش قیمت (ریال)<input class="product-option-delta" type="number" min="0" value="'+price+'"></label></div>'}).join('')||'<div class="muted">برای این ویژگی گزینه‌ای ثبت نشده است.</div>';list.querySelectorAll('.product-option-default').forEach(cb=>cb.addEventListener('change',()=>{if(!cb.checked)return;list.querySelectorAll('.product-option-default').forEach(other=>{if(other!==cb)other.checked=false})}));const m=document.querySelector('#attribute-option-modal');m.dataset.attributeId=attributeId;m.hidden=false;m.setAttribute('aria-hidden','false');document.body.classList.add('admin-attribute-modal-open')}
  function closeAttributeOptionModal(){const m=document.querySelector('#attribute-option-modal');if(!m)return;m.hidden=true;m.setAttribute('aria-hidden','true');document.body.classList.remove('admin-attribute-modal-open')}
  async function saveAttributeOptionModal(){const pEl=document.querySelector('#product-form'),id=pEl?.dataset.editId,status=document.querySelector('#attribute-modal-status');if(!id){if(status)status.textContent='ابتدا محصول را ذخیره کنید.';return}const rows=[...document.querySelectorAll('.attribute-option-editor-row')].map(row=>({optionId:row.dataset.optionId,active:row.querySelector('.product-option-active')?.checked,isDefault:row.querySelector('.product-option-default')?.checked,priceDeltaIrt:Number(row.querySelector('.product-option-delta')?.value||0)}));if(status)status.textContent='در حال ذخیره…';try{await api('/api/admin/products/'+encodeURIComponent(id)+'/attribute-options',{method:'PUT',body:JSON.stringify({attributeOptions:rows})});const d=await admin.products(),p=(d.items||[]).find(x=>String(x.id)===String(id));if(p){pEl.dataset.productJson=JSON.stringify(p);renderAttributeChoices(p.attribute_ids||[])}closeAttributeOptionModal()}catch(e){if(status)status.textContent=e.message||'ذخیره تنظیمات انجام نشد.'}}
  function bindForms(){
-  const attributeForm=document.querySelector('#attribute-form');
-  attributeForm?.addEventListener('submit',async e=>{e.preventDefault();const x=new FormData(attributeForm);try{await api('/api/admin/product-attributes',{method:'POST',body:JSON.stringify({name:x.get('name'),active:true})});attributeForm.reset();await load()}catch(err){alert(err.message)}});
   const form=document.querySelector('#product-form');
   document.querySelector('#product-reset')?.addEventListener('click',resetForm);
   document.querySelector('#product-add')?.addEventListener('click',()=>{resetForm();openProductModal()});
@@ -168,9 +147,6 @@ el.querySelectorAll('.edit').forEach(b=>b.onclick=()=>edit(items.find(x=>x.id===
   </form>
  </section>
 </div>
- <div class="panel"><div class="sectionhead"><div><h3>ویژگی‌های قابل انتخاب</h3><p class="muted">ویژگی عمومی بسازید و گزینه‌های آن را با وضعیت، پیش‌فرض و افزایش قیمت مدیریت کنید.</p></div></div>
- <form id="attribute-form" class="inline-option-form"><input name="name" required placeholder="مثلاً رنگ قاب"><button class="btn primary">ایجاد ویژگی</button></form>
- <div id="attributes-manager" class="attributes-manager"></div></div>
  <div class="panel"><h3>کاتالوگ</h3><div class="table-scroll"><table class="admin-table products-admin-table"><thead><tr><th>محصول / تصویر</th><th>SKU</th><th>قیمت</th><th>موجودی</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="products-grid"><tr><td colspan="6">در حال دریافت...</td></tr></tbody></table></div></div>
  </div>`;
 }
