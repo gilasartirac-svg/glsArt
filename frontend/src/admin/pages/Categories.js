@@ -21,7 +21,7 @@ export default function Categories(){
   </div>
   <div class="panel">
    <div class="panel-head"><strong>دسته‌بندی‌های ثبت‌شده</strong><button id="cat-refresh" class="btn ghost" type="button">بروزرسانی</button></div>
-   <div class="table-wrap"><table class="admin-table"><thead><tr><th>نام</th><th>Slug</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="cat-grid"><tr><td colspan="4">در حال دریافت...</td></tr></tbody></table></div>
+   <div class="table-wrap"><table class="admin-table"><thead><tr><th>نام</th><th>Slug</th><th>تعداد محصول</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="cat-grid"><tr><td colspan="5">در حال دریافت...</td></tr></tbody></table></div>
   </div>
  </div>`;
 }
@@ -41,18 +41,18 @@ export async function mount(){
   });
  };
  const load=async()=>{
-  grid.innerHTML='<tr><td colspan="4">در حال دریافت...</td></tr>';
+  grid.innerHTML='<tr><td colspan="5">در حال دریافت...</td></tr>';
   try{
    const d=await api('/api/admin/categories?_ts='+Date.now());
    const items=d.items||[];
-   grid.innerHTML=items.length?items.map(x=>`<tr><td>${esc(x.name)}</td><td dir="ltr">${esc(x.slug)}</td><td>${x.active?'فعال':'غیرفعال'}</td><td><button type="button" class="btn danger cat-delete" data-id="${esc(x.id)}">حذف</button></td></tr>`).join(''):'<tr><td colspan="4">دسته‌ای ثبت نشده است.</td></tr>';
+   grid.innerHTML=items.length?items.map(x=>`<tr><td>${esc(x.name)}</td><td dir="ltr">${esc(x.slug)}</td><td>${Number(x.product_count||0).toLocaleString('fa-IR')}</td><td>${x.active?'فعال':'غیرفعال'}</td><td><button type="button" class="btn danger cat-delete" data-id="${esc(x.id)}">حذف</button></td></tr>`).join(''):'<tr><td colspan="5">دسته‌ای ثبت نشده است.</td></tr>';
    if(!gridReady){
     setupDataGrid('cat-grid');
     gridReady=true;
    }
    bindActions();
   }catch(e){
-   grid.innerHTML='<tr><td colspan="4" class="error-cell">دریافت دسته‌بندی‌ها انجام نشد.</td></tr>';
+   grid.innerHTML='<tr><td colspan="5" class="error-cell">دریافت دسته‌بندی‌ها انجام نشد.</td></tr>';
    showError(e);
   }
  };
