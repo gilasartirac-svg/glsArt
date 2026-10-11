@@ -201,3 +201,11 @@ test('homepage mobile product card does not reserve an empty second grid column'
  assert.ok(mobile.includes('grid-template-columns:minmax(0,1fr)!important;'));
  assert.ok(mobile.includes('.home-latest .product-card-link{\n    display:flex!important;'));
 });
+
+
+test('desktop Shop results span the workspace after the legacy filter sidebar was removed',()=>{
+ const css=read('frontend/src/styles.css');
+ assert.ok(css.includes('.shop-page .gallery-workspace{display:block!important;'));
+ assert.ok(css.includes('.shop-page .gallery-results{'));
+ assert.ok(css.includes('grid-template-columns:repeat(3,minmax(0,1fr))!important'));
+});
