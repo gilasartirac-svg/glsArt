@@ -38,9 +38,27 @@ export default function Orders(){
      </table>
     </div>
    </section>
-   <aside id="order-detail" class="panel order-detail" aria-live="polite">
-    <div class="order-detail-empty"><span>‹</span><strong>جزئیات سفارش</strong><p>برای نمایش اطلاعات، یک سفارش را از جدول انتخاب کنید.</p></div>
-   </aside>
+  </div>
+  <style>
+   .orders-admin .order-modal[hidden]{display:none!important}
+   .orders-admin .order-modal{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:clamp(8px,2vw,24px);background:rgba(15,13,10,.68);backdrop-filter:blur(5px)}
+   .orders-admin .order-modal-dialog{position:relative;display:flex;flex-direction:column;width:min(100%,980px);max-height:min(92dvh,900px);overflow:hidden;border:1px solid var(--ui-line,#d7c8ae);border-radius:18px;background:var(--ui-surface,#fff);color:var(--ui-text,#29241d);box-shadow:0 24px 90px rgba(0,0,0,.35)}
+   .orders-admin .order-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--ui-line,#d7c8ae);background:var(--ui-surface-2,#f7f3ec)}
+   .orders-admin .order-modal-head strong{font-size:1.05rem}
+   .orders-admin .order-modal-close{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border:1px solid var(--ui-line,#d7c8ae);border-radius:12px;background:transparent;color:inherit;font-size:25px;cursor:pointer}
+   .orders-admin .order-modal-body{padding:clamp(12px,2vw,24px);overflow:auto;overscroll-behavior:contain}
+   .orders-admin .order-modal-body .order-detail{border:0;box-shadow:none;padding:0;background:transparent}
+   .orders-admin .order-modal-body .order-detail-head{gap:12px;flex-wrap:wrap}
+   .orders-admin .order-modal-body .receipt-review-preview{max-width:100%;overflow:auto}
+   .orders-admin .order-modal-close:focus-visible{outline:3px solid var(--ui-gold,#9b742d);outline-offset:3px}
+   @media(max-width:600px){.orders-admin .order-modal{padding:0;align-items:end}.orders-admin .order-modal-dialog{width:100%;max-height:96dvh;border-radius:18px 18px 0 0}.orders-admin .order-modal-head{padding:10px 14px}.orders-admin .order-modal-body{padding:12px}.orders-admin .order-modal-body .order-detail-grid{grid-template-columns:1fr 1fr}.orders-admin .order-modal-body .order-detail-actions{flex-wrap:wrap}}
+   @media(prefers-reduced-motion:no-preference){.orders-admin .order-modal-dialog{animation:orders-modal-enter .18s ease-out}@keyframes orders-modal-enter{from{opacity:.6;transform:translateY(10px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}}
+  </style>
+  <div id="order-detail-modal" class="order-modal" hidden>
+   <section class="order-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="order-modal-title">
+    <header class="order-modal-head"><strong id="order-modal-title">جزئیات سفارش مشتری</strong><button type="button" class="order-modal-close" id="order-modal-close" aria-label="بستن پنجره جزئیات">×</button></header>
+    <div class="order-modal-body"><aside id="order-detail" class="order-detail" aria-live="polite"><div class="order-detail-empty"><strong>در حال آماده‌سازی جزئیات سفارش…</strong></div></aside></div>
+   </section>
   </div>
  </div>`;
  setTimeout(()=>mount(),0);
@@ -49,6 +67,8 @@ export default function Orders(){
   if(!liveRoot)return;
   const grid=liveRoot.querySelector('#orders-grid');
   const detail=liveRoot.querySelector('#order-detail');
+  const modal=liveRoot.querySelector('#order-detail-modal');
+  const modalClose=liveRoot.querySelector('#order-modal-close');
   const error=liveRoot.querySelector('#orders-error');
   const count=liveRoot.querySelector('#orders-count');
   const refresh=liveRoot.querySelector('#orders-refresh');
@@ -79,7 +99,7 @@ export default function Orders(){
     if(e.target.closest('select,button,a'))return;
     await showDetail(row.dataset.id);
    });
-   grid.querySelectorAll('.order-receipt-btn').forEach(btn=>btn.onclick=async e=>{e.stopPropagation();await showDetail(btn.dataset.id);detail.scrollIntoView({behavior:'smooth',block:'nearest'});});
+   grid.querySelectorAll('.order-receipt-btn').forEach(btn=>btn.onclick=async e=>{e.stopPropagation();await showDetail(btn.dataset.id);});
    grid.querySelectorAll('.order-invoice-btn').forEach(btn=>btn.onclick=async e=>{e.stopPropagation();const w=window.open('about:blank','_blank','width=1000,height=900');try{const d=await admin.order(btn.dataset.id);openInvoice({...d.order,items:d.items||[]},d.invoice||{},w);}catch(err){try{w?.close()}catch{}error.textContent=err.message||'فاکتور دریافت نشد.';}});
    grid.querySelectorAll('.order-status').forEach(sel=>sel.onchange=async e=>{
     e.stopPropagation();
@@ -96,6 +116,9 @@ export default function Orders(){
   }
   async function showDetail(id){
    selectedId=id;
+   modal.hidden=false;
+   document.body.style.overflow='hidden';
+   modalClose?.focus({preventScroll:true});
    grid.querySelectorAll('.order-master-row').forEach(r=>r.classList.toggle('is-selected',r.dataset.id===id));
    detail.innerHTML='<div class="order-detail-loading">در حال دریافت جزئیات سفارش…</div>';
    try{
@@ -129,6 +152,11 @@ export default function Orders(){
     }
    }catch(e){detail.innerHTML='<div class="order-detail-empty"><strong>جزئیات سفارش دریافت نشد.</strong><p>'+esc(e.message||'خطای سرور')+'</p></div>';}
   }
+  const closeModal=()=>{modal.hidden=true;document.body.style.overflow='';};
+  modalClose.onclick=closeModal;
+  modal.onclick=e=>{if(e.target===modal)closeModal();};
+  const onModalKeydown=e=>{if(e.key==='Escape'&&!modal.hidden)closeModal();};
+  document.addEventListener('keydown',onModalKeydown);
   refresh.onclick=load;
   document.addEventListener('click',async e=>{
    if(e.target?.id==='order-detail-invoice'){const w=window.open('about:blank','_blank','width=1000,height=900');admin.order(selectedId).then(d=>{if(['PENDING','PAID','PROCESSING','SHIPPED','DELIVERED'].includes(String(d.order?.status||'').toUpperCase()))openInvoice({...d.order,items:d.items||[]},d.invoice||{},w);else{try{w?.close()}catch{}}}).catch(err=>{try{w?.close()}catch{}error.textContent=err.message||'فاکتور دریافت نشد.'})}
