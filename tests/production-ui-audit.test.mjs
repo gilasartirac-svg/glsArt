@@ -211,7 +211,8 @@ test('desktop shop grid cannot shrink to intrinsic product-card width',()=>{
  const desktop=css.slice(i);
  assert.ok(desktop.includes('@media (min-width:1200px)'));
  assert.ok(desktop.includes('.shop-page .gallery-workspace'));
+ assert.ok(desktop.includes('grid-template-columns:minmax(0,1fr)!important'));
  assert.ok(desktop.includes('.shop-page .gallery-results'));
  assert.ok(desktop.includes('width:100%'));
- assert.ok(desktop.includes('grid-template-columns:repeat(4,minmax(0,1fr))'));
+ assert.ok(desktop.includes('grid-template-columns:repeat(3,minmax(0,1fr))'));
 });
