@@ -50,11 +50,11 @@ for(const p of productPages){
   const image=String(p.image).startsWith('http')?String(p.image):siteOrigin+(String(p.image).startsWith('/')?'':'/')+String(p.image);
   const description=('خرید '+title+' از گیلاس آرت؛ تابلوهای معرق مس برجسته و آثار هنری دست‌ساز.').slice(0,300);
   const lastmod=String(p.updated_at||p.created_at||'');
-  const validLastmod=/^\\d{4}-\\d{2}-\\d{2}(?:[ T]\\d{2}:\\d{2}:\\d{2})?$/.test(lastmod);
+  const validLastmod=/^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}:\d{2})?$/.test(lastmod);
   const isoLastmod=validLastmod?(lastmod.includes('T')?lastmod.replace(' ','T')+'+03:30':lastmod+'T00:00:00+03:30'):'';
   const canonical=loc;
-  const imageHtml='<img src="'+htmlEscape(image)+'" alt="'+htmlEscape(title)+'" width="900" height="900" loading="eager" fetchpriority="high">';
-  const productHtml=localeEntry
+  const imageHtml='<img src="'+htmlEscape(image)+'" alt="'+htmlEscape(title)+'" loading="eager" fetchpriority="high">';
+  let productHtml=localeEntry
     .replace('<head>','<head><base href="/">')
     .replace(/<meta name="description" content="[^"]*">/, '<meta name="description" content="'+htmlEscape(description)+'">')
     .replace(/<meta property="og:type" content="[^"]*">/, '<meta property="og:type" content="product">')
@@ -62,9 +62,9 @@ for(const p of productPages){
     .replace(/<meta property="og:description" content="[^"]*">/, '<meta property="og:description" content="'+htmlEscape(description)+'">')
     .replace(/<meta property="og:url" content="[^"]*">/, '<meta property="og:url" content="'+canonical+'">')
     .replace(/<link rel="canonical" href="[^"]*">/, '<link rel="canonical" href="'+canonical+'">')
-    .replace(/<title>[^<]*<\\/title>/, '<title>'+htmlEscape(title)+' | گیلاس آرت</title>')
-    .replace(/<script type="application\\/ld\\+json">[\\s\\S]*?<\\/script>/, '<script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'Product',name:title,image:[image],url:canonical,description}).replace(/</g,'\\u003c')+'</script>')
-      const appStart=productHtml.indexOf('<div id="app">');
+    .replace(/<title>[^<]*<\/title>/, '<title>'+htmlEscape(title)+' | گیلاس آرت</title>')
+    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '<script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'Product',name:title,image:[image],url:canonical,description}).replace(/</g,'\\u003c')+'</script>');
+  const appStart=productHtml.indexOf('<div id="app">');
   const appEnd=productHtml.indexOf('</div><script src="config.js',appStart);
   if(appStart<0||appEnd<0)throw new Error('Could not prepare crawlable product HTML for '+slug);
   const crawlableApp='<div id="app"><main class="wrap page" id="crawlable-product"><article><h1>'+htmlEscape(title)+'</h1>'+imageHtml+'<p class="product-price"><strong>قیمت: '+new Intl.NumberFormat('fa-IR').format(Number(p.price_irt))+' تومان</strong></p><p>'+htmlEscape(description)+'</p><p><a href="'+canonical+'">مشاهده جزئیات و خرید محصول</a></p></article></main></div>';
@@ -73,8 +73,8 @@ for(const p of productPages){
   await mkdir(productDir,{recursive:true});
   await writeFile(productDir+'/index.html',finalProductHtml);
 }
-const sitemapBody=Array.from(sitemapUrls.values()).map(x=>'<url><loc>'+xmlEscape(x.loc)+'</loc>'+(x.lastmod&&/^\\d{4}-\\d{2}-\\d{2}/.test(String(x.lastmod))?'<lastmod>'+xmlEscape(String(x.lastmod).slice(0,10))+'</lastmod>':'')+'</url>').join('');
-await writeFile('dist/sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+sitemapBody+'</urlset>'); 
+const sitemapBody=Array.from(sitemapUrls.values()).map(x=>'<url><loc>'+xmlEscape(x.loc)+'</loc>'+(x.lastmod&&/^\d{4}-\d{2}-\d{2}/.test(String(x.lastmod))?'<lastmod>'+xmlEscape(String(x.lastmod).slice(0,10))+'</lastmod>':'')+'</url>').join('');
+await writeFile('dist/sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+sitemapBody+'</urlset>');
 const release=JSON.parse(await readFile('frontend/public/mobile-release.json','utf8'));const releaseVersion=String(release.web?.version||'dev').replace(/[^A-Za-z0-9._-]/g,'-');const buildVersion=String(process.env.GITHUB_SHA||releaseVersion).slice(0,12).replace(/[^A-Za-z0-9._-]/g,'-');const swSource=await readFile('dist/sw.js','utf8');await writeFile('dist/sw.js',swSource.replaceAll('__GILASART_VERSION__',buildVersion));await writeFile('dist/config.js',`window.GILASART_API=${JSON.stringify(process.env.GILASART_API||'https://api.gilasart.ir')};window.GILASART_APP_VERSION=${JSON.stringify(release.web?.version||'dev')};\n`);// Production asset optimization: minify JS/CSS only in dist so source files stay readable.
 for(const [file,loader] of [['dist/app.js','js'],['dist/styles.css','css']]){
   const source=await readFile(file,'utf8');
