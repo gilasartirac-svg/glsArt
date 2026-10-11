@@ -63,3 +63,7 @@
 
 /* Visible feedback while nearby artwork images are loading. */
 .artwork-loading{position:absolute;z-index:6;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:12px;max-width:calc(100vw - 32px);padding:13px 18px;border:1px solid rgba(217,164,65,.42);border-radius:999px;background:rgba(17,15,12,.88);color:#f8e8c8;box-shadow:0 10px 34px rgba(0,0,0,.3);backdrop-filter:blur(12px);font-size:12px;pointer-events:none;white-space:nowrap}.artwork-loading[hidden]{display:none!important}.artwork-loading__spinner{width:20px;height:20px;flex:0 0 20px;border:2px solid rgba(217,164,65,.28);border-top-color:#e6bd6c;border-radius:50%;animation:spin .75s linear infinite}@media(prefers-reduced-motion:reduce){.artwork-loading__spinner{animation:none}}
+
+
+/* Keep the combined movement joystick available on desktop as well as touch devices. */
+@media (min-width:1025px){.joystick-controls{display:flex;left:clamp(24px,4vw,56px);bottom:clamp(24px,3.5vh,42px)}.joystick{width:clamp(104px,9vw,124px)}.scene-caption{bottom:clamp(28px,4vh,48px);max-width:calc(100% - 210px)}}
