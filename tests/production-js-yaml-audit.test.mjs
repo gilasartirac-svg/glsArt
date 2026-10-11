@@ -47,3 +47,14 @@ test('admin receipt endpoint is restricted to card-transfer receipts and include
   assert.ok(worker.includes('SELECT provider,receipt_status,receipt_mime,receipt_size,receipt_data FROM payments WHERE order_id=?'));
   assert.ok(worker.includes("p.provider!=='card_transfer'||p.receipt_status==='NONE'"));
 });
+
+
+test('admin order details open in an accessible responsive modal', () => {
+  const source = read('../frontend/src/admin/pages/Orders.js');
+  assert.ok(source.includes('id="order-detail-modal" class="order-modal" hidden'));
+  assert.ok(source.includes('role="dialog" aria-modal="true"'));
+  assert.ok(source.includes('modal.hidden=false'));
+  assert.ok(source.includes("e.key==='Escape'"));
+  assert.ok(source.includes('id="order-modal-close"'));
+  assert.ok(source.includes('max-height:min(92dvh,900px)'));
+});
