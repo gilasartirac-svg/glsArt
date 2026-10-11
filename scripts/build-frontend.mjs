@@ -12,7 +12,8 @@ const localeSeo={
   en:{lang:'en',dir:'ltr',title:'GilasArt | Artworks & Decorative Wall Art',description:'GilasArt online gallery and store for artworks and decorative wall art.'},
   tr:{lang:'tr',dir:'ltr',title:'GilasArt | Sanat Eserleri ve Dekoratif Tablolar',description:'GilasArt; sanat eserleri ve dekoratif tablolar için çevrim içi galeri ve mağaza.'}
 };
-for(const locale of ['fa','en','tr','ar']){
+const locales=['fa','en','tr','ar'];
+for(const locale of locales){
   const meta=localeSeo[locale];
   const canonical=`https://gilasart.ir/${locale}/`;
   const alternates=['fa','ar','en','tr'].map(l=>`<link rel="alternate" hreflang="${l}" href="https://gilasart.ir/${l}/">`).join('');
@@ -40,7 +41,7 @@ if(!snapshot||!Array.isArray(snapshot.products))throw new Error('Cannot generate
 const xmlEscape=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
 const htmlEscape=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const sitemapUrls=new Map();
-const productPages=(snapshot.products||[]).filter(p=>p&&Number(p.active)!==0&&p.slug&&p.name&&Number.isFinite(Number(p.price_irt))&&Number(p.price_irt)>=0&&p.image&&/^[A-Za-z0-9_-]+$/.test(String(p.slug)));
+const productPages=(snapshot.products||[]).filter(p=>p&&Number(p.active)===1&&p.slug&&p.name&&Number.isFinite(Number(p.price_irt))&&Number(p.price_irt)>=0&&p.image&&/^[A-Za-z0-9_-]+$/.test(String(p.slug)));
 for(const p of productPages){
   const slug=String(p.slug);
   const loc=siteOrigin+'/'+encodeURIComponent(slug)+'/';
@@ -62,12 +63,12 @@ for(const p of productPages){
     .replace(/<meta property="og:url" content="[^"]*">/, '<meta property="og:url" content="'+canonical+'">')
     .replace(/<link rel="canonical" href="[^"]*">/, '<link rel="canonical" href="'+canonical+'">')
     .replace(/<title>[^<]*<\/title>/, '<title>'+htmlEscape(title)+' | گیلاس آرت</title>')
-    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '<script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'Product',name:title,image:[image],url:canonical,description}).replace(/</g,'\\u003c')+'</script>');
+    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '<script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'Product',name:title,image:[image],url:canonical,description,offers:{'@type':'Offer',price:Number(p.price_irt),priceCurrency:'IRR'}}).replace(/</g,'\\u003c')+'</script>');
   const appStart=productHtml.indexOf('<div id="app">');
-  const appEnd=productHtml.indexOf('</div><script src="config.js',appStart);
-  if(appStart<0||appEnd<0)throw new Error('Could not prepare crawlable product HTML for '+slug);
-  const crawlableApp='<div id="app"><main class="wrap page" id="crawlable-product"><article><h1>'+htmlEscape(title)+'</h1>'+imageHtml+'<p class="product-price"><strong>قیمت: '+new Intl.NumberFormat('fa-IR').format(Number(p.price_irt))+' تومان</strong></p><p>'+htmlEscape(description)+'</p><p><a href="'+canonical+'">مشاهده جزئیات و خرید محصول</a></p></article></main></div>';
-  const finalProductHtml=productHtml.slice(0,appStart)+crawlableApp+productHtml.slice(appEnd+'</div>'.length);
+  const scriptsStart=productHtml.indexOf('<script src="config.js',appStart);
+  if(appStart<0||scriptsStart<0)throw new Error('Could not prepare crawlable product HTML for '+slug);
+  const crawlableApp='<div id="app"><main class="wrap page" id="crawlable-product"><article><h1>'+htmlEscape(title)+'</h1>'+imageHtml+'<p class="product-price"><strong>قیمت: '+new Intl.NumberFormat('fa-IR').format(Number(p.price_irt))+' ریال</strong></p><p>'+htmlEscape(description)+'</p><p><a href="'+canonical+'">مشاهده جزئیات و خرید محصول</a></p></article></main></div>';
+  const finalProductHtml=productHtml.slice(0,appStart)+crawlableApp+productHtml.slice(scriptsStart);
   const productDir='dist/'+slug;
   await mkdir(productDir,{recursive:true});
   await writeFile(productDir+'/index.html',finalProductHtml);
