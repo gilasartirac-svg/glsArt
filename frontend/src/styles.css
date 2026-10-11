@@ -8142,3 +8142,19 @@ body{
     visibility:visible!important;
   }
 }
+
+
+/* Desktop Shop no longer renders a filter sidebar; the results must span the workspace. */
+@media (min-width:1000px){
+  .shop-page .gallery-workspace{
+    display:block!important;
+    width:100%;
+    min-width:0;
+  }
+  .shop-page .gallery-results{
+    display:block;
+    width:100%;
+    min-width:0;
+    max-width:100%;
+  }
+}
