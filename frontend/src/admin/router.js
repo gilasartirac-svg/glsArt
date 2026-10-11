@@ -1,6 +1,7 @@
 const loaders={
  dashboard:()=>import('./pages/Dashboard.js?v=20260929-admin'),
  products:()=>import('./pages/Products.js?v=20260929-admin'),
+ 'product-attributes':()=>import('./pages/ProductAttributes.js?v=20261011-product-attributes'),
  orders:()=>import('./pages/Orders.js?v=20260929-admin'),
  customers:()=>import('./pages/Customers.js?v=20260929-admin'),
  inventory:()=>import('./pages/Inventory.js?v=20260929-admin'),
