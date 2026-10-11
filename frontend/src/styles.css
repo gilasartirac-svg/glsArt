@@ -8100,3 +8100,45 @@ body{
 @media(max-width:480px){.customer-receipt-box{padding:12px}.customer-receipt-image{max-height:65vh}.customer-receipt-head{align-items:flex-start;flex-direction:column}}
 
 
+
+
+/* Desktop Shop visibility guard: enforce an in-flow product grid on wide screens.
+   Scoped to the actual results node so unrelated grids and mobile layouts are untouched. */
+@media (min-width:1000px){
+  .shop-page #results.product-stream{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-auto-flow:row;
+    align-content:start;
+    align-items:stretch;
+    gap:clamp(1rem,1.6vw,1.5rem);
+    width:100%;
+    min-width:0;
+    height:auto;
+    min-height:1px;
+    visibility:visible!important;
+    opacity:1!important;
+    overflow:visible;
+  }
+  .shop-page #results.product-stream > article.product-card{
+    display:flex!important;
+    position:relative;
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    height:auto;
+    min-height:0;
+    visibility:visible!important;
+    opacity:1!important;
+    animation:none!important;
+  }
+  .shop-page #results.product-stream > article.product-card > .product-card-link{
+    display:flex!important;
+    flex:1 1 auto;
+    flex-direction:column;
+    width:100%;
+    min-width:0;
+    min-height:100%;
+    visibility:visible!important;
+  }
+}
