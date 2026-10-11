@@ -5,6 +5,7 @@ export default function Sidebar(){
   const items=[
     ['dashboard','داشبورد','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h7V3H3v9Zm11 9h7v-9h-7v9ZM3 21h7v-5H3v5Zm11-18v5h7V3h-7Z"/></svg>'],
     ['products','محصولات','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z M8 8h8v8H8z"/></svg>'],
+    ['product-attributes','ویژگی‌های قابل انتخاب','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4z M8 9h8 M8 13h5"/></svg>'],
     ['categories','دسته‌بندی‌ها','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 21 8 12 13 3 8 12 3Zm0 8 9 5-9 5-9-5 9-5Z"/></svg>'],
     ['orders','سفارشات','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18H6z M9 7h6 M9 11h6 M9 15h4"/></svg>'],
     ['site-rules','قوانین سایت','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18H6z M9 7h6 M9 11h6 M9 15h6"/></svg>'],
