@@ -593,6 +593,11 @@
     "admin.partnerLogos.saved": "لوگوهای سازمانی ذخیره شد. لوگوهای فعال در صفحه اصلی نمایش داده می‌شوند.",
     "admin.orders.modalTitle": "جزئیات سفارش مشتری",
     "admin.orders.modalLoading": "در حال آماده‌سازی جزئیات سفارش…",
-    "admin.orders.modalClose": "بستن پنجره جزئیات"
+    "admin.orders.modalClose": "بستن پنجره جزئیات",
+    "admin.categories.productCount": "تعداد محصول",
+    "admin.productAttributes.description": "مدیریت مستقل ویژگی‌های عمومی، گزینه‌ها، وضعیت، مقدار پیش‌فرض و افزایش قیمت",
+    "admin.productAttributes.create": "ایجاد ویژگی جدید",
+    "admin.productAttributes.example": "برای نمونه «رنگ قاب» یا هر ویژگی عمومی قابل انتخاب در محصولات.",
+    "admin.productAttributes.loading": "در حال دریافت…"
   }
 }
