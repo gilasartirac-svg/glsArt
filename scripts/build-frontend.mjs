@@ -30,20 +30,47 @@ for(const locale of ['fa','en','tr','ar']){
   await mkdir(`dist/${locale}`,{recursive:true});
   await writeFile(`dist/${locale}/index.html`,html);
 }
-// Generate a locale-aware sitemap from the public storefront snapshot so published product/content routes are discoverable.
+// Generate a product-aware sitemap and static HTML product entries from the already-offline storefront snapshot.
+// Product pages contain crawlable title, price and original image in the initial HTML; no runtime API/JavaScript is required to read these basics.
 const siteOrigin='https://gilasart.ir';
-const locales=['fa','en','tr','ar'];
 const publicRoutes=['/','/shop','/about','/contact','/news','/articles','/terms','/privacy','/enamad','/aparat','/rewards','/support'];
 let snapshot=null;
 try{snapshot=JSON.parse(await readFile('frontend/public/data/storefront-index.json','utf8'))}catch{}
-const urls=new Map();
-const addRoute=(path,lastmod)=>{const clean=String(path||'/').startsWith('/')?String(path||'/'):'/'+String(path||'');for(const locale of locales){const loc=siteOrigin+'/'+locale+(clean==='/'?'':clean);urls.set(loc,{loc,lastmod})}};
-publicRoutes.forEach(p=>addRoute(p));
-for(const p of (snapshot?.products||[])){if(p?.active!==0&&p?.slug)addRoute('/'+encodeURIComponent(String(p.slug)),p.updated_at||p.created_at)}
-for(const x of (snapshot?.articles||[])){if(x?.slug)addRoute('/articles/'+encodeURIComponent(String(x.slug)),x.updated_at||x.published_at)}
-for(const x of (snapshot?.news||[])){if(x?.slug)addRoute('/news/'+encodeURIComponent(String(x.slug)),x.updated_at||x.published_at)}
-const sitemapBody=Array.from(urls.values()).map(x=>'<url><loc>'+x.loc+'</loc>'+(x.lastmod&&/^\\d{4}-\\d{2}-\\d{2}/.test(String(x.lastmod))?'<lastmod>'+String(x.lastmod).slice(0,10)+'</lastmod>':'')+'</url>').join('');
-await writeFile('dist/sitemap.xml','<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+sitemapBody+'</urlset>');
+if(!snapshot||!Array.isArray(snapshot.products))throw new Error('Cannot generate sitemap: offline storefront snapshot is missing or invalid.');
+const xmlEscape=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+const htmlEscape=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const sitemapUrls=new Map();
+for(const route of publicRoutes)sitemapUrls.set(siteOrigin+route,{loc:siteOrigin+route});
+const productPages=(snapshot.products||[]).filter(p=>p&&p.active!==0&&p.slug&&p.name&&Number.isFinite(Number(p.price_irt))&&Number(p.price_irt)>=0&&p.image);
+for(const p of productPages){
+  const slug=String(p.slug);
+  const loc=siteOrigin+'/'+encodeURIComponent(slug)+'/';
+  sitemapUrls.set(loc,{loc,lastmod:p.updated_at||p.created_at});
+  const title=String(p.name).slice(0,500);
+  const image=String(p.image).startsWith('http')?String(p.image):siteOrigin+(String(p.image).startsWith('/')?'':'/')+String(p.image);
+  const description=('خرید '+title+' از گیلاس آرت؛ تابلوهای معرق مس برجسته و آثار هنری دست‌ساز.').slice(0,300);
+  const lastmod=String(p.updated_at||p.created_at||'');
+  const validLastmod=/^\\d{4}-\\d{2}-\\d{2}(?:[ T]\\d{2}:\\d{2}:\\d{2})?$/.test(lastmod);
+  const isoLastmod=validLastmod?(lastmod.includes('T')?lastmod.replace(' ','T')+'+03:30':lastmod+'T00:00:00+03:30'):'';
+  const canonical=loc;
+  const imageHtml='<img src="'+htmlEscape(image)+'" alt="'+htmlEscape(title)+'" width="900" height="900" loading="eager" fetchpriority="high">';
+  const productHtml=localeEntry
+    .replace('<head>','<head><base href="/">')
+    .replace(/<meta name="description" content="[^"]*">/, '<meta name="description" content="'+htmlEscape(description)+'">')
+    .replace(/<meta property="og:type" content="[^"]*">/, '<meta property="og:type" content="product">')
+    .replace(/<meta property="og:title" content="[^"]*">/, '<meta property="og:title" content="'+htmlEscape(title)+' | گیلاس آرت">')
+    .replace(/<meta property="og:description" content="[^"]*">/, '<meta property="og:description" content="'+htmlEscape(description)+'">')
+    .replace(/<meta property="og:url" content="[^"]*">/, '<meta property="og:url" content="'+canonical+'">')
+    .replace(/<link rel="canonical" href="[^"]*">/, '<link rel="canonical" href="'+canonical+'">')
+    .replace(/<title>[^<]*<\\/title>/, '<title>'+htmlEscape(title)+' | گیلاس آرت</title>')
+    .replace(/<script type="application\\/ld\\+json">[\\s\\S]*?<\\/script>/, '<script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'Product',name:title,image:[image],url:canonical,description}).replace(/</g,'\\u003c')+'</script>')
+    .replace(/<div id="app">[\\s\\S]*?<\\/div>/, '<div id="app"><main class="wrap page" id="crawlable-product"><article><h1>'+htmlEscape(title)+'</h1>'+imageHtml+'<p class="product-price"><strong>قیمت: '+new Intl.NumberFormat('fa-IR').format(Number(p.price_irt))+' تومان</strong></p><p>'+htmlEscape(description)+'</p><p><a href="'+canonical+'">مشاهده جزئیات و خرید محصول</a></p></article></main></div>');
+  const productDir='dist/'+slug;
+  await mkdir(productDir,{recursive:true});
+  await writeFile(productDir+'/index.html',productHtml);
+}
+const sitemapBody=Array.from(sitemapUrls.values()).map(x=>'<url><loc>'+xmlEscape(x.loc)+'</loc>'+(x.lastmod&&/^\\d{4}-\\d{2}-\\d{2}/.test(String(x.lastmod))?'<lastmod>'+xmlEscape(String(x.lastmod).slice(0,10))+'</lastmod>':'')+'</url>').join('');
+await writeFile('dist/sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+sitemapBody+'</urlset>'); 
 const release=JSON.parse(await readFile('frontend/public/mobile-release.json','utf8'));const releaseVersion=String(release.web?.version||'dev').replace(/[^A-Za-z0-9._-]/g,'-');const buildVersion=String(process.env.GITHUB_SHA||releaseVersion).slice(0,12).replace(/[^A-Za-z0-9._-]/g,'-');const swSource=await readFile('dist/sw.js','utf8');await writeFile('dist/sw.js',swSource.replaceAll('__GILASART_VERSION__',buildVersion));await writeFile('dist/config.js',`window.GILASART_API=${JSON.stringify(process.env.GILASART_API||'https://api.gilasart.ir')};window.GILASART_APP_VERSION=${JSON.stringify(release.web?.version||'dev')};\n`);// Production asset optimization: minify JS/CSS only in dist so source files stay readable.
 for(const [file,loader] of [['dist/app.js','js'],['dist/styles.css','css']]){
   const source=await readFile(file,'utf8');
