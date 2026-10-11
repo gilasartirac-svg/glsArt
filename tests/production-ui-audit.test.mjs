@@ -201,3 +201,17 @@ test('homepage mobile product card does not reserve an empty second grid column'
  assert.ok(mobile.includes('grid-template-columns:minmax(0,1fr)!important;'));
  assert.ok(mobile.includes('.home-latest .product-card-link{\n    display:flex!important;'));
 });
+
+
+test('desktop shop grid cannot shrink to intrinsic product-card width',()=>{
+ const css=read('frontend/src/styles.css');
+ const marker='Desktop storefront recovery: prevent the product collection from shrinking';
+ const i=css.lastIndexOf(marker);
+ assert.ok(i>=0,'desktop storefront recovery rule is missing');
+ const desktop=css.slice(i);
+ assert.ok(desktop.includes('@media (min-width:1200px)'));
+ assert.ok(desktop.includes('.shop-page .gallery-workspace'));
+ assert.ok(desktop.includes('.shop-page .gallery-results'));
+ assert.ok(desktop.includes('width:100%'));
+ assert.ok(desktop.includes('grid-template-columns:repeat(4,minmax(0,1fr))'));
+});
