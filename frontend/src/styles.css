@@ -6536,6 +6536,60 @@ body.mobile-nav-open .ga-header-shell:has(.ga-header-menu-toggle[aria-expanded="
 }
 
 
+/* Desktop shop-card layout: keep artwork, titles and prices inside a balanced three-column grid. */
+@media (min-width:1024px){
+  .shop-page .product-stream{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:clamp(1.125rem,1.6vw,1.75rem);
+    align-items:stretch;
+  }
+  .shop-page .product-stream > .product-card{
+    min-width:0;
+    max-width:100%;
+    height:100%;
+  }
+  .shop-page .product-card-media{
+    width:100%;
+    aspect-ratio:1 / 1;
+    min-width:0;
+  }
+  .shop-page .product-art-frame{
+    width:100%;
+    height:100%;
+    min-width:0;
+    min-height:0;
+  }
+  .shop-page .product-card-body{
+    min-width:0;
+    padding:clamp(.875rem,1.2vw,1.25rem);
+  }
+  .shop-page .product-title-wrap{
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .shop-page .product-card-heading h3{
+    overflow-wrap:anywhere;
+  }
+  .shop-page .product-card-footer{
+    min-width:0;
+    align-items:flex-end;
+    gap:.75rem;
+  }
+  .shop-page .product-price-group{
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .shop-page .product-card-price{
+    white-space:normal;
+    overflow-wrap:anywhere;
+    line-height:1.5;
+  }
+  .shop-page .product-card-price small{
+    white-space:nowrap;
+  }
+}
+
+
 /* Homepage mobile readability fix — intentionally does not affect Shop or desktop.
    Use a vertical card on phones so artwork, full title and price each get enough room. */
 @media (max-width:767px){
@@ -8046,55 +8100,3 @@ body{
 @media(max-width:480px){.customer-receipt-box{padding:12px}.customer-receipt-image{max-height:65vh}.customer-receipt-head{align-items:flex-start;flex-direction:column}}
 
 
-/* Desktop shop-card layout: keep artwork, titles and prices inside a balanced three-column grid. */
-@media (min-width:1024px){
-  .shop-page .product-stream{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:clamp(1.125rem,1.6vw,1.75rem);
-    align-items:stretch;
-  }
-  .shop-page .product-stream > .product-card{
-    min-width:0;
-    max-width:100%;
-    height:100%;
-  }
-  .shop-page .product-card-media{
-    width:100%;
-    aspect-ratio:1 / 1;
-    min-width:0;
-  }
-  .shop-page .product-art-frame{
-    width:100%;
-    height:100%;
-    min-width:0;
-    min-height:0;
-  }
-  .shop-page .product-card-body{
-    min-width:0;
-    padding:clamp(.875rem,1.2vw,1.25rem);
-  }
-  .shop-page .product-title-wrap{
-    flex:1 1 auto;
-    min-width:0;
-  }
-  .shop-page .product-card-heading h3{
-    overflow-wrap:anywhere;
-  }
-  .shop-page .product-card-footer{
-    min-width:0;
-    align-items:flex-end;
-    gap:.75rem;
-  }
-  .shop-page .product-price-group{
-    flex:1 1 auto;
-    min-width:0;
-  }
-  .shop-page .product-card-price{
-    white-space:normal;
-    overflow-wrap:anywhere;
-    line-height:1.5;
-  }
-  .shop-page .product-card-price small{
-    white-space:nowrap;
-  }
-}
