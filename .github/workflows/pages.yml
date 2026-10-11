@@ -164,6 +164,28 @@ jobs:
           await page.locator('#results .product-card').first().waitFor({state:'visible',timeout:45000});
           const shopCards=await page.locator('#results .product-card').count();
           if(shopCards<1)fail('Shop runtime rendered zero product cards');
+          // Regression: desktop Shop cards must occupy real visible space above 1000px.
+          for(const width of [1001,1024,1200,1440]){
+            await page.setViewportSize({width,height:1000});
+            await page.waitForTimeout(180);
+            const grid=await page.locator('#results.product-stream').evaluate(el=>{
+              const s=getComputedStyle(el),r=el.getBoundingClientRect();
+              return {display:s.display,columns:s.gridTemplateColumns.split(' ').filter(Boolean).length,
+                width:r.width,height:r.height,left:r.left,right:r.right,visibility:s.visibility,opacity:s.opacity,
+                cards:[...el.querySelectorAll(':scope > .product-card')].slice(0,6).map(card=>{
+                  const cs=getComputedStyle(card),b=card.getBoundingClientRect();
+                  return {display:cs.display,visibility:cs.visibility,opacity:cs.opacity,
+                    width:b.width,height:b.height,left:b.left,right:b.right,top:b.top,bottom:b.bottom};
+                })};
+            });
+            if(grid.display!=='grid'||grid.columns!==3||grid.width<width*.7||grid.height<100||
+              grid.visibility!=='visible'||Number(grid.opacity)<0.99||grid.cards.length<1||
+              grid.cards.some(card=>card.display==='none'||card.visibility!=='visible'||Number(card.opacity)<0.99||
+                card.width<180||card.height<150||card.right<0||card.left>width)){
+              fail('Desktop Shop product cards are hidden, collapsed or out of layout at '+width+'px: '+JSON.stringify(grid));
+            }
+          }
+          await page.setViewportSize({width:1440,height:1000});
           const href=await page.locator('#results .product-card a.product-card-link').first().getAttribute('href');
           if(!href||!href.includes('/'))fail('Shop product link missing');
           await page.goto(new URL(href,'https://gilasart.ir').href+'?runtime_verify='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
