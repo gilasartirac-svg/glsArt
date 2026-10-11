@@ -64,10 +64,14 @@ for(const p of productPages){
     .replace(/<link rel="canonical" href="[^"]*">/, '<link rel="canonical" href="'+canonical+'">')
     .replace(/<title>[^<]*<\\/title>/, '<title>'+htmlEscape(title)+' | گیلاس آرت</title>')
     .replace(/<script type="application\\/ld\\+json">[\\s\\S]*?<\\/script>/, '<script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'Product',name:title,image:[image],url:canonical,description}).replace(/</g,'\\u003c')+'</script>')
-    .replace(/<div id="app">[\\s\\S]*?<\\/div>/, '<div id="app"><main class="wrap page" id="crawlable-product"><article><h1>'+htmlEscape(title)+'</h1>'+imageHtml+'<p class="product-price"><strong>قیمت: '+new Intl.NumberFormat('fa-IR').format(Number(p.price_irt))+' تومان</strong></p><p>'+htmlEscape(description)+'</p><p><a href="'+canonical+'">مشاهده جزئیات و خرید محصول</a></p></article></main></div>');
+      const appStart=productHtml.indexOf('<div id="app">');
+  const appEnd=productHtml.indexOf('</div><script src="config.js',appStart);
+  if(appStart<0||appEnd<0)throw new Error('Could not prepare crawlable product HTML for '+slug);
+  const crawlableApp='<div id="app"><main class="wrap page" id="crawlable-product"><article><h1>'+htmlEscape(title)+'</h1>'+imageHtml+'<p class="product-price"><strong>قیمت: '+new Intl.NumberFormat('fa-IR').format(Number(p.price_irt))+' تومان</strong></p><p>'+htmlEscape(description)+'</p><p><a href="'+canonical+'">مشاهده جزئیات و خرید محصول</a></p></article></main></div>';
+  const finalProductHtml=productHtml.slice(0,appStart)+crawlableApp+productHtml.slice(appEnd+'</div>'.length);
   const productDir='dist/'+slug;
   await mkdir(productDir,{recursive:true});
-  await writeFile(productDir+'/index.html',productHtml);
+  await writeFile(productDir+'/index.html',finalProductHtml);
 }
 const sitemapBody=Array.from(sitemapUrls.values()).map(x=>'<url><loc>'+xmlEscape(x.loc)+'</loc>'+(x.lastmod&&/^\\d{4}-\\d{2}-\\d{2}/.test(String(x.lastmod))?'<lastmod>'+xmlEscape(String(x.lastmod).slice(0,10))+'</lastmod>':'')+'</url>').join('');
 await writeFile('dist/sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+sitemapBody+'</urlset>'); 
