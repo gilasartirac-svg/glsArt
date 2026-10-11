@@ -33,15 +33,14 @@ for(const locale of ['fa','en','tr','ar']){
 // Generate a product-aware sitemap and static HTML product entries from the already-offline storefront snapshot.
 // Product pages contain crawlable title, price and original image in the initial HTML; no runtime API/JavaScript is required to read these basics.
 const siteOrigin='https://gilasart.ir';
-const publicRoutes=['/','/shop','/about','/contact','/news','/articles','/terms','/privacy','/enamad','/aparat','/rewards','/support'];
+// Torob XML sitemap: list product URLs only; product details belong in each product page HTML.
 let snapshot=null;
 try{snapshot=JSON.parse(await readFile('frontend/public/data/storefront-index.json','utf8'))}catch{}
 if(!snapshot||!Array.isArray(snapshot.products))throw new Error('Cannot generate sitemap: offline storefront snapshot is missing or invalid.');
 const xmlEscape=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
 const htmlEscape=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const sitemapUrls=new Map();
-for(const route of publicRoutes)sitemapUrls.set(siteOrigin+route,{loc:siteOrigin+route});
-const productPages=(snapshot.products||[]).filter(p=>p&&p.active!==0&&p.slug&&p.name&&Number.isFinite(Number(p.price_irt))&&Number(p.price_irt)>=0&&p.image);
+const productPages=(snapshot.products||[]).filter(p=>p&&Number(p.active)!==0&&p.slug&&p.name&&Number.isFinite(Number(p.price_irt))&&Number(p.price_irt)>=0&&p.image&&/^[A-Za-z0-9_-]+$/.test(String(p.slug)));
 for(const p of productPages){
   const slug=String(p.slug);
   const loc=siteOrigin+'/'+encodeURIComponent(slug)+'/';
