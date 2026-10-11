@@ -58,3 +58,15 @@ test('admin order details open in an accessible responsive modal', () => {
   assert.ok(source.includes('id="order-modal-close"'));
   assert.ok(source.includes('max-height:min(92dvh,900px)'));
 });
+
+test('desktop shop product cards use a stable three-column layout without price overflow', () => {
+  const css = read('../frontend/src/styles.css');
+  const desktopStart = css.lastIndexOf('/* Desktop shop-card layout: keep artwork, titles and prices inside a balanced three-column grid. */');
+  assert.ok(desktopStart >= 0, 'desktop shop-card override must exist');
+  const desktopCss = css.slice(desktopStart);
+  assert.ok(desktopCss.includes('@media (min-width:1024px)'));
+  assert.ok(desktopCss.includes('grid-template-columns:repeat(3,minmax(0,1fr))'));
+  assert.ok(desktopCss.includes('aspect-ratio:1 / 1'));
+  assert.ok(desktopCss.includes('overflow-wrap:anywhere'));
+  assert.ok(desktopCss.includes('white-space:normal'));
+});
