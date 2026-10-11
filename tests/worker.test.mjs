@@ -65,7 +65,7 @@ test('admin product attributes support creation, options and product assignment'
  assert.match(worker,/product_attribute_assignments/);
  assert.match(worker,/saveProductAttributeAssignments/);
  assert.match(products,/attributeIds:selectedAttributeIds\(\)/);
- assert.match(products,/priceDeltaIrt:Number\(x\.get\('price'\)\|\|0\)/);
+ assert.match(products,/priceDeltaIrt:Number\(row\.querySelector\('\.product-option-delta'\)\?\.value\|\|0\)/);
 });
 
 const featureSchema=readFileSync(new URL('../database/migrations/0014_flash_sales_support.sql',import.meta.url),'utf8');
