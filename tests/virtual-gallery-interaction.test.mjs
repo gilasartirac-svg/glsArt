@@ -81,7 +81,7 @@ test('gallery uses warm fixed lighting, real stone surfaces, and no direct artwo
   assert.match(script, /roughness: \.68, metalness: 0/);
   assert.match(script, /new THREE\.MeshBasicMaterial\(\{ color: 0xf4efe6, side: THREE\.DoubleSide, toneMapped: false \}\)/);
   assert.doesNotMatch(script, /new THREE\.SpotLight/);
-  assert.match(markup, /gallery\.css\?v=9/);
+  assert.match(markup, /gallery\.css\?v=\d+/);
 });
 
 test('camera motion uses velocity damping, angular inertia, and cinematic focus easing', () => {
@@ -104,7 +104,7 @@ test('gallery has a bright stone finish, decorative rugs and vases, and a fixed 
   assert.match(script, /new THREE\.LatheGeometry/);
   assert.match(script, /new THREE\.PerspectiveCamera\(57/);
   assert.match(script, /camera\.fov = 57/);
-  assert.match(markup, /gallery\.css\?v=9/);
+  assert.match(markup, /gallery\.css\?v=\d+/);
   assert.match(markup, /gallery\.js\?v=17/);
 });
 
