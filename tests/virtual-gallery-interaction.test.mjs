@@ -69,7 +69,9 @@ test('gallery uses warm fixed lighting, real stone surfaces, and no direct artwo
   assert.match(script, /marble_01_diff_1k\.jpg/);
   assert.match(script, /function addPillar\(x, z, marbleMaterial\)/);
   assert.match(script, /pillarMarbleMaterial = new THREE\.MeshStandardMaterial\(\{ color: 0xffffff, map: marbleTexture/);
-  assert.match(script, /loadStoneSurface\(pillarMarbleMaterial, \.72, 4\.2\)/);
+  assert.match(script, /const pillarTexture = texture\.clone\(\)/);
+  assert.match(script, /pillarTexture\.repeat\.set\(\.72, 4\.2\)/);
+  assert.doesNotMatch(script, /loadStoneSurface\(pillarMarbleMaterial/);
   assert.match(script, /addPillar\(-7\.25, z, pillarMarbleMaterial\)/);
   assert.match(script, /loadStoneSurface\(floorMaterial/);
   assert.match(script, /color: 0xfaf9f5, roughness: \.98, metalness: 0/);
