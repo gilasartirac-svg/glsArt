@@ -512,11 +512,18 @@ function setupScene() {
     material.map = texture;
     material.color.setHex(tint);
     material.needsUpdate = true;
+    // Reuse the downloaded marble image for the columns instead of downloading a second GPU texture.
+    if (textureUrl === stoneTextureUrl && material === floorMaterial && pillarMarbleMaterial) {
+      const pillarTexture = texture.clone();
+      pillarTexture.repeat.set(.72, 4.2);
+      pillarTexture.needsUpdate = true;
+      pillarMarbleMaterial.map = pillarTexture;
+      pillarMarbleMaterial.needsUpdate = true;
+    }
   }, undefined, () => { /* Keep the local procedural texture if the remote texture is unavailable. */ });
   const loadStoneSurface = (material, repeatX, repeatY) => loadSurfaceTexture(material, stoneTextureUrl, repeatX, repeatY);
   const loadVelvetSurface = (material, repeatX, repeatY) => loadSurfaceTexture(material, velvetTextureUrl, repeatX, repeatY, 0x98745d);
   loadStoneSurface(floorMaterial, 2.4, Math.max(4, corridorLength / 5));
-  loadStoneSurface(pillarMarbleMaterial, .72, 4.2);
   addCoveLighting(corridorLength, corridorCenter);
   const woodTextureUrl = 'https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/dark_wooden_planks/dark_wooden_planks_diff_1k.png';
   const doorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .42, metalness: .08, side: THREE.DoubleSide });
