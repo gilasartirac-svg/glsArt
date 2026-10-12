@@ -306,13 +306,8 @@ function addCoveLighting(corridorLength, corridorCenter) {
     const diffuser = new THREE.Mesh(new THREE.PlaneGeometry(.075, corridorLength - .25), led);
     diffuser.rotation.x = -Math.PI / 2;
     diffuser.position.set(side * 7.91, 4.115, corridorCenter); scene.add(diffuser);
-    // Soft warm light washes the plaster ceiling and gallery walls, rather than showing bare fixtures.
-    const count = Math.max(2, Math.ceil(corridorLength / 6));
-    for (let i = 0; i < count; i++) {
-      const z = bounds.zMin + (i + .5) * corridorLength / count;
-      const light = new THREE.PointLight(0xffe8c8, .48, 7.5, 1.55);
-      light.position.set(side * 7.35, 3.92, z); scene.add(light);
-    }
+    // The emissive diffuser and existing ambient/hemisphere fill provide the cove glow.
+    // Avoid dozens of real-time point lights on long corridors: they are costly on mobile GPUs.
   }
 }
 function addGrandfatherClock(woodMaterial) {
@@ -402,6 +397,11 @@ function addGalleryDecor(corridorLength, corridorCenter) {
   }
 }
 
+function getRenderPixelRatio() {
+  const lowPowerDevice = window.matchMedia('(pointer: coarse)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
+  return Math.min(window.devicePixelRatio || 1, lowPowerDevice ? 1 : 1.35);
+}
+
 function setupScene() {
   const rows = Math.max(5, Math.ceil(galleryProducts.length / 2));
   const corridorLength = Math.max(30, (rows - 1) * 3.1 + 12);
@@ -417,7 +417,7 @@ function setupScene() {
   camera.position.copy(cameraPosition);
   camera.rotation.order = 'YXZ';
   if (!renderer) renderer = new THREE.WebGLRenderer({ canvas, antialias: !/Android|iPhone|iPad/i.test(navigator.userAgent), alpha: false, powerPreference: 'low-power' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+  renderer.setPixelRatio(getRenderPixelRatio());
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -506,7 +506,7 @@ function setupScene() {
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(repeatX, repeatY);
-    texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy() || 1);
+    texture.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy() || 1);
     material.map = texture;
     material.color.setHex(tint);
     material.needsUpdate = true;
@@ -705,7 +705,7 @@ function onResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.fov = 57;
   camera.updateProjectionMatrix();
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+  renderer.setPixelRatio(getRenderPixelRatio());
   renderer.setSize(window.innerWidth, window.innerHeight, false);
 }
 
