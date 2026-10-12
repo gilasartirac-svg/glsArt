@@ -598,6 +598,7 @@
     "admin.productAttributes.description": "مدیریت مستقل ویژگی‌های عمومی، گزینه‌ها، وضعیت، مقدار پیش‌فرض و افزایش قیمت",
     "admin.productAttributes.create": "ایجاد ویژگی جدید",
     "admin.productAttributes.example": "برای نمونه «رنگ قاب» یا هر ویژگی عمومی قابل انتخاب در محصولات.",
-    "admin.productAttributes.loading": "در حال دریافت…"
+    "admin.productAttributes.loading": "در حال دریافت…",
+    "payment.invoice.popupBlocked": "مرورگر اجازه باز کردن فاکتور را نداد. لطفاً پنجره‌های بازشو را برای سایت فعال کنید."
   }
 }
