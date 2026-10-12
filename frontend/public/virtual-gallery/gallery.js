@@ -297,10 +297,15 @@ function addCoveLighting(corridorLength, corridorCenter) {
   });
   for (const side of [-1, 1]) {
     const x = side * 8.12;
+    // Recessed channel and white plaster lip conceal the LED source from the visitor's direct view.
     const recess = new THREE.Mesh(new THREE.BoxGeometry(.52, .12, corridorLength), coveBody);
     recess.position.set(x, 4.08, corridorCenter); scene.add(recess);
-    const diffuser = new THREE.Mesh(new THREE.BoxGeometry(.075, .018, corridorLength - .25), led);
-    diffuser.position.set(side * 7.91, 4.145, corridorCenter); scene.add(diffuser);
+    const plasterLip = new THREE.Mesh(new THREE.BoxGeometry(.16, .18, corridorLength), plaster);
+    plasterLip.position.set(side * 7.68, 4.08, corridorCenter); scene.add(plasterLip);
+    // Upward-facing diffuser: light is reflected by the white plaster ceiling, not a visible bare strip.
+    const diffuser = new THREE.Mesh(new THREE.PlaneGeometry(.075, corridorLength - .25), led);
+    diffuser.rotation.x = -Math.PI / 2;
+    diffuser.position.set(side * 7.91, 4.115, corridorCenter); scene.add(diffuser);
     // Soft warm light washes the plaster ceiling and gallery walls, rather than showing bare fixtures.
     const count = Math.max(2, Math.ceil(corridorLength / 6));
     for (let i = 0; i < count; i++) {
