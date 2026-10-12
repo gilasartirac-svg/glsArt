@@ -1,13 +1,13 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-12T02:59:53.000Z",
+  "generatedAt": "2026-10-12T04:21:00.000Z",
   "products": [
     {
       "id": "xls_0270",
       "slug": "Gilas800",
       "sku": "Gilas800",
       "name": "تابلوی معرق مس برجسته اسب و آینه",
-      "price_irt": 150000000,
+      "price_irt": 214500000,
       "image": "/uploaded/0003613_gilas800.png",
       "category_id": null,
       "category_ids": [
@@ -24,14 +24,14 @@
       "favorite_count": 1,
       "sold_count": 0,
       "created_at": "2026-09-30 02:35:03",
-      "updated_at": "2026-10-12 02:59:53"
+      "updated_at": "2026-10-12 04:22:38"
     },
     {
       "id": "xls_0269",
       "slug": "Gilas410",
       "sku": "Gilas410",
       "name": "تابلوی معرق مس برجسته فروهر ، گفتار نیک ، کردار نیک ، پندار نیک",
-      "price_irt": 89620000,
+      "price_irt": 128200000,
       "image": "/uploaded/0003619_gilas410.jpeg",
       "category_id": null,
       "category_ids": [
@@ -48,14 +48,14 @@
       "favorite_count": 0,
       "sold_count": 0,
       "created_at": "2026-09-30 02:35:01",
-      "updated_at": "2026-09-30 05:10:01"
+      "updated_at": "2026-10-12 04:22:38"
     },
     {
       "id": "xls_0268",
       "slug": "Gilas409",
       "sku": "Gilas409",
       "name": "تابلوی معرق مس برجسته درد عشقی کشیده‌ام که مَپُرس زهرِ هجری چشیده‌ام که مَپُرس",
-      "price_irt": 71620000,
+      "price_irt": 102500000,
       "image": "/uploaded/0003618_gilas409.png",
       "category_id": null,
       "category_ids": [
@@ -72,14 +72,14 @@
       "favorite_count": 1,
       "sold_count": 0,
       "created_at": "2026-09-30 02:35:01",
-      "updated_at": "2026-09-30 05:10:01"
+      "updated_at": "2026-10-12 04:22:38"
     },
     {
       "id": "xls_0267",
       "slug": "Gilas408",
       "sku": "Gilas408",
       "name": "تابلوی معرق مس برجسته از صداسخن عشق ندیدم خوشتر",
-      "price_irt": 75620000,
+      "price_irt": 108200000,
       "image": "/uploaded/0003614_gilas408.png",
       "category_id": null,
       "category_ids": [
@@ -96,14 +96,14 @@
       "favorite_count": 0,
       "sold_count": 0,
       "created_at": "2026-09-30 02:34:58",
-      "updated_at": "2026-09-30 05:10:01"
+      "updated_at": "2026-10-12 04:22:38"
     },
     {
       "id": "xls_0265",
       "slug": "Gilas407",
       "sku": "Gilas407",
       "name": "تابلوی معرق مس برجسته آیت الکرسی",
-      "price_irt": 94304000,
+      "price_irt": 134900000,
       "image": "/uploaded/0003571_gilas407.jpeg",
       "category_id": null,
       "category_ids": [
@@ -121,14 +121,14 @@
       "favorite_count": 0,
       "sold_count": 0,
       "created_at": "2026-09-30 02:34:58",
-      "updated_at": "2026-09-30 05:10:01"
+      "updated_at": "2026-10-12 04:22:38"
     },
     {
       "id": "xls_0264",
       "slug": "Gilas406",
       "sku": "Gilas406",
       "name": "تابلوی معرق مس برجسته الایاایهالساقحافظ",
-      "price_irt": 80648000,
+      "price_irt": 115400000,
       "image": "/uploaded/0003570_gilas406.jpeg",
       "category_id": null,
       "category_ids": [
@@ -145,14 +145,14 @@
       "favorite_count": 0,
       "sold_count": 0,
       "created_at": "2026-09-30 02:34:56",
-      "updated_at": "2026-09-30 05:10:01"
+      "updated_at": "2026-10-12 04:22:38"
     },
     {
       "id": "xls_0263",
       "slug": "Gilas405",
       "sku": "Gilas405",
       "name": "تابلوی معرق مس برجسته نورالسموات",
-      "price_irt": 92579000,
+      "price_irt": 132400000,
       "image": "/uploaded/0003567_gilas405.jpeg",
       "category_id": null,
       "category_ids": [
@@ -169,14 +169,14 @@
       "favorite_count": 0,
       "sold_count": 0,
       "created_at": "2026-09-30 02:34:56",
-      "updated_at": "2026-09-30 05:10:01"
+      "updated_at": "2026-10-12 04:22:38"
     },
     {
       "id": "xls_0262",
       "slug": "Gilas404",
       "sku": "Gilas404",
       "name": "تابلوی معرق مس برجسته وان يكاد",
-      "price_irt": 85579000,
+      "price_irt": 122400000,
       "image": "/uploaded/0003564_gilas404.jpeg",
       "category_id": null,
       "category_ids": [
@@ -193,7 +193,7 @@
       "favorite_count": 0,
       "sold_count": 0,
       "created_at": "2026-09-30 02:34:53",
-      "updated_at": "2026-09-30 05:10:01"
+      "updated_at": "2026-10-12 04:22:38"
     }
   ],
   "categories": [
