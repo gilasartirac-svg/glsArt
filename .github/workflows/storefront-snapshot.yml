@@ -45,7 +45,7 @@ jobs:
             .filter(p=>p&&p.active!==0)
             .sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))||String(b.id||'').localeCompare(String(a.id||'')))
             .map(p=>{
-              const image=(p.images||[]).find(x=>Number(x.is_primary)===1)?.path||(p.images||[0])?.path||'';
+              const image=(p.images||[]).find(x=>Number(x.is_primary)===1)?.path||(p.images||[0])?.path||'/data/product-image-unavailable.svg';
               return {
                 id:p.id,slug:p.slug,sku:p.sku,name:p.name,price_irt:Number(p.price_irt||0),
                 image,category_id:p.category_id,category_ids:Array.isArray(p.category_ids)?p.category_ids:[],
