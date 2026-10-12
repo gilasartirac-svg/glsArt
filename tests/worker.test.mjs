@@ -115,8 +115,11 @@ test('invoice preserves selected product option snapshots',()=>{
 });
 
 
-test('checkout explicitly guards ZarinPal single-transaction amount ceiling',async()=>{
- const s=await (await import('node:fs/promises')).readFile('worker/src/index.js','utf8');
- assert.match(s,/zarinpal_amount_limit/);
- assert.match(s,/Number\(o\.total_irt\)>1000000000/);
+test('checkout does not block online payments by a hard-coded amount ceiling',async()=>{
+ const fs=await import('node:fs/promises');
+ const workerSource=await fs.readFile('worker/src/index.js','utf8');
+ const appSource=await fs.readFile('frontend/src/app.js','utf8');
+ assert.doesNotMatch(workerSource,/zarinpal_amount_limit|novino_amount_limit/);
+ assert.doesNotMatch(workerSource,/Number\(o\.total_irt\)>1000000000|o\.total_irt>1000000000/);
+ assert.doesNotMatch(appSource,/totalIrt>1000000000/);
 });
