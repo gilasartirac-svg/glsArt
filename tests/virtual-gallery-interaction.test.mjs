@@ -72,8 +72,11 @@ test('gallery uses warm fixed lighting, real stone surfaces, and no direct artwo
   assert.match(script, /loadStoneSurface\(pillarMarbleMaterial, \.72, 4\.2\)/);
   assert.match(script, /addPillar\(-7\.25, z, pillarMarbleMaterial\)/);
   assert.match(script, /loadStoneSurface\(floorMaterial/);
-  assert.match(script, /large_floor_tiles_02_diff_1k\.png/);
-  assert.match(script, /function addCeilingTileGrid\(/);
+  assert.match(script, /color: 0xfaf9f5, roughness: \.98, metalness: 0, side: THREE\.DoubleSide/);
+  assert.match(script, /function addCoveLighting\(/);
+  assert.match(script, /emissive: 0xffd99a, emissiveIntensity: 2\.1/);
+  assert.match(script, /new THREE\.PointLight\(0xffe8c8, \.48, 7\.5, 1\.55\)/);
+  assert.doesNotMatch(script, /large_floor_tiles_02_diff_1k\.png/);
   assert.match(script, /function addEntranceDoor\(/);
   assert.match(script, /dark_wooden_planks_diff_1k\.png/);
   assert.match(script, /function addGrandfatherClock\(/);
