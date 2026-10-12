@@ -271,7 +271,12 @@ async function api(path,opt={}){
      if(retryable&&i<endpoints.length-1){lastError=Object.assign(new Error('http_'+r.status),{status:r.status,code:String(d.error||d.message||'http_'+r.status),path});continue}
      if(r.status===401||r.status===403)clearAuthState();
      const code=String(d.error||d.message||'');
-     const e=new Error(code==='d1_limit_exceeded'?'سرویس داده فروشگاه موقتاً به سقف روزانه رسیده است. لطفاً چند دقیقه بعد دوباره تلاش کنید.':(r.status===404?t('error.notFound'):r.status===401||r.status===403?t('error.unauthorized'):t('error.service')));
+     const knownPaymentErrors={
+      zarinpal_amount_limit:'مبلغ سفارش از سقف هر تراکنش زرین‌پال (۱٬۰۰۰٬۰۰۰٬۰۰۰ ریال) بیشتر است. برای پرداخت آنلاین این سفارش باید از درگاهی با سقف بالاتر استفاده شود؛ در صورت فعال بودن، روش کارت‌به‌کارت را انتخاب کنید.',
+      novino_amount_limit:'مبلغ سفارش از سقف هر تراکنش نوینوپی (۱٬۰۰۰٬۰۰۰٬۰۰۰ ریال) بیشتر است. در صورت فعال بودن، روش کارت‌به‌کارت را انتخاب کنید.',
+      payment_request_failed:'درگاه پرداخت درخواست را نپذیرفت. مبلغ سفارش ممکن است از سقف مجاز درگاه بیشتر باشد؛ روش پرداخت دیگری را انتخاب کنید یا با پشتیبانی تماس بگیرید.'
+     };
+     const e=new Error(knownPaymentErrors[code]||(code==='d1_limit_exceeded'?'سرویس داده فروشگاه موقتاً به سقف روزانه رسیده است. لطفاً چند دقیقه بعد دوباره تلاش کنید.':(r.status===404?t('error.notFound'):r.status===401||r.status===403?t('error.unauthorized'):t('error.service'))));
      e.status=r.status;e.code=code||('http_'+r.status);e.path=path;throw e;
     }
     const requiredShape=path=>{
@@ -987,6 +992,12 @@ async function cart(){
   });
   document.querySelector('#order')?.addEventListener('click',async()=>{
    const button=document.querySelector('#order'),msg=document.querySelector('#msg');
+   const provider=document.querySelector('input[name="payment-provider"]:checked')?.value||paymentOptions.defaultProvider||'zarinpal';
+   const totalIrt=Number(p.total_irt||0);
+   if(totalIrt>1000000000&&(provider==='zarinpal'||provider==='novinopay')){
+    if(msg)msg.innerHTML='<span class="error">مبلغ سفارش از سقف هر تراکنش این درگاه (۱٬۰۰۰٬۰۰۰٬۰۰۰ ریال) بیشتر است. لطفاً روش کارت‌به‌کارت را انتخاب کنید، اگر فعال است؛ در غیر این صورت برای هماهنگی پرداخت با پشتیبانی تماس بگیرید. سفارش هنوز ثبت نشده است.</span>';
+    return;
+   }
    const values={recipientName:String(document.querySelector('#rn')?.value||'').trim(),mobile:String(document.querySelector('#rm')?.value||'').replace(/\D/g,''),province:String(document.querySelector('#pr')?.value||'').trim(),city:String(document.querySelector('#ct')?.value||'').trim(),address:String(document.querySelector('#ad')?.value||'').trim(),postalCode:String(document.querySelector('#pc')?.value||'').replace(/\D/g,'')};
    if(!values.recipientName||!values.mobile||!values.province||!values.city||!values.address||!values.postalCode){if(msg)msg.innerHTML='<span class="error">لطفاً همه اطلاعات تحویل را کامل کنید.</span>';return}
    if(!/^09\d{9}$/.test(values.mobile)){if(msg)msg.innerHTML='<span class="error">شماره موبایل گیرنده باید معتبر باشد.</span>';return}
@@ -996,7 +1007,6 @@ async function cart(){
    try{
     const a=await api('/api/addresses',{method:'POST',body:JSON.stringify(values),headers:{'x-csrf-token':csrf()}});
     const o=await api('/api/orders',{method:'POST',body:JSON.stringify({addressId:a.addressId,idempotencyKey:idempotencyKey(),couponCode}),headers:{'x-csrf-token':csrf()}});
-    const provider=document.querySelector('input[name="payment-provider"]:checked')?.value||paymentOptions.defaultProvider||'zarinpal';
     const pay=await api('/api/orders/'+encodeURIComponent(o.orderId)+'/pay',{method:'POST',body:JSON.stringify({provider}),headers:{'x-csrf-token':csrf()}});
     if(!pay?.url)throw new Error('آدرس درگاه پرداخت از سرور دریافت نشد.');
     if(provider==='card_transfer'&&pay.manual){
