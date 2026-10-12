@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-12T04:21:00.000Z",
+  "generatedAt": "2026-10-12T04:50:38.050Z",
   "products": [
     {
       "id": "xls_0270",
@@ -2997,7 +2997,7 @@
       "sku": "Gilas211",
       "name": "تابلوی معرق مس برجسته وان يکاد",
       "price_irt": 98400000,
-      "image": "/uploaded/0001143_gilas211.jpeg",
+      "image": "/uploaded/0002465_gilas211.jpeg",
       "category_id": null,
       "category_ids": [
         "cat_gilas_horizontal",
@@ -3168,7 +3168,7 @@
       "sku": "Gilas116",
       "name": "تابلوی معرق مس برجسته وان يکاد",
       "price_irt": 84100000,
-      "image": "/uploaded/0002394_gilas116.jpeg",
+      "image": "/uploaded/0002395_gilas116.jpeg",
       "category_id": null,
       "category_ids": [
         "cat_gilas_vertical",
@@ -3363,7 +3363,7 @@
       "sku": "Gilas098",
       "name": "تابلوی معرق مس برجسته صلوات امام رضا",
       "price_irt": 85800000,
-      "image": "/uploaded/0001159_gilas098.jpeg",
+      "image": "/uploaded/0002335_gilas098.jpeg",
       "category_id": null,
       "category_ids": [
         "cat_gilas_horizontal",
@@ -3558,7 +3558,7 @@
       "sku": "Gilas089",
       "name": "تابلوی معرق مس برجسته ياعلي",
       "price_irt": 42900000,
-      "image": "/uploaded/0001169_gilas089.jpeg",
+      "image": "/uploaded/0001168_gilas089.jpeg",
       "category_id": null,
       "category_ids": [
         "cat_gilas_vertical",
@@ -3606,7 +3606,7 @@
       "sku": "Gilas087",
       "name": "تابلوی معرق مس برجسته ياعلي",
       "price_irt": 57200000,
-      "image": "/uploaded/0001171_gilas087.jpeg",
+      "image": "/uploaded/0001172_gilas087.jpeg",
       "category_id": null,
       "category_ids": [
         "cat_gilas_vertical",
@@ -3994,7 +3994,7 @@
       "sku": "Gilas069",
       "name": "تابلوی معرق مس برجسته بي تو به سر نمیشود",
       "price_irt": 85800000,
-      "image": "/uploaded/0001192_gilas069.jpeg",
+      "image": null,
       "category_id": null,
       "category_ids": [
         "cat_gilas_horizontal",
@@ -4018,7 +4018,7 @@
       "sku": "Gilas068",
       "name": "تابلوی معرق مس برجسته يا علي مدد",
       "price_irt": 42900000,
-      "image": "/uploaded/0001195_gilas068.jpeg",
+      "image": "/uploaded/0001196_gilas068.jpeg",
       "category_id": null,
       "category_ids": [
         "cat_gilas_square",
@@ -4140,7 +4140,7 @@
       "sku": "Gilas063",
       "name": "تابلوی معرق مس برجسته وان يكاد",
       "price_irt": 99100000,
-      "image": "/uploaded/0001201_gilas063.jpeg",
+      "image": "/uploaded/0002350_gilas063.jpeg",
       "category_id": null,
       "category_ids": [
         "cat_gilas_vertical",
@@ -4406,7 +4406,7 @@
       "sku": "Gilas050",
       "name": "تابلوی معرق مس برجسته وان يكاد عمودي",
       "price_irt": 112900000,
-      "image": "/uploaded/0001219_gilas050.jpeg",
+      "image": "/uploaded/0001220_gilas050.jpeg",
       "category_id": null,
       "category_ids": [
         "cat_gilas_vertical",
@@ -4646,7 +4646,7 @@
       "sku": "Gilas040",
       "name": "تابلوی معرق مس برجسته هزارعلي",
       "price_irt": 182000000,
-      "image": "/uploaded/0001114_gilas040.jpeg",
+      "image": "/uploaded/0001117_gilas040.jpeg",
       "category_id": null,
       "category_ids": [
         "cat_gilas_vertical",
@@ -4792,7 +4792,7 @@
       "sku": "Gilas033",
       "name": "تابلوی معرق مس برجسته صلوات امام رضا",
       "price_irt": 128300000,
-      "image": "/uploaded/0001105_gilas033.jpeg",
+      "image": "/uploaded/0001106_gilas033.jpeg",
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
@@ -5117,7 +5117,7 @@
       "sku": "Gilas019",
       "name": "تابلوی معرق مس برجسته علي(ع)",
       "price_irt": 83200000,
-      "image": "/uploaded/0001088_gilas019.jpeg",
+      "image": "/uploaded/0001091_gilas019.jpeg",
       "category_id": "cat_gilas_vertical",
       "category_ids": [
         "cat_gilas_vertical",
@@ -5492,7 +5492,7 @@
       "sku": "Gilas001",
       "name": "تابلوی معرق مس برجسته آیه وان یکاد",
       "price_irt": 118700000,
-      "image": "/uploaded/0001064_gilas001.jpeg",
+      "image": "/uploaded/0002388_gilas001.jpeg",
       "category_id": "cat_gilas_horizontal",
       "category_ids": [
         "cat_gilas_horizontal",
