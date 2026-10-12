@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-12T04:50:38.050Z",
+  "generatedAt": "2026-10-12T05:00:00.000Z",
   "products": [
     {
       "id": "xls_0270",
@@ -388,31 +388,6 @@
       "updated_at": "2026-10-12 04:22:38"
     },
     {
-      "id": "xls_0253",
-      "slug": "Gilas392",
-      "sku": "Gilas392",
-      "name": "تابلوی معرق مس برجسته چهارتکه",
-      "price_irt": 83000000,
-      "image": "/uploaded/0003554_gilas392.jpeg",
-      "category_id": null,
-      "category_ids": [
-        "cat_gilas_horizontal",
-        "cat_gilas_square",
-        "cat_gilas_all"
-      ],
-      "active": 1,
-      "flash_sale_active": 0,
-      "flash_sale_ends_at": null,
-      "flash_sale_price_irt": null,
-      "view_count": 3,
-      "review_count": 0,
-      "rating_avg": 0,
-      "favorite_count": 0,
-      "sold_count": 0,
-      "created_at": "2026-09-30 02:34:45",
-      "updated_at": "2026-10-12 04:22:38"
-    },
-    {
       "id": "xls_0252",
       "slug": "Gilas391",
       "sku": "Gilas391",
@@ -429,30 +404,6 @@
       "flash_sale_ends_at": null,
       "flash_sale_price_irt": null,
       "view_count": 6,
-      "review_count": 0,
-      "rating_avg": 0,
-      "favorite_count": 0,
-      "sold_count": 0,
-      "created_at": "2026-09-30 02:34:43",
-      "updated_at": "2026-10-12 04:22:38"
-    },
-    {
-      "id": "xls_0251",
-      "slug": "Gilas390",
-      "sku": "Gilas390",
-      "name": "تابلوی معرق مس برجسته یاعلی ابن موسی الرضا",
-      "price_irt": 76700000,
-      "image": "/uploaded/0003553_gilas390.jpeg",
-      "category_id": null,
-      "category_ids": [
-        "cat_gilas_square",
-        "cat_gilas_all"
-      ],
-      "active": 1,
-      "flash_sale_active": 0,
-      "flash_sale_ends_at": null,
-      "flash_sale_price_irt": null,
-      "view_count": 4,
       "review_count": 0,
       "rating_avg": 0,
       "favorite_count": 0,
@@ -602,31 +553,6 @@
       "favorite_count": 0,
       "sold_count": 0,
       "created_at": "2026-09-30 02:34:38",
-      "updated_at": "2026-10-12 04:22:38"
-    },
-    {
-      "id": "xls_0244",
-      "slug": "Gilas383",
-      "sku": "Gilas383",
-      "name": "تابلوی معرق مس برجسته سوره حمد",
-      "price_irt": 93100000,
-      "image": "/uploaded/0003595_gilas383.png",
-      "category_id": null,
-      "category_ids": [
-        "cat_gilas_horizontal",
-        "cat_gilas_vertical",
-        "cat_gilas_all"
-      ],
-      "active": 1,
-      "flash_sale_active": 0,
-      "flash_sale_ends_at": null,
-      "flash_sale_price_irt": null,
-      "view_count": 4,
-      "review_count": 0,
-      "rating_avg": 0,
-      "favorite_count": 0,
-      "sold_count": 0,
-      "created_at": "2026-09-30 02:34:35",
       "updated_at": "2026-10-12 04:22:38"
     },
     {
@@ -843,30 +769,6 @@
       "favorite_count": 0,
       "sold_count": 0,
       "created_at": "2026-09-30 02:34:27",
-      "updated_at": "2026-10-12 04:22:38"
-    },
-    {
-      "id": "xls_0234",
-      "slug": "Gilas373",
-      "sku": "Gilas373",
-      "name": "تابلوی معرق مس برجسته علی(ع)",
-      "price_irt": 78000000,
-      "image": "/uploaded/0002525_gilas373.jpeg",
-      "category_id": null,
-      "category_ids": [
-        "cat_gilas_square",
-        "cat_gilas_all"
-      ],
-      "active": 1,
-      "flash_sale_active": 0,
-      "flash_sale_ends_at": null,
-      "flash_sale_price_irt": null,
-      "view_count": 3,
-      "review_count": 0,
-      "rating_avg": 0,
-      "favorite_count": 0,
-      "sold_count": 0,
-      "created_at": "2026-09-30 02:34:25",
       "updated_at": "2026-10-12 04:22:38"
     },
     {
@@ -2752,54 +2654,6 @@
       "updated_at": "2026-10-12 04:22:38"
     },
     {
-      "id": "xls_0152",
-      "slug": "Gilas224",
-      "sku": "Gilas224",
-      "name": "تابلوی معرق مس برجسته مولود کعبه",
-      "price_irt": 132500000,
-      "image": "/uploaded/0002244_gilas224.jpeg",
-      "category_id": null,
-      "category_ids": [
-        "cat_gilas_vertical",
-        "cat_gilas_all"
-      ],
-      "active": 1,
-      "flash_sale_active": 0,
-      "flash_sale_ends_at": null,
-      "flash_sale_price_irt": null,
-      "view_count": 3,
-      "review_count": 0,
-      "rating_avg": 0,
-      "favorite_count": 0,
-      "sold_count": 0,
-      "created_at": "2026-09-30 02:31:27",
-      "updated_at": "2026-10-12 04:22:38"
-    },
-    {
-      "id": "xls_0151",
-      "slug": "Gilas223",
-      "sku": "Gilas223",
-      "name": "تابلوی معرق مس برجسته گفتارنیک",
-      "price_irt": 129400000,
-      "image": "/uploaded/0002236_gilas223.jpeg",
-      "category_id": null,
-      "category_ids": [
-        "cat_gilas_horizontal",
-        "cat_gilas_all"
-      ],
-      "active": 1,
-      "flash_sale_active": 0,
-      "flash_sale_ends_at": null,
-      "flash_sale_price_irt": null,
-      "view_count": 3,
-      "review_count": 0,
-      "rating_avg": 0,
-      "favorite_count": 0,
-      "sold_count": 0,
-      "created_at": "2026-09-30 02:31:24",
-      "updated_at": "2026-10-12 04:22:38"
-    },
-    {
       "id": "xls_0150",
       "slug": "Gilas221",
       "sku": "Gilas221",
@@ -2833,30 +2687,6 @@
       "category_id": null,
       "category_ids": [
         "cat_gilas_horizontal",
-        "cat_gilas_all"
-      ],
-      "active": 1,
-      "flash_sale_active": 0,
-      "flash_sale_ends_at": null,
-      "flash_sale_price_irt": null,
-      "view_count": 3,
-      "review_count": 0,
-      "rating_avg": 0,
-      "favorite_count": 0,
-      "sold_count": 0,
-      "created_at": "2026-09-30 02:31:21",
-      "updated_at": "2026-10-12 04:22:38"
-    },
-    {
-      "id": "xls_0147",
-      "slug": "Gilas219",
-      "sku": "Gilas219",
-      "name": "تابلوی معرق مس برجسته الله",
-      "price_irt": 100100000,
-      "image": "/uploaded/0002392_gilas219.jpeg",
-      "category_id": null,
-      "category_ids": [
-        "cat_gilas_square",
         "cat_gilas_all"
       ],
       "active": 1,
