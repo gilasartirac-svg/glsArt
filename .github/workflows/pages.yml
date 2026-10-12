@@ -36,8 +36,11 @@ jobs:
       - name: Check
         run: npm run check
 
-      - name: Check frontend JavaScript syntax
-        run: node --check frontend/src/app.js
+      - name: Check frontend and virtual gallery JavaScript syntax
+        run: |
+          set -euo pipefail
+          node --check frontend/src/app.js
+          node --check frontend/public/virtual-gallery/gallery.js
 
       - name: Test
         run: npm test
