@@ -209,9 +209,8 @@ function onArtworkClick(event) {
   if (record?.product) focusArtwork(record);
 }
 
-function addPillar(x, z) {
-  const material = new THREE.MeshStandardMaterial({ color: 0xe7e0d3, roughness: .38, metalness: .035 });
-  const pillar = new THREE.Mesh(new THREE.BoxGeometry(.3, 4.3, .3), material);
+function addPillar(x, z, marbleMaterial) {
+  const pillar = new THREE.Mesh(new THREE.BoxGeometry(.3, 4.3, .3), marbleMaterial);
   pillar.position.set(x, 2.15, z); scene.add(pillar);
   const trim = new THREE.Mesh(new THREE.BoxGeometry(.38, .06, .38), new THREE.MeshStandardMaterial({ color: 0x967044, metalness: .55, roughness: .38 }));
   trim.position.set(x, 3.8, z); scene.add(trim);
@@ -445,6 +444,8 @@ function setupScene() {
   const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(18, corridorLength), ceilingMaterial);
   ceiling.rotation.x = Math.PI / 2; ceiling.position.set(0, 4.2, corridorCenter); scene.add(ceiling);
   const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: marbleTexture, roughness: .68, metalness: 0, side: THREE.DoubleSide });
+  // Pillars share the local marble fallback and upgrade to the real marble texture when it loads.
+  const pillarMarbleMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: marbleTexture, roughness: .42, metalness: 0 });
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(18, corridorLength), floorMaterial);
   floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, corridorCenter); scene.add(floor);
   const floorGrid = new THREE.GridHelper(18, 48, 0x8b6a45, 0x5b554e);
@@ -497,6 +498,7 @@ function setupScene() {
   const loadStoneSurface = (material, repeatX, repeatY) => loadSurfaceTexture(material, stoneTextureUrl, repeatX, repeatY);
   const loadVelvetSurface = (material, repeatX, repeatY) => loadSurfaceTexture(material, velvetTextureUrl, repeatX, repeatY, 0x98745d);
   loadStoneSurface(floorMaterial, 2.4, Math.max(4, corridorLength / 5));
+  loadStoneSurface(pillarMarbleMaterial, .72, 4.2);
   const ceilingTilesUrl = 'https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/large_floor_tiles_02/large_floor_tiles_02_diff_1k.png';
   loadSurfaceTexture(ceilingMaterial, ceilingTilesUrl, 4, Math.max(5, corridorLength / 2.2), 0xf2e7d5);
   addCeilingTileGrid(corridorLength, corridorCenter);
@@ -516,7 +518,7 @@ function setupScene() {
     artworkQueue.push({ product, index, x: left ? -8.91 : 8.91, z: 1 - row * 3.1, rotation: left ? Math.PI / 2 : -Math.PI / 2 });
   });
   // Wider architectural piers break up the long-hall rhythm.
-  for (let i = 0; i < rows; i += 4) { const z = -2.2 - i * 3.1; addPillar(-7.25, z); addPillar(7.25, z - 1.45); }
+  for (let i = 0; i < rows; i += 4) { const z = -2.2 - i * 3.1; addPillar(-7.25, z, pillarMarbleMaterial); addPillar(7.25, z - 1.45, pillarMarbleMaterial); }
   const endGlow = new THREE.PointLight(0xffe3b8, .65, 16, 1.8); endGlow.position.set(0, 2.4, bounds.zMin + 1.5); scene.add(endGlow);
   galleryTextureLoader = new THREE.TextureLoader();
   clock = new THREE.Clock();
