@@ -77,8 +77,11 @@ test('gallery uses warm fixed lighting, real stone surfaces, and no direct artwo
   assert.match(script, /emissive: 0xffd99a, emissiveIntensity: 2\.1/);
   assert.doesNotMatch(script, /new THREE\.PointLight\(0xffe8c8, \.48, 7\.5, 1\.55\)/);
   assert.match(script, /function getRenderPixelRatio\(\)/);
-  assert.match(script, /lowPowerDevice \? 1 : 1\.35/);
+  assert.match(script, /lowPowerDevice \? 0\.85 : 1\.2/);
+  assert.match(script, /ARTWORK_TEXTURE_UPDATE_INTERVAL = 180/);
+  assert.match(script, /now - lastArtworkTextureUpdate >= ARTWORK_TEXTURE_UPDATE_INTERVAL/);
   assert.match(script, /texture\.anisotropy = Math\.min\(4,/);
+  assert.match(script, /marbleTexture\.anisotropy = Math\.min\(2,/);
   assert.match(script, /const plasterLip = new THREE\.Mesh\(new THREE\.BoxGeometry\(\.16, \.18, corridorLength\), plaster\)/);
   assert.match(script, /diffuser\.rotation\.x = -Math\.PI \/ 2/);
   assert.match(script, /function addEntranceDoor\(/);
@@ -141,7 +144,7 @@ test('virtual gallery supports one-finger look and faster two-finger pan/pinch o
 
 test('gallery creates every active product in progressive batches of ten without an artificial cap', () => {
   assert.match(script, /const rows = Math\.max\(5, Math\.ceil\(galleryProducts\.length \/ 2\)\)/);
-  assert.match(script, /const ARTWORK_BATCH_SIZE = 10/);
+  assert.match(script, /const ARTWORK_BATCH_SIZE = 2/);
   assert.match(script, /const ARTWORK_BUILD_DISTANCE = 14/);
   assert.match(script, /function buildNearbyArtworkBatch\(\)/);
   assert.match(script, /nextArtworkIndex \+ ARTWORK_BATCH_SIZE/);
@@ -151,7 +154,9 @@ test('gallery creates every active product in progressive batches of ten without
   assert.doesNotMatch(script, /limit: 5000/);
   assert.match(script, /if \(!allGalleryProducts\.length\) throw new Error/);
 });
-test('virtual gallery hides category controls and always opens the complete active collection', () => {
+test('virtual gallery hides category controls and the redundant shop button while opening the complete active collection', () => {
+  assert.doesNotMatch(markup, /class="shop-link"/);
+  assert.doesNotMatch(markup, /مشاهده آثار در فروشگاه/);
   assert.doesNotMatch(markup, /data-gallery-category=/);
   assert.doesNotMatch(markup, /category-selector/);
   assert.match(script, /selectedGalleryCategory = 'all'/);
