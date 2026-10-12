@@ -1090,7 +1090,6 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
    await env.DB.batch([env.DB.prepare("UPDATE payments SET status='REDIRECTED',authority=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND status!='PAID'").bind(authority,p.id),env.DB.prepare('INSERT INTO payment_attempts(id,payment_id,authority,request_code,raw_status) VALUES(?,?,?,?,?)').bind(uid(),p.id,authority,code,JSON.stringify({provider,code,message:data.message||null}))]);
    return json({ok:true,url:paymentRedirectUrl(provider,authority,await paymentEnvironment(env))});
   }
-  if(o.total_irt>1000000000)return json({error:'novino_amount_limit'},400);
   if(!env.NOVINOPAY_MERCHANT_ID)return json({error:'novinopay_not_configured'},503);
   const callback=await siteSetting(env,'novinopay_callback_url',env.PAYMENT_CALLBACK_URL||new URL(req.url).origin+'/api/payment/callback');
   const reqn=await novino(env,'request',{amount:o.total_irt,callback_url:callback,callback_method:'GET',invoice_id:oid,description:'GilasArt Order '+oid,email:'',mobile:me.mobile,name:me.name||''});
