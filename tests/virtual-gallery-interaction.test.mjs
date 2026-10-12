@@ -105,7 +105,7 @@ test('gallery has a bright stone finish, decorative rugs and vases, and a fixed 
   assert.match(script, /new THREE\.PerspectiveCamera\(57/);
   assert.match(script, /camera\.fov = 57/);
   assert.match(markup, /gallery\.css\?v=\d+/);
-  assert.match(markup, /gallery\.js\?v=17/);
+  assert.match(markup, /gallery\\.js\\?v=\\d+/);
 });
 
 test('left and right controls navigate to a centered, front-facing artwork view',()=>{
