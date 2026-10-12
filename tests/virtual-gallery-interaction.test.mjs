@@ -147,10 +147,13 @@ test('virtual gallery hides category controls and always opens the complete acti
   assert.match(script, /galleryProducts = \[\.\.\.allGalleryProducts\]/);
 });
 
-test('artwork wall surfaces do not add a second frame around framed product photos',()=>{
+test('each gallery artwork has physical depth and a visible SKU plaque beneath it',()=>{
+  assert.match(script,/new THREE\.BoxGeometry\(maxWidth, maxHeight, \.14\)/);
+  assert.match(script,/const backing = new THREE\.Mesh/);
+  assert.match(script,/const plaqueCanvas = document\.createElement\('canvas'\)/);
+  assert.match(script,/const sku = String\(product\?\.sku \|\| 'GilasArt'\)/);
+  assert.match(script,/const plaqueFace = new THREE\.Mesh/);
   assert.match(script,/hitMeshes: \[inner\]/);
-  assert.doesNotMatch(script,/const outerFrame = new THREE\.Mesh/);
-  assert.doesNotMatch(script,/const frameMesh = new THREE\.Mesh/);
 });
 test('product textures load near the visitor and unload at a distance to preserve memory',()=>{
   assert.match(script,/function updateArtworkTextures\(\)/);
