@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-12T05:00:00.000Z",
+  "generatedAt": "2026-10-12T05:10:00.000Z",
   "products": [
     {
       "id": "xls_0270",
@@ -3824,7 +3824,7 @@
       "sku": "Gilas069",
       "name": "تابلوی معرق مس برجسته بي تو به سر نمیشود",
       "price_irt": 85800000,
-      "image": null,
+      "image": "/data/product-image-unavailable.svg",
       "category_id": null,
       "category_ids": [
         "cat_gilas_horizontal",
