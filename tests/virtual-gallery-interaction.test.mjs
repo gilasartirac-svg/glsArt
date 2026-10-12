@@ -75,10 +75,10 @@ test('gallery uses warm fixed lighting, real stone surfaces, and no direct artwo
   assert.match(script, /color: 0xfaf9f5, roughness: \.98, metalness: 0, side: THREE\.DoubleSide/);
   assert.match(script, /function addCoveLighting\(/);
   assert.match(script, /emissive: 0xffd99a, emissiveIntensity: 2\.1/);
-  assert.doesNotMatch(script, /new THREE\\.PointLight\\(0xffe8c8, \\.48, 7\\.5, 1\\.55\\)/);
-  assert.match(script, /function getRenderPixelRatio\\(\\)/);
-  assert.match(script, /lowPowerDevice \\? 1 : 1\\.35/);
-  assert.match(script, /texture\\.anisotropy = Math\\.min\\(4,/);
+  assert.doesNotMatch(script, /new THREE\.PointLight\(0xffe8c8, \.48, 7\.5, 1\.55\)/);
+  assert.match(script, /function getRenderPixelRatio\(\)/);
+  assert.match(script, /lowPowerDevice \? 1 : 1\.35/);
+  assert.match(script, /texture\.anisotropy = Math\.min\(4,/);
   assert.match(script, /const plasterLip = new THREE\.Mesh\(new THREE\.BoxGeometry\(\.16, \.18, corridorLength\), plaster\)/);\n  assert.match(script, /diffuser\.rotation\.x = -Math\.PI \/ 2/);
   assert.match(script, /function addEntranceDoor\(/);
   assert.match(script, /dark_wooden_planks_diff_1k\.png/);
