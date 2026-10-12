@@ -973,10 +973,20 @@ function bindControls() {
       }
       const token = String(session.csrfToken || '');
       if (!token) throw new Error('جلسه خرید معتبر نیست؛ لطفاً دوباره وارد حساب شوید.');
+      // Match the storefront product page: submit each attribute's default option
+      // instead of an empty options array, which fails validation for required attributes.
+      const productKey = String(product.slug || product.id || '').trim();
+      if (!productKey) throw new Error('شناسه اثر برای افزودن به سبد خرید معتبر نیست.');
+      const productDetails = await request('/api/products/' + encodeURIComponent(productKey));
+      const attributes = Array.isArray(productDetails.attributes) ? productDetails.attributes : [];
+      const options = attributes.map(attribute => {
+        const option = (Array.isArray(attribute.options) ? attribute.options : []).find(item => item.is_default);
+        return option ? { attributeId: String(attribute.id), optionId: String(option.id) } : null;
+      }).filter(Boolean);
       await request('/api/cart', {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-csrf-token': token },
-        body: JSON.stringify({ productId: product.id, quantity: 1, options: [] })
+        body: JSON.stringify({ productId: product.id, quantity: 1, options })
       });
       if (message) message.textContent = 'این اثر با موفقیت به سبد خرید اضافه شد.';
       button.textContent = 'افزوده شد ✓';
