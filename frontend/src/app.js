@@ -1398,7 +1398,21 @@ async function router(){
    if(p[1]==='success'){
     layout('<section class="wrap page"><div class="panel"><span class="eyebrow">PAYMENT CONFIRMED</span><h1>پرداخت با موفقیت تأیید شد</h1>'+(order?'<p class="muted">شماره سفارش: '+escapeHtml(order)+'</p>':'')+'<p>فاکتور فروش سفارش شما آماده است.</p><div class="cart-checkout-bar"><button class="btn primary" id="payment-invoice-print" type="button">نمایش و چاپ فاکتور</button><a class="btn ghost" href="'+routeUrl('/account')+'">حساب کاربری</a></div></div></section>');
     document.querySelector('#payment-invoice-print')?.addEventListener('click',async()=>{
-     try{const d=await api('/api/orders/'+encodeURIComponent(order));openInvoiceWindow(d)}catch(e){alert(e.message||'فاکتور دریافت نشد.')}
+     // Open the tab directly inside the user gesture so mobile browsers do not block it.
+     const invoiceWindow=window.open('about:blank','_blank');
+     if(!invoiceWindow){alert('مرورگر اجازه باز کردن فاکتور را نداد. لطفاً پنجره‌های بازشو را برای سایت فعال کنید.');return}
+     try{
+      invoiceWindow.document.open();
+      invoiceWindow.document.write('<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><title>فاکتور گیلاس آرت</title><body style="font-family:Tahoma,sans-serif;padding:2rem;text-align:center">در حال آماده‌سازی فاکتور فروش…</body></html>');
+      invoiceWindow.document.close();
+      const d=await api('/api/orders/'+encodeURIComponent(order));
+      if(!d?.order||!Array.isArray(d.items))throw new Error('اطلاعات کامل فاکتور دریافت نشد.');
+      const invoiceModule=await import('./invoice.js?v=20261012-payment-invoice-1');
+      invoiceModule.openInvoice({...d.order,items:d.items,payment:d.payment||null},d.invoice||{},invoiceWindow);
+     }catch(e){
+      try{invoiceWindow.close()}catch{}
+      alert(e.message||'فاکتور دریافت نشد. لطفاً از بخش حساب کاربری دوباره تلاش کنید.');
+     }
     });
     return;
    }
