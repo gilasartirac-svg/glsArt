@@ -55,7 +55,9 @@ test('gallery add-to-cart uses the existing authenticated store API and CSRF tok
   assert.match(script, /request\('\/api\/me'\)/);
   assert.match(script, /session\.csrfToken/);
   assert.match(script, /request\('\/api\/cart',[\s\S]*?method: 'POST'/);
-  assert.match(script, /productId: product\.id, quantity: 1, options: \[\]/);
+  assert.match(script, /request\('\/api\/products\/' \+ encodeURIComponent\(productKey\)\)/);
+  assert.match(script, /attribute\.options[\s\S]*?find\(item => item\.is_default\)/);
+  assert.match(script, /productId: product\.id, quantity: 1, options/);
   assert.match(script, /gilasart:cart:added/);
   assert.doesNotMatch(script, /اتصال سبد خرید هنوز فعال نشده است/);
   assert.match(styles, /\.artwork-panel__cart/);
