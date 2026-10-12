@@ -67,6 +67,10 @@ test('gallery uses warm fixed lighting, real stone surfaces, and no direct artwo
   assert.match(script, /new THREE\.HemisphereLight/);
   assert.match(script, /new THREE\.Fog\(0xf0e7d8, 38, 118\)/);
   assert.match(script, /marble_01_diff_1k\.jpg/);
+  assert.match(script, /function addPillar\(x, z, marbleMaterial\)/);
+  assert.match(script, /pillarMarbleMaterial = new THREE\.MeshStandardMaterial\(\{ color: 0xffffff, map: marbleTexture/);
+  assert.match(script, /loadStoneSurface\(pillarMarbleMaterial, \.72, 4\.2\)/);
+  assert.match(script, /addPillar\(-7\.25, z, pillarMarbleMaterial\)/);
   assert.match(script, /loadStoneSurface\(floorMaterial/);
   assert.match(script, /large_floor_tiles_02_diff_1k\.png/);
   assert.match(script, /function addCeilingTileGrid\(/);
