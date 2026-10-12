@@ -307,8 +307,8 @@ jobs:
           if ! grep -qi 'data-joystick="combined"' /tmp/virtual-gallery.html || grep -qi 'data-joystick="look"' /tmp/virtual-gallery.html || grep -qi 'data-joystick="move"' /tmp/virtual-gallery.html || ! grep -qi 'id="client-clock"' /tmp/virtual-gallery.html || ! grep -qi 'id="artwork-loading"' /tmp/virtual-gallery.html; then
             echo "Published virtual gallery controls or client clock are missing"; exit 1
           fi
-          gallery_js_version=$(grep -oE 'gallery\.js\\?v=[0-9]+' /tmp/virtual-gallery.html | head -n1 | grep -oE '[0-9]+' || true)
-          gallery_css_version=$(grep -oE 'gallery\.css\\?v=[0-9]+' /tmp/virtual-gallery.html | head -n1 | grep -oE '[0-9]+' || true)
+          gallery_js_version=$(grep -oE 'gallery\.js\?v=[0-9]+' /tmp/virtual-gallery.html | head -n1 | grep -oE '[0-9]+' || true)
+          gallery_css_version=$(grep -oE 'gallery\.css\?v=[0-9]+' /tmp/virtual-gallery.html | head -n1 | grep -oE '[0-9]+' || true)
           test -n "$gallery_js_version" && test -n "$gallery_css_version"
           curl -fsSL --retry 3 --retry-all-errors "https://gilasart.ir/virtual-gallery/gallery.js?v=$gallery_js_version&verify=$GITHUB_SHA" -o /tmp/virtual-gallery.js
           curl -fsSL --retry 3 --retry-all-errors "https://gilasart.ir/virtual-gallery/gallery.css?v=$gallery_css_version&verify=$GITHUB_SHA" -o /tmp/virtual-gallery.css
