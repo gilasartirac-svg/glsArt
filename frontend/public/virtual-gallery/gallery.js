@@ -67,16 +67,52 @@ function addWallArt(x, z, rotation, index, title, imageUrl = '', product = null)
   group.position.set(x, 2.05, z);
   group.rotation.y = rotation;
   const maxWidth = 1.82, maxHeight = 2.08;
-  // Use an untinted, unlit surface: product images keep their original color and aspect ratio.
+  // Give each artwork real physical depth so it reads as a mounted object, not a flat decal.
+  const backingMaterial = new THREE.MeshStandardMaterial({ color: 0x6b4a2b, roughness: .46, metalness: .16 });
+  const backing = new THREE.Mesh(new THREE.BoxGeometry(maxWidth, maxHeight, .14), backingMaterial);
+  backing.position.z = -.035;
+  group.add(backing);
+  // Copper-toned side rails reveal the artwork's thickness from oblique viewing angles without covering its image.
+  const edgeMaterial = new THREE.MeshStandardMaterial({ color: 0x9b742d, roughness: .34, metalness: .68 });
+  for (const side of [-1, 1]) {
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(.035, maxHeight, .145), edgeMaterial);
+    rail.position.set(side * (maxWidth / 2 - .018), 0, -.025);
+    group.add(rail);
+  }
+  for (const side of [-1, 1]) {
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(maxWidth, .035, .145), edgeMaterial);
+    rail.position.set(0, side * (maxHeight / 2 - .018), -.025);
+    group.add(rail);
+  }
+  // The original product image stays untouched and sits just in front of the physical backing.
   const artworkMaterial = new THREE.MeshBasicMaterial({ color: 0xf4efe6, side: THREE.DoubleSide, toneMapped: false });
   const inner = new THREE.Mesh(new THREE.PlaneGeometry(maxWidth, maxHeight), artworkMaterial);
-  inner.position.z = .025;
+  inner.position.z = .045;
   group.add(inner);
+  // A real plaque below each artwork displays its actual product SKU.
+  const sku = String(product?.sku || 'GilasArt').trim().slice(0, 32);
+  const plaqueCanvas = document.createElement('canvas');
+  plaqueCanvas.width = 512; plaqueCanvas.height = 128;
+  const plaqueContext = plaqueCanvas.getContext('2d');
+  plaqueContext.fillStyle = '#34271b'; plaqueContext.fillRect(0, 0, 512, 128);
+  plaqueContext.strokeStyle = '#c6a05e'; plaqueContext.lineWidth = 5; plaqueContext.strokeRect(7, 7, 498, 114);
+  plaqueContext.fillStyle = '#f2d99e'; plaqueContext.font = 'bold 48px Arial, sans-serif';
+  plaqueContext.textAlign = 'center'; plaqueContext.textBaseline = 'middle';
+  plaqueContext.fillText(sku, 256, 64, 470);
+  const plaqueTexture = new THREE.CanvasTexture(plaqueCanvas);
+  plaqueTexture.colorSpace = THREE.SRGBColorSpace;
+  const plaqueMaterial = new THREE.MeshBasicMaterial({ map: plaqueTexture, side: THREE.DoubleSide, toneMapped: false });
+  const plaque = new THREE.Mesh(new THREE.BoxGeometry(.82, .205, .055), new THREE.MeshStandardMaterial({ color: 0x9b742d, roughness: .3, metalness: .72 }));
+  plaque.position.set(0, -(maxHeight / 2 + .17), .025);
+  group.add(plaque);
+  const plaqueFace = new THREE.Mesh(new THREE.PlaneGeometry(.78, .17), plaqueMaterial);
+  plaqueFace.position.set(0, -(maxHeight / 2 + .17), .055);
+  group.add(plaqueFace);
   scene.add(group);
   const record = {
-    group, title, index, product, hitMeshes: [inner], inner,
+    group, title, index, product, hitMeshes: [inner], inner, backing, plaque, plaqueFace,
     imageUrl: imageUrl ? galleryImageUrl(imageUrl) : '',
-    artworkMaterial, imageLoaded: false, imageLoading: false, imageLoadFailed: false,
+    artworkMaterial, plaqueTexture, imageLoaded: false, imageLoading: false, imageLoadFailed: false,
     maxWidth, maxHeight, lastNearAt: 0
   };
   record.hitMeshes.forEach(mesh => { mesh.userData.galleryArtwork = record; });
