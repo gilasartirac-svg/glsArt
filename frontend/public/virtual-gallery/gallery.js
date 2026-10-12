@@ -287,16 +287,27 @@ function addEntranceDoor(wallMaterial, doorMaterial, floorMaterial, ceilingMater
   const light = new THREE.PointLight(0xffd99a, .42, 8, 1.8);
   light.position.set(0, 3.15, doorZ - .35); scene.add(light);
 }
-function addCeilingTileGrid(corridorLength, corridorCenter) {
-  const grout = new THREE.MeshStandardMaterial({ color: 0x8c785c, roughness: .88, metalness: .02, transparent: true, opacity: .68 });
-  const y = 4.16;
-  for (let x = -8.25; x <= 8.25; x += 1.5) {
-    const line = new THREE.Mesh(new THREE.BoxGeometry(.018, .025, corridorLength), grout);
-    line.position.set(x, y, corridorCenter); scene.add(line);
-  }
-  for (let z = bounds.zMin + .5; z < bounds.zMax; z += 1.5) {
-    const line = new THREE.Mesh(new THREE.BoxGeometry(18, .025, .018), grout);
-    line.position.set(0, y, z); scene.add(line);
+function addCoveLighting(corridorLength, corridorCenter) {
+  // White plaster ceiling with concealed warm LED coves along both long edges.
+  const plaster = new THREE.MeshStandardMaterial({ color: 0xfaf9f5, roughness: .98, metalness: 0 });
+  const coveBody = new THREE.MeshStandardMaterial({ color: 0xf0eee7, roughness: .82, metalness: 0 });
+  const led = new THREE.MeshStandardMaterial({
+    color: 0xffedcf, emissive: 0xffd99a, emissiveIntensity: 2.1,
+    roughness: .32, metalness: 0, toneMapped: false
+  });
+  for (const side of [-1, 1]) {
+    const x = side * 8.12;
+    const recess = new THREE.Mesh(new THREE.BoxGeometry(.52, .12, corridorLength), coveBody);
+    recess.position.set(x, 4.08, corridorCenter); scene.add(recess);
+    const diffuser = new THREE.Mesh(new THREE.BoxGeometry(.075, .018, corridorLength - .25), led);
+    diffuser.position.set(side * 7.91, 4.145, corridorCenter); scene.add(diffuser);
+    // Soft warm light washes the plaster ceiling and gallery walls, rather than showing bare fixtures.
+    const count = Math.max(2, Math.ceil(corridorLength / 6));
+    for (let i = 0; i < count; i++) {
+      const z = bounds.zMin + (i + .5) * corridorLength / count;
+      const light = new THREE.PointLight(0xffe8c8, .48, 7.5, 1.55);
+      light.position.set(side * 7.35, 3.92, z); scene.add(light);
+    }
   }
 }
 function addGrandfatherClock(woodMaterial) {
@@ -440,7 +451,7 @@ function setupScene() {
   const ambient = new THREE.AmbientLight(0xfff0d8, 1.05); scene.add(ambient);
   const hemisphere = new THREE.HemisphereLight(0xfff7e9, 0x81705b, .88); scene.add(hemisphere);
   const galleryFill = new THREE.DirectionalLight(0xffe6bf, .24); galleryFill.position.set(-3, 7, 5); galleryFill.castShadow = false; scene.add(galleryFill);
-  const ceilingMaterial = new THREE.MeshStandardMaterial({ color: 0xf2e7d5, roughness: .98, metalness: 0, side: THREE.DoubleSide });
+  const ceilingMaterial = new THREE.MeshStandardMaterial({ color: 0xfaf9f5, roughness: .98, metalness: 0, side: THREE.DoubleSide });
   const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(18, corridorLength), ceilingMaterial);
   ceiling.rotation.x = Math.PI / 2; ceiling.position.set(0, 4.2, corridorCenter); scene.add(ceiling);
   const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, map: marbleTexture, roughness: .68, metalness: 0, side: THREE.DoubleSide });
@@ -499,9 +510,7 @@ function setupScene() {
   const loadVelvetSurface = (material, repeatX, repeatY) => loadSurfaceTexture(material, velvetTextureUrl, repeatX, repeatY, 0x98745d);
   loadStoneSurface(floorMaterial, 2.4, Math.max(4, corridorLength / 5));
   loadStoneSurface(pillarMarbleMaterial, .72, 4.2);
-  const ceilingTilesUrl = 'https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/large_floor_tiles_02/large_floor_tiles_02_diff_1k.png';
-  loadSurfaceTexture(ceilingMaterial, ceilingTilesUrl, 4, Math.max(5, corridorLength / 2.2), 0xf2e7d5);
-  addCeilingTileGrid(corridorLength, corridorCenter);
+  addCoveLighting(corridorLength, corridorCenter);
   const woodTextureUrl = 'https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/dark_wooden_planks/dark_wooden_planks_diff_1k.png';
   const doorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .42, metalness: .08, side: THREE.DoubleSide });
   const clockWoodMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .5, metalness: .04 });
