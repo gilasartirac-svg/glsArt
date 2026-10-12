@@ -147,9 +147,11 @@ test('virtual gallery hides category controls and always opens the complete acti
   assert.match(script, /galleryProducts = \[\.\.\.allGalleryProducts\]/);
 });
 
-test('each gallery artwork has physical depth and a visible SKU plaque beneath it',()=>{
-  assert.match(script,/new THREE\.BoxGeometry\(maxWidth, maxHeight, \.14\)/);
+test('gallery backing is black, matches the loaded artwork dimensions, and keeps the SKU plaque',()=>{
+  assert.match(script,/new THREE\.MeshStandardMaterial\(\{ color: 0x000000, roughness: \.78, metalness: 0 \}\)/);
   assert.match(script,/const backing = new THREE\.Mesh/);
+  assert.match(script,/record\.backing\.geometry = new THREE\.BoxGeometry\(width, height, \.14\)/);
+  assert.match(script,/record\.inner\.geometry = new THREE\.PlaneGeometry\(width, height\)/);
   assert.match(script,/const plaqueCanvas = document\.createElement\('canvas'\)/);
   assert.match(script,/const sku = String\(product\?\.sku \|\| 'GilasArt'\)/);
   assert.match(script,/const plaqueFace = new THREE\.Mesh/);
