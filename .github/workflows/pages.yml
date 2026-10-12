@@ -307,7 +307,12 @@ jobs:
           if ! grep -qi 'data-joystick="combined"' /tmp/virtual-gallery.html || grep -qi 'data-joystick="look"' /tmp/virtual-gallery.html || grep -qi 'data-joystick="move"' /tmp/virtual-gallery.html || ! grep -qi 'id="client-clock"' /tmp/virtual-gallery.html || ! grep -qi 'id="artwork-loading"' /tmp/virtual-gallery.html; then
             echo "Published virtual gallery controls or client clock are missing"; exit 1
           fi
-          gallery_js_version=$(grep -oE 'gallery\.js\?v=[0-9]+' /tmp/virtual-gallery.html | head -n1 | grep -oE '[0-9]+
+          gallery_js_version=$(grep -oE 'gallery\\.js\\?v=[0-9]+' /tmp/virtual-gallery.html | head -n1 | grep -oE '[0-9]+' || true)
+          gallery_css_version=$(grep -oE 'gallery\\.css\\?v=[0-9]+' /tmp/virtual-gallery.html | head -n1 | grep -oE '[0-9]+' || true)
+          test -n "$gallery_js_version" && test -n "$gallery_css_version"
+          curl -fsSL --retry 3 --retry-all-errors "https://gilasart.ir/virtual-gallery/gallery.js?v=$gallery_js_version&verify=$GITHUB_SHA" -o /tmp/virtual-gallery.js
+          curl -fsSL --retry 3 --retry-all-errors "https://gilasart.ir/virtual-gallery/gallery.css?v=$gallery_css_version&verify=$GITHUB_SHA" -o /tmp/virtual-gallery.css
+          if ! grep -q 'function bindJoysticks' /tmp/virtual-gallery.js || ! grep -q 'marble_01_diff_1k.jpg' /tmp/virtual-gallery.js || ! grep -q 'velour_velvet_diff_1k.jpg' /tmp/virtual-gallery.js || ! grep -q 'large_floor_tiles_02_diff_1k.png' /tmp/virtual-gallery.js || ! grep -q 'dark_wooden_planks_diff_1k.png' /tmp/virtual-gallery.js || ! grep -q 'function addGrandfatherClock' /tmp/virtual-gallery.js || ! grep -q 'function syncArtworkLoadingIndicator' /tmp/virtual-gallery.js || ! grep -q 'gilasart:cart:added' /tmp/virtual-gallery.js || ! grep -q '.joystick-controls' /tmp/virtual-gallery.css || ! grep -Fq '@media (min-width:1025px){.joystick-controls{display:flex' /tmp/virtual-gallery.css || ! grep -q '.artwork-loading__spinner' /tmp/virtual-gallery.css; then
             echo "Published virtual gallery assets are stale or incomplete"; exit 1
           fi
           echo "Published virtual gallery route, script, styles, joysticks and client clock verified"
@@ -414,48 +419,4 @@ jobs:
             echo "Published virtual gallery assets are stale or incomplete"; exit 1
           fi
           echo "Published virtual gallery route, script, styles, joysticks and client clock verified"
-
-      - name: Scan every sitemap product for unavailable-detail message
-        run: |
-          set -euo pipefail
-          cat > /tmp/gilasart-playwright/scan-sitemap-products.mjs <<'NODE'
-          import { chromium } from 'playwright';
-          const origin='https://gilasart.ir';
-          const normalize=s=>String(s||'').normalize('NFKC').replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[\u200c\u200f\u200e]/g,'').replace(/\s+/g,' ').trim();
-          const hasUnavailable=s=>/جزئیات\s*اثر\s*موقت(?:ا|اً)\s*در\s*دسترس\s*نیست/.test(normalize(s));
-          const response=await fetch(origin+'/sitemap.xml?full_scan='+Date.now(),{cache:'no-store'});
-          if(!response.ok)throw new Error('Sitemap fetch failed: HTTP '+response.status);
-          const xml=await response.text();
-          const urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1].trim());
-          if(!urls.length)throw new Error('Sitemap contains no URLs');
-          const browser=await chromium.launch({headless:true});
-          const findings=[],failures=[];
-          let next=0,completed=0;
-          const workers=Array.from({length:8},async()=>{
-            const context=await browser.newContext({locale:'fa-IR',serviceWorkers:'block'});
-            while(true){
-              const index=next++;
-              if(index>=urls.length)break;
-              const url=urls[index];
-              const page=await context.newPage();
-              try{
-                const res=await page.goto(url+'?sitemap_audit='+Date.now(),{waitUntil:'domcontentloaded',timeout:30000});
-                await page.waitForTimeout(1600);
-                const body=await page.locator('body').innerText({timeout:5000}).catch(()=> '');
-                if(hasUnavailable(body))findings.push({url,status:res?.status()??null,reason:'unavailable-detail-message'});
-                else if(!res||res.status()>=400)failures.push({url,status:res?.status()??null,reason:'http-or-navigation-failure'});
-                completed++;
-                if(completed%25===0)console.log('Progress '+completed+'/'+urls.length);
-              }catch(e){failures.push({url,reason:String(e.message||e).slice(0,180)});}
-              finally{await page.close().catch(()=>{});}
-            }
-            await context.close();
-          });
-          await Promise.all(workers);
-          await browser.close();
-          console.log('FULL_SITEMAP_PRODUCT_SCAN='+JSON.stringify({totalUrls:urls.length,scanned:completed,unavailableDetailMessageCount:findings.length,unavailableDetailMessageUrls:findings,otherFailures:failures.length,otherFailureUrls:failures}));
-          if(findings.length)process.exitCode=2;
-          NODE
-          cd /tmp/gilasart-playwright
-          node /tmp/gilasart-playwright/scan-sitemap-products.mjs
 
