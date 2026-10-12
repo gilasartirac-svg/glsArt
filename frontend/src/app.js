@@ -993,16 +993,6 @@ async function cart(){
   document.querySelector('#order')?.addEventListener('click',async()=>{
    const button=document.querySelector('#order'),msg=document.querySelector('#msg');
    const provider=document.querySelector('input[name="payment-provider"]:checked')?.value||paymentOptions.defaultProvider||'zarinpal';
-   const totalIrt=Number(p.total_irt||0);
-   if(totalIrt>1000000000&&(provider==='zarinpal'||provider==='novinopay')){
-    if(msg){
-     msg.setAttribute('role','alert');
-     msg.innerHTML='<span class="error">پرداخت آنلاین شروع نشد: مبلغ سفارش از سقف هر تراکنش این درگاه (۱٬۰۰۰٬۰۰۰٬۰۰۰ ریال = ۱۰۰ میلیون تومان) بیشتر است. سفارش ثبت نشده است. لطفاً مبلغ سبد را کاهش دهید یا روش کارت‌به‌کارت را انتخاب کنید.</span>';
-     msg.scrollIntoView({behavior:'smooth',block:'center'});
-    }
-    button.focus({preventScroll:true});
-    return;
-   }
    const values={recipientName:String(document.querySelector('#rn')?.value||'').trim(),mobile:String(document.querySelector('#rm')?.value||'').replace(/\D/g,''),province:String(document.querySelector('#pr')?.value||'').trim(),city:String(document.querySelector('#ct')?.value||'').trim(),address:String(document.querySelector('#ad')?.value||'').trim(),postalCode:String(document.querySelector('#pc')?.value||'').replace(/\D/g,'')};
    if(!values.recipientName||!values.mobile||!values.province||!values.city||!values.address||!values.postalCode){if(msg)msg.innerHTML='<span class="error">لطفاً همه اطلاعات تحویل را کامل کنید.</span>';return}
    if(!/^09\d{9}$/.test(values.mobile)){if(msg)msg.innerHTML='<span class="error">شماره موبایل گیرنده باید معتبر باشد.</span>';return}
