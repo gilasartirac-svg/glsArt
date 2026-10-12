@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-12T12:38:46.858Z",
+  "generatedAt": "2026-10-12T12:54:20.599Z",
   "products": [
     {
       "id": "xls_0270",
@@ -488,7 +488,7 @@
       "slug": "Gilas386",
       "sku": "Gilas386",
       "name": "تابلوی معرق مس برجسته چهارقل",
-      "price_irt": 152200000,
+      "price_irt": 250000000,
       "image": "/uploaded/0003573_gilas386.jpeg",
       "category_id": null,
       "category_ids": [
