@@ -113,3 +113,10 @@ test('invoice preserves selected product option snapshots',()=>{
  assert.match(invoice,/options_json/);
  assert.match(invoice,/invoice-option/);
 });
+
+
+test('checkout explicitly guards ZarinPal single-transaction amount ceiling',async()=>{
+ const s=await (await import('node:fs/promises')).readFile('worker/src/index.js','utf8');
+ assert.match(s,/zarinpal_amount_limit/);
+ assert.match(s,/Number\(o\.total_irt\)>1000000000/);
+});
