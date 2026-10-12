@@ -79,7 +79,8 @@ test('gallery uses warm fixed lighting, real stone surfaces, and no direct artwo
   assert.match(script, /function getRenderPixelRatio\(\)/);
   assert.match(script, /lowPowerDevice \? 1 : 1\.35/);
   assert.match(script, /texture\.anisotropy = Math\.min\(4,/);
-  assert.match(script, /const plasterLip = new THREE\.Mesh\(new THREE\.BoxGeometry\(\.16, \.18, corridorLength\), plaster\)/);\n  assert.match(script, /diffuser\.rotation\.x = -Math\.PI \/ 2/);
+  assert.match(script, /const plasterLip = new THREE\.Mesh\(new THREE\.BoxGeometry\(\.16, \.18, corridorLength\), plaster\)/);
+  assert.match(script, /diffuser\.rotation\.x = -Math\.PI \/ 2/);
   assert.match(script, /function addEntranceDoor\(/);
   assert.match(script, /dark_wooden_planks_diff_1k\.png/);
   assert.match(script, /function addGrandfatherClock\(/);
