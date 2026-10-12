@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-12T12:58:24.253Z",
+  "generatedAt": "2026-10-12T13:03:00.000Z",
   "products": [
     {
       "id": "xls_0270",
@@ -608,7 +608,7 @@
       "slug": "Gilas380",
       "sku": "Gilas380",
       "name": "تابلوی معرق مس برجسته پرنده های عاشق",
-      "price_irt": 70100000,
+      "price_irt": 250000000,
       "image": "/uploaded/0003537_gilas380.jpeg",
       "category_id": null,
       "category_ids": [
