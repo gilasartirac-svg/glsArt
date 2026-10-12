@@ -67,23 +67,11 @@ function addWallArt(x, z, rotation, index, title, imageUrl = '', product = null)
   group.position.set(x, 2.05, z);
   group.rotation.y = rotation;
   const maxWidth = 1.82, maxHeight = 2.08;
-  // Give each artwork real physical depth so it reads as a mounted object, not a flat decal.
-  const backingMaterial = new THREE.MeshStandardMaterial({ color: 0x6b4a2b, roughness: .46, metalness: .16 });
+  // The black backing is kept exactly the same width and height as the displayed artwork.
+  const backingMaterial = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: .78, metalness: 0 });
   const backing = new THREE.Mesh(new THREE.BoxGeometry(maxWidth, maxHeight, .14), backingMaterial);
   backing.position.z = -.035;
   group.add(backing);
-  // Copper-toned side rails reveal the artwork's thickness from oblique viewing angles without covering its image.
-  const edgeMaterial = new THREE.MeshStandardMaterial({ color: 0x9b742d, roughness: .34, metalness: .68 });
-  for (const side of [-1, 1]) {
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(.035, maxHeight, .145), edgeMaterial);
-    rail.position.set(side * (maxWidth / 2 - .018), 0, -.025);
-    group.add(rail);
-  }
-  for (const side of [-1, 1]) {
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(maxWidth, .035, .145), edgeMaterial);
-    rail.position.set(0, side * (maxHeight / 2 - .018), -.025);
-    group.add(rail);
-  }
   // The original product image stays untouched and sits just in front of the physical backing.
   const artworkMaterial = new THREE.MeshBasicMaterial({ color: 0xf4efe6, side: THREE.DoubleSide, toneMapped: false });
   const inner = new THREE.Mesh(new THREE.PlaneGeometry(maxWidth, maxHeight), artworkMaterial);
@@ -660,6 +648,8 @@ function updateArtworkTextures() {
           const height = Math.min(record.maxHeight, record.maxWidth / imageAspect);
           record.inner.geometry.dispose();
           record.inner.geometry = new THREE.PlaneGeometry(width, height);
+          record.backing.geometry.dispose();
+          record.backing.geometry = new THREE.BoxGeometry(width, height, .14);
           record.artworkMaterial.map = texture;
           record.artworkMaterial.color.set(0xffffff);
           record.artworkMaterial.needsUpdate = true;
@@ -675,6 +665,8 @@ function updateArtworkTextures() {
       record.artworkMaterial.needsUpdate = true;
       record.inner.geometry.dispose();
       record.inner.geometry = new THREE.PlaneGeometry(record.maxWidth, record.maxHeight);
+      record.backing.geometry.dispose();
+      record.backing.geometry = new THREE.BoxGeometry(record.maxWidth, record.maxHeight, .14);
       record.imageLoaded = false;
       if (texture) texture.dispose();
     }
