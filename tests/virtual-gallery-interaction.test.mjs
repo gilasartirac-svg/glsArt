@@ -76,7 +76,7 @@ test('gallery uses warm fixed lighting, real stone surfaces, and no direct artwo
   assert.match(script, /function addCoveLighting\(/);
   assert.match(script, /emissive: 0xffd99a, emissiveIntensity: 2\.1/);
   assert.match(script, /new THREE\.PointLight\(0xffe8c8, \.48, 7\.5, 1\.55\)/);
-  assert.doesNotMatch(script, /large_floor_tiles_02_diff_1k\.png/);
+  assert.match(script, /const plasterLip = new THREE\.Mesh\(new THREE\.BoxGeometry\(\.16, \.18, corridorLength\), plaster\)/);\n  assert.match(script, /diffuser\.rotation\.x = -Math\.PI \/ 2/);
   assert.match(script, /function addEntranceDoor\(/);
   assert.match(script, /dark_wooden_planks_diff_1k\.png/);
   assert.match(script, /function addGrandfatherClock\(/);
