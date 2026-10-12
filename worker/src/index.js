@@ -343,7 +343,7 @@ async function buildStorefrontSnapshot(env){
     m.get(x.attribute_id).options.push({id:x.option_id,name:x.option_name,is_default:Number(x.is_default)===1,price_delta_irt:Number(x.price_delta_irt||0)});
   }
   for(const x of reviewsR.results||[]){if(!reviewsBy.has(x.product_id))reviewsBy.set(x.product_id,[]);reviewsBy.get(x.product_id).push(x)}
-  const productDocs=products.map(p=>({...p,images:imagesBy.get(p.id)||[],category_ids:categoriesByProduct.get(p.id)||[],categories:(categoriesByProduct.get(p.id)||[]).map(id=>catMap.get(id)).filter(Boolean).map(x=>({id:x.id,slug:x.slug,name:x.name})),attributes:[...(attrsBy.get(p.id)?.values()||[])].filter(a=>a.options.length),reviews:reviewsBy.get(p.id)||[]}));
+  const productDocs=products.map(p=>({...p,images:(imagesBy.get(p.id)?.length?imagesBy.get(p.id):[{id:`fallback-${p.id}`,product_id:p.id,path:'/data/product-image-unavailable.svg',alt_text:p.name||'تصویر اثر در دسترس نیست',sort_order:0,is_primary:1}]),category_ids:categoriesByProduct.get(p.id)||[],categories:(categoriesByProduct.get(p.id)||[]).map(id=>catMap.get(id)).filter(Boolean).map(x=>({id:x.id,slug:x.slug,name:x.name})),attributes:[...(attrsBy.get(p.id)?.values()||[])].filter(a=>a.options.length),reviews:reviewsBy.get(p.id)||[]}));
   const settings=Object.fromEntries((settingsR.results||[]).map(x=>[x.key,x.value]));
   const bySort={
     newest:[...productDocs].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at))||String(b.id).localeCompare(String(a.id))),
