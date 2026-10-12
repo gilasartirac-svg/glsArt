@@ -1081,6 +1081,8 @@ if(u.pathname.startsWith('/api/products/')&&u.pathname.endsWith('/reviews')&&req
   }
   if(p.authority&&['REDIRECTED','CALLBACK','VERIFYING'].includes(p.status))return json({ok:true,url:paymentRedirectUrl(provider,p.authority,await paymentEnvironment(env)),reused:true});
   if(provider==='zarinpal'){
+   // ZarinPal rejects single transactions above 100,000,000 toman (1,000,000,000 IRR).
+   if(Number(o.total_irt)>1000000000)return json({error:'zarinpal_amount_limit',limit_irt:1000000000},400);
    if(!env.ZARINPAL_MERCHANT_ID)return json({error:'payment_not_configured'},503);
    const reqz=await zarin(env,'request.json',{amount:o.total_irt,description:'GilasArt Order '+oid,callback_url:await siteSetting(env,'zarinpal_callback_url',env.PAYMENT_CALLBACK_URL||new URL(req.url).origin+'/api/payment/callback'),mobile:me.mobile,currency:'IRR'});
    const data=reqz.data||{},code=Number(data.code||reqz.code||0),authority=data.authority;
