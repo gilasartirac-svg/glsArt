@@ -53,8 +53,10 @@ const movementTuning = { walkSpeed: 3.2, sprintSpeed: 6.2, acceleration: 8.5, da
 const galleryArt = [];
 const artworkQueue = [];
 let nextArtworkIndex = 0;
-const ARTWORK_BATCH_SIZE = 10;
+const ARTWORK_BATCH_SIZE = 2;
 const ARTWORK_BUILD_DISTANCE = 14;
+const ARTWORK_TEXTURE_UPDATE_INTERVAL = 180;
+let lastArtworkTextureUpdate = 0;
 let sceneCategory = null;
 let galleryProducts = [];
 let allGalleryProducts = [];
@@ -399,7 +401,7 @@ function addGalleryDecor(corridorLength, corridorCenter) {
 
 function getRenderPixelRatio() {
   const lowPowerDevice = window.matchMedia('(pointer: coarse)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
-  return Math.min(window.devicePixelRatio || 1, lowPowerDevice ? 1 : 1.35);
+  return Math.min(window.devicePixelRatio || 1, lowPowerDevice ? 0.85 : 1.2);
 }
 
 function setupScene() {
@@ -451,7 +453,7 @@ function setupScene() {
   marbleTexture.colorSpace = THREE.SRGBColorSpace;
   marbleTexture.wrapS = marbleTexture.wrapT = THREE.RepeatWrapping;
   marbleTexture.repeat.set(2, 5);
-  marbleTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  marbleTexture.anisotropy = Math.min(2, renderer.capabilities.getMaxAnisotropy() || 1);
   // Warm room-wide illumination; no concentrated beam is aimed at artwork faces.
   const ambient = new THREE.AmbientLight(0xfff0d8, 1.05); scene.add(ambient);
   const hemisphere = new THREE.HemisphereLight(0xfff7e9, 0x81705b, .88); scene.add(hemisphere);
@@ -696,7 +698,11 @@ function animate() {
   if (grandfatherClock?.pendulum) grandfatherClock.pendulum.rotation.z = Math.sin(performance.now() * .00165) * .22;
   updateMovement(delta);
   buildNearbyArtworkBatch();
-  updateArtworkTextures();
+  const now = performance.now();
+  if (now - lastArtworkTextureUpdate >= ARTWORK_TEXTURE_UPDATE_INTERVAL) {
+    lastArtworkTextureUpdate = now;
+    updateArtworkTextures();
+  }
   renderer.render(scene, camera);
 }
 
