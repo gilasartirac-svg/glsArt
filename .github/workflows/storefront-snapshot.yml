@@ -1,17 +1,16 @@
 name: Storefront Snapshot
 
 on:
+  # Midnight in Tehran (UTC+03:30) = 20:30 UTC on the previous day.
   schedule:
-    - cron: '0 0 * * *'
-      timezone: "Asia/Tehran"
+    - cron: '30 20 * * *'
   workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - 'worker/src/index.js'
+      - 'scripts/split-storefront-snapshot.mjs'
       - '.github/workflows/storefront-snapshot.yml'
 
-# Production D1 category correction: refresh the public snapshot on this workflow change.
 permissions:
   contents: write
 
@@ -22,116 +21,59 @@ concurrency:
 jobs:
   snapshot:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
-      - name: Checkout
+      - name: Checkout existing offline snapshot
         uses: actions/checkout@v4
 
-      - name: Fetch and split public storefront data
-        env:
-          SNAPSHOT_URL: https://gilasartworker.gilasart-ir-ac.workers.dev/api/storefront-snapshot
-        run: |
-          set -euo pipefail
-          mkdir -p frontend/public/data
-          tmp="$(mktemp)"
-          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 15 --max-time 120 "$SNAPSHOT_URL" -o "$tmp"
-          test -s "$tmp"
-          node - "$tmp" <<'NODE'
-          const fs=require('fs'),crypto=require('crypto');
-          const d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
-          if(d?.meta?.schemaVersion!==1) throw new Error('invalid source schemaVersion');
-          if(!Array.isArray(d.products)||!Array.isArray(d.categories)) throw new Error('source catalog missing');
-          // Keep attributes, option overrides, defaults and deltas inside the existing public storefront snapshot.
-          const products=[...(d.products||[])]
-            .filter(p=>p&&p.active!==0)
-            .sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))||String(b.id||'').localeCompare(String(a.id||'')))
-            .map(p=>{
-              const image=(p.images||[]).find(x=>Number(x.is_primary)===1)?.path||(p.images||[0])?.path||'/data/product-image-unavailable.svg';
-              return {
-                id:p.id,slug:p.slug,sku:p.sku,name:p.name,description:p.description||'',seo_title:p.seo_title||'',seo_description:p.seo_description||'',video_url:p.video_url||'',price_irt:Number(p.price_irt||0),
-                image,category_id:p.category_id,category_ids:Array.isArray(p.category_ids)?p.category_ids:[],
-                active:Number(p.active??1),flash_sale_active:Number(p.flash_sale_active||0),
-                flash_sale_ends_at:p.flash_sale_ends_at||null,flash_sale_price_irt:p.flash_sale_price_irt||null,
-                view_count:Number(p.view_count||0),review_count:Number(p.review_count||0),
-                rating_avg:Number(p.rating_avg||0),favorite_count:Number(p.favorite_count||0),
-                sold_count:Number(p.sold_count||0),stock:Number(p.stock||0),
-                images:Array.isArray(p.images)?p.images:[],
-                attributes:Array.isArray(p.attributes)?p.attributes:[],
-                categories:Array.isArray(p.categories)?p.categories:[],
-                reviews:Array.isArray(p.reviews)?p.reviews:[],
-                created_at:p.created_at||null,updated_at:p.updated_at||null
-              };
-            });
-          if(!products.length) throw new Error('empty product index');
-          const categories=(d.categories||[]).map(x=>({id:x.id,slug:x.slug,name:x.name,description:x.description||''}));
-          const publicContent=x=>({id:x.id,slug:x.slug,title:x.title,summary:x.summary||'',body:x.body||'',cover_image:x.cover_image||'',published_at:x.published_at||null,updated_at:x.updated_at||null});
-          const articles=(d.articles||[]).map(publicContent);
-          const news=(d.news||[]).map(publicContent);
-          const about=(d.about||[]).map(publicContent);
-          const contact=(d.contact||[]).map(x=>({id:x.id,slug:x.slug,title:x.title,summary:x.summary||'',body:x.body||'',cover_image:x.cover_image||'',phone:x.phone||'',mobile:x.mobile||'',address:x.address||'',map_url:x.map_url||'',published_at:x.published_at||null,updated_at:x.updated_at||null}));
-          const index={schemaVersion:2,generatedAt:d.meta.generatedAt,products,categories,articles,news,about,contact,settings:d.settings||{}};
-          const homeProducts=products.slice(0,8);
-          const flash=products.filter(p=>p.flash_sale_active===1&&p.flash_sale_ends_at&&new Date(p.flash_sale_ends_at).getTime()>Date.now()).slice(0,20);
-          const home={schemaVersion:2,generatedAt:d.meta.generatedAt,products:homeProducts,categories,settings:d.settings||{},flash};
-          fs.writeFileSync('frontend/public/data/storefront-index.json',JSON.stringify(index,null,2)+'\n');
-          fs.writeFileSync('frontend/public/data/home.json',JSON.stringify(home,null,2)+'\n');
-          const version=crypto.createHash('sha256').update(JSON.stringify(index)+JSON.stringify(home)).digest('hex').slice(0,16);
-          const manifest={
-            schemaVersion:2,version,generatedAt:d.meta.generatedAt,
-            productCount:products.length,categoryCount:categories.length,
-            articleCount:articles.length,newsCount:news.length,aboutCount:about.length,contactCount:contact.length
-          };
-          fs.writeFileSync('frontend/public/data/storefront-manifest.json',JSON.stringify(manifest,null,2)+'\n');
-          NODE
-          rm -f "$tmp"
+      - name: Split offline product list and product details (no D1/API calls)
+        run: node scripts/split-storefront-snapshot.mjs
 
-      - name: Validate split snapshot and privacy boundary
+      - name: Validate offline files and key relationships
         run: |
           set -euo pipefail
-          node <<'NODE'
-          const fs=require('fs');
-          const index=JSON.parse(fs.readFileSync('frontend/public/data/storefront-index.json','utf8'));
-          const manifest=JSON.parse(fs.readFileSync('frontend/public/data/storefront-manifest.json','utf8'));
-          const home=JSON.parse(fs.readFileSync('frontend/public/data/home.json','utf8'));
-          if(index.schemaVersion!==2||manifest.schemaVersion!==2||home.schemaVersion!==2)throw new Error('invalid split schema');
-          if(!Array.isArray(index.products)||index.products.length<1)throw new Error('empty product index');
-          if(!Array.isArray(index.categories)||!index.settings)throw new Error('index missing catalog metadata');
-          if(!Array.isArray(index.articles)||!Array.isArray(index.news)||!Array.isArray(index.about)||!Array.isArray(index.contact))throw new Error('index missing public content');
-          for(const x of [...index.articles,...index.news,...index.about,...index.contact])if(!x.slug||!x.title)throw new Error('public content missing slug/title');
-          const required=['id','slug','name','sku','price_irt','image','category_ids','flash_sale_active'];
-          for(const p of index.products)for(const k of required)if(p[k]===undefined||p[k]===null&&k!=='image')throw new Error('product index missing '+k);
-          if(index.products.some(p=>!p.image))throw new Error('product without image');
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const root='frontend/public/data/';
+          const index=JSON.parse(fs.readFileSync(root+'storefront-index.json','utf8'));
+          const details=JSON.parse(fs.readFileSync(root+'storefront-attributes.json','utf8'));
+          const manifest=JSON.parse(fs.readFileSync(root+'storefront-manifest.json','utf8'));
+          const home=JSON.parse(fs.readFileSync(root+'home.json','utf8'));
+          if(index.schemaVersion!==2||details.schemaVersion!==1||manifest.schemaVersion!==2||home.schemaVersion!==2)throw new Error('invalid snapshot schema');
+          if(!Array.isArray(index.products)||!index.products.length)throw new Error('empty product index');
+          if(Object.keys(details.byProductId||{}).length<index.products.length)throw new Error('product detail key map incomplete');
           for(const p of index.products){
-            if(!Array.isArray(p.attributes)||!Array.isArray(p.images)||!Array.isArray(p.categories)||!Array.isArray(p.reviews))throw new Error('product snapshot details missing arrays: '+p.sku);
-            for(const a of p.attributes){
-              if(!a.id||!Array.isArray(a.options))throw new Error('invalid attribute snapshot: '+p.sku);
-              for(const o of a.options)if(!o.id||typeof o.is_default!=='boolean'||!Number.isFinite(Number(o.price_delta_irt)))throw new Error('invalid option snapshot: '+p.sku);
-              if(a.options.length&&a.options.filter(o=>o.is_default).length!==1)throw new Error('attribute must have exactly one default option: '+p.sku+' / '+a.name);
+            if(!p.id||!p.slug||!p.name||!p.sku||!p.image||!Array.isArray(p.category_ids))throw new Error('invalid index product: '+(p?.sku||p?.id));
+            if(['attributes','images','categories','reviews'].some(k=>k in p))throw new Error('detail arrays leaked into index: '+p.sku);
+            const d=details.byProductId[String(p.id)];
+            if(!d||!Array.isArray(d.attributes)||!Array.isArray(d.images)||!Array.isArray(d.categories)||!Array.isArray(d.reviews))throw new Error('broken detail key for '+p.sku);
+            for(const a of d.attributes){
+              if(!a.id||!Array.isArray(a.options))throw new Error('invalid attribute: '+p.sku);
+              for(const o of a.options)if(!o.id||typeof o.is_default!=='boolean'||!Number.isFinite(Number(o.price_delta_irt)))throw new Error('invalid option: '+p.sku);
+              if(a.options.length&&a.options.filter(o=>o.is_default).length!==1)throw new Error('attribute must have one default option: '+p.sku+' / '+a.name);
             }
           }
           const forbidden=/admin_bootstrap|kavenegar|invoice_|national_id|postal_code|economic_code|customer/i;
-          if(forbidden.test(JSON.stringify(index))||forbidden.test(JSON.stringify(home)))throw new Error('sensitive field leaked into public snapshot');
+          if(forbidden.test(JSON.stringify(index))||forbidden.test(JSON.stringify(details))||forbidden.test(JSON.stringify(home)))throw new Error('sensitive field leaked into public snapshot');
+          if(fs.statSync(root+'storefront-index.json').size>=250000)throw new Error('product index exceeds 250 KB performance budget');
           if(Number(manifest.productCount)!==index.products.length)throw new Error('product count mismatch');
-          if(Number(manifest.categoryCount)!==index.categories.length)throw new Error('category count mismatch');
           console.log(JSON.stringify({
-            indexBytes:fs.statSync('frontend/public/data/storefront-index.json').size,
-            homeBytes:fs.statSync('frontend/public/data/home.json').size,
-            manifestBytes:fs.statSync('frontend/public/data/storefront-manifest.json').size,
-            products:index.products.length
-          }));
+            products:index.products.length,
+            indexBytes:fs.statSync(root+'storefront-index.json').size,
+            attributesBytes:fs.statSync(root+'storefront-attributes.json').size,
+            homeBytes:fs.statSync(root+'home.json').size
+          },null,2));
           NODE
-          rm -f frontend/public/data/storefront.json
-          test ! -e frontend/public/data/storefront.json
 
-      - name: Commit validated snapshot
+      - name: Commit validated offline files
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A frontend/public/data
+          git add frontend/public/data/storefront-index.json frontend/public/data/storefront-attributes.json frontend/public/data/storefront-manifest.json frontend/public/data/home.json
           if git diff --cached --quiet; then
-            echo "Snapshot unchanged; nothing to commit."
+            echo "Offline files are already split and valid; nothing to commit."
             exit 0
           fi
-          git commit -m "chore: split storefront snapshot"
+          git commit -m "chore: split offline product details"
           git push origin HEAD:main
