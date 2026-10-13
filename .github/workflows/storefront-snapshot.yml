@@ -53,7 +53,12 @@ jobs:
                 flash_sale_ends_at:p.flash_sale_ends_at||null,flash_sale_price_irt:p.flash_sale_price_irt||null,
                 view_count:Number(p.view_count||0),review_count:Number(p.review_count||0),
                 rating_avg:Number(p.rating_avg||0),favorite_count:Number(p.favorite_count||0),
-                sold_count:Number(p.sold_count||0),created_at:p.created_at||null,updated_at:p.updated_at||null
+                sold_count:Number(p.sold_count||0),stock:Number(p.stock||0),
+                images:Array.isArray(p.images)?p.images:[],
+                attributes:Array.isArray(p.attributes)?p.attributes:[],
+                categories:Array.isArray(p.categories)?p.categories:[],
+                reviews:Array.isArray(p.reviews)?p.reviews:[],
+                created_at:p.created_at||null,updated_at:p.updated_at||null
               };
             });
           if(!products.length) throw new Error('empty product index');
@@ -95,6 +100,14 @@ jobs:
           const required=['id','slug','name','sku','price_irt','image','category_ids','flash_sale_active'];
           for(const p of index.products)for(const k of required)if(p[k]===undefined||p[k]===null&&k!=='image')throw new Error('product index missing '+k);
           if(index.products.some(p=>!p.image))throw new Error('product without image');
+          for(const p of index.products){
+            if(!Array.isArray(p.attributes)||!Array.isArray(p.images)||!Array.isArray(p.categories)||!Array.isArray(p.reviews))throw new Error('product snapshot details missing arrays: '+p.sku);
+            for(const a of p.attributes){
+              if(!a.id||!Array.isArray(a.options))throw new Error('invalid attribute snapshot: '+p.sku);
+              for(const o of a.options)if(!o.id||typeof o.is_default!=='boolean'||!Number.isFinite(Number(o.price_delta_irt)))throw new Error('invalid option snapshot: '+p.sku);
+              if(a.options.length&&a.options.filter(o=>o.is_default).length!==1)throw new Error('attribute must have exactly one default option: '+p.sku+' / '+a.name);
+            }
+          }
           const forbidden=/admin_bootstrap|kavenegar|invoice_|national_id|postal_code|economic_code|customer/i;
           if(forbidden.test(JSON.stringify(index))||forbidden.test(JSON.stringify(home)))throw new Error('sensitive field leaked into public snapshot');
           if(Number(manifest.productCount)!==index.products.length)throw new Error('product count mismatch');
