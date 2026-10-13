@@ -774,7 +774,7 @@ async function product(slug){
   const defaultDelta=Number(defaultOption?.price_delta_irt||0);
   const options=a.options.map(o=>{
     const rawDelta=Number(o.price_delta_irt||0);
-    const delta=rawDelta-defaultDelta;
+    const delta=(a.options.length===1&&defaultDelta>0)?rawDelta:rawDelta-defaultDelta;
     return '<label class="product-option-card '+(o.is_default?'is-default':'')+'"><input class="product-option-input" type="radio" name="product-option-'+escapeHtml(a.id)+'" value="'+escapeHtml(o.id)+'" data-attribute-id="'+escapeHtml(a.id)+'" data-delta="'+delta+'" '+(o.is_default?'checked':'')+'><span class="product-option-card-ui"><span class="product-option-card-top"><strong>'+escapeHtml(o.name)+'</strong>'+(o.is_default?'<span class="product-option-default">پیش‌فرض</span>':'')+'</span></span></label>';
   }).join('');
   return '<fieldset class="product-option-group" data-attribute-group="'+escapeHtml(a.id)+'"><legend>'+escapeHtml(a.name)+'</legend><div class="product-option-grid" role="radiogroup" aria-label="'+escapeHtml(a.name)+'">'+options+'</div></fieldset>';
