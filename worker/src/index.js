@@ -299,7 +299,7 @@ async function loadProductAttributes(env,productId){
 
 async function buildStorefrontSnapshot(env){
   const [productsR,imagesR,categoriesR,assignmentsR,attributesR,reviewsR,contentR,faqR,settingsR]=await Promise.all([
-    env.DB.prepare(`SELECT id,category_id,slug,sku,name,description,price_irt,active,seo_title,seo_description,created_at,updated_at,flash_sale_active,flash_sale_ends_at,flash_sale_price_irt,video_url,view_count,review_count,rating_avg,favorite_count,sold_count FROM products WHERE active=1 ORDER BY created_at DESC,id DESC`).all(),
+    env.DB.prepare(`SELECT id,category_id,slug,sku,name,description,price_irt,active,seo_title,seo_description,created_at,updated_at,flash_sale_active,flash_sale_ends_at,flash_sale_price_irt,video_url,view_count,review_count,rating_avg,favorite_count,sold_count,COALESCE((SELECT quantity FROM inventory WHERE inventory.product_id=products.id),0) stock FROM products WHERE active=1 ORDER BY created_at DESC,id DESC`).all(),
     env.DB.prepare(`SELECT id,product_id,path,alt_text,sort_order,is_primary FROM product_images WHERE product_id IN (SELECT id FROM products WHERE active=1) ORDER BY product_id,sort_order,is_primary DESC`).all(),
     env.DB.prepare(`SELECT id,slug,name,description,parent_id,sort_order,image,seo_title,seo_description FROM categories WHERE active=1 ORDER BY sort_order,name`).all(),
     env.DB.prepare(`SELECT pca.product_id,pca.category_id,pca.sort_order FROM product_category_assignments pca JOIN products p ON p.id=pca.product_id AND p.active=1 JOIN categories c ON c.id=pca.category_id AND c.active=1 ORDER BY pca.product_id,pca.sort_order,c.name`).all(),
