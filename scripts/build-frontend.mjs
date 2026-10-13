@@ -90,7 +90,7 @@ const snapshotLoadNew=`const d=await r.json();
    for(const product of d.products){
     const detail=detailPayload.byProductId[String(product.id)];
     if(!detail||!Array.isArray(detail.attributes)||!Array.isArray(detail.images)||!Array.isArray(detail.categories)||!Array.isArray(detail.reviews))return null;
-    Object.assign(product,{attributes:detail.attributes,images:detail.images,categories:detail.categories,reviews:detail.reviews});
+    Object.assign(product,{attributes:detail.attributes,images:detail.images,categories:detail.categories,reviews:detail.reviews,description:detail.description||'',seo_title:detail.seo_title||'',seo_description:detail.seo_description||'',video_url:detail.video_url||''});
    }
    return d;`;
 if(!builtAppSource.includes(snapshotLoadOld))throw new Error('Could not apply keyed offline product-detail loader; refusing production build.');
