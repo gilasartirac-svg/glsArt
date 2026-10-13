@@ -41,6 +41,7 @@ jobs:
           const d=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
           if(d?.meta?.schemaVersion!==1) throw new Error('invalid source schemaVersion');
           if(!Array.isArray(d.products)||!Array.isArray(d.categories)) throw new Error('source catalog missing');
+          // Keep attributes, option overrides, defaults and deltas inside the existing public storefront snapshot.
           const products=[...(d.products||[])]
             .filter(p=>p&&p.active!==0)
             .sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))||String(b.id||'').localeCompare(String(a.id||'')))
