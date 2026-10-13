@@ -5,6 +5,7 @@ import {readFileSync} from 'node:fs';
 const app=readFileSync(new URL('../frontend/src/app.js',import.meta.url),'utf8');
 const worker=readFileSync(new URL('../worker/src/index.js',import.meta.url),'utf8');
 const snapshotWorkflow=readFileSync(new URL('../.github/workflows/storefront-snapshot.yml',import.meta.url),'utf8');
+const snapshotSplitter=readFileSync(new URL('../scripts/split-storefront-snapshot.mjs',import.meta.url),'utf8');
 
 test('public route contract is complete and Persian-only URLs stay unprefixed',()=>{
   for(const route of ['shop','cart','account','rewards','checkout','about','contact','news','articles','terms','support','payment','admin']){
@@ -28,12 +29,11 @@ test('product detail distinguishes 404 from service failure and offers recovery'
   assert.match(app,/product_detail_backend_failed/);
 });
 
-test('public snapshot carries CMS fallback content for about/contact/news/articles',()=>{
-  assert.match(snapshotWorkflow,/const publicContent=x=>/);
-  assert.match(snapshotWorkflow,/const about=/);
-  assert.match(snapshotWorkflow,/const contact=/);
-  assert.match(snapshotWorkflow,/body:x\.body\|\|''/);
-  assert.match(snapshotWorkflow,/index missing public content/);
+test('offline snapshot split preserves public CMS fallback content',()=>{
+  assert.match(snapshotWorkflow,/no D1\/API calls/);
+  assert.match(snapshotSplitter,/const index = await readJson\(indexPath\)/);
+  assert.match(snapshotSplitter,/for \(const product of index\.products\)/);
+  assert.doesNotMatch(snapshotSplitter,/delete index\.(articles|news|about|contact)/);
 });
 
 test('legacy monolithic storefront snapshot is not restored',()=>{
