@@ -384,7 +384,7 @@ async function resolveProductOptions(env,productId,raw){
     }
     const selectedDelta=Number(o.price_delta_irt||0);
     const defaultDelta=Number(defaultOption?.price_delta_irt||0);
-    const effectiveDelta=selectedDelta-defaultDelta;
+    const effectiveDelta=(a.options.length===1&&defaultDelta>0)?selectedDelta:selectedDelta-defaultDelta;
     normalized.push({attributeId:a.id,attributeName:a.name,optionId:o.id,optionName:o.name,priceDeltaIrt:selectedDelta,priceAdjustmentIrt:effectiveDelta,isDefault:o.id===defaultOption?.id});
     adjustment+=effectiveDelta;
   }
