@@ -30,7 +30,11 @@ for (const product of index.products) {
       attributes: Array.isArray(product.attributes) ? product.attributes : [],
       images: Array.isArray(product.images) ? product.images : [],
       categories: Array.isArray(product.categories) ? product.categories : [],
-      reviews: Array.isArray(product.reviews) ? product.reviews : []
+      reviews: Array.isArray(product.reviews) ? product.reviews : [],
+      description: product.description || '',
+      seo_title: product.seo_title || '',
+      seo_description: product.seo_description || '',
+      video_url: product.video_url || ''
     };
     extracted++;
   }
@@ -51,6 +55,10 @@ for (const product of index.products) {
   delete product.images;
   delete product.categories;
   delete product.reviews;
+  delete product.description;
+  delete product.seo_title;
+  delete product.seo_description;
+  delete product.video_url;
 }
 index.generatedAt = index.generatedAt || details.generatedAt;
 await writeFile(indexPath, JSON.stringify(index) + '\n');
