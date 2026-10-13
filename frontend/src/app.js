@@ -217,10 +217,20 @@ async function snapshotApi(path){
   const items=(d.products||[]).filter(p=>Number(p.flash_sale_active)===1&&p.flash_sale_ends_at&&new Date(p.flash_sale_ends_at).getTime()>Date.now()).sort((a,b)=>String(a.flash_sale_ends_at).localeCompare(String(b.flash_sale_ends_at))).slice(0,20).map(snapshotCore);
   return {items};
  }
- // Product detail is intentionally NOT served from the static storefront snapshot.
- // Product-specific attributes/options and their pricing are dynamic and must come
- // from the Worker/D1 source of truth. This prevents stale/global option lists
- // from the daily public snapshot from leaking into product dropdowns.
+ // Product detail and selectable attributes can use the same validated public snapshot.
+ // Cart/checkout pricing remains server-authoritative; the Worker revalidates option IDs and prices.
+ const detailMatch=u.pathname.match(/^\/api\/products\/([^/]+)$/);
+ if(detailMatch){
+  let slug=detailMatch[1];
+  try{slug=decodeURIComponent(slug)}catch{}
+  const p=(d.products||[]).find(x=>String(x.slug||'')===slug&&Number(x.active??1)===1);
+  if(!p||!Array.isArray(p.attributes)||!Array.isArray(p.images)||!Array.isArray(p.categories)||!Array.isArray(p.reviews))return null;
+  return {
+   product:{...p,category_name:p.categories[0]?.name||'',image:p.image||p.images.find(x=>Number(x.is_primary)===1)?.path||p.images[0]?.path||'',stock:Number(p.stock||0)},
+   images:p.images,attributes:p.attributes,reviews:p.reviews,categories:p.categories,
+   relatedProducts:[],quantityDiscountTiers:[],locale:'fa'
+  };
+ }
  if(u.pathname==='/api/products'){
   let items=[...(d.products||[])];
   const q=(u.searchParams.get('q')||'').trim().toLowerCase(),cat=u.searchParams.get('category')||'',sort=u.searchParams.get('sort')||'newest',minPrice=Math.max(0,Number(u.searchParams.get('min_price')||0)),maxPrice=Math.max(0,Number(u.searchParams.get('max_price')||0));
