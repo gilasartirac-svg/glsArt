@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-13T12:38:25.860Z",
+  "generatedAt": "2026-10-13T12:57:18.387Z",
   "products": [
     {
       "id": "xls_0270",
@@ -152,7 +152,7 @@
       "slug": "Gilas405",
       "sku": "Gilas405",
       "name": "تابلوی معرق مس برجسته نورالسموات",
-      "price_irt": 132400000,
+      "price_irt": 210000000,
       "image": "/uploaded/0003567_gilas405.jpeg",
       "category_id": null,
       "category_ids": [
@@ -176,7 +176,7 @@
       "slug": "Gilas404",
       "sku": "Gilas404",
       "name": "تابلوی معرق مس برجسته وان يكاد",
-      "price_irt": 122400000,
+      "price_irt": 210000000,
       "image": "/uploaded/0003564_gilas404.jpeg",
       "category_id": null,
       "category_ids": [
@@ -200,7 +200,7 @@
       "slug": "Gilas402",
       "sku": "Gilas402",
       "name": "تابلوی معرق مس برجسته و تذهیب بسم الله",
-      "price_irt": 132400000,
+      "price_irt": 210000000,
       "image": "/uploaded/0003563_gilas402.jpeg",
       "category_id": null,
       "category_ids": [
@@ -224,7 +224,7 @@
       "slug": "Gilas401",
       "sku": "Gilas401",
       "name": "تابلوی معرق مس برجسته آیت الکرس",
-      "price_irt": 136700000,
+      "price_irt": 210000000,
       "image": "/uploaded/0003562_gilas401.jpeg",
       "category_id": null,
       "category_ids": [
@@ -272,7 +272,7 @@
       "slug": "Gilas399",
       "sku": "Gilas399",
       "name": "تابلوی معرق مس برجسته اسماء الحسن",
-      "price_irt": 146500000,
+      "price_irt": 210000000,
       "image": "/uploaded/0003559_gilas399.jpeg",
       "category_id": null,
       "category_ids": [
@@ -632,7 +632,7 @@
       "slug": "Gilas379",
       "sku": "Gilas379",
       "name": "تابلوی معرق مس برجسته وان يكاد",
-      "price_irt": 128000000,
+      "price_irt": 210000000,
       "image": "/uploaded/0003536_gilas379.jpeg",
       "category_id": null,
       "category_ids": [
@@ -1041,7 +1041,7 @@
       "slug": "Gilas357",
       "sku": "Gilas357",
       "name": "تابلوی معرق مس برجسته آیت الکرسی",
-      "price_irt": 123000000,
+      "price_irt": 210000000,
       "image": "/uploaded/0002509_gilas357.jpeg",
       "category_id": null,
       "category_ids": [
@@ -1522,7 +1522,7 @@
       "slug": "Gilas337",
       "sku": "Gilas337",
       "name": "تابلوی معرق مس برجسته آیت الکرسی",
-      "price_irt": 250000000,
+      "price_irt": 210000000,
       "image": "/uploaded/0002426_gilas337.jpeg",
       "category_id": null,
       "category_ids": [
@@ -1954,7 +1954,7 @@
       "slug": "Gilas319",
       "sku": "Gilas319",
       "name": "تابلوی معرق مس برجسته آیت الکرسی معلی",
-      "price_irt": 125900000,
+      "price_irt": 210000000,
       "image": "/uploaded/0002368_gilas319.jpeg",
       "category_id": null,
       "category_ids": [
@@ -2608,7 +2608,7 @@
       "slug": "Gilas227",
       "sku": "Gilas227",
       "name": "تابلوی معرق مس برجسته نورالسموات",
-      "price_irt": 124500000,
+      "price_irt": 210000000,
       "image": "/uploaded/0002422_gilas227.jpeg",
       "category_id": null,
       "category_ids": [
@@ -2658,7 +2658,7 @@
       "slug": "Gilas221",
       "sku": "Gilas221",
       "name": "تابلوی معرق مس برجسته قل",
-      "price_irt": 122500000,
+      "price_irt": 210000000,
       "image": "/uploaded/0002390_gilas221.jpeg",
       "category_id": null,
       "category_ids": [
@@ -2730,7 +2730,7 @@
       "slug": "Gilas216",
       "sku": "Gilas216",
       "name": "تابلوی معرق مس برجسته سوره حمد",
-      "price_irt": 122500000,
+      "price_irt": 210000000,
       "image": "/uploaded/0002492_gilas216.jpeg",
       "category_id": null,
       "category_ids": [
@@ -2754,7 +2754,7 @@
       "slug": "Gilas214",
       "sku": "Gilas214",
       "name": "تابلوی معرق مس برجسته وان يكاد",
-      "price_irt": 136100000,
+      "price_irt": 210000000,
       "image": "/uploaded/0001139_gilas214.jpeg",
       "category_id": null,
       "category_ids": [
@@ -3507,7 +3507,7 @@
       "slug": "Gilas084",
       "sku": "Gilas084",
       "name": "تابلوی معرق مس برجسته وان يكاد",
-      "price_irt": 142000000,
+      "price_irt": 210000000,
       "image": "/uploaded/0001176_gilas084.jpeg",
       "category_id": null,
       "category_ids": [
