@@ -29,240 +29,83 @@ INSERT OR IGNORE INTO product_attribute_options(id,attribute_id,name,active,is_d
 ('opt_pdim_80x40_cm','attr_painting_dimensions','80x40 cm',1,0,0,22),
 ('opt_pdim_80x50_cm','attr_painting_dimensions','80x50 cm',1,0,0,23);
 
-INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order)
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas800')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas410')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas409')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas408')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas407')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas406')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas405')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas404')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas402')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas401')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas400')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas399')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas397')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas395')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas394')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas393')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas391')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas389')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas388')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas387')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas386')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas385')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas384')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas382')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas381')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas380')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas379')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas378')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas377')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas376')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas375')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas374')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas372')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas371')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas370')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas368')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas367')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas366')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas365')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas364')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas363')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas362')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas358')
-UNION ALL
-SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku)=lower('Gilas357');
+INSERT OR IGNORE INTO product_attribute_assignments(product_id,attribute_id,required,sort_order) SELECT id,'attr_painting_dimensions',1,1 FROM products WHERE lower(sku) IN ('gilas800','gilas410','gilas409','gilas408','gilas407','gilas406','gilas405','gilas404','gilas402','gilas401','gilas400','gilas399','gilas397','gilas395','gilas394','gilas393','gilas391','gilas389','gilas388','gilas387','gilas386','gilas385','gilas384','gilas382','gilas381','gilas380','gilas379','gilas378','gilas377','gilas376','gilas375','gilas374','gilas372','gilas371','gilas370','gilas368','gilas367','gilas366','gilas365','gilas364','gilas363','gilas362','gilas358','gilas357');
 
+WITH desired(sku,option_name,is_default,price_delta_irt) AS (VALUES
+('gilas800','50x70 cm',1,0),
+('gilas410','50x70 cm',1,0),
+('gilas410','60x80 cm',0,40000000),
+('gilas410','70x90 cm',0,80000000),
+('gilas409','80x50 cm',1,0),
+('gilas408','80x50 cm',1,0),
+('gilas407','100x30 cm',1,0),
+('gilas406','60x40 cm',1,0),
+('gilas405','70x70 cm',1,0),
+('gilas405','100x100 cm',0,90000000),
+('gilas404','70x70 cm',1,0),
+('gilas404','100x100 cm',0,80000000),
+('gilas402','70x70 cm',1,0),
+('gilas402','100x100 cm',0,80000000),
+('gilas401','70x70 cm',1,0),
+('gilas401','100x100 cm',0,80000000),
+('gilas400','70x70 cm',1,0),
+('gilas400','100x100 cm',0,80000000),
+('gilas399','70x70 cm',1,0),
+('gilas399','100x100 cm',0,80000000),
+('gilas397','25x25 cm',1,0),
+('gilas397','40x40 cm',0,30000000),
+('gilas395','50x35 cm',1,0),
+('gilas395','70x50 cm',0,60000000),
+('gilas394','35x35 cm',1,0),
+('gilas394','50x50 cm',0,60000000),
+('gilas393','50x35 cm',1,0),
+('gilas393','70x50 cm',0,60000000),
+('gilas391','50x35 cm',1,0),
+('gilas391','70x50 cm',0,75000000),
+('gilas389','50x50 cm',1,0),
+('gilas389','70x70 cm',0,95000000),
+('gilas388','75x60 cm',1,0),
+('gilas387','100x100 cm',1,0),
+('gilas386','100x50 cm',1,0),
+('gilas385','40x55 cm',1,0),
+('gilas385','50x70 cm',0,91000000),
+('gilas384','100x50 cm',1,0),
+('gilas382','50x25 cm',1,0),
+('gilas382','100x50 cm',0,121000000),
+('gilas381','80x40 cm',1,0),
+('gilas381','100x50 cm',0,100000000),
+('gilas380','100x50 cm',1,0),
+('gilas379','70x70 cm',1,0),
+('gilas379','100x100 cm',0,80000000),
+('gilas378','50x70 cm',1,0),
+('gilas378','70x90 cm',0,90000000),
+('gilas377','35x50 cm',1,0),
+('gilas377','50x70 cm',0,90000000),
+('gilas376','35x50 cm',1,0),
+('gilas376','50x70 cm',0,90000000),
+('gilas375','35x50 cm',1,0),
+('gilas375','50x70 cm',0,90000000),
+('gilas374','35x50 cm',1,0),
+('gilas374','50x70 cm',0,90000000),
+('gilas372','35x50 cm',1,0),
+('gilas372','50x70 cm',0,90000000),
+('gilas371','70x70 cm',1,0),
+('gilas371','100x100 cm',0,400000000),
+('gilas370','50x35 cm',1,0),
+('gilas368','35x35 cm',1,0),
+('gilas367','100x50 cm',1,0),
+('gilas366','35x35 cm',1,0),
+('gilas365','35x35 cm',1,0),
+('gilas364','30x60 cm',1,0),
+('gilas364','45x90 cm',0,85000000),
+('gilas363','70x70 cm',1,0),
+('gilas363','100x100 cm',0,115000000),
+('gilas362','50x35 cm',1,0),
+('gilas362','70x50 cm',0,85000000),
+('gilas358','50x50 cm',1,0),
+('gilas358','100x100 cm',0,115000000),
+('gilas357','60x60 cm',1,0),
+('gilas357','100x100 cm',0,155000000)
+)
 INSERT OR REPLACE INTO product_attribute_option_overrides(product_id,option_id,active,is_default,price_delta_irt)
-SELECT p.id,'opt_pdim_50x70_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas800')
-UNION ALL
-SELECT p.id,'opt_pdim_50x70_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas410')
-UNION ALL
-SELECT p.id,'opt_pdim_60x80_cm',1,0,40000000 FROM products p WHERE lower(p.sku)=lower('Gilas410')
-UNION ALL
-SELECT p.id,'opt_pdim_70x90_cm',1,0,80000000 FROM products p WHERE lower(p.sku)=lower('Gilas410')
-UNION ALL
-SELECT p.id,'opt_pdim_80x50_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas409')
-UNION ALL
-SELECT p.id,'opt_pdim_80x50_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas408')
-UNION ALL
-SELECT p.id,'opt_pdim_100x30_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas407')
-UNION ALL
-SELECT p.id,'opt_pdim_60x40_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas406')
-UNION ALL
-SELECT p.id,'opt_pdim_70x70_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas405')
-UNION ALL
-SELECT p.id,'opt_pdim_100x100_cm',1,0,90000000 FROM products p WHERE lower(p.sku)=lower('Gilas405')
-UNION ALL
-SELECT p.id,'opt_pdim_70x70_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas404')
-UNION ALL
-SELECT p.id,'opt_pdim_100x100_cm',1,0,80000000 FROM products p WHERE lower(p.sku)=lower('Gilas404')
-UNION ALL
-SELECT p.id,'opt_pdim_70x70_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas402')
-UNION ALL
-SELECT p.id,'opt_pdim_100x100_cm',1,0,80000000 FROM products p WHERE lower(p.sku)=lower('Gilas402')
-UNION ALL
-SELECT p.id,'opt_pdim_70x70_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas401')
-UNION ALL
-SELECT p.id,'opt_pdim_100x100_cm',1,0,80000000 FROM products p WHERE lower(p.sku)=lower('Gilas401')
-UNION ALL
-SELECT p.id,'opt_pdim_70x70_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas400')
-UNION ALL
-SELECT p.id,'opt_pdim_100x100_cm',1,0,80000000 FROM products p WHERE lower(p.sku)=lower('Gilas400')
-UNION ALL
-SELECT p.id,'opt_pdim_70x70_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas399')
-UNION ALL
-SELECT p.id,'opt_pdim_100x100_cm',1,0,80000000 FROM products p WHERE lower(p.sku)=lower('Gilas399')
-UNION ALL
-SELECT p.id,'opt_pdim_25x25_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas397')
-UNION ALL
-SELECT p.id,'opt_pdim_40x40_cm',1,0,30000000 FROM products p WHERE lower(p.sku)=lower('Gilas397')
-UNION ALL
-SELECT p.id,'opt_pdim_50x35_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas395')
-UNION ALL
-SELECT p.id,'opt_pdim_70x50_cm',1,0,60000000 FROM products p WHERE lower(p.sku)=lower('Gilas395')
-UNION ALL
-SELECT p.id,'opt_pdim_35x35_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas394')
-UNION ALL
-SELECT p.id,'opt_pdim_50x50_cm',1,0,60000000 FROM products p WHERE lower(p.sku)=lower('Gilas394')
-UNION ALL
-SELECT p.id,'opt_pdim_50x35_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas393')
-UNION ALL
-SELECT p.id,'opt_pdim_70x50_cm',1,0,60000000 FROM products p WHERE lower(p.sku)=lower('Gilas393')
-UNION ALL
-SELECT p.id,'opt_pdim_50x35_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas391')
-UNION ALL
-SELECT p.id,'opt_pdim_70x50_cm',1,0,75000000 FROM products p WHERE lower(p.sku)=lower('Gilas391')
-UNION ALL
-SELECT p.id,'opt_pdim_50x50_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas389')
-UNION ALL
-SELECT p.id,'opt_pdim_70x70_cm',1,0,95000000 FROM products p WHERE lower(p.sku)=lower('Gilas389')
-UNION ALL
-SELECT p.id,'opt_pdim_75x60_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas388')
-UNION ALL
-SELECT p.id,'opt_pdim_100x100_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas387')
-UNION ALL
-SELECT p.id,'opt_pdim_100x50_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas386')
-UNION ALL
-SELECT p.id,'opt_pdim_40x55_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas385')
-UNION ALL
-SELECT p.id,'opt_pdim_50x70_cm',1,0,91000000 FROM products p WHERE lower(p.sku)=lower('Gilas385')
-UNION ALL
-SELECT p.id,'opt_pdim_100x50_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas384')
-UNION ALL
-SELECT p.id,'opt_pdim_50x25_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas382')
-UNION ALL
-SELECT p.id,'opt_pdim_100x50_cm',1,0,121000000 FROM products p WHERE lower(p.sku)=lower('Gilas382')
-UNION ALL
-SELECT p.id,'opt_pdim_80x40_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas381')
-UNION ALL
-SELECT p.id,'opt_pdim_100x50_cm',1,0,100000000 FROM products p WHERE lower(p.sku)=lower('Gilas381')
-UNION ALL
-SELECT p.id,'opt_pdim_100x50_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas380')
-UNION ALL
-SELECT p.id,'opt_pdim_70x70_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas379')
-UNION ALL
-SELECT p.id,'opt_pdim_100x100_cm',1,0,80000000 FROM products p WHERE lower(p.sku)=lower('Gilas379')
-UNION ALL
-SELECT p.id,'opt_pdim_50x70_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas378')
-UNION ALL
-SELECT p.id,'opt_pdim_70x90_cm',1,0,90000000 FROM products p WHERE lower(p.sku)=lower('Gilas378')
-UNION ALL
-SELECT p.id,'opt_pdim_35x50_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas377')
-UNION ALL
-SELECT p.id,'opt_pdim_50x70_cm',1,0,90000000 FROM products p WHERE lower(p.sku)=lower('Gilas377')
-UNION ALL
-SELECT p.id,'opt_pdim_35x50_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas376')
-UNION ALL
-SELECT p.id,'opt_pdim_50x70_cm',1,0,90000000 FROM products p WHERE lower(p.sku)=lower('Gilas376')
-UNION ALL
-SELECT p.id,'opt_pdim_35x50_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas375')
-UNION ALL
-SELECT p.id,'opt_pdim_50x70_cm',1,0,90000000 FROM products p WHERE lower(p.sku)=lower('Gilas375')
-UNION ALL
-SELECT p.id,'opt_pdim_35x50_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas374')
-UNION ALL
-SELECT p.id,'opt_pdim_50x70_cm',1,0,90000000 FROM products p WHERE lower(p.sku)=lower('Gilas374')
-UNION ALL
-SELECT p.id,'opt_pdim_35x50_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas372')
-UNION ALL
-SELECT p.id,'opt_pdim_50x70_cm',1,0,90000000 FROM products p WHERE lower(p.sku)=lower('Gilas372')
-UNION ALL
-SELECT p.id,'opt_pdim_70x70_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas371')
-UNION ALL
-SELECT p.id,'opt_pdim_100x100_cm',1,0,400000000 FROM products p WHERE lower(p.sku)=lower('Gilas371')
-UNION ALL
-SELECT p.id,'opt_pdim_50x35_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas370')
-UNION ALL
-SELECT p.id,'opt_pdim_35x35_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas368')
-UNION ALL
-SELECT p.id,'opt_pdim_100x50_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas367')
-UNION ALL
-SELECT p.id,'opt_pdim_35x35_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas366')
-UNION ALL
-SELECT p.id,'opt_pdim_35x35_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas365')
-UNION ALL
-SELECT p.id,'opt_pdim_30x60_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas364')
-UNION ALL
-SELECT p.id,'opt_pdim_45x90_cm',1,0,85000000 FROM products p WHERE lower(p.sku)=lower('Gilas364')
-UNION ALL
-SELECT p.id,'opt_pdim_70x70_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas363')
-UNION ALL
-SELECT p.id,'opt_pdim_100x100_cm',1,0,115000000 FROM products p WHERE lower(p.sku)=lower('Gilas363')
-UNION ALL
-SELECT p.id,'opt_pdim_50x35_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas362')
-UNION ALL
-SELECT p.id,'opt_pdim_70x50_cm',1,0,85000000 FROM products p WHERE lower(p.sku)=lower('Gilas362')
-UNION ALL
-SELECT p.id,'opt_pdim_50x50_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas358')
-UNION ALL
-SELECT p.id,'opt_pdim_100x100_cm',1,0,115000000 FROM products p WHERE lower(p.sku)=lower('Gilas358')
-UNION ALL
-SELECT p.id,'opt_pdim_60x60_cm',1,1,0 FROM products p WHERE lower(p.sku)=lower('Gilas357')
-UNION ALL
-SELECT p.id,'opt_pdim_100x100_cm',1,0,155000000 FROM products p WHERE lower(p.sku)=lower('Gilas357');
+SELECT p.id,o.id,1,d.is_default,d.price_delta_irt FROM desired d JOIN products p ON lower(p.sku)=d.sku JOIN product_attribute_options o ON o.attribute_id='attr_painting_dimensions' AND o.name=d.option_name;
