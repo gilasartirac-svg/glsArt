@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "version": "40c1d9afa158a98c",
+  "version": "50f92a966e6434e4",
   "generatedAt": "2026-10-13T13:14:47.227Z",
   "productCount": 223,
   "categoryCount": 6,
@@ -12,5 +12,5 @@
   "detailProductCount": 223,
   "indexBytes": 122466,
   "attributesBytes": 733662,
-  "homeBytes": 22790
+  "homeBytes": 7234
 }
