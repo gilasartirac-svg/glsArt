@@ -161,7 +161,7 @@ async function loadStorefrontIndex(){
 }
 function snapshotCore(p){
  const image=p?.image||(p?.images||[]).find(x=>Number(x.is_primary)===1)?.path||(p?.images||[0])?.path||'';
- return {id:p.id,slug:p.slug,sku:p.sku,name:p.name,description:p.description||'',price_irt:Number(p.price_irt||0),category_id:p.category_id,category_ids:Array.isArray(p.category_ids)?p.category_ids:[],active:Number(p.active??1),flash_sale_active:Number(p.flash_sale_active||0),flash_sale_ends_at:p.flash_sale_ends_at||null,flash_sale_price_irt:p.flash_sale_price_irt||null,view_count:Number(p.view_count||0),rating_avg:Number(p.rating_avg||0),review_count:Number(p.review_count||0),favorite_count:Number(p.favorite_count||0),sold_count:Number(p.sold_count||0),created_at:p.created_at||null,updated_at:p.updated_at||null,image};
+ return {id:p.id,slug:p.slug,sku:p.sku,name:p.name,description:p.description||'',price_irt:Number(p.price_irt||0),category_id:p.category_id,category_ids:Array.isArray(p.category_ids)?p.category_ids:[],active:Number(p.active??1),flash_sale_active:Number(p.flash_sale_active||0),flash_sale_ends_at:p.flash_sale_ends_at||null,flash_sale_price_irt:p.flash_sale_price_irt||null,view_count:Number(p.view_count||0),rating_avg:Number(p.rating_avg||0),review_count:Number(p.review_count||0),favorite_count:Number(p.favorite_count||0),sold_count:Number(p.sold_count||0),created_at:p.created_at||null,updated_at:p.updated_at||null,image,attributes:Array.isArray(p.attributes)?p.attributes:[]};
 }
 function snapshotSort(items,sort){
  const a=[...items],s=String(sort||'newest');
@@ -471,6 +471,8 @@ function productCard(p){
  const shownIrt=hasFlashPrice?Number(p.flash_sale_price_irt):Number(p.price_irt||0);
  const shown=Math.max(0,Math.round(shownIrt/10));
  const name=escapeHtml(p.name||t("product.artwork")),sku=escapeHtml(p.sku||""),href=productUrl(p.slug);
+ const dimensionsAttribute=Array.isArray(p.attributes)?p.attributes.find(a=>a&&(a.id==="attr_painting_dimensions"||/ابعاد\s*تابلو/.test(String(a.name||"")))):null;
+ const dimensions=dimensionsAttribute&&Array.isArray(dimensionsAttribute.options)?[...new Set(dimensionsAttribute.options.map(o=>String(o?.name||"").trim()).filter(Boolean))]:[];
  const rating=Number(p.rating_avg||0),reviews=Number(p.review_count||0),sold=Number(p.sold_count||0);
  const socialProof=reviews>0||sold>0;
  const ratingText=rating>0?rating.toFixed(1):"—";
@@ -483,7 +485,7 @@ function productCard(p){
   <div class="product-card-heading"><div class="product-title-wrap"><span class="product-card-kicker">GILAS ART</span><h3>${name}</h3></div>${sku?`<span class="product-sku" dir="ltr">${sku}</span>`:""}</div>
   ${socialProof?`<div class="product-social-proof" aria-label="${t('product.buyerFeedback')}"><span class="product-rating"><b>★</b> ${ratingText}</span><span>${fa(reviews)} ${t('product.reviews')}</span>${sold?`<span>${fa(sold)} ${t('product.sales')}</span>`:""}</div>`:""}
   ${flash?`<div class="flash-timer product-card-timer" data-flash-end="${escapeHtml(p.flash_sale_ends_at)}" aria-label="${t('product.remaining')}"></div>`:""}
-  <div class="product-card-footer"><div class="product-price-group"><span class="product-price-label">${hasFlashPrice?t('product.specialPrice'):t('product.price')}</span><strong class="price product-card-price">${fa(shown)} <small>${t('product.toman')}</small></strong>${hasFlashPrice?`<span class="muted flash-old">${fa(Math.max(0,Math.round(Number(p.price_irt||0)/10)))} ${t('product.toman')}</span>`:""}</div><span class="product-card-arrow" aria-hidden="true">←</span></div>
+  <div class="product-card-footer"><div class="product-price-group"><span class="product-price-label">${hasFlashPrice?t('product.specialPrice'):t('product.price')}</span><strong class="price product-card-price">${fa(shown)} <small>${t('product.toman')}</small></strong>${hasFlashPrice?`<span class="muted flash-old">${fa(Math.max(0,Math.round(Number(p.price_irt||0)/10)))} ${t('product.toman')}</span>`:""}${dimensions.length?`<span class="product-card-dimensions" dir="ltr">${dimensions.map(d=>`<span>${escapeHtml(d)}</span>`).join("")}</span>`:""}</div><span class="product-card-arrow" aria-hidden="true">←</span></div>
  </div></a></article>`;
 }
 function jalaliDate(v){try{return new Intl.DateTimeFormat('fa-IR-u-ca-persian',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Tehran'}).format(new Date(v))}catch{return ''}}
