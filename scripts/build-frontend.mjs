@@ -75,7 +75,28 @@ for(const p of productPages){
 }
 const sitemapBody=Array.from(sitemapUrls.values()).map(x=>'<url><loc>'+xmlEscape(x.loc)+'</loc>'+(x.lastmod&&/^\d{4}-\d{2}-\d{2}/.test(String(x.lastmod))?'<lastmod>'+xmlEscape(String(x.lastmod).slice(0,10))+'</lastmod>':'')+'</url>').join('');
 await writeFile('dist/sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+sitemapBody+'</urlset>');
-const release=JSON.parse(await readFile('frontend/public/mobile-release.json','utf8'));const releaseVersion=String(release.web?.version||'dev').replace(/[^A-Za-z0-9._-]/g,'-');const buildVersion=String(process.env.GITHUB_SHA||releaseVersion).slice(0,12).replace(/[^A-Za-z0-9._-]/g,'-');const swSource=await readFile('dist/sw.js','utf8');await writeFile('dist/sw.js',swSource.replaceAll('__GILASART_VERSION__',buildVersion));await writeFile('dist/config.js',`window.GILASART_API=${JSON.stringify(process.env.GILASART_API||'https://api.gilasart.ir')};window.GILASART_APP_VERSION=${JSON.stringify(release.web?.version||'dev')};\n`);// Production asset optimization: minify JS/CSS only in dist so source files stay readable.
+const release=JSON.parse(await readFile('frontend/public/mobile-release.json','utf8'));const releaseVersion=String(release.web?.version||'dev').replace(/[^A-Za-z0-9._-]/g,'-');const buildVersion=String(process.env.GITHUB_SHA||releaseVersion).slice(0,12).replace(/[^A-Za-z0-9._-]/g,'-');const swSource=await readFile('dist/sw.js','utf8');await writeFile('dist/sw.js',swSource.replaceAll('__GILASART_VERSION__',buildVersion));await writeFile('dist/config.js',`window.GILASART_API=${JSON.stringify(process.env.GILASART_API||'https://api.gilasart.ir')};window.GILASART_APP_VERSION=${JSON.stringify(release.web?.version||'dev')};\n`);// Rejoin the normalized keyed detail file at runtime without duplicating it in the lightweight product index.
+const builtAppPath='dist/app.js';
+let builtAppSource=await readFile(builtAppPath,'utf8');
+const snapshotLoadOld=`const d=await r.json();
+   if(Number(d?.schemaVersion)!==2||!Array.isArray(d.products)||!Array.isArray(d.categories)||d.products.length<1)return null;
+   return d;`;
+const snapshotLoadNew=`const d=await r.json();
+   if(Number(d?.schemaVersion)!==2||!Array.isArray(d.products)||!Array.isArray(d.categories)||d.products.length<1)return null;
+   const detailResponse=await fetch(dataRoot()+'storefront-attributes.json?v='+version,{cache:'no-store',credentials:'same-origin'});
+   if(!detailResponse.ok)return null;
+   const detailPayload=await detailResponse.json();
+   if(Number(detailPayload?.schemaVersion)!==1||!detailPayload?.byProductId||typeof detailPayload.byProductId!=='object')return null;
+   for(const product of d.products){
+    const detail=detailPayload.byProductId[String(product.id)];
+    if(!detail||!Array.isArray(detail.attributes)||!Array.isArray(detail.images)||!Array.isArray(detail.categories)||!Array.isArray(detail.reviews))return null;
+    Object.assign(product,{attributes:detail.attributes,images:detail.images,categories:detail.categories,reviews:detail.reviews});
+   }
+   return d;`;
+if(!builtAppSource.includes(snapshotLoadOld))throw new Error('Could not apply keyed offline product-detail loader; refusing production build.');
+builtAppSource=builtAppSource.replace(snapshotLoadOld,snapshotLoadNew);
+await writeFile(builtAppPath,builtAppSource);
+// Production asset optimization: minify JS/CSS only in dist so source files stay readable.
 for(const [file,loader] of [['dist/app.js','js'],['dist/styles.css','css']]){
   const source=await readFile(file,'utf8');
   const result=await transform(source,{loader,minify:true,sourcemap:false,target:['es2020']});
