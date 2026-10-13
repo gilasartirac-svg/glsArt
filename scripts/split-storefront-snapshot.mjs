@@ -69,12 +69,7 @@ try { home = await readJson(homePath); } catch {}
 if (home && Array.isArray(home.products)) {
   for (const product of home.products) {
     if (!product || product.id === undefined || product.id === null) continue;
-    const linked = byProductId[String(product.id)];
-    if (!linked) continue;
-    product.attributes = linked.attributes;
-    product.images = linked.images;
-    product.categories = linked.categories;
-    product.reviews = linked.reviews;
+    for (const field of ['attributes', 'images', 'categories', 'reviews', 'description', 'seo_title', 'seo_description', 'video_url']) delete product[field];
   }
   await writeFile(homePath, JSON.stringify(home) + '\n');
 }
