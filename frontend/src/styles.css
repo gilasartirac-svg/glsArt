@@ -8158,3 +8158,24 @@ body{
     max-width:100%;
   }
 }
+
+
+/* Compact offline painting dimensions on storefront product cards. */
+.product-card-dimensions{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:0.08rem;
+  margin-top:0.24rem;
+  max-width:100%;
+  color:inherit;
+  opacity:.62;
+  font-size:.66rem;
+  font-weight:400;
+  line-height:1.35;
+  letter-spacing:0;
+  text-align:left;
+  overflow-wrap:anywhere;
+}
+.product-card-dimensions>span{display:block;max-width:100%;}
+@media (max-width:520px){.product-card-dimensions{font-size:.61rem;gap:.04rem;margin-top:.2rem;}}
