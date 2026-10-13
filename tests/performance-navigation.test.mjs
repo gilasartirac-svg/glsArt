@@ -21,6 +21,7 @@ test('split storefront snapshot is lightweight and versioned',()=>{
  assert.ok(index.products.every(p=>p.id&&p.slug&&p.name&&p.sku&&p.image&&Array.isArray(p.category_ids)));
  assert.ok(index.products.every(p=>!('attributes' in p)&&!('images' in p)&&!('categories' in p)&&!('reviews' in p)));
  assert.ok(index.products.every(p=>Array.isArray(details.byProductId[String(p.id)]?.attributes)));
+ assert.ok(home.products.every(p=>!('attributes' in p)&&!('images' in p)&&!('categories' in p)&&!('reviews' in p)));
  assert.ok(statSync(new URL('../frontend/public/data/storefront-index.json',import.meta.url)).size<250000);
  assert.ok(!requireLegacySnapshot());
 });
