@@ -1,11 +1,11 @@
 {
-  "paused": true,
-  "requests": 29936,
-  "d1RowsRead": 4778759,
-  "d1RowsWritten": 29568,
+  "paused": false,
+  "requests": 0,
+  "d1RowsRead": 0,
+  "d1RowsWritten": 0,
   "limit": 100000,
   "d1ReadLimit": 5000000,
   "d1WriteLimit": 100000,
-  "checkedAt": "2026-10-12T10:10:04Z",
-  "message": "فروشگاه گیلاس آرت در حال انجام به‌روزرسانی و آماده‌سازی برای ارائه خدمات بهتر است."
+  "checkedAt": "2026-10-13T00:00:51Z",
+  "message": "سرویس فروشگاه فعال است."
 }
