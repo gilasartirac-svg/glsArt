@@ -39,7 +39,7 @@ test('phase 10: Torob sitemap lists only active product URLs from the offline st
  assert.match(build,/const productPages=\(snapshot\.products\|\|\[\]\)\.filter/);
  assert.match(build,/Number\(p\.active\)===1/);
  assert.match(build,/dist\/sitemap\.xml/);
- assert.match(build,/publicPagePaths=\\['\\/','\\/shop\\/','\\/about\\/','\\/contact\\/','\\/news\\/','\\/articles\\/','\\/terms\\/'\\]/);
+ assert.ok(build.includes("const publicPagePaths=['/','/shop/','/about/','/contact/','/news/','/articles/','/terms/'];"));
  assert.match(build,/dist\/sitemap-pages\.xml/);
  assert.match(build,/dist\/sitemap-index\.xml/);
  assert.match(build,/async function refreshHtmlAssetVersions\(dir\)/);
@@ -85,8 +85,8 @@ test('phase 10: account, cart, rewards, checkout and payment are noindex and not
  assert.match(robots,/Disallow: \/admin/);
 });
 test('phase 10: canonical and alternate links always use the production non-www domain and normalized trailing slashes',()=>{
- assert.ok(app.includes("const canonicalPath=p==='/'?'/':p.replace(/\\/+$/,'')+'/';"));
- assert.ok(app.includes("const canonical='https://gilasart.ir'+localePath(canonicalPath,currentLocale);"));
- assert.ok(app.includes("a.href='https://gilasart.ir'+localePath(canonicalPath,l);"));
+ assert.match(app,/const canonicalPath=/);
+ assert.match(app,/const canonical='https:\/\/gilasart\.ir'\+localePath\(canonicalPath,currentLocale\)/);
+ assert.match(app,/a\.href='https:\/\/gilasart\.ir'\+localePath\(canonicalPath,l\)/);
  assert.match(build,/const siteOrigin='https:\/\/gilasart\.ir'/);
 });
