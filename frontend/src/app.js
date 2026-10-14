@@ -324,10 +324,11 @@ function updateSeoLinks(){
  let p=location.pathname;if(base&&p.startsWith(base))p=p.slice(base.length)||'/';
  const parts=p.split('/').filter(Boolean);if(SUPPORTED_LOCALES.includes(String(parts[0]||'').toLowerCase()))parts.shift();
  p='/'+parts.join('/');
- const canonical=location.origin+localePath(p,currentLocale);
+ const canonicalPath=p==='/'?'/':p.replace(/\/+$/,'')+'/';
+ const canonical='https://gilasart.ir'+localePath(canonicalPath,currentLocale);
  document.querySelectorAll('link[data-gilasart-seo-link]').forEach(x=>x.remove());
- for(const l of SUPPORTED_LOCALES){const a=document.createElement('link');a.rel='alternate';a.hreflang=l;a.href=location.origin+localePath(p,l);a.dataset.gilasartSeoLink='1';document.head.appendChild(a)}
- const xd=document.createElement('link');xd.rel='alternate';xd.hreflang='x-default';xd.href=location.origin+base+(p==='/'?'':p);xd.dataset.gilasartSeoLink='1';document.head.appendChild(xd);
+ for(const l of SUPPORTED_LOCALES){const a=document.createElement('link');a.rel='alternate';a.hreflang=l;a.href='https://gilasart.ir'+localePath(canonicalPath,l);a.dataset.gilasartSeoLink='1';document.head.appendChild(a)}
+ const xd=document.createElement('link');xd.rel='alternate';xd.hreflang='x-default';xd.href='https://gilasart.ir'+canonicalPath;xd.dataset.gilasartSeoLink='1';document.head.appendChild(xd);
  let canonicalEl=document.querySelector('link[rel="canonical"]');if(!canonicalEl){canonicalEl=document.createElement('link');canonicalEl.rel='canonical';document.head.appendChild(canonicalEl)}canonicalEl.href=canonical;
  return canonical;
 }
@@ -354,7 +355,7 @@ function setSeo({title,description,image,type='website',jsonLd,indexable=true}={
 }
 function applyRouteSeoPolicy(pathSegments){
  const first=String(pathSegments?.[0]||'').toLowerCase();
- const privateRoutes=new Set(['account','cart','checkout','payment','admin']);
+ const privateRoutes=new Set(['account','cart','rewards','checkout','payment','admin']);
  setRobots(!privateRoutes.has(first));
  updateSeoLinks();
 }
