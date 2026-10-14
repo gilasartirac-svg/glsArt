@@ -40,6 +40,15 @@ test('phase 10: Torob sitemap lists only active product URLs from the offline st
  assert.doesNotMatch(build,/publicRoutes=\[/);
  assert.doesNotMatch(build,/snapshot\?\.articles|snapshot\?\.news/);
  assert.match(build,/Could not prepare crawlable product HTML/);
+ assert.match(build,/name="product_id"/);
+ assert.match(build,/name="product_name"/);
+ assert.match(build,/property="og:image"/);
+ assert.match(build,/name="product_price"/);
+ assert.match(build,/name="product_old_price"/);
+ assert.match(build,/name="availability"/);
+ assert.match(build,/const currentPrice=saleActive\?salePrice:basePrice/);
+ assert.match(build,/Number\(p\.stock\)>0\?'instock':'outofstock'/);
+ assert.match(build,/price:currentPrice,priceCurrency:'IRR'/);
 });
 test('phase 10: robots points to the canonical production sitemap and protects private paths',()=>{
  assert.match(robots,/Disallow: \/admin/);
