@@ -16,6 +16,18 @@ Public visibility does not, by itself, grant a blanket license to reuse propriet
 
 ---
 
+## SEO و قابلیت خزش صفحات (به‌روزرسانی ۲۰۲۶-۱۰-۱۴)
+
+- دامنه مرجع و canonical همه مسیرها باید `https://gilasart.ir` باشد؛ نسخه `www` نباید canonical جداگانه تولید کند.
+- `scripts/build-frontend.mjs` برای صفحات عمومی اصلی (خانه، فروشگاه، درباره ما، تماس، اخبار، مقالات و قوانین) ورودی HTML با عنوان، توضیح، canonical، Open Graph، Twitter metadata و JSON-LD اختصاصی تولید می‌کند.
+- صفحات فروشگاه، درباره، تماس، اخبار، مقالات و قوانین در `sitemap-pages.xml` معرفی می‌شوند؛ `sitemap.xml` محصول‌محور و برای سازگاری با ترب حفظ شده و `sitemap-index.xml` هر دو را معرفی می‌کند.
+- صفحات حساب کاربری، سبد خرید، باشگاه امتیاز، تکمیل سفارش و پرداخت باید `noindex,follow` باشند و در sitemap عمومی نیایند. برای اینکه موتور جستجو بتواند دستور noindex را بخواند، این مسیرها در robots.txt مسدود نمی‌شوند؛ این موضوع جایگزین کنترل دسترسی سمت Worker نیست.
+- `robots.txt` همچنان مسیرهای `/admin` و `/api/` را مسدود می‌کند.
+- آزمون‌های SEO در `tests/phase10-seo-routing.test.mjs` عنوان، canonical، metadata، صفحات خصوصی و sitemap را بررسی می‌کنند.
+- امتیاز Lighthouse یا Google Search Console از تست واحد قابل استنتاج نیست؛ قبل از اعلام نمره ۱۰۰، اجرای Lighthouse روی نسخه منتشرشده و بررسی داده‌های واقعی Search Console لازم است.
+
+---
+
 ## 1. هدف و وضعیت پروژه
 
 GilasArt یک گالری و فروشگاه آنلاین آثار هنری با معماری Serverless است. پروژه فقط یک Storefront ساده نیست و این لایه‌ها را در یک معماری واحد دارد:
