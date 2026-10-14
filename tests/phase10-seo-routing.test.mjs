@@ -38,6 +38,8 @@ test('phase 10: Torob sitemap lists only active product URLs from the offline st
  assert.match(build,/publicPagePaths=\['\/','\/shop','\/about','\/contact','\/news','\/articles','\/terms'\]/);
  assert.match(build,/dist\/sitemap-pages\.xml/);
  assert.match(build,/dist\/sitemap-index\.xml/);
+ assert.match(build,/async function refreshHtmlAssetVersions\(dir\)/);
+ assert.match(build,/await refreshHtmlAssetVersions\('dist'\)/);
  assert.match(build,/sitemap-pages\.xml/);
  assert.match(build,/siteOrigin='https:\/\/gilasart\.ir'/);
  assert.match(build,/const loc=siteOrigin\+'\/'\+encodeURIComponent\(slug\)\+'\/'/);
