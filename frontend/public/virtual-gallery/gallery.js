@@ -977,10 +977,15 @@ function bindControls() {
       // instead of an empty options array, which fails validation for required attributes.
       const productKey = String(product.slug || product.id || '').trim();
       if (!productKey) throw new Error('شناسه اثر برای افزودن به سبد خرید معتبر نیست.');
-      const productDetails = await request('/api/products/' + encodeURIComponent(productKey));
-      const attributes = Array.isArray(productDetails.attributes) ? productDetails.attributes : [];
+      // Product attributes/options come from the offline snapshot loaded with the gallery.
+      // The live cart endpoint still validates every submitted option against current server data.
+      const attributes = Array.isArray(product.attributes) ? product.attributes : [];
       const options = attributes.map(attribute => {
-        const option = (Array.isArray(attribute.options) ? attribute.options : []).find(item => item.is_default);
+        const attributeOptions = Array.isArray(attribute.options) ? attribute.options : [];
+        const option = attributeOptions.find(item => item.is_default);
+        if (attribute.required && attributeOptions.length && !option) {
+          throw new Error('گزینه پیش‌فرض برای ویژگی «' + String(attribute.name || '') + '» در فایل آفلاین مشخص نشده است.');
+        }
         return option ? { attributeId: String(attribute.id), optionId: String(option.id) } : null;
       }).filter(Boolean);
       await request('/api/cart', {
