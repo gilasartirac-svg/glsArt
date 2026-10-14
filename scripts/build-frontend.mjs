@@ -145,7 +145,7 @@ await writeFile('dist/admin/index.html',`<!doctype html><html lang="fa" dir="rtl
    if(entry.isDirectory()){await refreshHtmlAssetVersions(file);continue;}
    if(!entry.isFile()||!entry.name.endsWith('.html'))continue;
    let html=await readFile(file,'utf8');
-   html=html.replace(/(styles\\.css|responsive-production\\.css|config\\.js|app\\.js)(?:\\?v=[^"'\\s>]*)?/g,(_,asset)=>asset+'?v='+buildVersion);
+   html=html.replace(/(styles\.css|responsive-production\.css|config\.js|app\.js)(?:\?v=[^"'\s>]*)?/g,(_,asset)=>asset+'?v='+buildVersion);
    await writeFile(file,html);
   }
  }
