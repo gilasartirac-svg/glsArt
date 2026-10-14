@@ -32,6 +32,10 @@ test('phase 10: private application routes are noindex',()=>{
 test('phase 10: Torob sitemap lists only active product URLs from the offline storefront snapshot',()=>{
  assert.match(build,/const locales=\['fa','en','tr','ar'\]/);
  assert.match(build,/storefront-index\.json/);
+ assert.match(build,/storefront-attributes\.json/);
+ assert.match(build,/productDetails\[String\(p\.id\)\]/);
+ assert.match(build,/detail\.seo_title/);
+ assert.match(build,/detail\.seo_description/);
  assert.match(build,/const productPages=\(snapshot\.products\|\|\[\]\)\.filter/);
  assert.match(build,/Number\(p\.active\)===1/);
  assert.match(build,/dist\/sitemap\.xml/);
