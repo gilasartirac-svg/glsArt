@@ -1,4 +1,4 @@
-import {cp, mkdir, readFile, writeFile} from 'node:fs/promises';
+import {cp, mkdir, readFile, readdir, writeFile} from 'node:fs/promises';
 import {transform} from 'esbuild';
 await mkdir('dist',{recursive:true});await cp('frontend/src','dist',{recursive:true});await cp('frontend/public','dist',{recursive:true});
 // GitHub Pages does not automatically return HTTP 200 for clean locale routes such as /fa/.
@@ -136,3 +136,17 @@ for(const file of ['dist/index.html','dist/404.html','dist/admin/index.html',...
 
 await mkdir('dist/admin',{recursive:true});
 await writeFile('dist/admin/index.html',`<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>کنترل پنل گیلاس آرت</title><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css"><link rel="stylesheet" href="../styles.css?v=20261005.1"><link rel="stylesheet" href="../admin/admin-ui.css?v=20261008-admin-ui"></head><body><div id="app"></div><script src="../config.js?v=20260928.9"></script><script src="../app.js?v=20261005.1" defer></script></body></html>`);
+
+ // Cache-bust assets in every generated HTML entry, including nested routes such as
+ // /shop/ and /payment/manual/ plus crawlable static product pages and admin shell.
+ async function refreshHtmlAssetVersions(dir){
+  for(const entry of await readdir(dir,{withFileTypes:true})){
+   const file=dir+'/'+entry.name;
+   if(entry.isDirectory()){await refreshHtmlAssetVersions(file);continue;}
+   if(!entry.isFile()||!entry.name.endsWith('.html'))continue;
+   let html=await readFile(file,'utf8');
+   html=html.replace(/(styles\\.css|responsive-production\\.css|config\\.js|app\\.js)(?:\\?v=[^"'\\s>]*)?/g,(_,asset)=>asset+'?v='+buildVersion);
+   await writeFile(file,html);
+  }
+ }
+ await refreshHtmlAssetVersions('dist');
