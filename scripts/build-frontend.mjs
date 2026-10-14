@@ -90,8 +90,8 @@ await writeFile('dist/sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<url
  // advertises both without changing the established product-feed URL.
  const publicPagePaths=['/','/shop','/about','/contact','/news','/articles','/terms'];
  const publicPageXml=publicPagePaths.map(path=>'<url><loc>'+xmlEscape(siteOrigin+path)+'</loc></url>').join('');
- await writeFile('dist/sitemap-pages.xml','<?xml version="1.0" encoding="UTF-8"?>\\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+publicPageXml+'</urlset>');
- const sitemapIndex='<?xml version="1.0" encoding="UTF-8"?>\\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><sitemap><loc>'+siteOrigin+'/sitemap-pages.xml</loc></sitemap><sitemap><loc>'+siteOrigin+'/sitemap.xml</loc></sitemap></sitemapindex>';
+ await writeFile('dist/sitemap-pages.xml','<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+publicPageXml+'</urlset>');
+ const sitemapIndex='<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><sitemap><loc>'+siteOrigin+'/sitemap-pages.xml</loc></sitemap><sitemap><loc>'+siteOrigin+'/sitemap.xml</loc></sitemap></sitemapindex>';
  await writeFile('dist/sitemap-index.xml',sitemapIndex);
 const release=JSON.parse(await readFile('frontend/public/mobile-release.json','utf8'));const releaseVersion=String(release.web?.version||'dev').replace(/[^A-Za-z0-9._-]/g,'-');const buildVersion=String(process.env.GITHUB_SHA||releaseVersion).slice(0,12).replace(/[^A-Za-z0-9._-]/g,'-');const swSource=await readFile('dist/sw.js','utf8');await writeFile('dist/sw.js',swSource.replaceAll('__GILASART_VERSION__',buildVersion));await writeFile('dist/config.js',`window.GILASART_API=${JSON.stringify(process.env.GILASART_API||'https://api.gilasart.ir')};window.GILASART_APP_VERSION=${JSON.stringify(release.web?.version||'dev')};\n`);// Rejoin the normalized keyed detail file at runtime without duplicating it in the lightweight product index.
 const builtAppPath='dist/app.js';
