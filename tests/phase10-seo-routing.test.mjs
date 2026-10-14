@@ -81,13 +81,13 @@ test('phase 10: requested public routes receive static page-specific SEO metadat
  assert.match(build,/noindex,follow/);
 });
 test('phase 10: account, cart, rewards, checkout and payment are noindex and not blocked by robots.txt',()=>{
- assert.match(app,/privateRoutes=new Set\(\['account','cart','rewards','checkout','payment','admin'\]\)/);
- for(const route of ['/account','/cart','/checkout','/payment']) assert.doesNotMatch(robots,new RegExp('Disallow: \\'+route+'(?:\\n|$)'));
+ assert.ok(app.includes("privateRoutes=new Set(['account','cart','rewards','checkout','payment','admin'])"));
+ assert.doesNotMatch(robots,/Disallow: \/(account|cart|checkout|payment|rewards)/);
  assert.match(robots,/Disallow: \/admin/);
 });
 test('phase 10: canonical and alternate links always use the production non-www domain and normalized trailing slashes',()=>{
- assert.match(app,/const canonicalPath=p==='\/'\?'\/'\:p\.replace\(\/\\\+\$\/,''\)\+'\/'/);
- assert.match(app,/const canonical='https:\/\/gilasart\.ir'\+localePath\(canonicalPath,currentLocale\)/);
- assert.match(app,/a\.href='https:\/\/gilasart\.ir'\+localePath\(canonicalPath,l\)/);
+ assert.ok(app.includes("const canonicalPath=p==='/'?'/':p.replace(/\\/+$/,'')+'/';"));
+ assert.ok(app.includes("const canonical='https://gilasart.ir'+localePath(canonicalPath,currentLocale);"));
+ assert.ok(app.includes("a.href='https://gilasart.ir'+localePath(canonicalPath,l);"));
  assert.match(build,/const siteOrigin='https:\/\/gilasart\.ir'/);
 });
