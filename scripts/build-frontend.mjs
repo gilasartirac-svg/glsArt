@@ -1,4 +1,4 @@
-import {cp, mkdir, readFile, writeFile} from 'node:fs/promises';
+import {cp, mkdir, readFile, readdir, writeFile} from 'node:fs/promises';
 import {transform} from 'esbuild';
 await mkdir('dist',{recursive:true});await cp('frontend/src','dist',{recursive:true});await cp('frontend/public','dist',{recursive:true});
 // GitHub Pages does not automatically return HTTP 200 for clean locale routes such as /fa/.
@@ -35,8 +35,12 @@ for(const locale of locales){
 // Product pages contain crawlable title, price and original image in the initial HTML; no runtime API/JavaScript is required to read these basics.
 const siteOrigin='https://gilasart.ir';
 // Torob XML sitemap: list product URLs only; product details belong in each product page HTML.
-let snapshot=null;
+let snapshot=null,productDetails={};
 try{snapshot=JSON.parse(await readFile('frontend/public/data/storefront-index.json','utf8'))}catch{}
+try{
+ const detailSnapshot=JSON.parse(await readFile('frontend/public/data/storefront-attributes.json','utf8'));
+ if(Number(detailSnapshot?.schemaVersion)===1&&detailSnapshot.byProductId&&typeof detailSnapshot.byProductId==='object')productDetails=detailSnapshot.byProductId;
+}catch{}
 if(!snapshot||!Array.isArray(snapshot.products))throw new Error('Cannot generate sitemap: offline storefront snapshot is missing or invalid.');
 const xmlEscape=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
 const htmlEscape=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -47,8 +51,10 @@ for(const p of productPages){
   const loc=siteOrigin+'/'+encodeURIComponent(slug)+'/';
   sitemapUrls.set(loc,{loc,lastmod:p.updated_at||p.created_at});
   const title=String(p.name).slice(0,500);
+  const detail=productDetails[String(p.id)]||{};
+  const seoTitle=String(detail.seo_title||title+' | گیلاس آرت').slice(0,500);
   const image=String(p.image).startsWith('http')?String(p.image):siteOrigin+(String(p.image).startsWith('/')?'':'/')+String(p.image);
-  const description=('خرید '+title+' از گیلاس آرت؛ تابلوهای معرق مس برجسته و آثار هنری دست‌ساز.').slice(0,300);
+  const description=String(detail.seo_description||detail.description||('خرید '+title+' از گیلاس آرت؛ تابلوهای معرق مس برجسته و آثار هنری دست‌ساز.')).slice(0,500);
   const basePrice=Number(p.price_irt);
   const saleEnd=Date.parse(String(p.flash_sale_ends_at||''));
   const salePrice=Number(p.flash_sale_price_irt);
@@ -67,12 +73,12 @@ for(const p of productPages){
     .replace('<head>','<head><base href="/">')
     .replace(/<meta name="description" content="[^"]*">/, '<meta name="description" content="'+htmlEscape(description)+'">')
     .replace(/<meta property="og:type" content="[^"]*">/, '<meta property="og:type" content="product">')
-    .replace(/<meta property="og:title" content="[^"]*">/, '<meta property="og:title" content="'+htmlEscape(title)+' | گیلاس آرت">')
+     .replace(/<meta property="og:title" content="[^"]*">/, '<meta property="og:title" content="'+htmlEscape(seoTitle)+'">')
     .replace(/<meta property="og:description" content="[^"]*">/, '<meta property="og:description" content="'+htmlEscape(description)+'">')
     .replace(/<meta property="og:url" content="[^"]*">/, '<meta property="og:url" content="'+canonical+'">')
     .replace(/<meta property="og:site_name" content="[^"]*">/, '<meta property="og:site_name" content="گیلاس آرت">'+torobMeta)
     .replace(/<link rel="canonical" href="[^"]*">/, '<link rel="canonical" href="'+canonical+'">')
-    .replace(/<title>[^<]*<\/title>/, '<title>'+htmlEscape(title)+' | گیلاس آرت</title>')
+    .replace(/<title>[^<]*<\/title>/, '<title>'+htmlEscape(seoTitle)+'</title>')
     .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '<script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'Product',name:title,image:[image],url:canonical,description,sku:productId,offers:{'@type':'Offer',price:currentPrice,priceCurrency:'IRR',availability:availability==='instock'?'https://schema.org/InStock':'https://schema.org/OutOfStock'}}).replace(/</g,'\\u003c')+'</script>');
   const appStart=productHtml.indexOf('<div id="app">');
   const scriptsStart=productHtml.indexOf('<script src="config.js',appStart);
@@ -85,6 +91,14 @@ for(const p of productPages){
 }
 const sitemapBody=Array.from(sitemapUrls.values()).map(x=>'<url><loc>'+xmlEscape(x.loc)+'</loc>'+(x.lastmod&&/^\d{4}-\d{2}-\d{2}/.test(String(x.lastmod))?'<lastmod>'+xmlEscape(String(x.lastmod).slice(0,10))+'</lastmod>':'')+'</url>').join('');
 await writeFile('dist/sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+sitemapBody+'</urlset>');
+ // Keep /sitemap.xml product-only for the existing Torob feed contract, and publish
+ // a separate Google sitemap for crawlable public landing pages. A sitemap index
+ // advertises both without changing the established product-feed URL.
+ const publicPagePaths=['/','/shop','/about','/contact','/news','/articles','/terms'];
+ const publicPageXml=publicPagePaths.map(path=>'<url><loc>'+xmlEscape(siteOrigin+path)+'</loc></url>').join('');
+ await writeFile('dist/sitemap-pages.xml','<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+publicPageXml+'</urlset>');
+ const sitemapIndex='<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><sitemap><loc>'+siteOrigin+'/sitemap-pages.xml</loc></sitemap><sitemap><loc>'+siteOrigin+'/sitemap.xml</loc></sitemap></sitemapindex>';
+ await writeFile('dist/sitemap-index.xml',sitemapIndex);
 const release=JSON.parse(await readFile('frontend/public/mobile-release.json','utf8'));const releaseVersion=String(release.web?.version||'dev').replace(/[^A-Za-z0-9._-]/g,'-');const buildVersion=String(process.env.GITHUB_SHA||releaseVersion).slice(0,12).replace(/[^A-Za-z0-9._-]/g,'-');const swSource=await readFile('dist/sw.js','utf8');await writeFile('dist/sw.js',swSource.replaceAll('__GILASART_VERSION__',buildVersion));await writeFile('dist/config.js',`window.GILASART_API=${JSON.stringify(process.env.GILASART_API||'https://api.gilasart.ir')};window.GILASART_APP_VERSION=${JSON.stringify(release.web?.version||'dev')};\n`);// Rejoin the normalized keyed detail file at runtime without duplicating it in the lightweight product index.
 const builtAppPath='dist/app.js';
 let builtAppSource=await readFile(builtAppPath,'utf8');
@@ -128,3 +142,17 @@ for(const file of ['dist/index.html','dist/404.html','dist/admin/index.html',...
 
 await mkdir('dist/admin',{recursive:true});
 await writeFile('dist/admin/index.html',`<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>کنترل پنل گیلاس آرت</title><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css"><link rel="stylesheet" href="../styles.css?v=20261005.1"><link rel="stylesheet" href="../admin/admin-ui.css?v=20261008-admin-ui"></head><body><div id="app"></div><script src="../config.js?v=20260928.9"></script><script src="../app.js?v=20261005.1" defer></script></body></html>`);
+
+ // Cache-bust assets in every generated HTML entry, including nested routes such as
+ // /shop/ and /payment/manual/ plus crawlable static product pages and admin shell.
+ async function refreshHtmlAssetVersions(dir){
+  for(const entry of await readdir(dir,{withFileTypes:true})){
+   const file=dir+'/'+entry.name;
+   if(entry.isDirectory()){await refreshHtmlAssetVersions(file);continue;}
+   if(!entry.isFile()||!entry.name.endsWith('.html'))continue;
+   let html=await readFile(file,'utf8');
+   html=html.replace(/(styles\.css|responsive-production\.css|config\.js|app\.js)(?:\?v=[^"'\s>]*)?/g,(_,asset)=>asset+'?v='+buildVersion);
+   await writeFile(file,html);
+  }
+ }
+ await refreshHtmlAssetVersions('dist');

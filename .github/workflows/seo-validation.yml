@@ -1,0 +1,48 @@
+name: SEO and Frontend Validation
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Check syntax
+        run: npm run check
+      - name: Run tests
+        run: npm test
+      - name: Build static production output
+        run: npm run build
+      - name: Verify generated sitemap documents
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from 'node:fs/promises';
+          for (const file of ['dist/sitemap.xml','dist/sitemap-pages.xml','dist/sitemap-index.xml']) {
+            const xml = await readFile(file, 'utf8');
+            if (!xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')) throw new Error(file + ': XML declaration missing');
+            if (!xml.includes('http://www.sitemaps.org/schemas/sitemap/0.9')) throw new Error(file + ': sitemap namespace missing');
+            if (xml.includes('\\\\n<')) throw new Error(file + ': invalid escaped newline in XML');
+            console.log(file + ': PASS (' + xml.length + ' bytes)');
+          }
+          const index = await readFile('dist/sitemap-index.xml', 'utf8');
+          if (!index.includes('https://gilasart.ir/sitemap-pages.xml') || !index.includes('https://gilasart.ir/sitemap.xml')) throw new Error('sitemap index references missing sitemap');
+          const pages = await readFile('dist/sitemap-pages.xml', 'utf8');
+          for (const path of ['/', '/shop', '/about', '/contact', '/news', '/articles', '/terms']) {
+            if (!pages.includes('https://gilasart.ir' + path)) throw new Error('public route missing from sitemap: ' + path);
+          }
+          NODE
