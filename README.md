@@ -23,7 +23,7 @@ Public visibility does not, by itself, grant a blanket license to reuse propriet
 - صفحات فروشگاه، درباره، تماس، اخبار، مقالات و قوانین در `sitemap-pages.xml` معرفی می‌شوند؛ `sitemap.xml` محصول‌محور و برای سازگاری با ترب حفظ شده و `sitemap-index.xml` هر دو را معرفی می‌کند.
 - صفحات حساب کاربری، سبد خرید، باشگاه امتیاز، تکمیل سفارش و پرداخت باید `noindex,follow` باشند و در sitemap عمومی نیایند. برای اینکه موتور جستجو بتواند دستور noindex را بخواند، این مسیرها در robots.txt مسدود نمی‌شوند؛ این موضوع جایگزین کنترل دسترسی سمت Worker نیست.
 - `robots.txt` همچنان مسیرهای `/admin` و `/api/` را مسدود می‌کند.
-- آزمون‌های SEO در `tests/phase10-seo-routing.test.mjs` عنوان، canonical، metadata، صفحات خصوصی و sitemap را بررسی می‌کنند.
+- آزمون‌های SEO در `tests/phase10-seo-routing.test.mjs` عنوان، canonical، metadata، صفحات خصوصی و sitemap را بررسی می‌کنند؛ `scripts/audit-seo-output.mjs` نیز خروجی واقعی build را بررسی و امتیاز چک‌لیست فنی هر مسیر را گزارش می‌کند.
 - امتیاز Lighthouse یا Google Search Console از تست واحد قابل استنتاج نیست؛ قبل از اعلام نمره ۱۰۰، اجرای Lighthouse روی نسخه منتشرشده و بررسی داده‌های واقعی Search Console لازم است.
 
 ---
