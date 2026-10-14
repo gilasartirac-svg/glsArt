@@ -35,8 +35,12 @@ for(const locale of locales){
 // Product pages contain crawlable title, price and original image in the initial HTML; no runtime API/JavaScript is required to read these basics.
 const siteOrigin='https://gilasart.ir';
 // Torob XML sitemap: list product URLs only; product details belong in each product page HTML.
-let snapshot=null;
+let snapshot=null,productDetails={};
 try{snapshot=JSON.parse(await readFile('frontend/public/data/storefront-index.json','utf8'))}catch{}
+try{
+ const detailSnapshot=JSON.parse(await readFile('frontend/public/data/storefront-attributes.json','utf8'));
+ if(Number(detailSnapshot?.schemaVersion)===1&&detailSnapshot.byProductId&&typeof detailSnapshot.byProductId==='object')productDetails=detailSnapshot.byProductId;
+}catch{}
 if(!snapshot||!Array.isArray(snapshot.products))throw new Error('Cannot generate sitemap: offline storefront snapshot is missing or invalid.');
 const xmlEscape=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
 const htmlEscape=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -47,8 +51,10 @@ for(const p of productPages){
   const loc=siteOrigin+'/'+encodeURIComponent(slug)+'/';
   sitemapUrls.set(loc,{loc,lastmod:p.updated_at||p.created_at});
   const title=String(p.name).slice(0,500);
+  const detail=productDetails[String(p.id)]||{};
+  const seoTitle=String(detail.seo_title||title+' | گیلاس آرت').slice(0,500);
   const image=String(p.image).startsWith('http')?String(p.image):siteOrigin+(String(p.image).startsWith('/')?'':'/')+String(p.image);
-  const description=('خرید '+title+' از گیلاس آرت؛ تابلوهای معرق مس برجسته و آثار هنری دست‌ساز.').slice(0,300);
+  const description=String(detail.seo_description||detail.description||('خرید '+title+' از گیلاس آرت؛ تابلوهای معرق مس برجسته و آثار هنری دست‌ساز.')).slice(0,500);
   const basePrice=Number(p.price_irt);
   const saleEnd=Date.parse(String(p.flash_sale_ends_at||''));
   const salePrice=Number(p.flash_sale_price_irt);
@@ -67,7 +73,7 @@ for(const p of productPages){
     .replace('<head>','<head><base href="/">')
     .replace(/<meta name="description" content="[^"]*">/, '<meta name="description" content="'+htmlEscape(description)+'">')
     .replace(/<meta property="og:type" content="[^"]*">/, '<meta property="og:type" content="product">')
-    .replace(/<meta property="og:title" content="[^"]*">/, '<meta property="og:title" content="'+htmlEscape(title)+' | گیلاس آرت">')
+     .replace(/<meta property="og:title" content="[^"]*">/, '<meta property="og:title" content="'+htmlEscape(seoTitle)+'">')
     .replace(/<meta property="og:description" content="[^"]*">/, '<meta property="og:description" content="'+htmlEscape(description)+'">')
     .replace(/<meta property="og:url" content="[^"]*">/, '<meta property="og:url" content="'+canonical+'">')
     .replace(/<meta property="og:site_name" content="[^"]*">/, '<meta property="og:site_name" content="گیلاس آرت">'+torobMeta)
