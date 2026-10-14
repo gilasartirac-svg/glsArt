@@ -35,16 +35,19 @@ test('Three.js objects are initialized only after the module is loaded', () => {
   assert.match(script, /if \(!THREE\) THREE = await loadThreeModule\(\);[\s\S]{0,250}if \(!cameraTarget\) \{[\s\S]{0,150}cameraPosition = new THREE\.Vector3/);
 });
 
-test('gallery products use an API-ready normalized contract with static JSON as current source', () => {
+test('gallery products and details use the split offline snapshot as the only catalog source', () => {
   assert.match(script, /import\(['"]\.\/product-adapter\.js['"]\)/);
+  assert.match(script, /fallbackUrl: root \+ 'data\/storefront-index\.json'/);
   assert.match(adapter, /export function normalizeGalleryProduct/);
   assert.match(adapter, /id,\s*slug,\s*sku,/);
   assert.match(adapter, /price:\s*\{/);
   assert.match(adapter, /currency:/);
   assert.match(adapter, /availability:/);
-  assert.match(adapter, /productsApiUrl/);
-  assert.match(adapter, /fallbackUrl/);
-  assert.match(adapter, /payload\.products/);
+  assert.match(adapter, /storefront-manifest\.json/);
+  assert.match(adapter, /manifest\?\.attributesFile/);
+  assert.match(adapter, /detailSnapshot\.byProductId\[key\]/);
+  assert.match(adapter, /attributes: Array\.isArray\(details\.attributes\)/);
+  assert.doesNotMatch(adapter, /productsApiUrl|payload\.products/);
 });
 
 test('gallery add-to-cart uses the existing authenticated store API and CSRF token', () => {
@@ -55,7 +58,8 @@ test('gallery add-to-cart uses the existing authenticated store API and CSRF tok
   assert.match(script, /request\('\/api\/me'\)/);
   assert.match(script, /session\.csrfToken/);
   assert.match(script, /request\('\/api\/cart',[\s\S]*?method: 'POST'/);
-  assert.match(script, /request\('\/api\/products\/' \+ encodeURIComponent\(productKey\)\)/);
+  assert.doesNotMatch(script, /request\('\/api\/products\/' \+ encodeURIComponent\(productKey\)\)/);
+  assert.match(script, /Array\.isArray\(product\.attributes\)/);
   assert.match(script, /attribute\.options[\s\S]*?find\(item => item\.is_default\)/);
   assert.match(script, /productId: product\.id, quantity: 1, options/);
   assert.match(script, /gilasart:cart:added/);
