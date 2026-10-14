@@ -28,7 +28,7 @@ jobs:
         run: npm test
       - name: Build static production output
         run: npm run build
-      - name: Verify generated sitemap documents
+      - name: Audit generated SEO metadata and score requested routes\n        run: node scripts/audit-seo-output.mjs\n      - name: Verify generated sitemap documents
         run: |
           node --input-type=module <<'NODE'
           import { readFile } from 'node:fs/promises';
