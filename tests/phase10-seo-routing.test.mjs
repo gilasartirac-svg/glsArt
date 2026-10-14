@@ -25,7 +25,7 @@ test('phase 10: SEO metadata and JSON-LD are updated for rendered pages',()=>{
 });
 
 test('phase 10: private application routes are noindex',()=>{
- assert.match(app,/const privateRoutes=new Set\(\['account','cart','checkout','payment','admin'\]\)/);
+ assert.ok(app.includes("privateRoutes=new Set(['account','cart','rewards','checkout','payment','admin'])"));
  assert.match(app,/applyRouteSeoPolicy\(p\)/);
 });
 
@@ -39,7 +39,7 @@ test('phase 10: Torob sitemap lists only active product URLs from the offline st
  assert.match(build,/const productPages=\(snapshot\.products\|\|\[\]\)\.filter/);
  assert.match(build,/Number\(p\.active\)===1/);
  assert.match(build,/dist\/sitemap\.xml/);
- assert.match(build,/publicPagePaths=\['\/','\/shop','\/about','\/contact','\/news','\/articles','\/terms'\]/);
+ assert.ok(build.includes("const publicPagePaths=['/','/shop/','/about/','/contact/','/news/','/articles/','/terms/'];"));
  assert.match(build,/dist\/sitemap-pages\.xml/);
  assert.match(build,/dist\/sitemap-index\.xml/);
  assert.match(build,/async function refreshHtmlAssetVersions\(dir\)/);
@@ -60,10 +60,41 @@ test('phase 10: Torob sitemap lists only active product URLs from the offline st
  assert.match(build,/Number\(p\.stock\)>0\?'instock':'outofstock'/);
  assert.match(build,/price:currentPrice,priceCurrency:'IRR'/);
 });
-test('phase 10: robots points to the canonical production sitemap and protects private paths',()=>{
+test('phase 10: robots exposes private noindex directives and blocks only admin/API paths',()=>{
  assert.match(robots,/Disallow: \/admin/);
- assert.match(robots,/Disallow: \/account/);
- assert.match(robots,/Disallow: \/checkout/);
- assert.match(robots,/Disallow: \/payment/);
+ assert.match(robots,/Disallow: \/api\//);
+ assert.doesNotMatch(robots,/Disallow: \/(account|cart|checkout|payment|rewards)/);
  assert.match(robots,/Sitemap: https:\/\/gilasart\.ir\/sitemap-index\.xml/);
+});
+
+test('phase 10: requested public routes receive static page-specific SEO metadata and crawlable headings',()=>{
+ for(const path of ['/shop/','/about/','/contact/','/news/','/articles/','/terms/']){
+  assert.ok(build.includes("path:'"+path+"'"),'missing route SEO definition: '+path);
+ }
+ assert.match(build,/routeSeoPages/);
+ assert.match(build,/seo-prerender/);
+ assert.match(build,/CollectionPage/);
+ assert.match(build,/ContactPage/);
+ assert.match(build,/meta name="twitter:title"/);
+ assert.match(build,/privateSeoPages/);
+ assert.match(build,/noindex,follow/);
+});
+test('phase 10: account, cart, rewards, checkout and payment are noindex and not blocked by robots.txt',()=>{
+ assert.ok(app.includes("privateRoutes=new Set(['account','cart','rewards','checkout','payment','admin'])"));
+ assert.doesNotMatch(robots,/Disallow: \/(account|cart|checkout|payment|rewards)/);
+ assert.match(robots,/Disallow: \/admin/);
+});
+test('phase 10: canonical and alternate links always use the production non-www domain and normalized trailing slashes',()=>{
+ assert.match(app,/const canonicalPath=/);
+ assert.ok(app.includes("const canonical='https://gilasart.ir'+localePath(canonicalPath,currentLocale);"));
+ assert.ok(app.includes("a.href='https://gilasart.ir'+localePath(canonicalPath,l);"));
+ assert.ok(build.includes("const siteOrigin='https://gilasart.ir'"));
+});
+
+test('phase 10: build provides initial crawlable homepage and social metadata for public and private routes',()=>{
+ assert.match(build,/homeCrawlable/);
+ assert.match(build,/homeProductImage/);
+ assert.match(build,/twitter:image/);
+ assert.match(build,/seo-prerender/);
+ assert.match(build,/privateSeoPages/);
 });

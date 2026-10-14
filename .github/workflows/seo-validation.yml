@@ -28,6 +28,8 @@ jobs:
         run: npm test
       - name: Build static production output
         run: npm run build
+      - name: Audit generated SEO metadata and score requested routes
+        run: node scripts/audit-seo-output.mjs
       - name: Verify generated sitemap documents
         run: |
           node --input-type=module <<'NODE'
