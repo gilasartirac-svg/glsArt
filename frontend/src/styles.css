@@ -9461,3 +9461,134 @@ body{
     transform:none!important;
   }
 }
+
+
+/* Production-safe panel text spacing audit — 2026-10-14.
+   Normalize internal breathing room only; leave page structure, behavior,
+   colors, typography, routes, and business logic unchanged. */
+#main-content :where(
+  .panel,
+  .box,
+  .card:not(.product-card):not(.article-card):not(.news-card):not(.cms-card):not(.aparat-card),
+  .cart-section,
+  .cart-checkout-bar,
+  .cart-coupon,
+  .cart-address-grid,
+  .product-detail-panel,
+  .product-options-panel,
+  .product-info,
+  .product-details,
+  .product-purchase-messages,
+  .shop-control-shell,
+  .shop-control-panel,
+  .rewards-balance-hero,
+  .rewards-account-card,
+  .reward-activity-panel,
+  .reward-coupons-panel,
+  .rewards-earn-panel,
+  .rewards-convert-panel,
+  .referral-panel,
+  .ticket-list,
+  .ticket-thread,
+  .ticket-form-panel,
+  .support-detail,
+  .ticket-form-intro,
+  .legal-page,
+  .cms-about-card,
+  .cms-contact-main,
+  .cms-contact-aside-premium,
+  .page-masthead,
+  .cms-hero,
+  .contact-hero-card,
+  .contact-info-card,
+  .cms-content-card,
+  .cms-page-card,
+  .cms-article-body,
+  .news-detail-body,
+  .article-detail-body,
+  .payment-receipt-success-panel,
+  .manual-payment-panel,
+  .payment-manual-panel,
+  .payment-success-panel
+) {
+  padding: clamp(.875rem, 2vw, 1.375rem);
+  min-width: 0;
+}
+
+#main-content :where(.product-card-body, .article-card-body, .news-card-body, .cms-card-body) {
+  padding: clamp(.875rem, 2vw, 1.25rem);
+  min-width: 0;
+}
+
+.admin-layout :where(
+  .panel,
+  .card:not(.product-card):not(.article-card):not(.news-card):not(.cms-card):not(.aparat-card),
+  .admin-card,
+  .widget,
+  .chart-box,
+  .stat-card
+) {
+  padding: clamp(.875rem, 1.8vw, 1.375rem);
+  min-width: 0;
+}
+
+@media (max-width: 520px) {
+  #main-content :where(
+    .panel,
+    .box,
+    .card:not(.product-card):not(.article-card):not(.news-card):not(.cms-card):not(.aparat-card),
+    .cart-section,
+    .cart-checkout-bar,
+    .cart-coupon,
+    .cart-address-grid,
+    .product-detail-panel,
+    .product-options-panel,
+    .product-info,
+    .product-details,
+    .product-purchase-messages,
+    .shop-control-shell,
+    .shop-control-panel,
+    .rewards-balance-hero,
+    .rewards-account-card,
+    .reward-activity-panel,
+    .reward-coupons-panel,
+    .rewards-earn-panel,
+    .rewards-convert-panel,
+    .referral-panel,
+    .ticket-list,
+    .ticket-thread,
+    .ticket-form-panel,
+    .support-detail,
+    .ticket-form-intro,
+    .legal-page,
+    .cms-about-card,
+    .cms-contact-main,
+    .cms-contact-aside-premium,
+    .page-masthead,
+    .cms-hero,
+    .contact-hero-card,
+    .contact-info-card,
+    .cms-content-card,
+    .cms-page-card,
+    .cms-article-body,
+    .news-detail-body,
+    .article-detail-body,
+    .payment-receipt-success-panel,
+    .manual-payment-panel,
+    .payment-manual-panel,
+    .payment-success-panel
+  ) {
+    padding: .875rem;
+  }
+
+  .admin-layout :where(
+    .panel,
+    .card:not(.product-card):not(.article-card):not(.news-card):not(.cms-card):not(.aparat-card),
+    .admin-card,
+    .widget,
+    .chart-box,
+    .stat-card
+  ) {
+    padding: .875rem;
+  }
+}
