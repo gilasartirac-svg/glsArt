@@ -49,6 +49,15 @@ for(const p of productPages){
   const title=String(p.name).slice(0,500);
   const image=String(p.image).startsWith('http')?String(p.image):siteOrigin+(String(p.image).startsWith('/')?'':'/')+String(p.image);
   const description=('خرید '+title+' از گیلاس آرت؛ تابلوهای معرق مس برجسته و آثار هنری دست‌ساز.').slice(0,300);
+  const basePrice=Number(p.price_irt);
+  const saleEnd=Date.parse(String(p.flash_sale_ends_at||''));
+  const salePrice=Number(p.flash_sale_price_irt);
+  const saleActive=Number(p.flash_sale_active)===1&&Number.isFinite(saleEnd)&&saleEnd>Date.now()&&Number.isFinite(salePrice)&&salePrice>0&&Number.isFinite(basePrice)&&basePrice>0&&salePrice<basePrice;
+  const currentPrice=saleActive?salePrice:basePrice;
+  const oldPrice=Number.isFinite(basePrice)&&basePrice>=currentPrice?basePrice:currentPrice;
+  const availability=Number.isFinite(Number(p.stock))&&Number(p.stock)>0?'instock':'outofstock';
+  const productId=String(p.sku||p.id);
+  const torobMeta='<meta name="product_id" content="'+htmlEscape(productId)+'"><meta name="product_name" content="'+htmlEscape(title)+'"><meta property="og:image" content="'+htmlEscape(image)+'"><meta name="product_price" content="'+htmlEscape(currentPrice)+'"><meta name="product_old_price" content="'+htmlEscape(oldPrice)+'"><meta name="availability" content="'+availability+'">';
   const lastmod=String(p.updated_at||p.created_at||'');
   const validLastmod=/^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}:\d{2})?$/.test(lastmod);
   const isoLastmod=validLastmod?(lastmod.includes('T')?lastmod.replace(' ','T')+'+03:30':lastmod+'T00:00:00+03:30'):'';
@@ -61,13 +70,14 @@ for(const p of productPages){
     .replace(/<meta property="og:title" content="[^"]*">/, '<meta property="og:title" content="'+htmlEscape(title)+' | گیلاس آرت">')
     .replace(/<meta property="og:description" content="[^"]*">/, '<meta property="og:description" content="'+htmlEscape(description)+'">')
     .replace(/<meta property="og:url" content="[^"]*">/, '<meta property="og:url" content="'+canonical+'">')
+    .replace(/<meta property="og:site_name" content="[^"]*">/, '<meta property="og:site_name" content="گیلاس آرت">'+torobMeta)
     .replace(/<link rel="canonical" href="[^"]*">/, '<link rel="canonical" href="'+canonical+'">')
     .replace(/<title>[^<]*<\/title>/, '<title>'+htmlEscape(title)+' | گیلاس آرت</title>')
-    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '<script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'Product',name:title,image:[image],url:canonical,description,offers:{'@type':'Offer',price:Number(p.price_irt),priceCurrency:'IRR'}}).replace(/</g,'\\u003c')+'</script>');
+    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '<script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'Product',name:title,image:[image],url:canonical,description,sku:productId,offers:{'@type':'Offer',price:currentPrice,priceCurrency:'IRR',availability:availability==='instock'?'https://schema.org/InStock':'https://schema.org/OutOfStock'}}).replace(/</g,'\\u003c')+'</script>');
   const appStart=productHtml.indexOf('<div id="app">');
   const scriptsStart=productHtml.indexOf('<script src="config.js',appStart);
   if(appStart<0||scriptsStart<0)throw new Error('Could not prepare crawlable product HTML for '+slug);
-  const crawlableApp='<div id="app"><main class="wrap page" id="crawlable-product"><article><h1>'+htmlEscape(title)+'</h1>'+imageHtml+'<p class="product-price"><strong>قیمت: '+new Intl.NumberFormat('fa-IR').format(Number(p.price_irt))+' ریال</strong></p><p>'+htmlEscape(description)+'</p><p><a href="'+canonical+'">مشاهده جزئیات و خرید محصول</a></p></article></main></div>';
+  const crawlableApp='<div id="app"><main class="wrap page" id="crawlable-product"><article><h1>'+htmlEscape(title)+'</h1>'+imageHtml+'<p class="product-price"><strong>قیمت: '+new Intl.NumberFormat('fa-IR').format(currentPrice)+' ریال</strong></p><p>'+htmlEscape(description)+'</p><p><a href="'+canonical+'">مشاهده جزئیات و خرید محصول</a></p></article></main></div>';
   const finalProductHtml=productHtml.slice(0,appStart)+crawlableApp+productHtml.slice(scriptsStart);
   const productDir='dist/'+slug;
   await mkdir(productDir,{recursive:true});
