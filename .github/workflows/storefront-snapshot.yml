@@ -8,6 +8,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'worker/src/index.js'
       - 'scripts/split-storefront-snapshot.mjs'
       - '.github/workflows/storefront-snapshot.yml'
 
@@ -21,15 +22,98 @@ concurrency:
 jobs:
   snapshot:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
-      - name: Checkout existing offline snapshot
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Split offline product list and product details (no D1/API calls)
+      - name: Fetch fresh public data from the Worker snapshot endpoint
+        env:
+          SNAPSHOT_URL: https://gilasartworker.gilasart-ir-ac.workers.dev/api/storefront-snapshot
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp)"
+          trap 'rm -f "$tmp"' EXIT
+          curl -fsSL --retry 4 --retry-all-errors --connect-timeout 15 --max-time 120 "$SNAPSHOT_URL" -o "$tmp"
+          test -s "$tmp"
+          node - "$tmp" <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const d = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          if (d?.meta?.schemaVersion !== 1) throw new Error('Invalid source schemaVersion');
+          if (!Array.isArray(d.products) || !Array.isArray(d.categories)) throw new Error('Source catalog is incomplete');
+
+          const products = [...d.products]
+            .filter(p => p && p.active !== 0 && p.active !== false)
+            .sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')) || String(b.id || '').localeCompare(String(a.id || '')))
+            .map(p => {
+              const images = Array.isArray(p.images) ? p.images : [];
+              const image = images.find(x => Number(x?.is_primary) === 1)?.path || images[0]?.path || '/data/product-image-unavailable.svg';
+              return {
+                id: p.id, slug: p.slug, sku: p.sku, name: p.name,
+                description: p.description || '', seo_title: p.seo_title || '',
+                seo_description: p.seo_description || '', video_url: p.video_url || '',
+                price_irt: Number(p.price_irt || 0), image,
+                category_id: p.category_id,
+                category_ids: Array.isArray(p.category_ids) ? p.category_ids : [],
+                active: Number(p.active ?? 1),
+                flash_sale_active: Number(p.flash_sale_active || 0),
+                flash_sale_ends_at: p.flash_sale_ends_at || null,
+                flash_sale_price_irt: p.flash_sale_price_irt || null,
+                view_count: Number(p.view_count || 0), review_count: Number(p.review_count || 0),
+                rating_avg: Number(p.rating_avg || 0), favorite_count: Number(p.favorite_count || 0),
+                sold_count: Number(p.sold_count || 0), stock: Number(p.stock || 0),
+                images,
+                attributes: Array.isArray(p.attributes) ? p.attributes : [],
+                categories: Array.isArray(p.categories) ? p.categories : [],
+                reviews: Array.isArray(p.reviews) ? p.reviews : [],
+                created_at: p.created_at || null, updated_at: p.updated_at || null
+              };
+            });
+          if (!products.length) throw new Error('Refusing to publish an empty product catalog');
+
+          const categories = d.categories.map(x => ({ id: x.id, slug: x.slug, name: x.name, description: x.description || '' }));
+          const publicContent = x => ({
+            id: x.id, slug: x.slug, title: x.title, summary: x.summary || '',
+            body: x.body || '', cover_image: x.cover_image || '',
+            published_at: x.published_at || null, updated_at: x.updated_at || null
+          });
+          const articles = (d.articles || []).map(publicContent);
+          const news = (d.news || []).map(publicContent);
+          const about = (d.about || []).map(publicContent);
+          const contact = (d.contact || []).map(x => ({
+            id: x.id, slug: x.slug, title: x.title, summary: x.summary || '',
+            body: x.body || '', cover_image: x.cover_image || '',
+            phone: x.phone || '', mobile: x.mobile || '', address: x.address || '',
+            map_url: x.map_url || '', published_at: x.published_at || null,
+            updated_at: x.updated_at || null
+          }));
+          const index = {
+            schemaVersion: 2, generatedAt: d.meta.generatedAt, products, categories,
+            articles, news, about, contact, settings: d.settings || {}
+          };
+          const homeProducts = products.slice(0, 8);
+          const flash = products.filter(p => p.flash_sale_active === 1 && p.flash_sale_ends_at && new Date(p.flash_sale_ends_at).getTime() > Date.now()).slice(0, 20);
+          const home = { schemaVersion: 2, generatedAt: d.meta.generatedAt, products: homeProducts, categories, settings: d.settings || {}, flash };
+          const root = 'frontend/public/data/';
+          fs.mkdirSync(root, { recursive: true });
+          fs.writeFileSync(root + 'storefront-index.json', JSON.stringify(index) + '\n');
+          fs.writeFileSync(root + 'home.json', JSON.stringify(home) + '\n');
+          const version = crypto.createHash('sha256').update(JSON.stringify(index) + JSON.stringify(home)).digest('hex').slice(0, 16);
+          const manifest = {
+            schemaVersion: 2, version, generatedAt: d.meta.generatedAt,
+            productCount: products.length, categoryCount: categories.length,
+            articleCount: articles.length, newsCount: news.length,
+            aboutCount: about.length, contactCount: contact.length
+          };
+          fs.writeFileSync(root + 'storefront-manifest.json', JSON.stringify(manifest, null, 2) + '\n');
+          console.log(JSON.stringify({ sourceGeneratedAt: d.meta.generatedAt, products: products.length, categories: categories.length }));
+          NODE
+
+      - name: Split product details into the linked attributes file
         run: node scripts/split-storefront-snapshot.mjs
 
-      - name: Validate offline files and key relationships
+      - name: Validate offline files, key relationships, size, and privacy boundary
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
@@ -41,11 +125,11 @@ jobs:
           const home=JSON.parse(fs.readFileSync(root+'home.json','utf8'));
           if(index.schemaVersion!==2||details.schemaVersion!==1||manifest.schemaVersion!==2||home.schemaVersion!==2)throw new Error('invalid snapshot schema');
           if(!Array.isArray(index.products)||!index.products.length)throw new Error('empty product index');
-          if(Object.keys(details.byProductId||{}).length<index.products.length)throw new Error('product detail key map incomplete');
-          if(home.products.some(p=>['attributes','images','categories','reviews'].some(k=>k in p)))throw new Error('product detail arrays leaked into home snapshot');
+          if(Object.keys(details.byProductId||{}).length!==index.products.length)throw new Error('product detail key map incomplete or has stale entries');
+          if(home.products.some(p=>['attributes','images','categories','reviews','description','seo_title','seo_description','video_url'].some(k=>k in p)))throw new Error('product details leaked into home snapshot');
           for(const p of index.products){
             if(!p.id||!p.slug||!p.name||!p.sku||!p.image||!Array.isArray(p.category_ids))throw new Error('invalid index product: '+(p?.sku||p?.id));
-            if(['attributes','images','categories','reviews'].some(k=>k in p))throw new Error('detail arrays leaked into index: '+p.sku);
+            if(['attributes','images','categories','reviews','description','seo_title','seo_description','video_url'].some(k=>k in p))throw new Error('detail fields leaked into index: '+p.sku);
             const d=details.byProductId[String(p.id)];
             if(!d||!Array.isArray(d.attributes)||!Array.isArray(d.images)||!Array.isArray(d.categories)||!Array.isArray(d.reviews))throw new Error('broken detail key for '+p.sku);
             for(const a of d.attributes){
@@ -57,7 +141,8 @@ jobs:
           const forbidden=/admin_bootstrap|kavenegar|invoice_|national_id|postal_code|economic_code|customer/i;
           if(forbidden.test(JSON.stringify(index))||forbidden.test(JSON.stringify(details))||forbidden.test(JSON.stringify(home)))throw new Error('sensitive field leaked into public snapshot');
           if(fs.statSync(root+'storefront-index.json').size>=250000)throw new Error('product index exceeds 250 KB performance budget');
-          if(Number(manifest.productCount)!==index.products.length)throw new Error('product count mismatch');
+          if(Number(manifest.productCount)!==index.products.length||Number(manifest.detailProductCount)!==index.products.length)throw new Error('product count mismatch');
+          if(manifest.attributesFile!=='storefront-attributes.json')throw new Error('attributes file name mismatch');
           console.log(JSON.stringify({
             products:index.products.length,
             indexBytes:fs.statSync(root+'storefront-index.json').size,
@@ -73,10 +158,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add frontend/public/data/storefront-index.json frontend/public/data/storefront-attributes.json frontend/public/data/storefront-manifest.json frontend/public/data/home.json
           if git diff --cached --quiet; then
-            echo "Offline files are already split and valid; nothing to commit."
+            echo "Offline snapshot is unchanged; nothing to commit."
             exit 0
           fi
-          git commit -m "chore: split offline product details"
+          git commit -m "chore: refresh and split storefront snapshot"
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main
