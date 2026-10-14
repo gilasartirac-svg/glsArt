@@ -39,7 +39,7 @@ test('phase 10: Torob sitemap lists only active product URLs from the offline st
  assert.match(build,/const productPages=\(snapshot\.products\|\|\[\]\)\.filter/);
  assert.match(build,/Number\(p\.active\)===1/);
  assert.match(build,/dist\/sitemap\.xml/);
- assert.match(build,/publicPagePaths=\['\/','\/shop','\/about','\/contact','\/news','\/articles','\/terms'\]/);
+ assert.match(build,/publicPagePaths=\\['\\/','\\/shop\\/','\\/about\\/','\\/contact\\/','\\/news\\/','\\/articles\\/','\\/terms\\/'\\]/);
  assert.match(build,/dist\/sitemap-pages\.xml/);
  assert.match(build,/dist\/sitemap-index\.xml/);
  assert.match(build,/async function refreshHtmlAssetVersions\(dir\)/);
@@ -60,11 +60,10 @@ test('phase 10: Torob sitemap lists only active product URLs from the offline st
  assert.match(build,/Number\(p\.stock\)>0\?'instock':'outofstock'/);
  assert.match(build,/price:currentPrice,priceCurrency:'IRR'/);
 });
-test('phase 10: robots points to the canonical production sitemap and protects private paths',()=>{
+test('phase 10: robots exposes private noindex directives and blocks only admin/API paths',()=>{
  assert.match(robots,/Disallow: \/admin/);
- assert.match(robots,/Disallow: \/account/);
- assert.match(robots,/Disallow: \/checkout/);
- assert.match(robots,/Disallow: \/payment/);
+ assert.match(robots,/Disallow: \/api\//);
+ assert.doesNotMatch(robots,/Disallow: \/(account|cart|checkout|payment|rewards)/);
  assert.match(robots,/Sitemap: https:\/\/gilasart\.ir\/sitemap-index\.xml/);
 });
 
