@@ -29,8 +29,10 @@ test('product detail distinguishes 404 from service failure and offers recovery'
   assert.match(app,/product_detail_backend_failed/);
 });
 
-test('offline snapshot split preserves public CMS fallback content',()=>{
-  assert.match(snapshotWorkflow,/no D1\/API calls/);
+test('offline snapshot refreshes public Worker data before splitting and preserves CMS fallback content',()=>{
+  assert.match(snapshotWorkflow,/SNAPSHOT_URL: https:\/\/gilasartworker\.gilasart-ir-ac\.workers\.dev\/api\/storefront-snapshot/);
+  assert.match(snapshotWorkflow,/Fetch fresh public data from the Worker snapshot endpoint/);
+  assert.match(snapshotWorkflow,/Split product details into the linked attributes file/);
   assert.match(snapshotSplitter,/const index = await readJson\(indexPath\)/);
   assert.match(snapshotSplitter,/for \(const product of index\.products\)/);
   assert.doesNotMatch(snapshotSplitter,/delete index\.(articles|news|about|contact)/);
