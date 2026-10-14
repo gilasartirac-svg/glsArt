@@ -4,7 +4,7 @@ import Header from './components/Header.js';
 function ensureAdminStyles(){
  const href=(location.pathname.startsWith('/glsArt/')?'/glsArt':'')+'/admin/admin-ui.css';
  let link=document.querySelector('link[data-gilasart-admin-css]');
- if(!link){link=document.createElement('link');link.rel='stylesheet';link.href=href+'?v=20261008-admin-ui';link.dataset.gilasartAdminCss='1';document.head.appendChild(link)}
+ if(!link){link=document.createElement('link');link.rel='stylesheet';link.href=href+'?v=20261014-admin-theme';link.dataset.gilasartAdminCss='1';document.head.appendChild(link)}
 }
 
 export function removeAdminStyles(){
