@@ -67,3 +67,27 @@ test('phase 10: robots points to the canonical production sitemap and protects p
  assert.match(robots,/Disallow: \/payment/);
  assert.match(robots,/Sitemap: https:\/\/gilasart\.ir\/sitemap-index\.xml/);
 });
+
+test('phase 10: requested public routes receive static page-specific SEO metadata and crawlable headings',()=>{
+ for(const path of ['/shop/','/about/','/contact/','/news/','/articles/','/terms/']){
+  assert.ok(build.includes("path:'"+path+"'"),'missing route SEO definition: '+path);
+ }
+ assert.match(build,/routeSeoPages/);
+ assert.match(build,/seo-prerender/);
+ assert.match(build,/CollectionPage/);
+ assert.match(build,/ContactPage/);
+ assert.match(build,/meta name="twitter:title"/);
+ assert.match(build,/privateSeoPages/);
+ assert.match(build,/noindex,follow/);
+});
+test('phase 10: account, cart, rewards, checkout and payment are noindex and not blocked by robots.txt',()=>{
+ assert.match(app,/privateRoutes=new Set\(\['account','cart','rewards','checkout','payment','admin'\]\)/);
+ for(const route of ['/account','/cart','/checkout','/payment']) assert.doesNotMatch(robots,new RegExp('Disallow: \\'+route+'(?:\\n|$)'));
+ assert.match(robots,/Disallow: \/admin/);
+});
+test('phase 10: canonical and alternate links always use the production non-www domain and normalized trailing slashes',()=>{
+ assert.match(app,/const canonicalPath=p==='\/'\?'\/'\:p\.replace\(\/\\\+\$\/,''\)\+'\/'/);
+ assert.match(app,/const canonical='https:\/\/gilasart\.ir'\+localePath\(canonicalPath,currentLocale\)/);
+ assert.match(app,/a\.href='https:\/\/gilasart\.ir'\+localePath\(canonicalPath,l\)/);
+ assert.match(build,/const siteOrigin='https:\/\/gilasart\.ir'/);
+});
