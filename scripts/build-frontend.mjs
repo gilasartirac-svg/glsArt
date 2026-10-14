@@ -160,11 +160,11 @@ for(const page of privateSeoPages){
  html=html.replace(/<meta property="og:url" content="[^"]*">/,'<meta property="og:url" content="'+siteOrigin+page.path+'">');
  html=html.replace(/<link rel="canonical" href="[^"]*">/,'<link rel="canonical" href="'+siteOrigin+page.path+'">');
  html=html.replace(/<title>[^<]*<\/title>/,'<title>'+htmlEscape(page.title)+'</title>');
- const appStart=html.indexOf('<div id="app">'),scriptsStart=html.indexOf('<script src="config.js',appStart);
- if(appStart<0||scriptsStart<0)throw new Error('Could not prepare noindex shell for '+page.path);
  html=html.replace(/<meta property="og:title" content="[^"]*">/,'<meta property="og:title" content="'+htmlEscape(page.title)+'">');
  html=html.replace(/<meta property="og:description" content="[^"]*">/,'<meta property="og:description" content="'+htmlEscape(page.description)+'">');
  html=html.replace('</head>','<meta name="twitter:title" content="'+htmlEscape(page.title)+'"><meta name="twitter:description" content="'+htmlEscape(page.description)+'">'+(homeProductImage?'<meta property="og:image" content="'+htmlEscape(homeProductImage)+'"><meta name="twitter:image" content="'+htmlEscape(homeProductImage)+'">':'')+'</head>');
+ const appStart=html.indexOf('<div id="app">'),scriptsStart=html.indexOf('<script src="config.js',html.indexOf('<div id="app">'));
+ if(appStart<0||scriptsStart<0)throw new Error('Could not prepare noindex shell for '+page.path);
  const shell='<div id="app"><main class="wrap page"><section class="panel"><h1>'+htmlEscape(page.heading)+'</h1><p>'+htmlEscape(page.description)+'</p><a href="'+siteOrigin+'/account/">ورود به حساب کاربری</a></section></main></div>';
  html=html.slice(0,appStart)+shell+html.slice(scriptsStart);
  await mkdir('dist/'+page.folder,{recursive:true});
