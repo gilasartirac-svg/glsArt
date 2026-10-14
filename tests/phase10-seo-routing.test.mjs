@@ -90,3 +90,11 @@ test('phase 10: canonical and alternate links always use the production non-www 
  assert.ok(app.includes("a.href='https://gilasart.ir'+localePath(canonicalPath,l);"));
  assert.ok(build.includes("const siteOrigin='https://gilasart.ir'"));
 });
+
+test('phase 10: build provides initial crawlable homepage and social metadata for public and private routes',()=>{
+ assert.match(build,/homeCrawlable/);
+ assert.match(build,/homeProductImage/);
+ assert.match(build,/twitter:image/);
+ assert.match(build,/seo-prerender/);
+ assert.match(build,/privateSeoPages/);
+});
