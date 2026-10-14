@@ -25,7 +25,7 @@ test('phase 10: SEO metadata and JSON-LD are updated for rendered pages',()=>{
 });
 
 test('phase 10: private application routes are noindex',()=>{
- assert.match(app,/const privateRoutes=new Set\(\['account','cart','checkout','payment','admin'\]\)/);
+ assert.match(app,/const privateRoutes=new Set\\(\\['account','cart','rewards','checkout','payment','admin'\\]\\)/);
  assert.match(app,/applyRouteSeoPolicy\(p\)/);
 });
 
