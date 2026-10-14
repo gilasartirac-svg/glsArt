@@ -6,4 +6,4 @@ Disallow: /cart
 Disallow: /checkout
 Disallow: /payment
 Disallow: /api/
-Sitemap: https://gilasart.ir/sitemap.xml
+Sitemap: https://gilasart.ir/sitemap-index.xml
