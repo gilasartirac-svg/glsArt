@@ -80,6 +80,7 @@ for(const p of productPages){
     .replace(/<link rel="canonical" href="[^"]*">/, '<link rel="canonical" href="'+canonical+'">')
     .replace(/<title>[^<]*<\/title>/, '<title>'+htmlEscape(seoTitle)+'</title>')
     .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '<script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'Product',name:title,image:[image],url:canonical,description,sku:productId,offers:{'@type':'Offer',price:currentPrice,priceCurrency:'IRR',availability:availability==='instock'?'https://schema.org/InStock':'https://schema.org/OutOfStock'}}).replace(/</g,'\\u003c')+'</script>');
+  productHtml=productHtml.replace('</head>','<meta name="twitter:title" content="'+htmlEscape(seoTitle)+'"><meta name="twitter:description" content="'+htmlEscape(description)+'"><meta name="twitter:image" content="'+htmlEscape(image)+'"></head>');
   const appStart=productHtml.indexOf('<div id="app">');
   const scriptsStart=productHtml.indexOf('<script src="config.js',appStart);
   if(appStart<0||scriptsStart<0)throw new Error('Could not prepare crawlable product HTML for '+slug);
@@ -89,6 +90,26 @@ for(const p of productPages){
   await mkdir(productDir,{recursive:true});
   await writeFile(productDir+'/index.html',finalProductHtml);
 }
+// Give the homepage useful initial HTML before the SPA hydrates, with metadata and internal product links.
+const homeTitle='گیلاس آرت | خرید تابلو و آثار هنری';
+const homeDescription='گیلاس آرت؛ فروشگاه تخصصی تابلوهای معرق مس برجسته و آثار هنری دکوراتیو.';
+const homeProductImage=productPages[0]?(String(productPages[0].image).startsWith('http')?String(productPages[0].image):siteOrigin+(String(productPages[0].image).startsWith('/')?'':'/')+String(productPages[0].image)):'';
+let homeHtml=await readFile('dist/index.html','utf8');
+homeHtml=homeHtml.replace(/<meta name="description" content="[^"]*">/,'<meta name="description" content="'+htmlEscape(homeDescription)+'">');
+homeHtml=homeHtml.replace(/<meta name="robots" content="[^"]*">/,'<meta name="robots" content="index,follow,max-image-preview:large">');
+homeHtml=homeHtml.replace(/<meta property="og:title" content="[^"]*">/,'<meta property="og:title" content="'+htmlEscape(homeTitle)+'">');
+homeHtml=homeHtml.replace(/<meta property="og:description" content="[^"]*">/,'<meta property="og:description" content="'+htmlEscape(homeDescription)+'">');
+homeHtml=homeHtml.replace(/<meta property="og:url" content="[^"]*">/,'<meta property="og:url" content="'+siteOrigin+'/">');
+homeHtml=homeHtml.replace(/<link rel="canonical" href="[^"]*">/,'<link rel="canonical" href="'+siteOrigin+'/">');
+homeHtml=homeHtml.replace(/<title>[^<]*<\/title>/,'<title>'+htmlEscape(homeTitle)+'</title>');
+homeHtml=homeHtml.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/,'<script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'WebSite',name:'گیلاس آرت',url:siteOrigin+'/',description:homeDescription,inLanguage:'fa-IR'}).replace(/</g,'\\u003c')+'</script>');
+homeHtml=homeHtml.replace('</head>','<meta name="twitter:title" content="'+htmlEscape(homeTitle)+'"><meta name="twitter:description" content="'+htmlEscape(homeDescription)+'">'+(homeProductImage?'<meta property="og:image" content="'+htmlEscape(homeProductImage)+'"><meta name="twitter:image" content="'+htmlEscape(homeProductImage)+'">':'')+'</head>');
+const homeAppStart=homeHtml.indexOf('<div id="app">'),homeScriptsStart=homeHtml.indexOf('<script src="config.js',homeAppStart);
+if(homeAppStart<0||homeScriptsStart<0)throw new Error('Could not prepare crawlable homepage HTML.');
+const homePreview=productPages.slice(0,6).map(p=>'<li><a href="'+siteOrigin+'/'+encodeURIComponent(String(p.slug))+'/">'+htmlEscape(p.name)+'</a></li>').join('');
+const homeCrawlable='<div id="app"><main class="wrap page seo-prerender" dir="rtl"><h1>تابلوهای معرق مس برجسته و آثار هنری گیلاس آرت</h1><p>مجموعه‌ای از تابلوهای معرق مس برجسته و آثار هنری دکوراتیو دست‌ساز را در فروشگاه گیلاس آرت ببینید.</p><p><a href="'+siteOrigin+'/shop/">مشاهده همه تابلوها</a></p><ul aria-label="نمونه آثار">'+homePreview+'</ul><nav aria-label="صفحات اصلی"><a href="'+siteOrigin+'/about/">درباره ما</a> · <a href="'+siteOrigin+'/contact/">تماس با ما</a> · <a href="'+siteOrigin+'/news/">اخبار</a></nav></main></div>';
+homeHtml=homeHtml.slice(0,homeAppStart)+homeCrawlable+homeHtml.slice(homeScriptsStart);
+await writeFile('dist/index.html',homeHtml);
 // Generate page-specific crawlable HTML for public landing pages and noindex shells for private flows.
 const routeSeoPages=[
  {path:'/shop/',folder:'shop',title:'خرید تابلو معرق مس و آثار هنری | فروشگاه گیلاس آرت',description:'خرید آنلاین تابلوهای معرق مس برجسته و آثار هنری دست‌ساز از گیلاس آرت؛ مشاهده مجموعه آثار، بررسی قیمت‌ها و انتخاب تابلو برای دکوراسیون.',heading:'فروشگاه تابلوهای معرق مس و آثار هنری',intro:'مجموعه تابلوهای معرق مس برجسته و آثار هنری دست‌ساز گیلاس آرت را ببینید، قیمت‌ها را مقایسه کنید و اثر مناسب فضای خود را انتخاب کنید.',type:'CollectionPage'},
@@ -100,6 +121,7 @@ const routeSeoPages=[
 ];
 for(const page of routeSeoPages){
  const canonical=siteOrigin+page.path;
+ const socialImage=homeProductImage;
  let html=localeEntry.replace('<head>','<head><base href="/">');
  html=html.replace(/<meta name="description" content="[^"]*">/,'<meta name="description" content="'+htmlEscape(page.description)+'">');
  html=html.replace(/<meta name="robots" content="[^"]*">/,'<meta name="robots" content="index,follow,max-image-preview:large">');
@@ -109,7 +131,7 @@ for(const page of routeSeoPages){
  html=html.replace(/<meta property="og:url" content="[^"]*">/,'<meta property="og:url" content="'+canonical+'">');
  html=html.replace(/<link rel="canonical" href="[^"]*">/,'<link rel="canonical" href="'+canonical+'">');
  html=html.replace(/<title>[^<]*<\/title>/,'<title>'+htmlEscape(page.title)+'</title>');
- html=html.replace('</head>','<meta name="twitter:title" content="'+htmlEscape(page.title)+'"><meta name="twitter:description" content="'+htmlEscape(page.description)+'"></head>');
+ html=html.replace('</head>','<meta name="twitter:title" content="'+htmlEscape(page.title)+'"><meta name="twitter:description" content="'+htmlEscape(page.description)+'">'+(socialImage?'<meta property="og:image" content="'+htmlEscape(socialImage)+'"><meta name="twitter:image" content="'+htmlEscape(socialImage)+'">':'')+'</head>');
  const jsonLd={'@context':'https://schema.org','@type':page.type,name:page.title,description:page.description,url:canonical,inLanguage:'fa-IR',isPartOf:{'@type':'WebSite',name:'گیلاس آرت',url:siteOrigin+'/' }};
  html=html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/,'<script type="application/ld+json">'+JSON.stringify(jsonLd).replace(/</g,'\\u003c')+'</script>');
  const appStart=html.indexOf('<div id="app">'),scriptsStart=html.indexOf('<script src="config.js',appStart);
@@ -140,6 +162,9 @@ for(const page of privateSeoPages){
  html=html.replace(/<title>[^<]*<\/title>/,'<title>'+htmlEscape(page.title)+'</title>');
  const appStart=html.indexOf('<div id="app">'),scriptsStart=html.indexOf('<script src="config.js',appStart);
  if(appStart<0||scriptsStart<0)throw new Error('Could not prepare noindex shell for '+page.path);
+ html=html.replace(/<meta property="og:title" content="[^"]*">/,'<meta property="og:title" content="'+htmlEscape(page.title)+'">');
+ html=html.replace(/<meta property="og:description" content="[^"]*">/,'<meta property="og:description" content="'+htmlEscape(page.description)+'">');
+ html=html.replace('</head>','<meta name="twitter:title" content="'+htmlEscape(page.title)+'"><meta name="twitter:description" content="'+htmlEscape(page.description)+'">'+(homeProductImage?'<meta property="og:image" content="'+htmlEscape(homeProductImage)+'"><meta name="twitter:image" content="'+htmlEscape(homeProductImage)+'">':'')+'</head>');
  const shell='<div id="app"><main class="wrap page"><section class="panel"><h1>'+htmlEscape(page.heading)+'</h1><p>'+htmlEscape(page.description)+'</p><a href="'+siteOrigin+'/account/">ورود به حساب کاربری</a></section></main></div>';
  html=html.slice(0,appStart)+shell+html.slice(scriptsStart);
  await mkdir('dist/'+page.folder,{recursive:true});
