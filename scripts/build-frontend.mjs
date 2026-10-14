@@ -78,7 +78,7 @@ for(const p of productPages){
     .replace(/<meta property="og:url" content="[^"]*">/, '<meta property="og:url" content="'+canonical+'">')
     .replace(/<meta property="og:site_name" content="[^"]*">/, '<meta property="og:site_name" content="گیلاس آرت">'+torobMeta)
     .replace(/<link rel="canonical" href="[^"]*">/, '<link rel="canonical" href="'+canonical+'">')
-    .replace(/<title>[^<]*<\/title>/, '<title>'+htmlEscape(title)+' | گیلاس آرت</title>')
+    .replace(/<title>[^<]*<\/title>/, '<title>'+htmlEscape(seoTitle)+'</title>')
     .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '<script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'Product',name:title,image:[image],url:canonical,description,sku:productId,offers:{'@type':'Offer',price:currentPrice,priceCurrency:'IRR',availability:availability==='instock'?'https://schema.org/InStock':'https://schema.org/OutOfStock'}}).replace(/</g,'\\u003c')+'</script>');
   const appStart=productHtml.indexOf('<div id="app">');
   const scriptsStart=productHtml.indexOf('<script src="config.js',appStart);
