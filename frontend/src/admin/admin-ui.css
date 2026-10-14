@@ -525,3 +525,207 @@
 @media (prefers-reduced-motion:reduce){
   .admin-layout .admin-session-logout,.admin-layout .admin-header-actions .theme-toggle{transition:none}
 }
+
+
+/* Day theme: admin-specific semantic hierarchy.
+   Loaded after the storefront stylesheet, so admin controls retain clear separation. */
+:root[data-theme="light"] .admin-layout{
+  --admin-bg:#F1EBE1;
+  --admin-surface:#FFFCF6;
+  --admin-surface-2:#F4EBDD;
+  --admin-line:#D8C8AF;
+  --admin-text:#30291F;
+  --admin-muted:#746553;
+  --admin-gold:#8B642B;
+  --admin-gold-strong:#76501D;
+  background:
+    radial-gradient(ellipse at 8% 0%,rgba(177,128,55,.09),transparent 27rem),
+    linear-gradient(145deg,#F5F0E7,#ECE2D4);
+  color:var(--admin-text);
+}
+:root[data-theme="light"] .admin-layout .admin-page{
+  padding-block:clamp(1rem,2vw,1.75rem);
+}
+:root[data-theme="light"] .admin-layout .admin-title{
+  padding:0 0 1rem;
+  margin-bottom:1.25rem;
+  border-bottom:1px solid #D7C5A7;
+}
+:root[data-theme="light"] .admin-layout .admin-title h2{
+  color:#30271C;
+  letter-spacing:-.025em;
+}
+:root[data-theme="light"] .admin-layout :is(.admin-kicker,.eyebrow){
+  color:#89612A;
+}
+:root[data-theme="light"] .admin-layout .panel{
+  border:1px solid #DCCCB5;
+  border-radius:17px;
+  background:linear-gradient(150deg,#FFFEFB 0%,#FBF5EB 100%);
+  box-shadow:0 5px 18px rgba(65,47,24,.045),0 1px 2px rgba(65,47,24,.025);
+}
+:root[data-theme="light"] .admin-layout .panel-head{
+  padding-bottom:.75rem;
+  margin-bottom:.875rem;
+  border-bottom:1px solid #E5D8C5;
+}
+:root[data-theme="light"] .admin-layout .sectionhead{
+  padding-bottom:.75rem;
+  margin-bottom:1rem;
+  border-bottom:1px solid #DCCCB5;
+}
+:root[data-theme="light"] .admin-layout .sectionhead h3,
+:root[data-theme="light"] .admin-layout .panel-head h3{
+  color:#3A2E20;
+}
+:root[data-theme="light"] .admin-layout .cards .card,
+:root[data-theme="light"] .admin-layout .stat-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid #DED0BA;
+  border-radius:16px;
+  background:linear-gradient(150deg,#FFFEFB,#F6EEE1);
+  box-shadow:0 4px 14px rgba(65,47,24,.04);
+}
+:root[data-theme="light"] .admin-layout .stat-card::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto;
+  height:3px;
+  background:linear-gradient(90deg,#B8892D,#D6B979);
+}
+:root[data-theme="light"] .admin-layout .stat-card strong{
+  color:#6F4D1D;
+}
+:root[data-theme="light"] .admin-layout :is(.form input,.form select,.form textarea,input,select,textarea){
+  border-color:#D1BFA4;
+  border-radius:11px;
+  background:#FFFEFB;
+  color:#30291F;
+  box-shadow:inset 0 1px 2px rgba(65,47,24,.025);
+}
+:root[data-theme="light"] .admin-layout :is(.form label,label){
+  color:#5D4F3C;
+  font-weight:650;
+}
+:root[data-theme="light"] .admin-layout :is(input,select,textarea):focus{
+  border-color:#A77E3F;
+  box-shadow:0 0 0 3px rgba(167,126,63,.15);
+}
+:root[data-theme="light"] .admin-layout .btn.primary{
+  background:linear-gradient(135deg,#916B30,#75501F);
+  color:#FFFCF6;
+  border-color:#75501F;
+  box-shadow:0 4px 11px rgba(117,80,31,.16);
+}
+:root[data-theme="light"] .admin-layout .btn.ghost{
+  border:1px solid #D5C3A7;
+  background:linear-gradient(180deg,#FFFEFB,#F3E8D8);
+  color:#59462E;
+}
+:root[data-theme="light"] .admin-layout .table-wrap,
+:root[data-theme="light"] .admin-layout .table-scroll,
+:root[data-theme="light"] .admin-layout .orders-table-wrap{
+  border:1px solid #D7C5A7;
+  border-radius:14px;
+  background:#FFFCF6;
+  box-shadow:0 3px 12px rgba(65,47,24,.035);
+}
+:root[data-theme="light"] .admin-layout .admin-table{
+  background:#FFFCF6;
+}
+:root[data-theme="light"] .admin-layout .admin-table th{
+  background:#E9DCC7;
+  color:#4D402E;
+  border-bottom:1px solid #D0B994;
+}
+:root[data-theme="light"] .admin-layout .admin-table td{
+  border-bottom:1px solid #E9E0D4;
+  background:transparent;
+}
+:root[data-theme="light"] .admin-layout .admin-table tbody tr:nth-child(even) td{
+  background:#FAF5ED;
+}
+:root[data-theme="light"] .admin-layout .admin-table tbody tr:hover td{
+  background:#F0E2CB;
+}
+:root[data-theme="light"] .admin-layout .order-master-row td{
+  border-bottom:1px solid #E6D9C6;
+  background:#FFFCF6;
+}
+:root[data-theme="light"] .admin-layout .order-master-row.is-selected td{
+  background:#F0E2C9;
+  box-shadow:inset 0 -1px 0 #D2B784;
+}
+:root[data-theme="light"] .admin-layout .order-detail,
+:root[data-theme="light"] .admin-layout .orders-master{
+  border:1px solid #D8C8AF;
+  border-radius:17px;
+  background:linear-gradient(145deg,#FFFCF6,#F3E9DA);
+}
+:root[data-theme="light"] .admin-layout .order-detail-section{
+  border:1px solid #E0D1BA;
+  border-radius:14px;
+  background:#FFFEFB;
+}
+:root[data-theme="light"] .admin-layout .attribute-card,
+:root[data-theme="light"] .admin-layout .attribute-choice-card,
+:root[data-theme="light"] .admin-layout .inline-option-form,
+:root[data-theme="light"] .admin-layout .social-links-editor{
+  border:1px solid #DFD0B8;
+  border-radius:14px;
+  background:linear-gradient(145deg,#FFFEFB,#F7F0E5);
+}
+:root[data-theme="light"] .admin-layout .attribute-option-row{
+  border-bottom:1px solid #E7DCCB;
+}
+:root[data-theme="light"] .admin-layout .notice{
+  border:1px solid #DDC49A;
+  background:linear-gradient(140deg,#FFFCF6,#F4E7D2);
+  color:#624C2C;
+}
+:root[data-theme="light"] .admin-layout .pill{
+  border:1px solid #DFCFB4;
+  background:#F3E7D5;
+  color:#684B23;
+}
+:root[data-theme="light"] .admin-layout .admin-header{
+  background:rgba(255,252,246,.97);
+  border-bottom:1px solid #D8C8AF;
+  box-shadow:0 4px 16px rgba(65,47,24,.045);
+}
+:root[data-theme="light"] .admin-layout .admin-status-badge,
+:root[data-theme="light"] .admin-layout .admin-user-badge{
+  border-color:#D9C8AE;
+  background:#F3E8D8;
+  color:#5B4A34;
+}
+:root[data-theme="light"] .admin-layout .admin-session-logout,
+:root[data-theme="light"] .admin-layout .admin-header-actions .theme-toggle{
+  border-color:#D7C5A8;
+  background:#FFFCF6;
+  color:#59462E;
+}
+:root[data-theme="light"] .admin-layout .admin-session-logout:hover,
+:root[data-theme="light"] .admin-layout .admin-header-actions .theme-toggle:hover{
+  border-color:#BFA273;
+  background:#F1E2C9;
+}
+@media(max-width:767px){
+  :root[data-theme="light"] .admin-layout .admin-page{
+    padding-block:1rem;
+  }
+  :root[data-theme="light"] .admin-layout .panel{
+    border-radius:14px;
+  }
+  :root[data-theme="light"] .admin-layout .table-wrap,
+  :root[data-theme="light"] .admin-layout .table-scroll,
+  :root[data-theme="light"] .admin-layout .orders-table-wrap{
+    border-radius:11px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  :root[data-theme="light"] .admin-layout :is(.panel,.card,.stat-card,.btn){
+    transition:none!important;
+  }
+}
