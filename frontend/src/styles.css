@@ -8324,12 +8324,12 @@ body{
 }
 
 /* Product tiles and artwork: keep the artwork visually dominant */
-:root:not([data-theme="dark"]) :is(.product-card,.product-tile,.product-item,.shop-page .product-card){
+:root:not([data-theme="dark"]) :is(.product-card,.product-tile){
   background:var(--ui-surface);
   border-color:#E0D6C7;
   box-shadow:0 5px 18px rgba(66,49,25,.055);
 }
-:root:not([data-theme="dark"]) :is(.product-card,.product-tile,.product-item):hover{
+:root:not([data-theme="dark"]) :is(.product-card,.product-tile):hover{
   border-color:#C8AD7D;
   box-shadow:0 13px 30px rgba(66,49,25,.105);
 }
