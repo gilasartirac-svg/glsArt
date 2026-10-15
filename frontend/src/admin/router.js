@@ -27,7 +27,7 @@ const loaders={
  articles:()=>import('./pages/Articles.js?v=20260929-admin'),
  support:()=>import('./pages/SupportTickets.js?v=20260929-admin'),
  'site-rules':()=>import('./pages/SiteRules.js?v=20260929-admin'),
- 'storefront-snapshot':()=>import('./pages/StorefrontSnapshot.js?v=20261004-snapshot')
+ 'storefront-snapshot':()=>import('./pages/StorefrontSnapshot.js?v=20261015-independent-pages')
 };
 
 export default async function adminRouter(){
