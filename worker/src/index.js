@@ -561,6 +561,12 @@ async function route(req,env){const u=new URL(req.url); if(u.pathname==='/api/lo
   await recordVisitor(req,env,key);return json({ok:true});
  }
  if(u.pathname==='/api/admin/visitors'&&req.method==='GET')return visitorAdminList(req,env);
+ if(u.pathname==='/api/content-snapshot'&&req.method==='GET'){
+  const section=String(u.searchParams.get('section')||'').trim().toLowerCase();
+  if(!['about','contact'].includes(section))return json({error:'invalid_content_section'},400,{'cache-control':'no-store'});
+  const result=await env.DB.prepare('SELECT id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE active=1 AND section=? ORDER BY published_at DESC,created_at DESC').bind(section).all();
+  return json({schemaVersion:1,section,generatedAt:now(),items:result.results||[]},200,{'cache-control':'no-store, max-age=0'});
+ }
  if(u.pathname==='/api/storefront-snapshot'&&req.method==='GET'){
   const snapshot=await buildStorefrontSnapshot(env);
   return json(snapshot,200,{'cache-control':'no-store'});
@@ -744,20 +750,25 @@ if(u.pathname==='/api/admin/tickets'&&req.method==='GET'){if(!(await requirePerm
  if(u.pathname==='/api/admin/storefront-snapshot/trigger'&&req.method==='POST'){
   if(!me)return json({error:'unauthorized'},401);
   if(!(await requirePermission(me,env,'settings.read'))||!requireCsrf(req))return json({error:'forbidden'},403);
+  const b=await body(req),scope=String(b.scope||'catalog').trim().toLowerCase();
+  if(!['catalog','about','contact'].includes(scope))return json({error:'invalid_snapshot_scope'},400);
   const token=String(env.GITHUB_ACTIONS_TOKEN||'').trim();
   if(!token)return json({error:'snapshot_trigger_not_configured',message:'GITHUB_ACTIONS_TOKEN is not configured'},503);
-  const response=await fetch('https://api.github.com/repos/gilasartirac-svg/glsArt/actions/workflows/storefront-snapshot.yml/dispatches',{
+  const workflow=scope==='catalog'?'storefront-snapshot.yml':'content-pages-snapshot.yml';
+  const dispatch={ref:'main'};
+  if(scope!=='catalog')dispatch.inputs={section:scope};
+  const response=await fetch('https://api.github.com/repos/gilasartirac-svg/glsArt/actions/workflows/'+workflow+'/dispatches',{
     method:'POST',
-    headers:{'accept':'application/vnd.github+json','authorization':'Bearer '+token,'x-github-api-version':'2022-11-28','user-agent':'GilasArt-Storefront-Snapshot'},
-    body:JSON.stringify({ref:'main'})
+    headers:{'accept':'application/vnd.github+json','authorization':'Bearer '+token,'x-github-api-version':'2022-11-28','user-agent':'GilasArt-Offline-Snapshot'},
+    body:JSON.stringify(dispatch)
   });
   if(!response.ok){
     const detail=await response.text().catch(()=> '');
-    console.error('storefront snapshot trigger failed',response.status,detail.slice(0,500));
+    console.error('offline snapshot trigger failed',scope,response.status,detail.slice(0,500));
     return json({error:'snapshot_trigger_failed'},502);
   }
-  await audit(env,me,'admin.storefront_snapshot.trigger','system','storefront_snapshot',{after:{workflow:'storefront-snapshot.yml',ref:'main'}},req);
-  return json({ok:true,status:'queued'});
+  await audit(env,me,'admin.offline_snapshot.trigger','system',scope,{after:{workflow,scope,ref:'main'}},req);
+  return json({ok:true,status:'queued',scope});
  }
 
  if(u.pathname.startsWith('/api/admin')){
