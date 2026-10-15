@@ -729,3 +729,35 @@
     transition:none!important;
   }
 }
+
+
+/* Independent offline publishing center — premium, responsive control cards. */
+.admin-layout .offline-intro{display:flex;align-items:center;gap:18px;margin-bottom:18px;padding:22px;background:linear-gradient(115deg,color-mix(in srgb,var(--ui-gold) 11%,var(--ui-surface)),var(--ui-surface));border-color:color-mix(in srgb,var(--ui-gold) 28%,var(--admin-line))}
+.admin-layout .offline-intro-mark{display:grid;place-items:center;flex:0 0 64px;width:64px;height:64px;border:1px solid color-mix(in srgb,var(--ui-gold) 45%,var(--admin-line));border-radius:20px;color:var(--ui-gold);font-weight:900;font-size:22px;letter-spacing:-1px;background:color-mix(in srgb,var(--ui-gold) 8%,var(--ui-surface))}
+.admin-layout .offline-intro strong{font-size:18px;font-weight:850}
+.admin-layout .offline-intro p{margin:5px 0 10px;color:var(--admin-muted);line-height:1.9}
+.admin-layout .offline-legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--admin-muted);font-size:12px}
+.admin-layout .offline-legend span{display:inline-flex;align-items:center;gap:7px}
+.admin-layout .offline-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.admin-layout .offline-dot-gold{background:var(--ui-gold)}
+.admin-layout .offline-dot-green{background:var(--ui-success)}
+.admin-layout .offline-snapshot-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch}
+.admin-layout .offline-snapshot-card{display:flex;flex-direction:column;gap:10px;min-width:0;padding:20px;position:relative;border-color:var(--admin-line);box-shadow:var(--ui-shadow-soft);transition:transform .18s ease,border-color .18s ease}
+.admin-layout .offline-snapshot-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--ui-gold) 42%,var(--admin-line))}
+.admin-layout .offline-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.admin-layout .offline-card-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:color-mix(in srgb,var(--ui-gold) 12%,var(--ui-surface-2));color:var(--ui-gold);font-size:24px}
+.admin-layout .offline-card-index{font-size:12px;letter-spacing:2px;color:var(--admin-muted);font-weight:800}
+.admin-layout .offline-snapshot-card h3{font-size:18px;margin:0;font-weight:850}
+.admin-layout .offline-snapshot-card p{font-size:13px;line-height:2;color:var(--admin-muted);margin:0;min-height:78px}
+.admin-layout .offline-card-note{font-size:12px;line-height:1.8;padding:9px 11px;border-radius:10px;background:color-mix(in srgb,var(--ui-success) 7%,var(--ui-surface));border:1px solid color-mix(in srgb,var(--ui-success) 20%,var(--admin-line))}
+.admin-layout .offline-run{width:100%;min-height:46px;margin-top:auto;font-weight:800}
+.admin-layout .offline-run:disabled{opacity:.7;cursor:wait}
+.admin-layout .offline-card-status{min-height:42px;padding:9px 10px;border-radius:10px;background:color-mix(in srgb,var(--ui-text) 3%,transparent);color:var(--admin-muted);font-size:12px;line-height:1.8}
+.admin-layout .offline-card-status[data-state="queued"]{color:var(--ui-success);background:color-mix(in srgb,var(--ui-success) 8%,transparent)}
+.admin-layout .offline-card-status[data-state="error"]{color:var(--ui-danger);background:color-mix(in srgb,var(--ui-danger) 8%,transparent)}
+.admin-layout .offline-safety{margin-top:18px;border-inline-start:3px solid var(--ui-gold)}
+.admin-layout .offline-safety h3{margin:0 0 6px;font-size:15px}
+.admin-layout .offline-safety p{margin:0;color:var(--admin-muted);line-height:2;font-size:13px}
+@media(max-width:900px){.admin-layout .offline-snapshot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-layout .offline-snapshot-card-catalog{grid-column:1/-1}}
+@media(max-width:560px){.admin-layout .offline-intro{align-items:flex-start;padding:15px;gap:12px}.admin-layout .offline-intro-mark{flex-basis:48px;width:48px;height:48px;border-radius:14px;font-size:18px}.admin-layout .offline-snapshot-grid{grid-template-columns:1fr}.admin-layout .offline-snapshot-card-catalog{grid-column:auto}.admin-layout .offline-snapshot-card p{min-height:0}}
+@media(prefers-reduced-motion:reduce){.admin-layout .offline-snapshot-card{transition:none}.admin-layout .offline-snapshot-card:hover{transform:none}}
