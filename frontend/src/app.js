@@ -202,8 +202,29 @@ async function loadHomeSnapshot(){
 }
 async function snapshotApi(path){
  if(!/^\/api\/(home|products|categories|flash-sales|site-rules|content)(?:[/?]|$)/.test(path))return null;
- const d=await loadStorefrontIndex();if(!d)return null;
  const u=new URL(path,'https://snapshot.local');
+ // About and Contact are published independently, without reloading product data.
+ const contentPath=u.pathname.startsWith('/api/content/')?u.pathname.split('/').filter(Boolean):[];
+ const contentSection=u.pathname==='/api/content'?String(u.searchParams.get('section')||'').trim().toLowerCase():String(contentPath[1]||'').toLowerCase();
+ if(['about','contact'].includes(contentSection)){
+  try{
+   const r=await fetch(dataRoot()+contentSection+'.json',{cache:'no-store',credentials:'same-origin'});
+   if(r.ok){
+    const page=await r.json();
+    if(Number(page?.schemaVersion)===1&&page.section===contentSection&&Array.isArray(page.items)){
+     if(u.pathname==='/api/content')return {items:page.items,limit:20,offset:0,hasMore:false};
+     if(u.pathname.startsWith('/api/content/')){
+      let slug=contentPath.slice(2).join('/');
+      for(let i=0;i<2;i++){try{const next=decodeURIComponent(slug);if(next===slug)break;slug=next}catch{break}}
+      slug=String(slug||'').normalize('NFC');
+      const item=page.items.find(x=>String(x.slug||'').normalize('NFC')===slug);
+      return item?{item}:null;
+     }
+    }
+   }
+  }catch{}
+ }
+ const d=await loadStorefrontIndex();if(!d)return null;
  if(u.pathname==='/api/home'){
   const items=snapshotSort(d.products,'newest').slice(0,8).map(snapshotCore);
   const flash=(d.products||[]).filter(p=>Number(p.flash_sale_active)===1&&p.flash_sale_ends_at&&new Date(p.flash_sale_ends_at).getTime()>Date.now()).sort((a,b)=>String(a.flash_sale_ends_at).localeCompare(String(b.flash_sale_ends_at))).slice(0,20).map(snapshotCore);
