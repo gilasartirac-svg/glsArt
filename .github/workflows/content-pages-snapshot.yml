@@ -46,7 +46,7 @@ jobs:
           if(forbidden.test(JSON.stringify(data)))throw new Error('Sensitive field found in content snapshot');
           const root='frontend/public/data/';
           fs.mkdirSync(root,{recursive:true});
-          fs.writeFileSync(root+section+'.json',JSON.stringify({schemaVersion:1,section,generatedAt:data.generatedAt,items:data.items})+'\\n');
+          fs.writeFileSync(root+section+'.json',JSON.stringify({schemaVersion:1,section,generatedAt:data.generatedAt,items:data.items})+'\n');
           console.log(JSON.stringify({section,items:data.items.length,generatedAt:data.generatedAt}));
           NODE
 
