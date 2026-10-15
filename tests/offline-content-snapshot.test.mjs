@@ -22,7 +22,7 @@ test('About and Contact have a D1 snapshot endpoint scoped to one CMS section',(
 test('content-only workflow writes and commits only the selected page JSON',()=>{
  assert.match(workflow,/workflow_dispatch:/);
  assert.match(workflow,/options:\s*\n\s*- about\s*\n\s*- contact/);
- assert.match(workflow,/api\/content-snapshot\?section=\$SECTION/);
+ assert.match(workflow,/SNAPSHOT_URL\\?section=\\$SECTION/);
  assert.match(workflow,/frontend\/public\/data\/\$SECTION\.json/);
  assert.doesNotMatch(workflow,/storefront-index\.json|home\.json|storefront-attributes\.json/);
 });
@@ -38,9 +38,9 @@ test('About and Contact requests prefer their independent offline JSON without l
 });
 
 test('publishing center exposes three independent controls and preserves the catalog workflow',()=>{
- assert.match(page,/data-snapshot-scope="catalog"/);
- assert.match(page,/data-snapshot-scope="about"/);
- assert.match(page,/data-snapshot-scope="contact"/);
+ assert.match(page,/id:'catalog'/);
+ assert.match(page,/id:'about'/);
+ assert.match(page,/id:'contact'/);
  assert.match(page,/JSON\.stringify\(\{scope\}\)/);
  assert.match(router,/StorefrontSnapshot\.js\?v=20261015-independent-pages/);
  assert.match(adminApp,/20261015-publishing-center/);
