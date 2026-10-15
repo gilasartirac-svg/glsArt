@@ -15,7 +15,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: content-page-snapshot-${{ inputs.section }}
+  group: storefront-snapshot
   cancel-in-progress: false
 
 jobs:
