@@ -599,6 +599,14 @@
     "admin.productAttributes.create": "ایجاد ویژگی جدید",
     "admin.productAttributes.example": "برای نمونه «رنگ قاب» یا هر ویژگی عمومی قابل انتخاب در محصولات.",
     "admin.productAttributes.loading": "در حال دریافت…",
-    "payment.invoice.popupBlocked": "مرورگر اجازه باز کردن فاکتور را نداد. لطفاً پنجره‌های بازشو را برای سایت فعال کنید."
+    "payment.invoice.popupBlocked": "مرورگر اجازه باز کردن فاکتور را نداد. لطفاً پنجره‌های بازشو را برای سایت فعال کنید.",
+    "admin.snapshot.center.title": "مرکز آفلاین‌سازی محتوا",
+    "admin.snapshot.center.description": "هر بخش را مستقل منتشر کنید؛ ویرایش یک صفحه باعث بازسازی کاتالوگ محصولات نمی‌شود.",
+    "admin.snapshot.center.intro": "انتشار دقیق، سریع و مستقل",
+    "admin.snapshot.center.help": "برای تغییرات روزمره فقط بخش مربوطه را اجرا کنید. هر عملیات فقط فایل‌های همان بخش را به‌روزرسانی می‌کند.",
+    "admin.snapshot.center.catalog": "کاتالوگ فروشگاه",
+    "admin.snapshot.center.content": "صفحات محتوایی",
+    "admin.snapshot.center.safetyTitle": "حفاظت از داده‌های عملیاتی",
+    "admin.snapshot.center.safetyText": "این فایل‌ها فقط برای نمایش عمومی‌اند. موجودی و قیمت نهایی خرید، سبد خرید، سفارش‌ها، پرداخت‌ها و اطلاعات خصوصی همچنان از Backend و D1 اعتبارسنجی می‌شوند."
   }
 }
