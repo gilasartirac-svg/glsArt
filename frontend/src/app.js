@@ -1171,7 +1171,19 @@ async function cmsPage(section){
  const bodyText=v=>escapeHtml(String(v||'')).replace(/\r?\n/g,'<br>');
  const coverVisual=x=>{const src=safeUrl(x?.cover_image);return src?'<div class="cms-page-visual"><img src="'+escapeHtml(src)+'" alt="'+escapeHtml(x?.title||'تصویر محتوا')+'" loading="eager" decoding="async"><span><small>GILAS ART</small><strong>'+escapeHtml(x?.title||'')+'</strong></span></div>':'<div class="cms-page-visual cms-page-visual-empty" aria-hidden="true"><span>GILAS ART</span><strong>روایت و هنر</strong></div>'};
  try{
-  const d=await api('/api/content?section='+encodeURIComponent(section)+'&limit=20'),items=Array.isArray(d.items)?d.items:[];
+  const d=await api('/api/content?section='+encodeURIComponent(section)+'&limit=20');
+  let items=Array.isArray(d.items)?d.items:[];
+  // If the API/snapshot adapter returned an empty list, retry the independent
+  // published page JSON directly with a fresh URL to avoid a cached empty response.
+  if(!items.length&&['about','contact'].includes(section)){
+   try{
+    const r=await fetch(dataRoot()+section+'.json?refresh='+Date.now(),{cache:'no-store',credentials:'same-origin'});
+    if(r.ok){
+     const page=await r.json();
+     if(Number(page?.schemaVersion)===1&&page.section===section&&Array.isArray(page.items))items=page.items;
+    }
+   }catch{}
+  }
   let body='';
   const visual=coverVisual(items[0]);
   if(section==='contact'){
