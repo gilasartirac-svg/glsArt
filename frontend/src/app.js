@@ -205,7 +205,7 @@ async function snapshotApi(path){
  const u=new URL(path,'https://snapshot.local');
  // About and Contact are published independently, without reloading product data.
  const contentPath=u.pathname.startsWith('/api/content/')?u.pathname.split('/').filter(Boolean):[];
- const contentSection=u.pathname==='/api/content'?String(u.searchParams.get('section')||'').trim().toLowerCase():String(contentPath[1]||'').toLowerCase();
+ const contentSection=u.pathname==='/api/content'?String(u.searchParams.get('section')||'').trim().toLowerCase():String(contentPath[2]||'').toLowerCase();
  if(['about','contact'].includes(contentSection)){
   try{
    const r=await fetch(dataRoot()+contentSection+'.json',{cache:'no-store',credentials:'same-origin'});
@@ -214,7 +214,7 @@ async function snapshotApi(path){
     if(Number(page?.schemaVersion)===1&&page.section===contentSection&&Array.isArray(page.items)){
      if(u.pathname==='/api/content')return {items:page.items,limit:20,offset:0,hasMore:false};
      if(u.pathname.startsWith('/api/content/')){
-      let slug=contentPath.slice(2).join('/');
+      let slug=contentPath.slice(3).join('/');
       for(let i=0;i<2;i++){try{const next=decodeURIComponent(slug);if(next===slug)break;slug=next}catch{break}}
       slug=String(slug||'').normalize('NFC');
       const item=page.items.find(x=>String(x.slug||'').normalize('NFC')===slug);
