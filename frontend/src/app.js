@@ -205,7 +205,13 @@ async function snapshotApi(path){
  const u=new URL(path,'https://snapshot.local');
  // About and Contact are published independently, without reloading product data.
  const contentPath=u.pathname.startsWith('/api/content/')?u.pathname.split('/').filter(Boolean):[];
- const contentSection=u.pathname==='/api/content'?String(u.searchParams.get('section')||'').trim().toLowerCase():String(contentPath[2]||'').toLowerCase();
+ const contentSection=u.pathname==='/api/site-rules'?'site-rules':u.pathname==='/api/content'?String(u.searchParams.get('section')||'').trim().toLowerCase():String(contentPath[2]||'').toLowerCase();
+ if(contentSection==='site-rules'){
+  try{
+   const r=await fetch(dataRoot()+'site-rules.json',{cache:'no-store',credentials:'same-origin'});
+   if(r.ok){const page=await r.json();if(Number(page?.schemaVersion)===1&&page.section==='site-rules'&&page.item&&typeof page.item.body==='string')return {item:page.item};}
+  }catch{}
+ }
  if(['about','contact'].includes(contentSection)){
   try{
    const r=await fetch(dataRoot()+contentSection+'.json',{cache:'no-store',credentials:'same-origin'});

@@ -1,16 +1,7 @@
 name: Storefront Snapshot
 
 on:
-  # Midnight in Tehran (UTC+03:30) = 20:30 UTC on the previous day.
-  schedule:
-    - cron: '30 20 * * *'
-  workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'worker/src/index.js'
-      - 'scripts/split-storefront-snapshot.mjs'
-      - '.github/workflows/storefront-snapshot.yml'
+  workflow_dispatch: {}
 
 permissions:
   contents: write

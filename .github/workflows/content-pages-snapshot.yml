@@ -10,6 +10,7 @@ on:
         options:
           - about
           - contact
+          - site-rules
 
 permissions:
   contents: write
@@ -32,7 +33,7 @@ jobs:
           SNAPSHOT_URL: https://gilasartworker.gilasart-ir-ac.workers.dev/api/content-snapshot
         run: |
           set -euo pipefail
-          case "$SECTION" in about|contact) ;; *) echo "Invalid section"; exit 1 ;; esac
+          case "$SECTION" in about|contact|site-rules) ;; *) echo "Invalid section"; exit 1 ;; esac
           tmp="$(mktemp)"
           trap 'rm -f "$tmp"' EXIT
           curl -fsSL --retry 3 --retry-all-errors --connect-timeout 15 --max-time 45 "$SNAPSHOT_URL?section=$SECTION" -o "$tmp"
@@ -40,14 +41,22 @@ jobs:
           const fs=require('fs');
           const file=process.argv[2], section=process.argv[3];
           const data=JSON.parse(fs.readFileSync(file,'utf8'));
-          if(data.schemaVersion!==1||data.section!==section||!Array.isArray(data.items))throw new Error('Invalid content snapshot response');
-          if(data.items.some(x=>x.section!==section||!x.id||!x.title))throw new Error('Unexpected or invalid CMS item');
+          if(data.schemaVersion!==1||data.section!==section)throw new Error('Invalid content snapshot response');
+          if(section==='site-rules'){
+            if(!data.item||typeof data.item.title!=='string'||typeof data.item.body!=='string')throw new Error('Invalid site-rules snapshot');
+          }else{
+            if(!Array.isArray(data.items))throw new Error('Invalid CMS items');
+            if(data.items.some(x=>x.section!==section||!x.id||!x.title))throw new Error('Unexpected or invalid CMS item');
+          }
           const forbidden=/admin_bootstrap|kavenegar|invoice_|national_id|postal_code|economic_code|customer/i;
           if(forbidden.test(JSON.stringify(data)))throw new Error('Sensitive field found in content snapshot');
           const root='frontend/public/data/';
           fs.mkdirSync(root,{recursive:true});
-          fs.writeFileSync(root+section+'.json',JSON.stringify({schemaVersion:1,section,generatedAt:data.generatedAt,items:data.items})+'\n');
-          console.log(JSON.stringify({section,items:data.items.length,generatedAt:data.generatedAt}));
+          const output=section==='site-rules'
+            ? {schemaVersion:1,section,generatedAt:data.generatedAt,item:data.item}
+            : {schemaVersion:1,section,generatedAt:data.generatedAt,items:data.items};
+          fs.writeFileSync(root+section+'.json',JSON.stringify(output)+'\n');
+          console.log(JSON.stringify({section,items:section==='site-rules'?1:data.items.length,generatedAt:data.generatedAt}));
           NODE
 
       - name: Validate selected page file
@@ -59,9 +68,13 @@ jobs:
           const fs=require('fs'),section=process.argv[2];
           const p='frontend/public/data/'+section+'.json';
           const d=JSON.parse(fs.readFileSync(p,'utf8'));
-          if(d.schemaVersion!==1||d.section!==section||!Array.isArray(d.items))throw new Error('Offline page validation failed');
-          if(d.items.some(x=>x.section!==section))throw new Error('Section mismatch');
-          console.log('PASS: '+section+' snapshot ('+d.items.length+' entries)');
+          if(d.schemaVersion!==1||d.section!==section)throw new Error('Offline page validation failed');
+          if(section==='site-rules'){
+            if(!d.item||typeof d.item.title!=='string'||typeof d.item.body!=='string')throw new Error('Site rules validation failed');
+          }else{
+            if(!Array.isArray(d.items)||d.items.some(x=>x.section!==section))throw new Error('Section mismatch');
+          }
+          console.log('PASS: '+section+' snapshot ('+(section==='site-rules'?1:d.items.length)+' entries)');
           NODE
 
       - name: Commit only the selected page file

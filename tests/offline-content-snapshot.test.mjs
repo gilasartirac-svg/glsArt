@@ -50,7 +50,7 @@ test('Worker dispatch routes only the selected section to the content workflow',
  const start=worker.indexOf("u.pathname==='/api/admin/storefront-snapshot/trigger'");
  const end=worker.indexOf("if(u.pathname.startsWith('/api/admin'))",start);
  const route=worker.slice(start,end);
- assert.match(route,/\['catalog','about','contact'\]/);
+ assert.match(route,/\['catalog','about','contact','site-rules'\]/);
  assert.match(route,/scope==='catalog'\?'storefront-snapshot\.yml':'content-pages-snapshot\.yml'/);
  assert.match(route,/dispatch\.inputs=\{section:scope\}/);
 });
