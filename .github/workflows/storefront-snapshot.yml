@@ -1,7 +1,8 @@
 name: Storefront Snapshot
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
+
 permissions:
   contents: write
 
