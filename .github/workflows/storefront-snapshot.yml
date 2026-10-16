@@ -1,10 +1,6 @@
 name: Storefront Snapshot
 
-on:
-  # Midnight in Tehran (UTC+03:30) = 20:30 UTC on the previous day.
-  schedule:
-    - cron: '30 20 * * *'
-  workflow_dispatch:
+on:  workflow_dispatch:
   push:
     branches: [main]
     paths:
