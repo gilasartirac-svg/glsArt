@@ -491,7 +491,7 @@ function routeUrl(path){return localePath(path)}
 function scrollRouteTop(){try{window.scrollTo({top:0,left:0,behavior:'auto'});document.documentElement.scrollTop=0;document.body.scrollTop=0}catch{try{window.scrollTo(0,0)}catch{}}}
 const SHOP_RETURN_STATE_KEY='gilasart:shop-return-state:v1';
 function isShopRoute(pathname=location.pathname){
- const path=String(pathname||'/').replace(/\\/+$/,'')||'/';
+ const path=String(pathname||'/').replace(/\/+$/,'')||'/';
  return path==='/shop'||path===(routeBase()+'/shop');
 }
 function saveShopReturnState(){
@@ -508,7 +508,7 @@ function saveShopReturnState(){
 function getShopReturnState(){
  try{
   const saved=JSON.parse(sessionStorage.getItem(SHOP_RETURN_STATE_KEY)||'null');
-  if(!saved||saved.url!==location.pathname+location.search||!Number.isFinite(Number(saved.scrollY))||!Number.isFinite(Number(saved.loadedCount))||Date.now()-Number(saved.savedAt)>30*60*1000)return null;
+  if(!saved||saved.url!==location.pathname+location.search||!Number.isFinite(Number(saved.scrollY))||!Number.isFinite(Number(saved.loadedCount))||!Number.isFinite(Number(saved.savedAt))||Date.now()-Number(saved.savedAt)>30*60*1000)return null;
   return {scrollY:Math.max(0,Number(saved.scrollY)||0),loadedCount:Math.max(0,Math.min(5000,Math.floor(Number(saved.loadedCount)||0)))};
  }catch{return null}
 }
