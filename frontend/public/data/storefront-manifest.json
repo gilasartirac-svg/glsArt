@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "version": "b795b660db9dce8d",
+  "version": "124d12a3dbb8b820",
   "generatedAt": "2026-10-15T20:55:37.579Z",
   "productCount": 223,
   "categoryCount": 6,
@@ -11,6 +11,6 @@
   "attributesFile": "storefront-attributes.json",
   "detailProductCount": 223,
   "indexBytes": 122462,
-  "attributesBytes": 736470,
+  "attributesBytes": 736392,
   "homeBytes": 7234
 }
