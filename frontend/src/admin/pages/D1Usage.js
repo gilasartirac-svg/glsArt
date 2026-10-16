@@ -2,6 +2,7 @@ import {api} from '../services/api.js';
 
 const fmt=n=>new Intl.NumberFormat('fa-IR').format(Math.max(0,Number(n)||0));
 const pct=n=>new Intl.NumberFormat('fa-IR',{maximumFractionDigits:2}).format(Number(n)||0);
+let refreshUsage=()=>{};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 export default function D1Usage(){
  setTimeout(load,0);
@@ -28,6 +29,7 @@ export default function D1Usage(){
    if(status)status.textContent=String(e?.message||'دریافت آمار ناموفق بود. اگر تنظیمات Analytics انجام نشده باشد، Secretهای لازم باید در Worker تنظیم شوند.');
   }finally{if(button)button.disabled=false}
  }
+ refreshUsage=load;
  return '<div class="admin-page" dir="rtl"><div class="admin-title"><div><div class="eyebrow">CLOUDFLARE • D1 ANALYTICS</div><h2>پایش مصرف دیتابیس D1</h2><span class="muted">آمار روز جاری بر پایه UTC؛ سقف مرجع طرح رایگان ۵٬۰۰۰٬۰۰۰ ردیف خوانده‌شده.</span></div><button id="d1-usage-refresh" type="button" class="btn primary">به‌روزرسانی آمار</button></div><div class="offline-snapshot-grid"><section class="panel"><div class="eyebrow">ROWS READ TODAY</div><h3 id="d1-usage-read">—</h3><p>مجموع ردیف‌های خوانده‌شده</p></section><section class="panel"><div class="eyebrow">REMAINING</div><h3 id="d1-usage-remaining">—</h3><p>باقی‌مانده تا سقف روزانه</p></section><section class="panel"><div class="eyebrow">ROWS WRITTEN</div><h3 id="d1-usage-written">—</h3><p>ردیف‌های نوشته‌شده امروز</p></section><section class="panel"><div class="eyebrow">USAGE</div><h3 id="d1-usage-percent">—</h3><progress id="d1-usage-progress" max="100" value="0" aria-label="درصد مصرف روزانه"></progress><p>وضعیت: <strong id="d1-usage-state">—</strong></p></section></div><div class="panel"><div class="sectionhead"><h3>بیشترین مصرف‌های ثبت‌شده</h3><span class="muted">بر اساس گروه‌های آماری GraphQL</span></div><div class="table-scroll"><table class="admin-table"><thead><tr><th>ساعت UTC</th><th>Rows read</th><th>Rows written</th><th>مشخصه کوئری / گروه</th></tr></thead><tbody id="d1-usage-hourly"><tr><td colspan="4">در حال دریافت…</td></tr></tbody></table></div><p class="muted">آخرین بررسی: <span id="d1-usage-checked">—</span></p></div><div id="d1-usage-status" class="notice" role="status" aria-live="polite">آماده دریافت آمار</div><div class="notice">این صفحه آمار Analytics را نمایش می‌دهد؛ مقدار «باقی‌مانده» محاسبه‌ای بر اساس سقف مرجع است و جایگزین شمارنده رسمی محدودیت‌های Cloudflare نیست. در صورت تأخیر Analytics، عدد ممکن است با مصرف لحظه‌ای تفاوت داشته باشد.</div></div>';
 }
-export async function mount(){document.querySelector('#d1-usage-refresh')?.addEventListener('click',load);}
+export async function mount(){document.querySelector('#d1-usage-refresh')?.addEventListener('click',()=>refreshUsage());}
