@@ -9592,3 +9592,33 @@ body{
     padding: .875rem;
   }
 }
+
+
+/* Responsive About / Contact / CMS banners:
+   keep the image visually legible on narrow screens without widening the page.
+   Desktop presentation is intentionally unchanged. */
+@media (max-width: 600px) {
+  .cms-page > .cms-page-visual {
+    height: clamp(150px, 42vw, 190px);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .cms-page > .cms-page-visual > img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 0;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .cms-page > .cms-page-visual > span {
+    right: 14px;
+    left: 14px;
+    bottom: 14px;
+    padding: .5rem .75rem;
+  }
+}
