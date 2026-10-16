@@ -25,6 +25,8 @@ function friendlyError(data,status,path){
  const code=String(data?.error||'');
  if(code==='analytics_not_configured')return 'تنظیمات اتصال Cloudflare Analytics کامل نیست؛ وجود CLOUDFLARE_API_TOKEN و CLOUDFLARE_ACCOUNT_ID در Worker بررسی شود.';
  if(code==='analytics_request_failed')return 'Cloudflare Analytics درخواست را نپذیرفت (HTTP '+String(Number(data?.status)||status)+')؛ مجوز توکن Analytics و شناسه حساب را بررسی می‌کنیم.';
+ if(code==='analytics_connection_failed')return 'ارتباط Worker با Cloudflare Analytics برقرار نشد؛ اتصال خروجی Worker و دسترسی سرویس را بررسی کنید و دوباره تلاش کنید.';
+ if(code==='analytics_response_invalid')return 'پاسخ Cloudflare Analytics قابل خواندن نبود؛ لطفاً دوباره تلاش کنید.';
  if(code==='analytics_query_failed'){
   const details=Array.isArray(data?.details)?data.details.map(x=>String(x||'').slice(0,180)).join('؛ '):'';
   return 'پرس‌وجوی GraphQL مربوط به آمار D1 ناموفق بود.'+(details?' جزئیات: '+details:'');
