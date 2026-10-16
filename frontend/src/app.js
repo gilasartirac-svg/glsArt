@@ -211,6 +211,9 @@ async function snapshotApi(path){
    const r=await fetch(dataRoot()+'site-rules.json',{cache:'no-store',credentials:'same-origin'});
    if(r.ok){const page=await r.json();if(Number(page?.schemaVersion)===1&&page.section==='site-rules'&&page.item&&typeof page.item.body==='string')return {item:page.item};}
   }catch{}
+  // If the independent offline file is absent or invalid, use the live API instead of
+  // fabricating default content from the product catalog snapshot.
+  return null;
  }
  if(['about','contact'].includes(contentSection)){
   try{
@@ -229,6 +232,9 @@ async function snapshotApi(path){
     }
    }
   }catch{}
+  // Missing About/Contact snapshots must fall back to the CMS API, not an empty
+  // array from storefront-index.json. Once published, the independent file wins.
+  return null;
  }
  const d=await loadStorefrontIndex();if(!d)return null;
  if(u.pathname==='/api/home'){
