@@ -31,7 +31,7 @@ test('D1 usage page displays analytics-derived reads and remaining quota',()=>{
  assert.match(worker,/rowsRead/);
  assert.match(adminPage,/d1-usage-read/);
  assert.match(adminPage,/d1-usage-remaining/);
- assert.match(adminPage,/CLOUDFLARE_API_TOKEN/);
+ assert.match(worker,/CLOUDFLARE_API_TOKEN/);
  assert.match(router,/d1-usage/);
  assert.match(sidebar,/d1-usage/);
 });
