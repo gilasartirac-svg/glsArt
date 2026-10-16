@@ -563,6 +563,11 @@ async function route(req,env){const u=new URL(req.url); if(u.pathname==='/api/lo
  if(u.pathname==='/api/admin/visitors'&&req.method==='GET')return visitorAdminList(req,env);
  if(u.pathname==='/api/content-snapshot'&&req.method==='GET'){
   const section=String(u.searchParams.get('section')||'').trim().toLowerCase();
+  if(section==='site-rules'){
+   const result=await env.DB.prepare("SELECT key,value,updated_at FROM site_settings WHERE key IN ('site_rules_title','site_rules_body')").all();
+   const rows=result.results||[],map=Object.fromEntries(rows.map(x=>[x.key,x.value]));
+   return json({schemaVersion:1,section,generatedAt:now(),item:{title:map.site_rules_title||'قوانین سایت',body:map.site_rules_body||'ثبت سفارش و پرداخت به معنی پذیرش قوانین و شرایط فروش گیلاس آرت است.',updated_at:rows.map(x=>x.updated_at).filter(Boolean).sort().pop()||null}},200,{'cache-control':'no-store, max-age=0'});
+  }
   if(!['about','contact'].includes(section))return json({error:'invalid_content_section'},400,{'cache-control':'no-store'});
   const result=await env.DB.prepare('SELECT id,section,title,slug,summary,body,cover_image,phone,mobile,address,map_url,active,published_at,sort_order,created_at,updated_at FROM cms_entries WHERE active=1 AND section=? ORDER BY published_at DESC,created_at DESC').bind(section).all();
   return json({schemaVersion:1,section,generatedAt:now(),items:result.results||[]},200,{'cache-control':'no-store, max-age=0'});
@@ -751,7 +756,7 @@ if(u.pathname==='/api/admin/tickets'&&req.method==='GET'){if(!(await requirePerm
   if(!me)return json({error:'unauthorized'},401);
   if(!(await requirePermission(me,env,'settings.read'))||!requireCsrf(req))return json({error:'forbidden'},403);
   const b=await body(req),scope=String(b.scope||'catalog').trim().toLowerCase();
-  if(!['catalog','about','contact'].includes(scope))return json({error:'invalid_snapshot_scope'},400);
+  if(!['catalog','about','contact','site-rules'].includes(scope))return json({error:'invalid_snapshot_scope'},400);
   const token=String(env.GITHUB_ACTIONS_TOKEN||'').trim();
   if(!token)return json({error:'snapshot_trigger_not_configured',message:'GITHUB_ACTIONS_TOKEN is not configured'},503);
   const workflow=scope==='catalog'?'storefront-snapshot.yml':'content-pages-snapshot.yml';
