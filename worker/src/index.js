@@ -561,6 +561,26 @@ async function route(req,env){const u=new URL(req.url); if(u.pathname==='/api/lo
   await recordVisitor(req,env,key);return json({ok:true});
  }
  if(u.pathname==='/api/admin/visitors'&&req.method==='GET')return visitorAdminList(req,env);
+ if(u.pathname==='/api/admin/d1-usage'&&req.method==='GET'){
+  if(!me)return json({error:'unauthorized'},401,{'cache-control':'no-store'});
+  if(!(await requirePermission(me,env,'settings.read')))return json({error:'forbidden'},403,{'cache-control':'no-store'});
+  const token=String(env.CLOUDFLARE_API_TOKEN||'').trim();
+  const accountTag=String(env.CLOUDFLARE_ACCOUNT_ID||'').trim();
+  if(!token||!accountTag)return json({error:'analytics_not_configured',message:'CLOUDFLARE_API_TOKEN و CLOUDFLARE_ACCOUNT_ID باید به‌صورت Secret در Worker تنظیم شوند.'},503,{'cache-control':'no-store'});
+  const start=new Date();start.setUTCHours(0,0,0,0);
+  const end=new Date();
+  const query='query D1Usage($accountTag: String!, $databaseName: String!, $start: Time!, $end: Time!) { viewer { accounts(filter: { accountTag: $accountTag }) { d1QueriesAdaptive(filter: { databaseName: $databaseName, datetime_geq: $start, datetime_leq: $end }, limit: 10000) { sum { rowsRead rowsWritten } dimensions { datetimeHour queryBatchParameter } } } } }';
+  const response=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers:{'authorization':'Bearer '+token,'content-type':'application/json'},body:JSON.stringify({query,variables:{accountTag,databaseName:'gilasartdatabase',start:start.toISOString(),end:end.toISOString()}})});
+  if(!response.ok)return json({error:'analytics_request_failed',status:response.status},502,{'cache-control':'no-store'});
+  const payload=await response.json();
+  if(Array.isArray(payload.errors)&&payload.errors.length)return json({error:'analytics_query_failed',details:payload.errors.map(x=>String(x.message||'GraphQL error').slice(0,180))},502,{'cache-control':'no-store'});
+  const groups=payload?.data?.viewer?.accounts?.[0]?.d1QueriesAdaptive||[];
+  const rowsRead=groups.reduce((sum,x)=>sum+Number(x?.sum?.rowsRead||0),0);
+  const rowsWritten=groups.reduce((sum,x)=>sum+Number(x?.sum?.rowsWritten||0),0);
+  const limit=5000000;
+  return json({source:'cloudflare-graphql-d1QueriesAdaptive',databaseName:'gilasartdatabase',periodStart:start.toISOString(),checkedAt:now(),rowsRead,rowsWritten,limit,remaining:Math.max(0,limit-rowsRead),percent:Math.min(100,rowsRead/limit*100),groups:groups.map(x=>({hour:x?.dimensions?.datetimeHour||null,query:x?.dimensions?.queryBatchParameter||null,rowsRead:Number(x?.sum?.rowsRead||0),rowsWritten:Number(x?.sum?.rowsWritten||0)})).sort((a,b)=>b.rowsRead-a.rowsRead).slice(0,20)},200,{'cache-control':'no-store, max-age=0'});
+ }
+
  if(u.pathname==='/api/content-snapshot'&&req.method==='GET'){
   const section=String(u.searchParams.get('section')||'').trim().toLowerCase();
   if(section==='site-rules'){
