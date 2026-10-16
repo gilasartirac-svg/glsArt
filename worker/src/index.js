@@ -571,9 +571,18 @@ async function route(req,env){const u=new URL(req.url); if(u.pathname==='/api/lo
   const today=new Date().toISOString().slice(0,10);
   const databaseId='3e6741e8-e50c-4c8d-b50a-33d9db2dfd4c';
   const query='query D1Usage($accountTag: String!, $databaseId: String!, $start: Date, $end: Date) { viewer { accounts(filter: { accountTag: $accountTag }) { d1AnalyticsAdaptiveGroups(limit: 10000, filter: { date_geq: $start, date_leq: $end, databaseId: $databaseId }) { sum { rowsRead rowsWritten } dimensions { date databaseId } } d1QueriesAdaptiveGroups(limit: 10000, filter: { date_geq: $start, date_leq: $end, databaseId: $databaseId }) { sum { rowsRead rowsWritten } dimensions { datetimeHour query } } } } }';
-  const response=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers:{'authorization':'Bearer '+token,'content-type':'application/json'},body:JSON.stringify({query,variables:{accountTag,databaseId,start:today,end:today}})});
+  let response,payload;
+  try{
+   response=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers:{'authorization':'Bearer '+token,'content-type':'application/json'},body:JSON.stringify({query,variables:{accountTag,databaseId,start:today,end:today}})});
+  }catch(e){
+   console.error('d1_usage_analytics_network_failed',String(e?.message||e).slice(0,240));
+   return json({error:'analytics_connection_failed',message:'ارتباط Worker با Cloudflare Analytics برقرار نشد؛ دوباره تلاش کنید.'},502,{'cache-control':'no-store'});
+  }
   if(!response.ok)return json({error:'analytics_request_failed',status:response.status},502,{'cache-control':'no-store'});
-  const payload=await response.json();
+  try{payload=await response.json()}catch(e){
+   console.error('d1_usage_analytics_invalid_json',String(e?.message||e).slice(0,240));
+   return json({error:'analytics_response_invalid',message:'پاسخ Cloudflare Analytics قابل خواندن نبود.'},502,{'cache-control':'no-store'});
+  }
   if(Array.isArray(payload.errors)&&payload.errors.length)return json({error:'analytics_query_failed',details:payload.errors.map(x=>String(x.message||'GraphQL error').slice(0,180))},502,{'cache-control':'no-store'});
   const account=payload?.data?.viewer?.accounts?.[0];
   if(!account)return json({error:'analytics_query_failed',details:['Cloudflare Analytics returned no account for the configured account ID.']},502,{'cache-control':'no-store'});
