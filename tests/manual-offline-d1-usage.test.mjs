@@ -9,6 +9,7 @@ const app=read('frontend/src/app.js');
 const adminPage=read('frontend/src/admin/pages/D1Usage.js');
 const router=read('frontend/src/admin/router.js');
 const sidebar=read('frontend/src/admin/components/Sidebar.js');
+const adminApi=read('frontend/src/admin/services/api.js');
 
 test('offline snapshots run only through manual dispatch',()=>{
  assert.match(workflow,/workflow_dispatch:/);
@@ -38,4 +39,8 @@ test('D1 usage page displays analytics-derived reads and remaining quota',()=>{
  assert.match(worker,/CLOUDFLARE_API_TOKEN/);
  assert.match(router,/d1-usage/);
  assert.match(sidebar,/d1-usage/);
+ assert.match(adminApi,/analytics_not_configured/);
+ assert.match(adminApi,/analytics_request_failed/);
+ assert.match(adminApi,/analytics_query_failed/);
+ assert.match(adminApi,/data\?\.details/);
 });

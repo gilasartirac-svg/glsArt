@@ -23,6 +23,12 @@ async function ensureCsrf(force=false){
 
 function friendlyError(data,status,path){
  const code=String(data?.error||'');
+ if(code==='analytics_not_configured')return 'تنظیمات اتصال Cloudflare Analytics کامل نیست؛ وجود CLOUDFLARE_API_TOKEN و CLOUDFLARE_ACCOUNT_ID در Worker بررسی شود.';
+ if(code==='analytics_request_failed')return 'Cloudflare Analytics درخواست را نپذیرفت (HTTP '+String(Number(data?.status)||status)+')؛ مجوز توکن Analytics و شناسه حساب را بررسی می‌کنیم.';
+ if(code==='analytics_query_failed'){
+  const details=Array.isArray(data?.details)?data.details.map(x=>String(x||'').slice(0,180)).join('؛ '):'';
+  return 'پرس‌وجوی GraphQL مربوط به آمار D1 ناموفق بود.'+(details?' جزئیات: '+details:'');
+ }
  if(status===401||code==='unauthorized')return 'نشست مدیریت معتبر نیست یا منقضی شده است.';
  if(status===403||code==='forbidden')return 'دسترسی این کاربر به این بخش تأیید نشد.';
  if(status===404||code==='not_found')return 'مسیر یا اطلاعات در سرور پیدا نشد.';
