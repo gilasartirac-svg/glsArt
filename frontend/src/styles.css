@@ -9592,3 +9592,8 @@ body{
     padding: .875rem;
   }
 }
+
+
+/* Shop: remove the introductory masthead and reclaim its vertical space. */
+.shop-page-masthead{display:none!important}
+.shop-page{padding-block-start:0!important;margin-block-start:0!important}
