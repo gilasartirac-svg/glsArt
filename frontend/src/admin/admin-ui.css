@@ -761,3 +761,115 @@
 @media(max-width:900px){.admin-layout .offline-snapshot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-layout .offline-snapshot-card-catalog{grid-column:1/-1}}
 @media(max-width:560px){.admin-layout .offline-intro{align-items:flex-start;padding:15px;gap:12px}.admin-layout .offline-intro-mark{flex-basis:48px;width:48px;height:48px;border-radius:14px;font-size:18px}.admin-layout .offline-snapshot-grid{grid-template-columns:1fr}.admin-layout .offline-snapshot-card-catalog{grid-column:auto}.admin-layout .offline-snapshot-card p{min-height:0}}
 @media(prefers-reduced-motion:reduce){.admin-layout .offline-snapshot-card{transition:none}.admin-layout .offline-snapshot-card:hover{transform:none}}
+
+
+/* Cross-page quality pass — consistent spacing, legibility and responsive controls.
+   Presentation only: all selectors remain inside .admin-layout. */
+.admin-layout .admin-page :is(h1,h2,h3,h4){overflow-wrap:anywhere;text-wrap:pretty}
+.admin-layout .admin-page :is(p,li,dd,dt,label,legend,summary){line-height:1.8}
+.admin-layout .admin-page :is(.panel,.card,.stat-card,.notice,.error,.success,.ok){min-width:0;overflow-wrap:anywhere}
+.admin-layout .admin-page :is(.panel,.card,.stat-card){transition:border-color .18s ease,box-shadow .18s ease}
+.admin-layout .admin-page :is(.panel,.card,.stat-card):focus-within{border-color:color-mix(in srgb,var(--ui-gold) 42%,var(--admin-line))}
+.admin-layout .admin-page :is(input,select,textarea,button,.btn,[role=button]){font:inherit}
+.admin-layout .admin-page :is(input,select,textarea){min-height:var(--ui-control-h,44px)}
+.admin-layout .admin-page textarea{min-height:132px;line-height:1.9}
+.admin-layout .admin-page input[type=checkbox],
+.admin-layout .admin-page input[type=radio]{width:18px;height:18px;min-height:18px;accent-color:var(--ui-gold);flex:0 0 auto}
+.admin-layout .admin-page input[type=number]{font-variant-numeric:tabular-nums}
+.admin-layout .admin-page :is(button,.btn,[role=button]){touch-action:manipulation}
+.admin-layout .admin-page :is(button,.btn):not(:disabled){cursor:pointer}
+.admin-layout .admin-page :is(button,.btn):disabled{cursor:not-allowed;opacity:.62;filter:saturate(.72)}
+.admin-layout .admin-page :is(a,button,input,select,textarea,[tabindex]):focus-visible{outline:2px solid var(--ui-gold);outline-offset:3px}
+.admin-layout .admin-page :is(.notice,.error,.success,.ok){border-radius:13px}
+.admin-layout .admin-page :is(.error,[role=alert]){overflow-wrap:anywhere}
+.admin-layout .admin-page :is(.toolbar,.actions,.form-actions,.toolbar-actions){row-gap:10px}
+.admin-layout .admin-page :is(.toolbar,.actions,.form-actions,.toolbar-actions) > *{max-width:100%}
+.admin-layout .admin-page :is(.table-wrap,.table-scroll,.orders-table-wrap){overscroll-behavior-inline:contain;scrollbar-width:thin;scrollbar-color:var(--ui-line) transparent}
+.admin-layout .admin-page .admin-table{font-size:14px;font-variant-numeric:tabular-nums}
+.admin-layout .admin-page .admin-table :is(th,td){overflow-wrap:anywhere}
+.admin-layout .admin-page .admin-table td :is(input,select,textarea){max-width:260px}
+.admin-layout .admin-page .admin-table td .btn{white-space:normal;line-height:1.5}
+.admin-layout .admin-page :is(.data-grid-toolbar,.reviews-toolbar,.orders-master-head,.order-detail-head,.panel-head,.sectionhead){min-width:0}
+.admin-layout .admin-page :is(.data-grid-search,input[type=search]){min-width:0}
+.admin-layout .admin-page :is(.empty-state,.loading-state,.order-detail-empty,.order-detail-loading){border:1px dashed var(--admin-line);border-radius:14px;background:color-mix(in srgb,var(--ui-text) 1.5%,transparent)}
+.admin-layout .admin-page :is(.status,.badge,.pill,[data-state]){max-width:100%;overflow-wrap:anywhere}
+.admin-layout .admin-page progress{display:block;width:100%;height:10px;overflow:hidden;border:0;border-radius:999px;accent-color:var(--ui-gold)}
+.admin-layout .admin-page progress::-webkit-progress-bar{background:var(--ui-surface-3);border-radius:999px}
+.admin-layout .admin-page progress::-webkit-progress-value{background:linear-gradient(90deg,var(--ui-gold),var(--ui-copper));border-radius:999px}
+.admin-layout .admin-page progress::-moz-progress-bar{background:linear-gradient(90deg,var(--ui-gold),var(--ui-copper));border-radius:999px}
+.admin-layout .admin-page .offline-snapshot-grid{align-items:stretch}
+.admin-layout .admin-page .offline-snapshot-grid > .panel{height:100%}
+.admin-layout .admin-page .social-link-row > *{min-width:0}
+.admin-layout .admin-page .enamad-admin-preview > *{min-width:0}
+.admin-layout .admin-page .admin-modal-backdrop{overscroll-behavior:contain}
+.admin-layout .admin-page .admin-modal{max-height:calc(100dvh - 36px);overscroll-behavior:contain}
+.admin-layout .admin-page .admin-modal :is(input,select,textarea){max-width:100%}
+.admin-layout .admin-page :is(img,video,iframe,canvas,svg){max-width:100%}
+.admin-layout .admin-page img{height:auto}
+.admin-layout .admin-page :is(.product-admin-thumb img,.social-link-icon img){height:100%}
+.admin-layout .admin-page .product-admin-thumb img{object-fit:cover}
+.admin-layout .admin-page :is(.product-admin-image-file,.product-admin-slug,code,pre){overflow-wrap:anywhere}
+.admin-layout .admin-page pre{max-width:100%;overflow:auto;white-space:pre-wrap}
+.admin-layout .admin-page :is(.cms-editor,.invoice-settings,.social-links-editor,.footer-social-admin,.admin-snapshot-hero){min-width:0}
+.admin-layout .admin-page .cms-editor :is(input,select,textarea){width:100%}
+.admin-layout .admin-page .form-grid > label,.admin-layout .admin-page .form > label{min-width:0}
+.admin-layout .admin-page .form label :is(input,select,textarea){margin-top:2px}
+.admin-layout .admin-page .admin-title > :is(div,section){min-width:0}
+.admin-layout .admin-page .admin-title > .btn{flex:0 0 auto}
+.admin-layout .admin-page :is(.stats-grid,.cards,.grid,.reviews-stats,.offline-snapshot-grid) > *{min-width:0}
+.admin-layout .admin-page .stat-card :is(strong,h3){font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.admin-layout .admin-page .data-grid-count{line-height:1.7}
+.admin-layout .admin-page .social-link-row{grid-template-columns:48px minmax(0,.8fr) minmax(0,1fr) minmax(0,1.5fr) auto auto}
+.admin-layout .admin-page .social-link-row :is(input,select){min-width:0}
+.admin-layout .admin-page .admin-table th{line-height:1.6}
+.admin-layout .admin-page .admin-table tbody tr:focus-within td{background:color-mix(in srgb,var(--ui-gold) 5%,transparent)}
+
+@media(min-width:1440px){
+ .admin-layout .admin-page{padding-inline:clamp(22px,2vw,34px)}
+ .admin-layout .admin-page .stats-grid,.admin-layout .admin-page .cards{gap:18px}
+ .admin-layout .admin-page .panel{padding:22px}
+}
+@media(min-width:768px) and (max-width:1023px){
+ .admin-layout .admin-page .social-link-row{grid-template-columns:48px repeat(2,minmax(0,1fr))}
+ .admin-layout .admin-page .social-link-row > :is(label,.social-active-field){min-width:0}
+ .admin-layout .admin-page .social-link-row > .social-link-icon{grid-row:span 2}
+ .admin-layout .admin-page .admin-title{align-items:flex-start}
+ .admin-layout .admin-page .admin-title > .btn{white-space:normal}
+ .admin-layout .admin-page .admin-table{font-size:13px}
+}
+@media(max-width:767px){
+ .admin-layout .admin-page{padding-inline:0!important}
+ .admin-layout .admin-page .admin-title{gap:12px}
+ .admin-layout .admin-page .admin-title > .btn{width:100%;white-space:normal}
+ .admin-layout .admin-page :is(.toolbar,.actions,.form-actions,.toolbar-actions){align-items:stretch}
+ .admin-layout .admin-page :is(.toolbar,.actions,.form-actions,.toolbar-actions) > .btn{flex:1 1 140px}
+ .admin-layout .admin-page :is(input,select,textarea){font-size:16px}
+ .admin-layout .admin-page .admin-table{font-size:13px}
+ .admin-layout .admin-page .admin-table :is(th,td){padding:10px 9px}
+ .admin-layout .admin-page .admin-table td .btn{min-height:40px}
+ .admin-layout .admin-page .social-link-row{grid-template-columns:44px minmax(0,1fr);align-items:start}
+ .admin-layout .admin-page .social-link-icon{grid-row:span 2;width:44px;height:44px}
+ .admin-layout .admin-page .social-link-row > :is(label,.social-active-field){grid-column:2}
+ .admin-layout .admin-page .social-active-field{padding:8px 0}
+ .admin-layout .admin-page .enamad-admin-preview{grid-template-columns:minmax(0,1fr)}
+ .admin-layout .admin-page .enamad-admin-preview textarea{grid-column:auto}
+ .admin-layout .admin-page .admin-modal-backdrop{padding:10px}
+ .admin-layout .admin-page .admin-modal{max-height:calc(100dvh - 20px);border-radius:15px}
+ .admin-layout .admin-page .admin-modal-head{padding:14px}
+ .admin-layout .admin-page .admin-modal :is(.toolbar,.actions,.form-actions){flex-direction:column;align-items:stretch}
+ .admin-layout .admin-page .admin-modal :is(.toolbar,.actions,.form-actions) .btn{width:100%}
+ .admin-layout .admin-page .offline-intro{min-width:0}
+ .admin-layout .admin-page .offline-legend{gap:8px 12px}
+}
+@media(max-width:359px){
+ .admin-layout .admin-page .panel{padding:11px}
+ .admin-layout .admin-page .admin-title h2{font-size:18px}
+ .admin-layout .admin-page :is(.stats-grid,.cards,.grid,.reviews-stats,.offline-snapshot-grid){grid-template-columns:minmax(0,1fr)}
+ .admin-layout .admin-page .social-link-row{grid-template-columns:minmax(0,1fr)}
+ .admin-layout .admin-page .social-link-icon{grid-row:auto}
+ .admin-layout .admin-page .social-link-row > :is(label,.social-active-field){grid-column:1}
+ .admin-layout .admin-page .admin-table{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){
+ .admin-layout .admin-page :is(.panel,.card,.stat-card,.offline-snapshot-card){transition:none!important}
+}
