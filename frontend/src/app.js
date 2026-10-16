@@ -489,8 +489,40 @@ function layout(content){
 function routeBase(){return location.pathname.startsWith('/glsArt/')||location.pathname==='/glsArt'?'/glsArt':''}
 function routeUrl(path){return localePath(path)}
 function scrollRouteTop(){try{window.scrollTo({top:0,left:0,behavior:'auto'});document.documentElement.scrollTop=0;document.body.scrollTop=0}catch{try{window.scrollTo(0,0)}catch{}}}
+const SHOP_RETURN_STATE_KEY='gilasart:shop-return-state:v1';
+function isShopRoute(pathname=location.pathname){
+ const path=String(pathname||'/').replace(/\\/+$/,'')||'/';
+ return path==='/shop'||path===(routeBase()+'/shop');
+}
+function saveShopReturnState(){
+ const results=document.querySelector('#results');
+ if(!isShopRoute()||!results)return;
+ const payload={
+  url:location.pathname+location.search,
+  scrollY:Math.max(0,Math.round(window.scrollY||window.pageYOffset||0)),
+  loadedCount:results.querySelectorAll('.product-card').length,
+  savedAt:Date.now()
+ };
+ try{sessionStorage.setItem(SHOP_RETURN_STATE_KEY,JSON.stringify(payload))}catch{}
+}
+function getShopReturnState(){
+ try{
+  const saved=JSON.parse(sessionStorage.getItem(SHOP_RETURN_STATE_KEY)||'null');
+  if(!saved||saved.url!==location.pathname+location.search||!Number.isFinite(Number(saved.scrollY))||!Number.isFinite(Number(saved.loadedCount))||Date.now()-Number(saved.savedAt)>30*60*1000)return null;
+  return {scrollY:Math.max(0,Number(saved.scrollY)||0),loadedCount:Math.max(0,Math.min(5000,Math.floor(Number(saved.loadedCount)||0)))};
+ }catch{return null}
+}
+function restoreShopReturnPosition(saved){
+ if(!saved)return;
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  try{window.scrollTo({top:saved.scrollY,left:0,behavior:'auto'})}catch{window.scrollTo(0,saved.scrollY)}
+  try{sessionStorage.removeItem(SHOP_RETURN_STATE_KEY)}catch{}
+ }));
+}
 function navigate(path,{replace=false}={}){
  const raw=String(path||'/'),target=raw.startsWith('#/')?raw.slice(1):raw,url=routeUrl(target||'/');
+ let targetPath='';try{targetPath=new URL(url,location.origin).pathname}catch{}
+ if(isShopRoute()&&!isShopRoute(targetPath))saveShopReturnState();
  if(url===location.pathname+location.search&&!routeInFlight)return;
  if(replace)history.replaceState({},'',url);else history.pushState({},'',url);
  scrollRouteTop();showRouteSkeleton();
@@ -613,6 +645,8 @@ async function shop(){
  const paginationState=()=>({limit:String(pageSize),offset:String(offset)});
  let selectedCategories=new Set(),allItems=[],filteredItems=[],sentinel,observer;
  const params=new URLSearchParams(location.search||'');
+ const savedReturnState=getShopReturnState();
+ let pendingRestoreCount=savedReturnState?Math.max(pageSize,Math.ceil(savedReturnState.loadedCount/pageSize)*pageSize):null;
  query=(params.get('q')||'').trim();
  sort=params.get('sort')||'newest';
  minPrice=Math.max(0,Number(params.get('min_price')||0));
@@ -716,7 +750,11 @@ async function shop(){
   startFlashTimers(results);
  };
  let refresh=()=>{
-  applyFilters();offset=Math.min(pageSize,filteredItems.length);if(offset===0)offset=0;done=offset>=filteredItems.length;
+  applyFilters();
+  const restoreCount=pendingRestoreCount;
+  pendingRestoreCount=null;
+  offset=Math.min(restoreCount===null?pageSize:restoreCount,filteredItems.length);
+  done=offset>=filteredItems.length;
   renderPage(false);renderActiveFilters();updatePriceUi();syncUrl();
  };
  const loadMore=()=>{
@@ -788,6 +826,7 @@ async function shop(){
  const originalRefresh=refresh;
  refresh=()=>{originalRefresh();updateControlIndicators()};
  refresh();
+ if(savedReturnState)restoreShopReturnPosition(savedReturnState);
 }
 
 async function product(slug){
