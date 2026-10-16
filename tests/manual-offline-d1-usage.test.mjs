@@ -27,7 +27,11 @@ test('site rules have a dedicated snapshot and do not depend on catalog JSON',()
 
 test('D1 usage page displays analytics-derived reads and remaining quota',()=>{
  assert.match(worker,/\/api\/admin\/d1-usage/);
- assert.match(worker,/d1QueriesAdaptive/);
+ assert.match(worker,/d1AnalyticsAdaptiveGroups/);
+ assert.match(worker,/d1QueriesAdaptiveGroups/);
+ assert.match(worker,/databaseId/);
+ assert.ok(worker.includes('dimensions { datetimeHour query }'));
+ assert.ok(!worker.includes('d1QueriesAdaptive('));
  assert.match(worker,/rowsRead/);
  assert.match(adminPage,/d1-usage-read/);
  assert.match(adminPage,/d1-usage-remaining/);
